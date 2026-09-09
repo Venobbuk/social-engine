@@ -14,5 +14,17 @@
     "pr-review-toolkit@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "playwright@claude-plugins-official": true
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node contract-kit/contract-rules.cjs --hook ."
+          }
+        ]
+      }
+    ]
   }
 }

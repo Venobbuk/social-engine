@@ -1,0 +1,18 @@
+{
+  "version": "v6",
+  "at": "2026-09-06T16:22:28.175Z",
+  "files": {
+    "CLAUDE.md": "379dba191765",
+    "BLUEPRINT.md": "d93dd7f42063",
+    "contract-rules.cjs": "4e7297fab06a",
+    "ledger.cjs": "3f6c99c73d09",
+    "probe-template.cjs": "2f48abdcb7f5",
+    "START.md": "a7d3acd9fedc",
+    "INSTALL.md": "cfd2504f2ec6",
+    "settings-hook-example.json": "16424f4fc8b5",
+    "bootstrap.cjs": "745e68b4f7d4",
+    "test-hook-e2e.cjs": "2b83d1c92682",
+    "LESSONS_2026-08-31_stock-session.md": "b0ea844131cd",
+    "LESSONS_2026-09-02_devloop-gating.md": "05b4eba31ad1"
+  }
+}

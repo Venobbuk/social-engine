@@ -1,0 +1,15 @@
+{
+  "//": "Merge the hooks block into the project's .claude/settings.json (project root = where BLUEPRINT.md lives). On every turn-end the checker receives the Stop-hook JSON on stdin, extracts the ACTUAL assistant turn from transcript_path, and grades it (C5 claims-evidence, C6 family-counts, C8 walked-proof, C9 grounding, C10 probe-verdict, C11 verify-ledger) plus the project structure (C1-C4, C7 sign-off, C12 docker-layout). Exit 2 + stderr = the turn is blocked and Claude is shown the failures. stop_hook_active is honored so it can never loop forever. Runs in ~0.1 s. This is the layer that removes discipline from the loop — Claude cannot end a turn on an unevidenced 'done', and cannot claim a fix without an executed probe's verdict file.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node contract-kit/contract-rules.cjs --hook ."
+          }
+        ]
+      }
+    ]
+  }
+}

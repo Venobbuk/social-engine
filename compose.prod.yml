@@ -1,0 +1,92 @@
+# social-engine — production compose (phase 0). Lives at /root/social-engine/compose.yml
+# Rules baked in: no builds on kaka (image pulled from ghcr), memory/CPU caps on every service,
+# ports bound to 127.0.0.1 only, own network + volumes, media never on disk (OSS).
+name: social-engine
+
+services:
+  web:
+    image: ghcr.io/venobbuk/social-engine:${SOCIAL_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "127.0.0.1:3960:3000"
+    volumes:
+      - ./.config:/misskey/.config:ro
+    environment:
+      NODE_ENV: production
+    env_file:
+      - /root/social-engine.env          # OSS_SOCIAL_* — created by the operator, never by the agent
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
+          cpus: "2.0"
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+  transcode:
+    # our addition (spec §2b item 10): ffmpeg worker, one job at a time, low priority
+    image: ghcr.io/venobbuk/social-engine-transcode:${SOCIAL_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on: [redis]
+    env_file:
+      - /root/social-engine.env
+    environment:
+      TRANSCODE_CONCURRENCY: "1"
+      NICE: "15"
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: "2.0"
+    profiles: ["transcode"]              # off until phase 1 ships the worker
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: social
+      POSTGRES_DB: social
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets: [db_password]
+    command: ["postgres", "-c", "shared_buffers=128MB", "-c", "max_connections=60", "-c", "work_mem=4MB"]
+    volumes:
+      - social-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U social -d social"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "200mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - social-redis:/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+secrets:
+  db_password:
+    file: /root/social-engine.dbpass       # operator-created, chmod 600
+
+volumes:
+  social-pgdata:
+  social-redis:
+
+# Dev instance (rule N): see compose.dev.yml — bind-mounts the source into the same image on :3970
+# with `pnpm dev`, own db/redis on alt ports, federation none, SMTP blackholed. Edit → visible in seconds.
