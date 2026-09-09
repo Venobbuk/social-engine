@@ -1,0 +1,37 @@
+{
+  "probe": "reclub-forensic",
+  "verdict": "PASS",
+  "at": "2026-09-09T19:00:19.826Z",
+  "checks": [
+    {
+      "name": "xapk manifest version",
+      "pass": true,
+      "detail": "co.reclub 2.45.12"
+    },
+    {
+      "name": "decoded string count",
+      "pass": true,
+      "detail": "130476 lines (>= 128,251 decoded strings; some contain newlines)"
+    },
+    {
+      "name": "doc exists",
+      "pass": true,
+      "detail": "143 lines"
+    },
+    {
+      "name": "component/route/api/enum tokens present in strings.txt",
+      "pass": true,
+      "detail": "224 checked, missing: []"
+    },
+    {
+      "name": "quoted UI labels present in strings.txt",
+      "pass": true,
+      "detail": "128 checked, missing: []"
+    }
+  ],
+  "evidence": {
+    "xapk": "D:/Downloads/Reclub+-+Social+Sports+Nearby_2.45.12_APKPure.xapk",
+    "doc": "D:/Downloads/RECLUB_FORENSIC_PAGES_20260910.md",
+    "strings": "D:\\tmp\\claude\\C--Users-Venobbuk-AppData-Roaming-Claude-scratch-workspaces-4016c153-54ae-4f0e-875d-d947ac9c07aa-feeec166-1152-4046-8fba-34f102b2976b-scratch-2026-09-09-33d341\\349d7648-cd2c-46b4-bc74-39509aac311e\\scratchpad\\reclub\\out\\strings.txt"
+  }
+}
