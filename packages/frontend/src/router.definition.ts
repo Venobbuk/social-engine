@@ -286,6 +286,13 @@ export const ROUTE_DEF = [{
 	path: '/auth/:token',
 	component: page(() => import('@/pages/auth.vue')),
 }, {
+	path: '/sso',
+	component: page(() => import('@/pages/sso.vue')),
+	query: {
+		jwt: 'jwt',
+		redirect: 'redirect',
+	},
+}, {
 	path: '/miauth/:session',
 	component: page(() => import('@/pages/miauth.vue')),
 	query: {

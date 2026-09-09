@@ -16,6 +16,7 @@ export * as 'admin/abuse-report/notification-recipient/list' from './endpoints/a
 export * as 'admin/abuse-report/notification-recipient/show' from './endpoints/admin/abuse-report/notification-recipient/show.js';
 export * as 'admin/abuse-report/notification-recipient/update' from './endpoints/admin/abuse-report/notification-recipient/update.js';
 export * as 'admin/abuse-user-reports' from './endpoints/admin/abuse-user-reports.js';
+export * as 'adapter/sso' from './endpoints/adapter/sso.js';
 export * as 'admin/accounts/create' from './endpoints/admin/accounts/create.js';
 export * as 'admin/accounts/delete' from './endpoints/admin/accounts/delete.js';
 export * as 'admin/accounts/find-by-email' from './endpoints/admin/accounts/find-by-email.js';
