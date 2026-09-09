@@ -5,7 +5,7 @@ name: social-engine
 
 services:
   web:
-    image: ghcr.io/venobbuk/social-engine:${SOCIAL_IMAGE_TAG:-latest}
+    image: ghcr.io/venobbuk/social-engine:${SOCIAL_IMAGE_TAG:-master}
     restart: unless-stopped
     depends_on:
       db:
