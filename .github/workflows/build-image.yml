@@ -4,7 +4,7 @@ name: build-image
 
 on:
   push:
-    branches: [main]
+    branches: [master, main]
     tags: ["v*"]
   workflow_dispatch:
 
