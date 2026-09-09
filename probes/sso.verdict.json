@@ -1,0 +1,8 @@
+{
+  "id": "sso",
+  "at": "2026-09-09T18:19:44.255Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": "{\"first\":{\"status\":200,\"created\":true,\"username\":\"hkpl_abd744e14f43\",\"userId\":\"aqxzm6evd37y0003\",\"hasToken\":true},\"second\":{\"status\":200,\"created\":false,\"userId\":\"aqxzm6evd37y0003\"},\"tampered\":{\"status\":400,\"code\":\"ADAPTER_SSO_INVALID\"},\"me\":{\"username\":\"hkpl_abd744e14f43\",\"name\":\"Probe Player\"}}",
+  "detail": "JWT exchanged for a session, idempotent on repeat, tampered JWT rejected, /api/i shows the derived user with the host display name"
+}

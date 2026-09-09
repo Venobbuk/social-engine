@@ -13,5 +13,15 @@
     "path": "ops-apply_object_storage.sh",
     "sha": "9fe05d635aaa",
     "evidence": "probes/oss-upload.verdict.json"
+  },
+  {
+    "path": "packages/backend/src/server/api/endpoints/adapter/sso.ts",
+    "sha": "06b397a23c35",
+    "evidence": "probes/sso.verdict.json"
+  },
+  {
+    "path": "packages/frontend/src/pages/sso.vue",
+    "sha": "02bcf595ee55",
+    "evidence": "probes/sso.verdict.json"
   }
 ]

@@ -1,0 +1,8 @@
+{
+  "id": "hkpl-sso-mint",
+  "at": "2026-09-09T18:14:29.695Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": "{\"nosess\":\"401\",\"hasJwt\":true,\"urlOk\":true,\"alg\":\"RS256\",\"iss\":\"hkpl\",\"aud\":\"social.silkvo.com\",\"subLen\":36,\"hasName\":true,\"ttl\":120,\"tenant\":\"uat\",\"sigLen\":342}",
+  "detail": "401 without session; with a QA session: RS256 JWT, iss hkpl, aud social.silkvo.com, 120 s TTL, name present, url → /sso"
+}

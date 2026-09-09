@@ -22,5 +22,21 @@
     "at": "2026-09-09T17:18:51.492Z",
     "commit": "0b0d9a4fb6",
     "proved": false
+  },
+  "packages/backend/src/server/api/endpoints/adapter/sso.ts": {
+    "sha": "06b397a23c35",
+    "verdict": "pass",
+    "evidence": "probes/sso.verdict.json (engine exchange, idempotent, tamper) + probes/hkpl-sso-mint.verdict.json (hkpl mint) + browser walk sso_walk_mobile.png",
+    "at": "2026-09-09T18:20:20.504Z",
+    "commit": "73a07be500",
+    "proved": false
+  },
+  "packages/frontend/src/pages/sso.vue": {
+    "sha": "02bcf595ee55",
+    "verdict": "pass",
+    "evidence": "probes/sso.verdict.json (engine exchange, idempotent, tamper) + probes/hkpl-sso-mint.verdict.json (hkpl mint) + browser walk sso_walk_mobile.png",
+    "at": "2026-09-09T18:20:20.584Z",
+    "commit": "73a07be500",
+    "proved": false
   }
 }
