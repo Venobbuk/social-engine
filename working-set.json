@@ -1,0 +1,17 @@
+[
+  {
+    "path": "compose.prod.yml",
+    "sha": "3a156120f028",
+    "evidence": "probes/oss-upload.verdict.json"
+  },
+  {
+    "path": ".github/workflows/build-image.yml",
+    "sha": "92d041c8f800",
+    "evidence": "probes/oss-upload.verdict.json"
+  },
+  {
+    "path": "ops-apply_object_storage.sh",
+    "sha": "9fe05d635aaa",
+    "evidence": "probes/oss-upload.verdict.json"
+  }
+]

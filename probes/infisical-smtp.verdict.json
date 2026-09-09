@@ -1,0 +1,8 @@
+{
+  "id": "infisical-smtp",
+  "at": "2026-09-09T15:49:02.045Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": "https://secrets.silkvo.com/api/status -> HTTP 200, emailConfigured=true; https://secrets.silkvo.com/api/v1/account-recovery/send-email -> HTTP 200",
+  "detail": "emailConfigured true and recovery route accepts requests"
+}

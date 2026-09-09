@@ -1,0 +1,8 @@
+{
+  "id": "no-fed",
+  "at": "2026-09-09T17:11:10.252Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": "meta 200 federation=none disableRegistration=true; nodeinfo 200 openRegistrations=false; POST /inbox -> 403",
+  "detail": "closed instance: federation none, registration off, inbox rejects unsigned activity"
+}

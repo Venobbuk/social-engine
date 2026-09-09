@@ -1,0 +1,26 @@
+{
+  "compose.prod.yml": {
+    "sha": "3a156120f028",
+    "verdict": "pass",
+    "evidence": "probes/oss-upload.verdict.json + probes/no-fed.verdict.json: stack up on kaka, upload round-trips via OSS, instance closed",
+    "at": "2026-09-09T17:18:51.379Z",
+    "commit": "0b0d9a4fb6",
+    "proved": false
+  },
+  ".github/workflows/build-image.yml": {
+    "sha": "92d041c8f800",
+    "verdict": "pass",
+    "evidence": "probes/oss-upload.verdict.json + probes/no-fed.verdict.json: stack up on kaka, upload round-trips via OSS, instance closed",
+    "at": "2026-09-09T17:18:51.448Z",
+    "commit": "0b0d9a4fb6",
+    "proved": false
+  },
+  "ops-apply_object_storage.sh": {
+    "sha": "9fe05d635aaa",
+    "verdict": "pass",
+    "evidence": "probes/oss-upload.verdict.json + probes/no-fed.verdict.json: stack up on kaka, upload round-trips via OSS, instance closed",
+    "at": "2026-09-09T17:18:51.492Z",
+    "commit": "0b0d9a4fb6",
+    "proved": false
+  }
+}

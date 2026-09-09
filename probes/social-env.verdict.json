@@ -1,0 +1,8 @@
+{
+  "id": "social-env",
+  "at": "2026-09-09T16:21:55.530Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": "ssh kaka: 600 | OSS_SOCIAL_ACCESS_KEY_ID OSS_SOCIAL_ACCESS_KEY_SECRET OSS_SOCIAL_BUCKET OSS_SOCIAL_ENDPOINT OSS_SOCIAL_PUBLIC_BASE_URL OSS_SOCIAL_REGION | 0",
+  "detail": "mode 600, six keys present, no placeholders"
+}

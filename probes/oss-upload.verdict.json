@@ -1,0 +1,8 @@
+{
+  "id": "oss-upload",
+  "at": "2026-09-09T17:17:50.808Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": "sha256=6b7b8096be9b105be68d3deea5935ca9d4574b6cece7bbddd23ae24b898d84cd | url=https://media.social.silkvo.com/files/1ed0d60a-fa12-468c-b4ff-b38c4a4b9118 | http=200 bytes=65536 | server: nginx | content-type: application/octet-stream | back_sha256=6b7b8096be9b105be68d3deea5935ca9d4574b6cece7bbddd23ae24b898d84cd",
+  "detail": "file served from media.social.silkvo.com with identical bytes (64 KB, sha256 match)"
+}
