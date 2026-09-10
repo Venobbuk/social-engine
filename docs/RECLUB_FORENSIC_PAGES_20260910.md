@@ -111,7 +111,7 @@ Verdict key: 🔴 Reclub ahead · 🟡 parity or different shape · 🟢 ours ah
 **Ours:** ⚪ no ads, no subscription by design; revenue = anchor-host margin and pyke commerce (handover §3).
 
 ## 17. Languages
-**Reclub:** en + Tagalog + Indonesian + Spanish + Portuguese in the bundle [L]. No Chinese. **Ours:** zh-Hant, zh-Hans, en (Misskey locales; hkpl trilingual). **Verdict:** 🟢 for Hong Kong.
+**CORRECTED 2026-09-10 (bytecode pass):** Reclub ships 9 languages in the bundle: en, vi, ja, zh_TW, zh_CN, tl, ko, id, th (49 namespaces × 6,358 keys each; e.g. `meets:cancellation_freeze` = "Cancellation freeze" / 取消凍結 / 取消冻结 — `forensic/i18n_other.json`, `forensic/bind_stats.json`). My earlier "no Chinese" line came from the string-table pass, which mislabelled the UTF-16 strings. **Ours:** zh-Hant, zh-Hans, en (Misskey locales). **Verdict:** 🟡 parity, not 🟢.
 
 ---
 
@@ -135,8 +135,8 @@ Verdict key: 🔴 Reclub ahead · 🟡 parity or different shape · 🟢 ours ah
 | Venues | crowd-sourced beta | hkpl 60 approved | picker + map | 🟢 data / 🔴 visibility |
 | Notifications | 6 toggles, push | web push | hkpl push | 🟡 |
 | Ads / subs | heavy | none | none | ⚪ |
-| Languages | en/tl/id/es/pt | zh-Hant/zh-Hans/en | same | 🟢 HK |
+| Languages | 9 incl. zh_TW/zh_CN (corrected) | zh-Hant/zh-Hans/en | same | 🟡 |
 
-**Honest reading:** today Reclub is ahead on every consumer-facing page except onboarding, DUPR and language. Everything that flips the table is one module, the meet object with its states, plus wiring what hkpl already owns (DUPR, venues, clubs, competitions, payments through pyke). The binary shows their meet is richer than their help centre lets on (structured level gate, cancellation freeze, check-in, gender and age gates), so the flow spec's build list now includes all four.
+**Honest reading:** today Reclub is ahead on every consumer-facing page except onboarding and DUPR. Everything that flips the table is one module, the meet object with its states, plus wiring what hkpl already owns (DUPR, venues, clubs, competitions, payments through pyke). The binary shows their meet is richer than their help centre lets on (structured level gate, cancellation freeze, check-in, gender and age gates), so the flow spec's build list now includes all four.
 
 Artifacts: probe `probes/reclub-forensic.verdict.json` (every bracketed token and quoted label in this document is checked verbatim against the string table); decoded strings `scratchpad/reclub/out/strings.txt` (128,251 strings), grouped lists `api.txt` (144 routes), `modals.txt`, `pascal.txt` (708 domain components), `labels.txt` (11,858 UI strings), `domain.txt`.
