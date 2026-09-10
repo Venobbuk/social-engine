@@ -4,7 +4,7 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
-import { In, LessThan, Not } from 'typeorm';
+import { In, IsNull, LessThan, Not } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { MeetsRepository, MeetParticipantsRepository, MeetPlayerLevelsRepository, UsersRepository } from '@/models/_.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
@@ -441,7 +441,8 @@ export class MeetService {
 		let promoted = 0;
 		let spots = await this.spotsLeft(meet);
 		while (spots > 0) {
-			const next = await this.meetParticipantsRepository.findOne({ where: { meetId: meet.id, status: 'waitlisted' }, order: { waitlistRank: 'ASC' } });
+			// players whose hold expired keep their past holdExpiresAt and are not auto-promoted again (they can accept a free spot themselves)
+			const next = await this.meetParticipantsRepository.findOne({ where: { meetId: meet.id, status: 'waitlisted', holdExpiresAt: IsNull() }, order: { waitlistRank: 'ASC' } });
 			if (next == null) break;
 			if (meet.payByMinutes && next.userId) {
 				await this.setStatus(meet, next, 'hold', meet.payByMinutes);
@@ -465,8 +466,10 @@ export class MeetService {
 		for (const p of expired) {
 			const meet = await this.meetsRepository.findOneBy({ id: p.meetId });
 			if (meet == null) continue;
-			await this.setStatus(meet, p, 'waitlisted');
-			if (p.userId) this.notify(p.userId, meet, 'Hold expired', `Your held spot in ${meet.name} was released.`);
+			// direct write (not setStatus): the expiry marker must be in place BEFORE the freed spot is offered to the next player
+			await this.meetParticipantsRepository.update(p.id, { status: 'waitlisted', holdExpiresAt: p.holdExpiresAt, waitlistRank: await this.nextWaitlistRank(meet.id), statusChangedAt: now });
+			await this.promoteFromWaitlist(meet);
+			if (p.userId) this.notify(p.userId, meet, 'Hold expired', `Your held spot in ${meet.name} was released. You stay on the waitlist; accept a free spot when one shows.`);
 			expiredHolds++;
 		}
 
