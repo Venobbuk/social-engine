@@ -38,5 +38,101 @@
     "at": "2026-09-09T18:20:20.584Z",
     "commit": "73a07be500",
     "proved": false
+  },
+  "packages/backend/src/modules/meets/MeetService.ts": {
+    "sha": "07aed91892a8",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:11.601Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/MeetEntityService.ts": {
+    "sha": "fcd804d94637",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:11.756Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/MeetSweepProcessorService.ts": {
+    "sha": "c0eb119cb376",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:11.863Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/models/Meet.ts": {
+    "sha": "d4c5d425eb41",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:11.928Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/models/MeetParticipant.ts": {
+    "sha": "a0bf3822e904",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:11.988Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/models/MeetPlayerLevel.ts": {
+    "sha": "8e9bc3bd7db8",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:12.056Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/models/json-schema.ts": {
+    "sha": "b8267a8e246c",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:12.128Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/migration/1785100000000-meet.js": {
+    "sha": "ab64a72a874f",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:12.185Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/endpoints/_shared.ts": {
+    "sha": "1924f4bdd2be",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:12.240Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/endpoints/create.ts": {
+    "sha": "5e6bda2ab87b",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:12.299Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/endpoints/update.ts": {
+    "sha": "462eae9a0aca",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:12.353Z",
+    "commit": "00d43d0410",
+    "proved": false
+  },
+  "packages/backend/src/modules/meets/endpoints/list.ts": {
+    "sha": "06bd9b4c199b",
+    "verdict": "pass",
+    "evidence": "probes/meet-core.verdict.json PASS 20/20 on kaka 2026-09-10 (image cd283b7035)",
+    "at": "2026-09-10T10:32:12.408Z",
+    "commit": "00d43d0410",
+    "proved": false
   }
 }
