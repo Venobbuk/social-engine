@@ -189,5 +189,8 @@ Each step ships behind a probe (`probes/<id>.cjs` → verdict) and a walked scre
 
 ---
 
-## 10. What would get this to L6
-Run the app. Options: an Android emulator on this PC (Android Studio, ~10 GB) with the XAPK installed and an account the operator creates; or a phone with the app signed in and screen-mirrored. Then every screen in §4 gets walked and screenshotted, and the server-side rules the binary cannot show (auto-advance, push timing) get observed.
+## 10. L6 walk — DONE on the operator's phone (2026-09-10 12:59–13:30)
+Paired over Tailscale, 87 captures in `D:Downloadseclub_walk`, written up in `D:DownloadsRECLUB_WALK_L6_20260910.md`. Confirms the create-meet form order and option values (cancellation freeze 2/4/6/8/12/24 h; auto-approve off, +1 on by default), the 2.46.0 navigation (bottom bar Home/Feed/Inbox/Menu + search FAB), notification defaults (8 toggles on), and — the strategic fact — that Reclub already hosts the Hong Kong pickleball scene: 95 clubs within 20 km of Tung Chung, 63,747 memberships summed, largest 6,127 (`reclub_walk/HK_CLUBS_SEEN.txt`), with PayMe-in-notes as the payment rail. Also captured Reclub's in-app notice on the 9 Sep 2026 DUPR shutdown and match-submission failures.
+
+### Remaining for L6
+Host-side screens need a test meet/club on the account. Options: an Android emulator on this PC (Android Studio, ~10 GB) with the XAPK installed and an account the operator creates; or a phone with the app signed in and screen-mirrored. Then every screen in §4 gets walked and screenshotted, and the server-side rules the binary cannot show (auto-advance, push timing) get observed.
