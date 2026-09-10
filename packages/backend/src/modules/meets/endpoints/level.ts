@@ -31,8 +31,8 @@ export const paramDef = {
 	properties: {
 		sport: { type: 'string', minLength: 1, maxLength: 32, default: 'pickleball' },
 		selfLevel: { type: 'number', nullable: true, minimum: 0, maximum: 10 },
-		gender: { type: 'string', nullable: true, enum: ['male', 'female', 'nonbinary', null] },
-		ageGroup: { type: 'string', nullable: true, enum: ['junior', 'adult', 'senior', null] },
+		gender: { type: 'string', nullable: true, enum: ['male', 'female', 'nonbinary'] },
+		ageGroup: { type: 'string', nullable: true, enum: ['junior', 'adult', 'senior'] },
 	},
 	required: [],
 } as const;

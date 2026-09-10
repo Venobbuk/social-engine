@@ -11,7 +11,7 @@ import { DI } from '@/di-symbols.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
 import { ApiError } from '@/server/api/error.js';
-import { meetErrors, meetParamProps, toApiError } from './_shared.js';
+import { meetErrors, meetParamProps, parseIsoDate, toApiError } from './_shared.js';
 
 export const meta = {
 	tags: ['meets'],
@@ -23,6 +23,7 @@ export const meta = {
 	errors: {
 		noSuchChannel: { message: 'No such channel.', code: 'NO_SUCH_CHANNEL', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000010' },
 		startInPast: { message: 'Meet date and time cannot be in the past.', code: 'MEET_START_IN_PAST', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000011' },
+		invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000013' },
 		...meetErrors,
 	},
 } as const;
@@ -42,7 +43,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private meetEntityService: MeetEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const startAt = new Date(ps.startAt);
+			const startAt = parseIsoDate(ps.startAt);
+			if (startAt == null) throw new ApiError(meta.errors.invalidDate);
 			if (startAt.getTime() < Date.now()) throw new ApiError(meta.errors.startInPast);
 			if (ps.channelId) {
 				const channel = await this.channelsRepository.findOneBy({ id: ps.channelId });

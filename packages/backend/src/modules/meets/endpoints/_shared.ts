@@ -38,6 +38,12 @@ const map: Record<string, keyof typeof meetErrors> = {
 	'meet:guest_limit': 'guestLimit',
 };
 
+export function parseIsoDate(v: string | undefined | null): Date | null {
+	if (v == null) return null;
+	const d = new Date(v);
+	return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function toApiError(e: unknown): never {
 	if (e instanceof IdentifiableError && map[e.id]) {
 		throw new ApiError(meetErrors[map[e.id]]);
@@ -52,7 +58,7 @@ export const meetParamProps = {
 	type: { type: 'string', enum: ['listing', 'managed'] },
 	sport: { type: 'string', minLength: 1, maxLength: 32 },
 	format: { type: 'string', nullable: true, maxLength: 32 },
-	startAt: { type: 'string', format: 'date-time' },
+	startAt: { type: 'string', minLength: 10, maxLength: 40 }, // ISO 8601; parsed and validated in code (ajv here has no date-time format)
 	durationMinutes: { type: 'integer', minimum: 15, maximum: 1440 },
 	timezone: { type: 'string', maxLength: 64 },
 	venueName: { type: 'string', nullable: true, maxLength: 256 },

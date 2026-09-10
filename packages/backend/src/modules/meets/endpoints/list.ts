@@ -10,6 +10,7 @@ import type { MeetsRepository, MeetParticipantsRepository } from '@/models/_.js'
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import { DI } from '@/di-symbols.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { parseIsoDate } from './_shared.js';
 
 // Discover + "my meets". Nearby search uses a bounding box + haversine in SQL (no PostGIS needed at HK scale).
 export const meta = {
@@ -25,8 +26,8 @@ export const paramDef = {
 		scope: { type: 'string', enum: ['discover', 'mine', 'hosting', 'channel'], default: 'discover' },
 		channelId: { type: 'string', format: 'misskey:id', nullable: true },
 		sport: { type: 'string', nullable: true, maxLength: 32 },
-		from: { type: 'string', format: 'date-time', nullable: true },
-		to: { type: 'string', format: 'date-time', nullable: true },
+		from: { type: 'string', nullable: true, maxLength: 40 },
+		to: { type: 'string', nullable: true, maxLength: 40 },
 		lat: { type: 'number', nullable: true, minimum: -90, maximum: 90 },
 		lng: { type: 'number', nullable: true, minimum: -180, maximum: 180 },
 		radiusKm: { type: 'number', nullable: true, minimum: 0.1, maximum: 500 },
@@ -53,8 +54,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			if (!ps.includeCancelled) q.andWhere('meet.status = :active', { active: 'active' });
 			if (ps.sport) q.andWhere('meet.sport = :sport', { sport: ps.sport });
-			if (ps.from) q.andWhere('meet.startAt >= :from', { from: new Date(ps.from) });
-			if (ps.to) q.andWhere('meet.startAt <= :to', { to: new Date(ps.to) });
+			const from = parseIsoDate(ps.from), to = parseIsoDate(ps.to);
+			if (from) q.andWhere('meet.startAt >= :from', { from });
+			if (to) q.andWhere('meet.startAt <= :to', { to });
 			if (!ps.includePast && !ps.from) q.andWhere('meet.startAt + (meet.durationMinutes * interval \'1 minute\') >= :now', { now: new Date() });
 
 			switch (ps.scope) {
