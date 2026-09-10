@@ -63,10 +63,10 @@ Estimate (L0): module + pages + probes ≈ 4–6 working days; hkpl SSO 1–2 da
 
 ---
 
-## 4. Decisions needed
-1. Go on this flow (Y/N or edits).
-2. Price mode default: fixed per head (recommended) vs cost-split.
-3. Level gate: hard gate (default) vs soft (warn only).
-4. Guests per member: 0 / 1 / 2 (recommended 1, counted).
+## 4. Decisions — ANSWERED by the operator 2026-09-10
+1. Go: **yes** ("1 yes, i ask u to find the best fit" — best fit = build inside the Misskey fork, see docs/MEET_MODULE_PLAN_20260910.md).
+2. Price mode default: **free** ("free for now first"); fee types None/Free/Per head/Auto-split stay available per meet, default None.
+3. Level gate: **hard minimum** ("yes"), **no maximum by default** ("we allow higher DUPR player to play"); host may set a maximum per meet; gate modes Guidance/AutoApprove/Strict exist, default Strict on the minimum only.
+4. Guests per member: **1, counted** ("yes, is just a setting we can set later") — a club/meet setting.
 
-SIGN-OFF (meet flow): no
+SIGN-OFF (meet flow): yes — 2026-09-10, operator answers quoted above.
