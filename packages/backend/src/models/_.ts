@@ -21,6 +21,9 @@ import { MiAvatarDecoration } from '@/models/AvatarDecoration.js';
 import { MiBlocking } from '@/models/Blocking.js';
 import { MiBubbleGameRecord } from '@/models/BubbleGameRecord.js';
 import { MiChannel } from '@/models/Channel.js';
+import { MiMeet } from '@/models/Meet.js';
+import { MiMeetParticipant } from '@/models/MeetParticipant.js';
+import { MiMeetPlayerLevel } from '@/models/MeetPlayerLevel.js';
 import { MiChannelFavorite } from '@/models/ChannelFavorite.js';
 import { MiChannelFollowing } from '@/models/ChannelFollowing.js';
 import { MiChannelMuting } from "@/models/ChannelMuting.js";
@@ -160,6 +163,9 @@ export {
 	MiWebhook,
 	MiSystemWebhook,
 	MiChannel,
+	MiMeet,
+	MiMeetParticipant,
+	MiMeetPlayerLevel,
 	MiRetentionAggregation,
 	MiRole,
 	MiRoleAssignment,
@@ -240,6 +246,9 @@ export type UserSecurityKeysRepository = Repository<MiUserSecurityKey> & MiRepos
 export type WebhooksRepository = Repository<MiWebhook> & MiRepository<MiWebhook>;
 export type SystemWebhooksRepository = Repository<MiSystemWebhook> & MiRepository<MiWebhook>;
 export type ChannelsRepository = Repository<MiChannel> & MiRepository<MiChannel>;
+export type MeetsRepository = Repository<MiMeet> & MiRepository<MiMeet>;
+export type MeetParticipantsRepository = Repository<MiMeetParticipant> & MiRepository<MiMeetParticipant>;
+export type MeetPlayerLevelsRepository = Repository<MiMeetPlayerLevel> & MiRepository<MiMeetPlayerLevel>;
 export type RetentionAggregationsRepository = Repository<MiRetentionAggregation> & MiRepository<MiRetentionAggregation>;
 export type RolesRepository = Repository<MiRole> & MiRepository<MiRole>;
 export type RoleAssignmentsRepository = Repository<MiRoleAssignment> & MiRepository<MiRoleAssignment>;

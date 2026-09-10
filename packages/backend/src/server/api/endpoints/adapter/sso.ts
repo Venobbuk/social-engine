@@ -15,6 +15,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { UsersRepository } from '@/models/_.js';
 import { SignupService } from '@/core/SignupService.js';
+import { MeetService } from '@/core/MeetService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '@/server/api/error.js';
 
@@ -93,6 +94,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private usersRepository: UsersRepository,
 
 		private signupService: SignupService,
+		private meetService: MeetService,
 	) {
 		super(meta, paramDef, async (ps) => {
 			let claims: Claims;
@@ -112,6 +114,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					await this.usersRepository.update(existing.id, { name: displayName });
 				}
 				// token can only be null for remote users; local accounts always carry one
+				await this.syncLevel(existing.id, claims);
 				const token = existing.token ?? (await this.usersRepository.findOneByOrFail({ id: existing.id })).token!;
 				return { token, userId: existing.id, username: existing.username, created: false };
 			}
@@ -123,7 +126,22 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				ignorePreservedUsernames: true,
 			});
 			if (displayName) await this.usersRepository.update(account.id, { name: displayName });
+			await this.syncLevel(account.id, claims);
 			return { token: secret, userId: account.id, username: account.username, created: true };
 		});
+	}
+
+	// Host-provided rating feeds the meet gates (DUPR doubles is the value hkpl carries; singles unknown).
+	private async syncLevel(userId: string, claims: Claims): Promise<void> {
+		if (claims.dupr_rating == null && claims.dupr_id == null) return;
+		try {
+			await this.meetService.upsertLevel(userId, 'pickleball', {
+				...(claims.dupr_rating != null ? { duprDoubles: Number(claims.dupr_rating) } : {}),
+				...(claims.dupr_id != null ? { duprId: String(claims.dupr_id) } : {}),
+				source: claims.iss,
+			});
+		} catch {
+			// level sync is best-effort; login must not fail because of it
+		}
 	}
 }

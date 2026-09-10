@@ -73,6 +73,9 @@ import { MiUserSecurityKey } from '@/models/UserSecurityKey.js';
 import { MiWebhook } from '@/models/Webhook.js';
 import { MiSystemWebhook } from '@/models/SystemWebhook.js';
 import { MiChannel } from '@/models/Channel.js';
+import { MiMeet } from '@/models/Meet.js';
+import { MiMeetParticipant } from '@/models/MeetParticipant.js';
+import { MiMeetPlayerLevel } from '@/models/MeetPlayerLevel.js';
 import { MiRetentionAggregation } from '@/models/RetentionAggregation.js';
 import { MiRole } from '@/models/Role.js';
 import { MiRoleAssignment } from '@/models/RoleAssignment.js';
@@ -231,6 +234,9 @@ export const entities = [
 	MiPromoRead,
 	MiRelay,
 	MiChannel,
+	MiMeet,
+	MiMeetParticipant,
+	MiMeetPlayerLevel,
 	MiChannelFollowing,
 	MiChannelFavorite,
 	MiChannelMuting,

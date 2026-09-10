@@ -75,6 +75,7 @@ import { ClipService } from './ClipService.js';
 import { FeaturedService } from './FeaturedService.js';
 import { FanoutTimelineService } from './FanoutTimelineService.js';
 import { ChannelFollowingService } from './ChannelFollowingService.js';
+import { MeetService } from './MeetService.js';
 import { ChatService } from './ChatService.js';
 import { RegistryApiService } from './RegistryApiService.js';
 import { ReversiService } from './ReversiService.js';
@@ -102,6 +103,7 @@ import { AppEntityService } from './entities/AppEntityService.js';
 import { AuthSessionEntityService } from './entities/AuthSessionEntityService.js';
 import { BlockingEntityService } from './entities/BlockingEntityService.js';
 import { ChannelEntityService } from './entities/ChannelEntityService.js';
+import { MeetEntityService } from './entities/MeetEntityService.js';
 import { ChatEntityService } from './entities/ChatEntityService.js';
 import { ClipEntityService } from './entities/ClipEntityService.js';
 import { DriveFileEntityService } from './entities/DriveFileEntityService.js';
@@ -226,6 +228,7 @@ const $FeaturedService: Provider = { provide: 'FeaturedService', useExisting: Fe
 const $FanoutTimelineService: Provider = { provide: 'FanoutTimelineService', useExisting: FanoutTimelineService };
 const $FanoutTimelineEndpointService: Provider = { provide: 'FanoutTimelineEndpointService', useExisting: FanoutTimelineEndpointService };
 const $ChannelFollowingService: Provider = { provide: 'ChannelFollowingService', useExisting: ChannelFollowingService };
+const $MeetService: Provider = { provide: 'MeetService', useExisting: MeetService };
 const $ChannelMutingService: Provider = { provide: 'ChannelMutingService', useExisting: ChannelMutingService };
 const $ChatService: Provider = { provide: 'ChatService', useExisting: ChatService };
 const $RegistryApiService: Provider = { provide: 'RegistryApiService', useExisting: RegistryApiService };
@@ -255,6 +258,7 @@ const $AppEntityService: Provider = { provide: 'AppEntityService', useExisting: 
 const $AuthSessionEntityService: Provider = { provide: 'AuthSessionEntityService', useExisting: AuthSessionEntityService };
 const $BlockingEntityService: Provider = { provide: 'BlockingEntityService', useExisting: BlockingEntityService };
 const $ChannelEntityService: Provider = { provide: 'ChannelEntityService', useExisting: ChannelEntityService };
+const $MeetEntityService: Provider = { provide: 'MeetEntityService', useExisting: MeetEntityService };
 const $ChatEntityService: Provider = { provide: 'ChatEntityService', useExisting: ChatEntityService };
 const $ClipEntityService: Provider = { provide: 'ClipEntityService', useExisting: ClipEntityService };
 const $DriveFileEntityService: Provider = { provide: 'DriveFileEntityService', useExisting: DriveFileEntityService };
@@ -379,6 +383,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		FanoutTimelineService,
 		FanoutTimelineEndpointService,
 		ChannelFollowingService,
+		MeetService,
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -408,6 +413,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AuthSessionEntityService,
 		BlockingEntityService,
 		ChannelEntityService,
+		MeetEntityService,
 		ChatEntityService,
 		ClipEntityService,
 		DriveFileEntityService,
@@ -530,6 +536,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$FanoutTimelineService,
 		$FanoutTimelineEndpointService,
 		$ChannelFollowingService,
+		$MeetService,
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,
@@ -559,6 +566,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AuthSessionEntityService,
 		$BlockingEntityService,
 		$ChannelEntityService,
+		$MeetEntityService,
 		$ChatEntityService,
 		$ClipEntityService,
 		$DriveFileEntityService,
@@ -681,6 +689,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		FanoutTimelineService,
 		FanoutTimelineEndpointService,
 		ChannelFollowingService,
+		MeetService,
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -709,6 +718,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		AuthSessionEntityService,
 		BlockingEntityService,
 		ChannelEntityService,
+		MeetEntityService,
 		ChatEntityService,
 		ClipEntityService,
 		DriveFileEntityService,
@@ -830,6 +840,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$FanoutTimelineService,
 		$FanoutTimelineEndpointService,
 		$ChannelFollowingService,
+		$MeetService,
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,
@@ -858,6 +869,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$AuthSessionEntityService,
 		$BlockingEntityService,
 		$ChannelEntityService,
+		$MeetEntityService,
 		$ChatEntityService,
 		$ClipEntityService,
 		$DriveFileEntityService,

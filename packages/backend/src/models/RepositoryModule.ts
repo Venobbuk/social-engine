@@ -5,6 +5,9 @@
 
 import { Module } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
+import { MiMeet } from '@/models/Meet.js';
+import { MiMeetParticipant } from '@/models/MeetParticipant.js';
+import { MiMeetPlayerLevel } from '@/models/MeetPlayerLevel.js';
 import {
 	MiAbuseReportNotificationRecipient,
 	MiAbuseUserReport,
@@ -418,6 +421,24 @@ const $channelsRepository: Provider = {
 	inject: [DI.db],
 };
 
+const $meetsRepository: Provider = {
+	provide: DI.meetsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiMeet).extend(miRepository as MiRepository<MiMeet>),
+	inject: [DI.db],
+};
+
+const $meetParticipantsRepository: Provider = {
+	provide: DI.meetParticipantsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiMeetParticipant).extend(miRepository as MiRepository<MiMeetParticipant>),
+	inject: [DI.db],
+};
+
+const $meetPlayerLevelsRepository: Provider = {
+	provide: DI.meetPlayerLevelsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiMeetPlayerLevel).extend(miRepository as MiRepository<MiMeetPlayerLevel>),
+	inject: [DI.db],
+};
+
 const $channelFollowingsRepository: Provider = {
 	provide: DI.channelFollowingsRepository,
 	useFactory: (db: DataSource) => db.getRepository(MiChannelFollowing).extend(miRepository as MiRepository<MiChannelFollowing>),
@@ -602,6 +623,9 @@ const $reversiGamesRepository: Provider = {
 		$promoReadsRepository,
 		$relaysRepository,
 		$channelsRepository,
+		$meetsRepository,
+		$meetParticipantsRepository,
+		$meetPlayerLevelsRepository,
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,
@@ -680,6 +704,9 @@ const $reversiGamesRepository: Provider = {
 		$promoReadsRepository,
 		$relaysRepository,
 		$channelsRepository,
+		$meetsRepository,
+		$meetParticipantsRepository,
+		$meetPlayerLevelsRepository,
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,
