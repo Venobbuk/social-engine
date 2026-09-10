@@ -5,7 +5,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { MeetService } from '@/core/MeetService.js';
+import { MeetService } from '@/modules/meets/MeetService.js';
 
 // The signed-in player sets their own self rating / gender / age group for a sport (DUPR values come from the host adapter).
 export const meta = {

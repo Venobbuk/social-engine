@@ -5,9 +5,9 @@
 
 import { Injectable } from '@nestjs/common';
 import type Logger from '@/logger.js';
-import { MeetService } from '@/core/MeetService.js';
+import { MeetService } from '@/modules/meets/MeetService.js';
 import { bindThis } from '@/decorators.js';
-import { QueueLoggerService } from '../QueueLoggerService.js';
+import { QueueLoggerService } from '@/queue/QueueLoggerService.js';
 
 // Runs every minute from the system queue: expires holds, purges maybes, auto-confirms stale invitations.
 @Injectable()

@@ -7,9 +7,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Brackets } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { MeetsRepository, MeetParticipantsRepository } from '@/models/_.js';
-import type { MiMeet } from '@/models/Meet.js';
+import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import { DI } from '@/di-symbols.js';
-import { MeetEntityService } from '@/core/entities/MeetEntityService.js';
+import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
 
 // Discover + "my meets". Nearby search uses a bounding box + haversine in SQL (no PostGIS needed at HK scale).
 export const meta = {

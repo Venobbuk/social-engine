@@ -4,8 +4,8 @@
  */
 
 import { PrimaryColumn, Entity, Index, JoinColumn, Column, ManyToOne } from 'typeorm';
-import { id } from './util/id.js';
-import { MiUser } from './User.js';
+import { id } from '@/models/util/id.js';
+import { MiUser } from '@/models/User.js';
 
 // Per-user, per-sport level record used by meet gates. Filled by the host adapter (hkpl SSO carries
 // dupr_rating) and by the user's own self rating. One row per (user, sport).

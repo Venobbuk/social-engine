@@ -8,9 +8,9 @@ import { IsNull } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { MeetsRepository, UsersRepository } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
-import { MeetService } from '@/core/MeetService.js';
-import { MeetEntityService } from '@/core/entities/MeetEntityService.js';
-import { ApiError } from '../../../error.js';
+import { MeetService } from '@/modules/meets/MeetService.js';
+import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { ApiError } from '@/server/api/error.js';
 import { meetErrors, toApiError } from '../_shared.js';
 
 // Host adds a player: invite a user (userId) or reserve a spot for a non-app player (displayName).

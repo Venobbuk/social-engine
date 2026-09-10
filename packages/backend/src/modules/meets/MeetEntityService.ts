@@ -9,13 +9,13 @@ import { DI } from '@/di-symbols.js';
 import type { MeetsRepository, MeetParticipantsRepository, MeetPlayerLevelsRepository, UsersRepository } from '@/models/_.js';
 import type { Packed } from '@/misc/json-schema.js';
 import type { MiUser } from '@/models/User.js';
-import type { MiMeet } from '@/models/Meet.js';
-import type { MiMeetParticipant } from '@/models/MeetParticipant.js';
+import type { MiMeet } from '@/modules/meets/models/Meet.js';
+import type { MiMeetParticipant } from '@/modules/meets/models/MeetParticipant.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
-import { MeetService } from '@/core/MeetService.js';
-import { UserEntityService } from './UserEntityService.js';
-import { ChannelEntityService } from './ChannelEntityService.js';
+import { MeetService } from '@/modules/meets/MeetService.js';
+import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 
 const ACTIVE_STATUSES = ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe'];
 

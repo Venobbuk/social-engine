@@ -5,9 +5,9 @@
 
 import { Module } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import { MiMeet } from '@/models/Meet.js';
-import { MiMeetParticipant } from '@/models/MeetParticipant.js';
-import { MiMeetPlayerLevel } from '@/models/MeetPlayerLevel.js';
+import { MiMeet } from '@/modules/meets/models/Meet.js';
+import { MiMeetParticipant } from '@/modules/meets/models/MeetParticipant.js';
+import { MiMeetPlayerLevel } from '@/modules/meets/models/MeetPlayerLevel.js';
 import {
 	MiAbuseReportNotificationRecipient,
 	MiAbuseUserReport,

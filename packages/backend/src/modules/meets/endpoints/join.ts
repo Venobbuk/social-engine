@@ -4,12 +4,13 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
+import ms from 'ms';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { MeetsRepository } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
-import { MeetService } from '@/core/MeetService.js';
-import { MeetEntityService } from '@/core/entities/MeetEntityService.js';
-import { ApiError } from '../../error.js';
+import { MeetService } from '@/modules/meets/MeetService.js';
+import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { ApiError } from '@/server/api/error.js';
 import { meetErrors, toApiError } from './_shared.js';
 
 export const meta = {
@@ -17,6 +18,7 @@ export const meta = {
 	requireCredential: true,
 	prohibitMoved: true,
 	kind: 'write:meets',
+	limit: { duration: ms('1hour'), max: 60 },
 	res: { type: 'object', optional: false, nullable: false, ref: 'Meet' },
 	errors: { ...meetErrors },
 } as const;
@@ -25,9 +27,10 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		meetId: { type: 'string', format: 'misskey:id' },
-		answer: { type: 'string', enum: ['accept', 'decline', 'maybe'] },
+		accessToken: { type: 'string', nullable: true, maxLength: 32 },
+		guests: { type: 'integer', minimum: 0, maximum: 5, default: 0 },
 	},
-	required: ['meetId', 'answer'],
+	required: ['meetId'],
 } as const;
 
 @Injectable()
@@ -42,7 +45,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
 			if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
 			try {
-				await this.meetService.respond(meet, me, ps.answer);
+				await this.meetService.join(meet, me, { accessToken: ps.accessToken ?? null, guests: ps.guests });
 				return await this.meetEntityService.pack(meet.id, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);

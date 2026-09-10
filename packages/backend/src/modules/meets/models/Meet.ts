@@ -4,10 +4,10 @@
  */
 
 import { PrimaryColumn, Entity, Index, JoinColumn, Column, ManyToOne } from 'typeorm';
-import { id } from './util/id.js';
-import { MiUser } from './User.js';
-import { MiChannel } from './Channel.js';
-import { MiChatRoom } from './ChatRoom.js';
+import { id } from '@/models/util/id.js';
+import { MiUser } from '@/models/User.js';
+import { MiChannel } from '@/models/Channel.js';
+import { MiChatRoom } from '@/models/ChatRoom.js';
 
 // The meet object: a social open-play session with capacity, RSVP states, gates and (later) fees.
 // Field set follows docs/spec_meets.md §Y.2 (Reclub 2.45.12 model) reduced to what v1 needs.

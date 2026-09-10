@@ -7,8 +7,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { MeetsRepository, MeetParticipantsRepository } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
-import { MeetEntityService } from '@/core/entities/MeetEntityService.js';
-import { ApiError } from '../../error.js';
+import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { ApiError } from '@/server/api/error.js';
 import { meetErrors } from './_shared.js';
 
 export const meta = {

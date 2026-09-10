@@ -4,8 +4,8 @@
  */
 
 import { PrimaryColumn, Entity, Index, JoinColumn, Column, ManyToOne } from 'typeorm';
-import { id } from './util/id.js';
-import { MiUser } from './User.js';
+import { id } from '@/models/util/id.js';
+import { MiUser } from '@/models/User.js';
 import { MiMeet } from './Meet.js';
 
 // RSVP row. One per (meet, user) for real users; reserved slots and plus-ones have no user.
