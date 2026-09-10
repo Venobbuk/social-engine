@@ -23,5 +23,15 @@
     "path": "packages/frontend/src/pages/sso.vue",
     "sha": "02bcf595ee55",
     "evidence": "probes/sso.verdict.json"
-  }
+  },
+  "packages/backend/src/modules/meets/MeetService.ts",
+  "packages/backend/src/modules/meets/MeetEntityService.ts",
+  "packages/backend/src/modules/meets/MeetSweepProcessorService.ts",
+  "packages/backend/src/modules/meets/models/Meet.ts",
+  "packages/backend/src/modules/meets/models/MeetParticipant.ts",
+  "packages/backend/src/modules/meets/models/MeetPlayerLevel.ts",
+  "packages/backend/src/modules/meets/models/json-schema.ts",
+  "packages/backend/migration/1785100000000-meet.js",
+  "probes/meet-core.cjs",
+  "probes/meet-core.remote.cjs"
 ]
