@@ -7,11 +7,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import ms from 'ms';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { ChannelsRepository } from '@/models/_.js';
+import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import { DI } from '@/di-symbols.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
 import { ApiError } from '@/server/api/error.js';
-import { meetErrors, meetParamProps, parseIsoDate, toApiError } from './_shared.js';
+import { meetErrors, meetParamProps, parseIsoDate, pickMeetFields, toApiError } from './_shared.js';
 
 export const meta = {
 	tags: ['meets'],
@@ -51,8 +52,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (channel == null) throw new ApiError(meta.errors.noSuchChannel);
 			}
 			try {
-				const { startAt: _ignored, ...rest } = ps;
-				const meet = await this.meetService.create(me, { ...rest, startAt });
+				const fields = pickMeetFields(ps as Record<string, unknown>) as Partial<MiMeet>;
+				const meet = await this.meetService.create(me, { ...fields, name: ps.name, durationMinutes: ps.durationMinutes, capacity: ps.capacity, startAt });
 				return await this.meetEntityService.pack(meet, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);

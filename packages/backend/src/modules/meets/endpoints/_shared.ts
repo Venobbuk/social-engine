@@ -86,3 +86,10 @@ export const meetParamProps = {
 	ageGroup: { type: 'string', enum: ['any', 'junior', 'adult', 'senior'] },
 	submitMatches: { type: 'boolean' },
 } as const;
+
+/** Copy only the meet fields from a request body (Misskey passes the auth token as `i` inside the body). */
+export function pickMeetFields(ps: Record<string, unknown>): Record<string, unknown> {
+	const out: Record<string, unknown> = {};
+	for (const k of Object.keys(meetParamProps)) if (ps[k] !== undefined) out[k] = ps[k];
+	return out;
+}
