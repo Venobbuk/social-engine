@@ -99,3 +99,27 @@ export const packedMeetSchema = {
 		participants: { type: 'array', optional: true, nullable: false, items: { type: 'object', optional: false, nullable: false, ref: 'MeetParticipant' } },
 	},
 } as const;
+
+/** MEET-MATCH-V1: one row of Reclub's Matches pane. isPending = no scores; winnerTeam from score sets (majority of games). */
+export const packedMeetMatchSchema = {
+	type: 'object',
+	properties: {
+		id: { type: 'string', optional: false, nullable: false, format: 'id' },
+		meetId: { type: 'string', optional: false, nullable: false, format: 'id' },
+		round: { type: 'number', optional: false, nullable: true },
+		courtIndex: { type: 'number', optional: false, nullable: true },
+		team1Ids: { type: 'array', optional: false, nullable: false, items: { type: 'string', format: 'id' } },
+		team2Ids: { type: 'array', optional: false, nullable: false, items: { type: 'string', format: 'id' } },
+		scores: { type: 'array', optional: false, nullable: false, items: { type: 'array', items: { type: 'number' } } },
+		isPending: { type: 'boolean', optional: false, nullable: false },
+		winnerTeam: { type: 'number', optional: false, nullable: true },
+		canUpdateScore: { type: 'boolean', optional: false, nullable: false },
+		canManage: { type: 'boolean', optional: false, nullable: false },
+		duprStatus: { type: 'string', optional: false, nullable: true, enum: ['queued', 'submitted', 'failed', 'ineligible'] },
+		duprSubmittedBy: { type: 'object', optional: false, nullable: true, ref: 'UserLite' },
+		duprSubmittedAt: { type: 'string', optional: false, nullable: true, format: 'date-time' },
+		duprError: { type: 'string', optional: false, nullable: true },
+		duprEligibility: { type: 'object', optional: true, nullable: true },
+		updatedAt: { type: 'string', optional: false, nullable: false, format: 'date-time' },
+	},
+} as const;

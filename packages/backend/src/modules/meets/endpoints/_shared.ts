@@ -27,6 +27,9 @@ export const meetErrors = {
 	private: { message: 'This is a private meet, only invited people and participants can see.', code: 'MEET_PRIVATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000010' },
 	capacityBelowConfirmed: { message: 'Capacity cannot be below the confirmed count.', code: 'MEET_CAPACITY_BELOW_CONFIRMED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000011' },
 	hostNeedsSeat: { message: 'The host cannot take a seat in a full meet.', code: 'MEET_HOST_NEEDS_SEAT', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000012' },
+	// MEET-MATCH-V1
+	noSuchMatch: { message: 'No such match.', code: 'NO_SUCH_MATCH', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000013' },
+	duprLocked: { message: 'These matches have already been submitted to DUPR.', code: 'MEET_DUPR_LOCKED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014' },
 } as const;
 
 const map: Record<string, keyof typeof meetErrors> = {
@@ -46,6 +49,9 @@ const map: Record<string, keyof typeof meetErrors> = {
 	'meet:capacity_below_confirmed': 'capacityBelowConfirmed',
 	'meet:host_needs_seat': 'hostNeedsSeat',
 	'meet:meet_not_found': 'noSuchMeet',
+	'meet:no_such_match': 'noSuchMatch',
+	'meet:no_such_participant': 'noSuchParticipant',
+	'meet:dupr_locked': 'duprLocked',
 };
 
 export function parseIsoDate(v: string | undefined | null): Date | null {

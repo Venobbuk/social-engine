@@ -11,10 +11,12 @@ import type { Packed } from '@/misc/json-schema.js';
 import type { MiUser } from '@/models/User.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import type { MiMeetParticipant } from '@/modules/meets/models/MeetParticipant.js';
+import type { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
+import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 
@@ -35,6 +37,7 @@ export class MeetEntityService {
 		private channelEntityService: ChannelEntityService,
 		private meetService: MeetService,
 		private meetLevelService: MeetLevelService,
+		private meetMatchService: MeetMatchService,
 		private idService: IdService,
 	) {
 	}
@@ -166,6 +169,35 @@ export class MeetEntityService {
 			myGate,
 			isHost,
 			participants,
+		};
+	}
+
+	/** MEET-MATCH-V1: Reclub match card — isPending, winner by games won, canManage/canUpdateScore, DUPR badge. */
+	@bindThis
+	public async packMatch(m: MiMeetMatch, meet: MiMeet, me?: MiUser | null, opts: { eligibility?: boolean } = {}): Promise<Packed<'MeetMatch'>> {
+		const isHost = me ? await this.meetMatchService.isHost(meet, me) : false;
+		const canUpdateScore = me ? (isHost || await this.meetMatchService.canUpdateScore(meet, m, me)) : false;
+		let w1 = 0, w2 = 0;
+		for (const [a, b] of m.scores) { if (a > b) w1++; else if (b > a) w2++; }
+		const winnerTeam = m.scores.length === 0 || w1 === w2 ? null : (w1 > w2 ? 1 : 2);
+		return {
+			id: m.id,
+			meetId: m.meetId,
+			round: m.round,
+			courtIndex: m.courtIndex,
+			team1Ids: m.team1Ids,
+			team2Ids: m.team2Ids,
+			scores: m.scores,
+			isPending: m.scores.length === 0,
+			winnerTeam,
+			canUpdateScore: canUpdateScore && m.duprStatus !== 'submitted',
+			canManage: isHost,
+			duprStatus: m.duprStatus,
+			duprSubmittedBy: m.duprSubmittedById ? await this.userEntityService.pack(m.duprSubmittedById, me, { schema: 'UserLite' }).catch(() => null) : null,
+			duprSubmittedAt: m.duprSubmittedAt ? m.duprSubmittedAt.toISOString() : null,
+			duprError: m.duprError,
+			duprEligibility: opts.eligibility ? await this.meetMatchService.eligibility(meet, m).then(e => ({ isEligible: e.isEligible, errors: e.errors })) : undefined,
+			updatedAt: m.updatedAt.toISOString(),
 		};
 	}
 

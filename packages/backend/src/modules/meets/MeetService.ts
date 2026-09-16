@@ -315,7 +315,7 @@ export class MeetService {
 	}
 
 	/** Private meets: the access token, an invitation, or club membership (any attached club's channel) admits. */
-	private async mayViewPrivate(meet: MiMeet, userId: MiUser['id'] | null, accessToken?: string | null): Promise<boolean> {
+	public async mayViewPrivate(meet: MiMeet, userId: MiUser['id'] | null, accessToken?: string | null): Promise<boolean> {
 		if (meet.visibility !== 'private') return true;
 		if (accessToken && meet.accessToken === accessToken) return true;
 		if (!userId) return false;

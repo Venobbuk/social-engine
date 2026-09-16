@@ -23,6 +23,9 @@ services:
       ADAPTER_SSO_JTI_OPTIONAL: "1"
     env_file:
       - /root/social-engine.env          # OSS_SOCIAL_* — created by the operator, never by the agent
+      - /root/social-engine.hkpl.env     # ADAPTER_HKPL_URL / _S2S_SECRET / _ALLOW_LOCAL — MEET-MATCH-V1 (SOCIAL-DUPR-V1 door)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # hkpl-app :3939 lives on this box
     deploy:
       resources:
         limits:
