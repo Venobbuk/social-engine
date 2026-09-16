@@ -123,12 +123,24 @@ export class MeetService {
 	 * The locked row is re-read inside the transaction so the callback sees current counters.
 	 */
 	private async withMeetLock<T>(meetId: MiMeet['id'], fn: (em: EntityManager, meet: MiMeet) => Promise<T>): Promise<T> {
-		return await this.db.transaction(async em => {
+		// Side effects (chat room membership, notifications) queue here and run AFTER commit. Inside the lock they
+		// need a second pool connection; under N concurrent joins the N waiters hold every connection, the holder
+		// starves, and the waiters die at statement_timeout — observed live as 9/11 joins → 500 (probe C2, 09-16).
+		const after: Array<() => Promise<void> | void> = [];
+		const result = await this.db.transaction(async em => {
+			this.afterCommit.set(em, after);
 			const rows = await em.query(`SELECT * FROM "meet" WHERE "id" = $1 FOR UPDATE`, [meetId]) as MiMeet[];
 			if (!rows.length) throw this.err('meet_not_found', 'This meet does not exist.');
 			return await fn(em, rows[0]);
 		});
+		for (const f of after) {
+			try { await f(); } catch { /* best-effort side effects; the seat is already committed */ }
+		}
+		return result;
 	}
+
+	/** Per-transaction queue of post-commit side effects (keyed by the transaction's own EntityManager). */
+	private readonly afterCommit = new WeakMap<EntityManager, Array<() => Promise<void> | void>>();
 
 	/** The claim. True iff a seat was taken. Zero rows = full, not active, or started — no separate read decided it. */
 	private async claimSeat(em: EntityManager, meetId: MiMeet['id']): Promise<boolean> {
@@ -168,7 +180,7 @@ export class MeetService {
 		if (row.status === 'confirmed') return row;
 		if (await this.claimSeat(em, meet.id)) {
 			const r = await this.setRowStatus(em, row, 'confirmed');
-			await this.onConfirmed(meet, r);
+			this.onConfirmed(em, meet, r);
 			return r;
 		}
 		if (fallback === 'waitlisted') return await this.setRowStatus(em, row, 'waitlisted', { waitlistRank: await this.nextRank(em, meet.id) });
@@ -196,7 +208,7 @@ export class MeetService {
 			if (!next) break;
 			if (!(await this.claimSeat(em, meet.id))) break;
 			const r = await this.setRowStatus(em, next, 'confirmed');
-			await this.onConfirmed(meet, r);
+			this.onConfirmed(em, meet, r);
 			promoted++;
 		}
 		return promoted;
@@ -450,7 +462,7 @@ export class MeetService {
 				if (row.status === 'confirmed') return row as MiMeetParticipant;
 				if (!(await this.claimSeat(em, meet.id))) throw this.err('meet_full', 'This meet is full.');
 				const r = await this.setRowStatus(em, row, 'confirmed');
-				await this.onConfirmed(meet, r);
+				this.onConfirmed(em, meet, r);
 				return r as MiMeetParticipant;
 			}
 			const r = await this.leaveConfirmed(em, locked, row, status);
@@ -489,7 +501,7 @@ export class MeetService {
 			if (data.status === 'confirmed') {
 				if (!(await this.claimSeat(em, meet.id))) throw this.err('meet_full', 'This meet is full, do you want to put this reservation to confirmed or waitlist?');
 				row = await this.setRowStatus(em, row, 'confirmed');
-				await this.onConfirmed(meet, row);
+				this.onConfirmed(em, meet, row);
 			} else if (data.status === 'waitlisted') {
 				row = await this.setRowStatus(em, row, 'waitlisted', { waitlistRank: await this.nextRank(em, meet.id) });
 			} else {
@@ -591,7 +603,14 @@ export class MeetService {
 	}
 
 	// ---------------------------------------------------------------------------------------- misc
-	private async onConfirmed(meet: MiMeet, p: Row): Promise<void> {
+	/** Queue the confirmed-seat side effects for after commit (runs at once if no transaction is in flight). */
+	private onConfirmed(em: EntityManager, meet: MiMeet, p: Row): void {
+		const q = this.afterCommit.get(em);
+		if (q) q.push(() => this.onConfirmedNow(meet, p));
+		else void this.onConfirmedNow(meet, p).catch(() => {});
+	}
+
+	private async onConfirmedNow(meet: MiMeet, p: Row): Promise<void> {
 		if (p.userId && meet.chatRoomId) {
 			try {
 				const room = await this.chatService.findRoomById(meet.chatRoomId);
