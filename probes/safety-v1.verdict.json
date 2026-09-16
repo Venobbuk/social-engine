@@ -1,0 +1,104 @@
+{
+  "id": "safety-v1",
+  "at": "2026-09-16T22:56:28.663Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 10,
+  "total": 10,
+  "family": {
+    "found": 10,
+    "fixed": 10
+  },
+  "evidence": "[\"1a review before the meet starts is refused=ok {\\\"status\\\":400,\\\"code\\\":\\\"MEET_INVALID_TRANSITION\\\"}\",\"1b a non-participant cannot review=ok {\\\"status\\\":400}\",\"2 kudos are public and tallied=ok {\\\"kudos\\\":{\\\"Great partner\\\":2,\\\"On time\\\":1}}\",\"3 private feedback: target sees it, a third party does not=ok {\\\"target\\\":1,\\\"third\\\":0}\",\"4 warnings private below 5, public at 5 distinct authors=ok {\\\"below\\\":4,\\\"at5\\\":5,\\\"publicAt5\\\":true}\",\"5 a noShow tag counts in noShows30d=ok {\\\"noShows30d\\\":1}\",\"6a a host the viewer never played with is flagged=ok {\\\"safety\\\":{\\\"newHostUserIds\\\":[\\\"ar89kx4imnr7001c\\\"],\\\"blockedUserIds\\\":[]}}\",\"6b a blocked roster member is flagged and cannot message the blocker=ok {\\\"blocked\\\":[\\\"aqxxu52tsfmc000g\\\"],\\\"chat\\\":500}\",\"7a a non-minted (demo) account is refused=ok {\\\"status\\\":500}\",\"7b tester1 deletes their 波友 account; the league login still works and a fresh 波友 account is minted on next sign-in=ok {\\\"del\\\":200,\\\"showAfter\\\":404,\\\"remint\\\":200,\\\"newId\\\":true}\"]",
+  "detail": "Reclub safety model on the live engine: review gate, public kudos, private feedback, 5-warning threshold, no-show, Safety First context, block, self-delete",
+  "checks": [
+    {
+      "name": "1a review before the meet starts is refused",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "code": "MEET_INVALID_TRANSITION"
+      }
+    },
+    {
+      "name": "1b a non-participant cannot review",
+      "pass": true,
+      "detail": {
+        "status": 400
+      }
+    },
+    {
+      "name": "2 kudos are public and tallied",
+      "pass": true,
+      "detail": {
+        "kudos": {
+          "Great partner": 2,
+          "On time": 1
+        }
+      }
+    },
+    {
+      "name": "3 private feedback: target sees it, a third party does not",
+      "pass": true,
+      "detail": {
+        "target": 1,
+        "third": 0
+      }
+    },
+    {
+      "name": "4 warnings private below 5, public at 5 distinct authors",
+      "pass": true,
+      "detail": {
+        "below": 4,
+        "at5": 5,
+        "publicAt5": true
+      }
+    },
+    {
+      "name": "5 a noShow tag counts in noShows30d",
+      "pass": true,
+      "detail": {
+        "noShows30d": 1
+      }
+    },
+    {
+      "name": "6a a host the viewer never played with is flagged",
+      "pass": true,
+      "detail": {
+        "safety": {
+          "newHostUserIds": [
+            "ar89kx4imnr7001c"
+          ],
+          "blockedUserIds": []
+        }
+      }
+    },
+    {
+      "name": "6b a blocked roster member is flagged and cannot message the blocker",
+      "pass": true,
+      "detail": {
+        "blocked": [
+          "aqxxu52tsfmc000g"
+        ],
+        "chat": 500
+      }
+    },
+    {
+      "name": "7a a non-minted (demo) account is refused",
+      "pass": true,
+      "detail": {
+        "status": 500
+      }
+    },
+    {
+      "name": "7b tester1 deletes their 波友 account; the league login still works and a fresh 波友 account is minted on next sign-in",
+      "pass": true,
+      "detail": {
+        "del": 200,
+        "showAfter": 404,
+        "remint": 200,
+        "newId": true
+      }
+    }
+  ]
+}
