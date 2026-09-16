@@ -118,6 +118,7 @@ export const packedMeetMatchSchema = {
 		duprStatus: { type: 'string', optional: false, nullable: true, enum: ['queued', 'submitted', 'failed', 'ineligible'] },
 		duprSubmittedBy: { type: 'object', optional: false, nullable: true, ref: 'UserLite' },
 		duprSubmittedAt: { type: 'string', optional: false, nullable: true, format: 'date-time' },
+		duprRef: { type: 'string', optional: false, nullable: true },
 		duprError: { type: 'string', optional: false, nullable: true },
 		duprEligibility: { type: 'object', optional: true, nullable: true },
 		updatedAt: { type: 'string', optional: false, nullable: false, format: 'date-time' },

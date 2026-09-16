@@ -60,8 +60,10 @@ export class MeetMatchService {
 	public async list(meet: MiMeet): Promise<MiMeetMatch[]> {
 		const rows = await this.meetMatchesRepository.find({ where: { meetId: meet.id }, order: { round: 'ASC', courtIndex: 'ASC', id: 'ASC' } });
 		// lazily refresh the badge for rows hkpl is still draining (at most once a minute per row)
-		const stale = rows.filter(r => r.duprStatus === 'queued' && Date.now() - new Date(r.updatedAt).getTime() > 60_000);
-		for (const r of stale) await this.refreshDupr(r).catch(() => {});
+		for (let i = 0; i < rows.length; i++) {
+			const r = rows[i];
+			if (r.duprStatus === 'queued' && Date.now() - new Date(r.updatedAt).getTime() > 60_000) rows[i] = await this.refreshDupr(r).catch(() => r);
+		}
 		return rows;
 	}
 

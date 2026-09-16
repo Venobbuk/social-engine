@@ -1,6 +1,6 @@
 // Runs ON kaka (node 20): MEET-MATCH-V1 end to end — engine (127.0.0.1:3960) → hkpl branch route (real code from
 // /root/hkpl-boyau-wt, served on :3977 against the hkpl_boyau_sbx sandbox) → DuprWriteQueue row. Not a mock.
-// The engine container must carry ADAPTER_HKPL_URL=http://host.docker.internal:3977 + the same secret (env file).
+// The engine container must carry ADAPTER_HKPL_URL=http://boyau-dupr-probe:3977 + the same secret (env file).
 //   M1  host creates a meet (cap 4, autoApprove, allowPlayerScoring, submitMatches); 4 users join → 4 confirmed
 //   M2  a non-host creates a match → MEET_NOT_HOST
 //   M3  host creates round 1 / court 0, [p1,p2] vs [p3,p4] → isPending, canManage
@@ -15,7 +15,7 @@
 //   M11 submit-dupr by a non-host → MEET_NOT_HOST
 'use strict';
 const fs = require('fs');
-const { execFileSync, spawn } = require('child_process');
+const { execFileSync } = require('child_process');
 const BASE = 'http://127.0.0.1:3960/api';
 const demo = JSON.parse(fs.readFileSync('/root/social-engine.demo-users', 'utf8'));
 const names = Object.keys(demo);
@@ -39,20 +39,26 @@ function hsql(q) {
 	const u = execFileSync('docker', ['exec', 'hkpl-db-dev', 'sh', '-c', 'echo $POSTGRES_USER']).toString().trim();
 	return execFileSync('docker', ['exec', 'hkpl-db-dev', 'psql', '-U', u, '-d', 'hkpl_boyau_sbx', '-tA', '-F', '|', '-c', q]).toString().trim();
 }
-const sandboxUrl = () => execFileSync('docker', ['exec', 'hkpl-dev-app', 'sh', '-c', 'echo $DATABASE_URL']).toString().trim().replace(/\/[^/?]*(\?|$)/, '/hkpl_boyau_sbx$1');
 
 (async () => {
-	// the real hkpl branch route, served alone against the sandbox
-	const server = spawn('node', ['probes/_social_dupr_server.cjs'], {
-		cwd: '/root/hkpl-boyau-wt',
-		env: { ...process.env, NODE_PATH: '/root/hkpl-server/node_modules', DATABASE_URL: sandboxUrl(), SOCIAL_S2S_SECRET: HKPL_ENV.ADAPTER_HKPL_S2S_SECRET, DUPR_ROUTE: 'off', PORT: '3977' },
-		stdio: ['ignore', 'pipe', 'pipe'],
-	});
+	// the real hkpl branch route, served alone against the sandbox — as a CONTAINER on the engine's docker network
+	// (ufw drops bridge→host traffic, so no host port is reachable from the engine; Misskey's HTTP client resolves
+	// names through DNS, which docker's embedded resolver answers for container names). Same image and node_modules
+	// volume as hkpl-dev-app; the worktree is mounted read-only; the sandbox DB is reached on the default bridge.
+	const dbPass = execFileSync('docker', ['exec', 'hkpl-db-dev', 'sh', '-c', 'echo $POSTGRES_PASSWORD']).toString().trim();
+	const dbUser = execFileSync('docker', ['exec', 'hkpl-db-dev', 'sh', '-c', 'echo $POSTGRES_USER']).toString().trim();
+	const dbIp = execFileSync('docker', ['inspect', 'hkpl-db-dev', '-f', '{{(index .NetworkSettings.Networks "bridge").IPAddress}}']).toString().trim();
+	try { execFileSync('docker', ['rm', '-f', 'boyau-dupr-probe'], { stdio: 'ignore' }); } catch {}
+	execFileSync('docker', ['run', '-d', '--name', 'boyau-dupr-probe', '--network', 'social-engine_default',
+		'-v', '/root/hkpl-boyau-wt:/wt:ro', '-v', 'hkpl-dev-nm:/root/hkpl-server/node_modules:ro', '-w', '/wt',
+		'-e', 'NODE_PATH=/root/hkpl-server/node_modules', '-e', `DATABASE_URL=postgresql://${dbUser}:${encodeURIComponent(dbPass)}@${dbIp}:5432/hkpl_boyau_sbx`,
+		'-e', `SOCIAL_S2S_SECRET=${HKPL_ENV.ADAPTER_HKPL_S2S_SECRET}`, '-e', 'DUPR_ROUTE=off', '-e', 'PORT=3977', '-e', 'SANDBOX_TENANT_IDS=uat,uat-test',
+		'hkpl-docker-hkpl-app', 'node', 'probes/_social_dupr_server.cjs'], { stdio: 'ignore' });
+	execFileSync('docker', ['network', 'connect', 'bridge', 'boyau-dupr-probe'], { stdio: 'ignore' });
 	let serverLog = '';
-	server.stdout.on('data', d => { serverLog += d; }); server.stderr.on('data', d => { serverLog += d; });
-	for (let i = 0; i < 40 && !serverLog.includes('ready'); i++) await new Promise(r => setTimeout(r, 250));
+	for (let i = 0; i < 60 && !serverLog.includes('ready'); i++) { await new Promise(r => setTimeout(r, 500)); try { serverLog = execFileSync('docker', ['logs', 'boyau-dupr-probe'], { stdio: ['ignore', 'pipe', 'pipe'] }).toString(); } catch {} }
 	out.serverReady = serverLog.includes('ready');
-	const stop = () => { try { server.kill('SIGTERM'); } catch {} };
+	const stop = () => { try { serverLog = execFileSync('docker', ['logs', 'boyau-dupr-probe'], { stdio: ['ignore', 'pipe', 'pipe'] }).toString(); } catch {} try { execFileSync('docker', ['rm', '-f', 'boyau-dupr-probe'], { stdio: 'ignore' }); } catch {} };
 
 	try {
 		const host = names[0];

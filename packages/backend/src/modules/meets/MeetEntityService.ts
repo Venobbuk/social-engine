@@ -195,6 +195,7 @@ export class MeetEntityService {
 			duprStatus: m.duprStatus,
 			duprSubmittedBy: m.duprSubmittedById ? await this.userEntityService.pack(m.duprSubmittedById, me, { schema: 'UserLite' }).catch(() => null) : null,
 			duprSubmittedAt: m.duprSubmittedAt ? m.duprSubmittedAt.toISOString() : null,
+			duprRef: m.duprRef,
 			duprError: m.duprError,
 			duprEligibility: opts.eligibility ? await this.meetMatchService.eligibility(meet, m).then(e => ({ isEligible: e.isEligible, errors: e.errors })) : undefined,
 			updatedAt: m.updatedAt.toISOString(),
