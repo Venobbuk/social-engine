@@ -16,7 +16,7 @@ import { DeleteAccountService } from '@/core/DeleteAccountService.js';
 export const meta = {
 	tags: ['account'],
 	requireCredential: true,
-	secure: true,
+	// not `secure`: the SSO issues a first-party APP credential (S4), and secure endpoints admit only native tokens
 	kind: 'write:account',
 	res: { type: 'object', optional: false, nullable: false, properties: { deleted: { type: 'boolean', optional: false, nullable: false } } },
 } as const;
