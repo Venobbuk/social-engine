@@ -187,7 +187,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				password: randomBytes(24).toString('base64url'),
 				ignorePreservedUsernames: true,
 			});
-			if (displayName) await this.usersRepository.update(account.id, { name: displayName });
+			// CHAT-SCOPE-V1: a Reclub member can message anyone in the app (Reclub inbox → any player). Misskey's default
+			// 'mutual' (both must follow) made every first message 'recipient is cannot chat'; a person can still narrow it
+			// in i/update. Existing accounts were moved to 'everyone' by SQL on 2026-09-17.
+			await this.usersRepository.update(account.id, { chatScope: 'everyone', ...(displayName ? { name: displayName } : {}) });
 			const ratingSynced = await this.syncLevel(account.id, claims);
 			const token = await this.issueCredential(account.id, claims);
 			return { token, userId: account.id, username: account.username, created: true, lang, ratingSynced };
