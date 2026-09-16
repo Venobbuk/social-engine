@@ -1,0 +1,59 @@
+{
+  "id": "merge-live",
+  "at": "2026-09-16T20:56:31.179Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 6,
+  "total": 6,
+  "evidence": "[\"hkpl password login=ok {\\\"status\\\":200}\",\"sso mint=ok {\\\"status\\\":200}\",\"engine exchange ok; same jwt refused the 2nd time (jti enforced)=ok {\\\"first\\\":200,\\\"second\\\":400,\\\"code\\\":\\\"ADAPTER_SSO_REPLAYED\\\"}\",\"me/leagues with session -> 200 + array=ok {\\\"status\\\":200,\\\"leagues\\\":0}\",\"engine → prod hkpl DUPR door answered (not 401): status ineligible=ok {\\\"http\\\":200,\\\"duprStatus\\\":\\\"ineligible\\\",\\\"err\\\":\\\"not_connected\\\"}\",\"league site up=ok {\\\"status\\\":200}\"]",
+  "detail": "the three doors on prod hkpl-app after the merge: SSO (jti enforced), me/leagues, DUPR",
+  "checks": [
+    {
+      "name": "hkpl password login",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "sso mint",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "engine exchange ok; same jwt refused the 2nd time (jti enforced)",
+      "pass": true,
+      "detail": {
+        "first": 200,
+        "second": 400,
+        "code": "ADAPTER_SSO_REPLAYED"
+      }
+    },
+    {
+      "name": "me/leagues with session -> 200 + array",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "leagues": 0
+      }
+    },
+    {
+      "name": "engine → prod hkpl DUPR door answered (not 401): status ineligible",
+      "pass": true,
+      "detail": {
+        "http": 200,
+        "duprStatus": "ineligible",
+        "err": "not_connected"
+      }
+    },
+    {
+      "name": "league site up",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    }
+  ]
+}
