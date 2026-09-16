@@ -44,6 +44,7 @@ export const packedMeetSchema = {
 		channelId: { type: 'string', optional: false, nullable: true, format: 'id' },
 		channel: { type: 'object', optional: true, nullable: true, ref: 'Channel' },
 		chatRoomId: { type: 'string', optional: false, nullable: true, format: 'id' },
+		safety: { type: 'object', optional: true, nullable: true, description: 'SAFETY-V1: newHostUserIds + blockedUserIds for the viewer (Reclub Safety First interstitial)' },
 		type: { type: 'string', optional: false, nullable: false, enum: ['listing', 'managed'] },
 		sport: { type: 'string', optional: false, nullable: false },
 		format: { type: 'string', optional: false, nullable: true },
@@ -101,6 +102,25 @@ export const packedMeetSchema = {
 } as const;
 
 /** MEET-MATCH-V1: one row of Reclub's Matches pane. isPending = no scores; winnerTeam from score sets (majority of games). */
+/** SAFETY-V1: what a viewer may see about a person (reviews visible to them + no-show count). */
+export const packedPlayerReviewsSchema = {
+	type: 'object',
+	properties: {
+		userId: { type: 'string', optional: false, nullable: false, format: 'id' },
+		endorsements: { type: 'array', optional: false, nullable: false, items: { type: 'object', properties: {
+			author: { type: 'object', optional: false, nullable: true, ref: 'UserLite' }, body: { type: 'string', optional: false, nullable: true }, createdAt: { type: 'string', optional: false, nullable: false, format: 'date-time' } } } },
+		feedback: { type: 'array', optional: false, nullable: false, items: { type: 'object', properties: {
+			author: { type: 'object', optional: false, nullable: true, ref: 'UserLite' }, body: { type: 'string', optional: false, nullable: true }, createdAt: { type: 'string', optional: false, nullable: false, format: 'date-time' } } } },
+		warnings: { type: 'array', optional: false, nullable: false, items: { type: 'object', properties: {
+			author: { type: 'object', optional: false, nullable: true, ref: 'UserLite' }, body: { type: 'string', optional: false, nullable: true }, createdAt: { type: 'string', optional: false, nullable: false, format: 'date-time' } } } },
+		warningCount: { type: 'number', optional: false, nullable: false },
+		warningsPublic: { type: 'boolean', optional: false, nullable: false },
+		noShows30d: { type: 'number', optional: false, nullable: false },
+		kudos: { type: 'object', optional: false, nullable: false, description: 'endorsement body → count (Reclub kudo dimensions live in the body)' },
+		mine: { type: 'object', optional: false, nullable: false, description: 'the viewer\'s own rows about this person, by type' },
+	},
+} as const;
+
 export const packedMeetMatchSchema = {
 	type: 'object',
 	properties: {

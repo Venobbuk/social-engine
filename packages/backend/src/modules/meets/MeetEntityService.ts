@@ -169,6 +169,7 @@ export class MeetEntityService {
 			myGate,
 			isHost,
 			participants,
+			safety: me ? await this.meetService.safetyContext(meet, me.id).catch(() => null) : null,
 		};
 	}
 

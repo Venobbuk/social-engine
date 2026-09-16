@@ -17,6 +17,8 @@ import { ChatService } from '@/core/ChatService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { bindThis } from '@/decorators.js';
+import type { Packed } from '@/misc/json-schema.js';
+import type { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { secureRndstr, L_CHARS } from '@/misc/secure-rndstr.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 
@@ -601,6 +603,28 @@ export class MeetService {
 			return warningsPublic || viewerId === targetUserId || viewerId === r.authorId;
 		});
 		return { reviews, warningCount, warningsPublic };
+	}
+
+	/** SAFETY-V1: a review needs a shared meet — both confirmed on this meet (host counts as confirmed). */
+	@bindThis
+	public async assertPlayedTogether(meet: MiMeet, authorId: MiUser['id'], targetUserId: MiUser['id']): Promise<void> {
+		const rows = await this.meetParticipantsRepository.find({ where: { meetId: meet.id, userId: In([authorId, targetUserId]) }, select: { userId: true, status: true, isHost: true } });
+		const okFor = (id: string) => rows.some(r => r.userId === id && (r.status === 'confirmed' || r.isHost));
+		if (!okFor(authorId) || !okFor(targetUserId)) throw this.err('not_participant', 'You can only review someone you played with.');
+		if (new Date(meet.startAt).getTime() > Date.now()) throw this.err('invalid_transition', 'You can review players once the meet has started.');
+	}
+
+	/** SAFETY-V1: the packed view of a person's reviews for a viewer (see reviewsVisibleTo) + no-shows + kudos tally. */
+	@bindThis
+	public async packReviews(targetUserId: MiUser['id'], viewerId: MiUser['id'] | null, users: UserEntityService): Promise<Packed<'PlayerReviews'>> {
+		const { reviews, warningCount, warningsPublic } = await this.reviewsVisibleTo(targetUserId, viewerId);
+		const packRow = async (r: MiMeetReview) => ({ author: await users.pack(r.authorId, null, { schema: 'UserLite' as const }).catch(() => null), body: r.body, createdAt: r.createdAt.toISOString() });
+		const by = async (t: MiMeetReview['type']) => Promise.all(reviews.filter(r => r.type === t).map(packRow));
+		const kudos: Record<string, number> = {};
+		for (const r of reviews) if (r.type === 'endorsement' && r.body) for (const k of r.body.split(',').map(x => x.trim()).filter(Boolean)) kudos[k] = (kudos[k] ?? 0) + 1;
+		const mine: Record<string, string | null> = {};
+		if (viewerId) for (const r of await this.meetReviewsRepository.findBy({ authorId: viewerId, targetUserId })) mine[r.type] = r.body;
+		return { userId: targetUserId, endorsements: await by('endorsement'), feedback: await by('feedback'), warnings: await by('warning'), warningCount, warningsPublic, noShows30d: await this.noShowCount(targetUserId), kudos, mine } as Packed<'PlayerReviews'>;
 	}
 
 	/** "No showed {{count}} times in 30 days" — derived, never stored against the person. */
