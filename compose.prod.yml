@@ -18,6 +18,9 @@ services:
       - ./.config:/misskey/.config:ro
     environment:
       NODE_ENV: production
+      # SSO-SEAM-V2 transition (2026-09-16): admit jti-less JWTs from hkpl until its IDENTITY-PERSON-V1 mint is
+      # deployed. REMOVE this line once it is — with it set, replay protection is not enforced for old mints.
+      ADAPTER_SSO_JTI_OPTIONAL: "1"
     env_file:
       - /root/social-engine.env          # OSS_SOCIAL_* — created by the operator, never by the agent
     deploy:
