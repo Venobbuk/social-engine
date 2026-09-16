@@ -3,7 +3,7 @@ SPDX-FileCopyrightText: silkvo social-engine contributors
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
-<!-- /sso?jwt=…&redirect=/channels — host single sign-on landing (spec §2b item 1). A host (hkpl) sends the member
+<!-- /sso?redirect=/channels#jwt=… — host single sign-on landing (spec §2b item 1). A host (hkpl) sends the member
 here with a short-lived JWT; we exchange it for an account token and log in, then continue to `redirect`. -->
 <template>
 <PageWithAnimBg>
@@ -43,11 +43,24 @@ function safeRedirect(p?: string): string {
 	return (s.startsWith('/') && !s.startsWith('//')) ? s : '/channels';
 }
 
+// SSO-SEAM-V2 (2026-09-16, dry-run S2): the JWT arrives in the URL FRAGMENT (#jwt=…), not the query. A fragment
+// is never sent to any server, never lands in access logs or Referer, and is scrubbed from history here after
+// use. The query form is still accepted during the transition so the pre-V2 hkpl redirect keeps working.
+function tokenFromUrl(): string | undefined {
+	if (props.jwt) return props.jwt;
+	const h = window.location.hash.replace(/^#/, '');
+	if (!h) return undefined;
+	return new URLSearchParams(h).get('jwt') ?? undefined;
+}
+
 async function run() {
 	state.value = 'working';
 	try {
-		if (!props.jwt) throw new Error('missing token');
-		const res = await misskeyApi('adapter/sso', { jwt: props.jwt }) as { token: string };
+		const jwt = tokenFromUrl();
+		if (!jwt) throw new Error('missing token');
+		// scrub before the network call: a failure page must not keep the token in the address bar or history
+		if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+		const res = await misskeyApi('adapter/sso', { jwt }) as { token: string };
 		await login(res.token, safeRedirect(props.redirect));
 	} catch (e: any) {
 		state.value = 'error';
