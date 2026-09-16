@@ -62,7 +62,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			switch (ps.scope) {
 				case 'mine': {
 					if (me == null) return [];
-					q.innerJoin('meet_participant', 'mp', 'mp."meetId" = meet.id AND mp."userId" = :meId AND mp.status IN (:...active)', { meId: me.id, active: ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe'] });
+					// EXISTS, not innerJoin on a raw table name: TypeORM resolved that join to nothing and the scope returned 0 rows for a
+					// confirmed participant (found on live 09-16 by the Home tab; the same SQL by hand returned 1).
+					q.andWhere('EXISTS (SELECT 1 FROM meet_participant mp WHERE mp."meetId" = meet.id AND mp."userId" = :meId AND mp.status IN (:...active))', { meId: me.id, active: ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe'] });
 					break;
 				}
 				case 'hosting': {
