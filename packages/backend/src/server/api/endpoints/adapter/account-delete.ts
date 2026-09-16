@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
-import type { UsersRepository } from '@/models/_.js';
+import type { UsersRepository, UsedUsernamesRepository } from '@/models/_.js';
 import { DeleteAccountService } from '@/core/DeleteAccountService.js';
 
 // ACCOUNT-DELETE-V1 (PDPO, Reclub settings › delete account): an account minted by the host SSO has a password
@@ -28,6 +28,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
+		@Inject(DI.usedUsernamesRepository)
+		private usedUsernamesRepository: UsedUsernamesRepository,
 		private deleteAccountService: DeleteAccountService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
@@ -39,6 +41,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// mints a fresh account instead of colliding with the deleted one (found by probes/safety-v1 7b: remint 500)
 			const freed = user.username + '_x' + Date.now().toString(36);
 			await this.usersRepository.update(user.id, { username: freed, usernameLower: freed.toLowerCase() });
+			// the deletion job also parks the name in used_username (no reuse by strangers); for a host-minted name the
+			// only possible re-user IS the same person, so release it
+			await this.usedUsernamesRepository.delete({ username: user.usernameLower });
 			return { deleted: true };
 		});
 	}
