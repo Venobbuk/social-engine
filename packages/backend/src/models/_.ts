@@ -27,6 +27,8 @@ import { MiMeetPlayerLevel } from '@/modules/meets/models/MeetPlayerLevel.js';
 import { MiMeetGroup } from '@/modules/meets/models/MeetGroup.js';
 import { MiMeetReview } from '@/modules/meets/models/MeetReview.js';
 import { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
+import { MiVenue } from '@/modules/venues/models/Venue.js';
+import { MiUserLocation } from '@/modules/venues/models/UserLocation.js';
 import { MiChannelFavorite } from '@/models/ChannelFavorite.js';
 import { MiChannelFollowing } from '@/models/ChannelFollowing.js';
 import { MiChannelMuting } from "@/models/ChannelMuting.js";
@@ -172,6 +174,8 @@ export {
 	MiMeetGroup,
 	MiMeetReview,
 	MiMeetMatch,
+	MiVenue,
+	MiUserLocation,
 	MiRetentionAggregation,
 	MiRole,
 	MiRoleAssignment,
@@ -258,6 +262,8 @@ export type MeetPlayerLevelsRepository = Repository<MiMeetPlayerLevel> & MiRepos
 export type MeetGroupsRepository = Repository<MiMeetGroup> & MiRepository<MiMeetGroup>;
 export type MeetReviewsRepository = Repository<MiMeetReview> & MiRepository<MiMeetReview>;
 export type MeetMatchesRepository = Repository<MiMeetMatch> & MiRepository<MiMeetMatch>;
+export type VenuesRepository = Repository<MiVenue> & MiRepository<MiVenue>;
+export type UserLocationsRepository = Repository<MiUserLocation> & MiRepository<MiUserLocation>;
 export type RetentionAggregationsRepository = Repository<MiRetentionAggregation> & MiRepository<MiRetentionAggregation>;
 export type RolesRepository = Repository<MiRole> & MiRepository<MiRole>;
 export type RoleAssignmentsRepository = Repository<MiRoleAssignment> & MiRepository<MiRoleAssignment>;

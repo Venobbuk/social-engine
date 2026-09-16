@@ -151,6 +151,17 @@ export * as 'meets/matches/list' from '@/modules/meets/endpoints/matches/list.js
 export * as 'meets/matches/upsert' from '@/modules/meets/endpoints/matches/upsert.js';
 export * as 'meets/matches/delete' from '@/modules/meets/endpoints/matches/delete.js';
 export * as 'meets/matches/submit-dupr' from '@/modules/meets/endpoints/matches/submit-dupr.js';
+export * as 'venues/show' from '@/modules/venues/endpoints/show.js';
+export * as 'venues/search' from '@/modules/venues/endpoints/search.js';
+export * as 'venues/create' from '@/modules/venues/endpoints/create.js';
+export * as 'venues/autocomplete' from '@/modules/venues/endpoints/autocomplete.js';
+export * as 'venues/resolve' from '@/modules/venues/endpoints/resolve.js';
+export * as 'venues/staff-update' from '@/modules/venues/endpoints/staff-update.js';
+export * as 'venues/locations/list' from '@/modules/venues/endpoints/locations-list.js';
+export * as 'venues/locations/save' from '@/modules/venues/endpoints/locations-save.js';
+export * as 'venues/locations/delete' from '@/modules/venues/endpoints/locations-delete.js';
+export * as 'adapter/venues/sync' from '@/modules/venues/endpoints/sync.js';
+export * as 'adapter/clubs/sync' from '@/modules/venues/endpoints/clubs-sync.js';
 export * as 'channels/favorite' from './endpoints/channels/favorite.js';
 export * as 'channels/featured' from './endpoints/channels/featured.js';
 export * as 'channels/follow' from './endpoints/channels/follow.js';

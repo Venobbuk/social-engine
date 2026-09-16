@@ -11,6 +11,8 @@ import { MiMeetPlayerLevel } from '@/modules/meets/models/MeetPlayerLevel.js';
 import { MiMeetGroup } from '@/modules/meets/models/MeetGroup.js';
 import { MiMeetReview } from '@/modules/meets/models/MeetReview.js';
 import { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
+import { MiVenue } from '@/modules/venues/models/Venue.js';
+import { MiUserLocation } from '@/modules/venues/models/UserLocation.js';
 import {
 	MiAbuseReportNotificationRecipient,
 	MiAbuseUserReport,
@@ -446,6 +448,16 @@ const $meetGroupsRepository: Provider = {
 	useFactory: (db: DataSource) => db.getRepository(MiMeetGroup).extend(miRepository as MiRepository<MiMeetGroup>),
 	inject: [DI.db],
 };
+const $venuesRepository: Provider = {
+	provide: DI.venuesRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiVenue).extend(miRepository as MiRepository<MiVenue>),
+	inject: [DI.db],
+};
+const $userLocationsRepository: Provider = {
+	provide: DI.userLocationsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiUserLocation).extend(miRepository as MiRepository<MiUserLocation>),
+	inject: [DI.db],
+};
 const $meetMatchesRepository: Provider = {
 	provide: DI.meetMatchesRepository,
 	useFactory: (db: DataSource) => db.getRepository(MiMeetMatch).extend(miRepository as MiRepository<MiMeetMatch>),
@@ -647,6 +659,8 @@ const $reversiGamesRepository: Provider = {
 		$meetGroupsRepository,
 		$meetReviewsRepository,
 		$meetMatchesRepository,
+		$venuesRepository,
+		$userLocationsRepository,
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,
@@ -731,6 +745,8 @@ const $reversiGamesRepository: Provider = {
 		$meetGroupsRepository,
 		$meetReviewsRepository,
 		$meetMatchesRepository,
+		$venuesRepository,
+		$userLocationsRepository,
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,

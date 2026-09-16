@@ -78,6 +78,7 @@ import { ChannelFollowingService } from './ChannelFollowingService.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
+import { VenueService } from '@/modules/venues/VenueService.js';
 import { ChatService } from './ChatService.js';
 import { RegistryApiService } from './RegistryApiService.js';
 import { ReversiService } from './ReversiService.js';
@@ -233,6 +234,7 @@ const $ChannelFollowingService: Provider = { provide: 'ChannelFollowingService',
 const $MeetService: Provider = { provide: 'MeetService', useExisting: MeetService };
 const $MeetLevelService: Provider = { provide: 'MeetLevelService', useExisting: MeetLevelService };
 const $MeetMatchService: Provider = { provide: 'MeetMatchService', useExisting: MeetMatchService };
+const $VenueService: Provider = { provide: 'VenueService', useExisting: VenueService };
 const $ChannelMutingService: Provider = { provide: 'ChannelMutingService', useExisting: ChannelMutingService };
 const $ChatService: Provider = { provide: 'ChatService', useExisting: ChatService };
 const $RegistryApiService: Provider = { provide: 'RegistryApiService', useExisting: RegistryApiService };
@@ -390,6 +392,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MeetService,
 		MeetLevelService,
 		MeetMatchService,
+		VenueService,
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -545,6 +548,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MeetService,
 		$MeetLevelService,
 		$MeetMatchService,
+		$VenueService,
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,
@@ -700,6 +704,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MeetService,
 		MeetLevelService,
 		MeetMatchService,
+		VenueService,
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -853,6 +858,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MeetService,
 		$MeetLevelService,
 		$MeetMatchService,
+		$VenueService,
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,

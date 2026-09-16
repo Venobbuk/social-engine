@@ -29,6 +29,7 @@ import { packedPageBlockSchema, packedPageSchema } from '@/models/json-schema/pa
 import { packedNoteFavoriteSchema } from '@/models/json-schema/note-favorite.js';
 import { packedChannelSchema } from '@/models/json-schema/channel.js';
 import { packedMeetSchema, packedMeetParticipantSchema, packedMeetMatchSchema } from '@/modules/meets/models/json-schema.js';
+import { packedVenueSchema, packedUserLocationSchema } from '@/modules/venues/models/json-schema.js';
 import { packedAntennaSchema } from '@/models/json-schema/antenna.js';
 import { packedClipSchema } from '@/models/json-schema/clip.js';
 import { packedFederationInstanceSchema } from '@/models/json-schema/federation-instance.js';
@@ -112,6 +113,8 @@ export const refs = {
 	Meet: packedMeetSchema,
 	MeetParticipant: packedMeetParticipantSchema,
 	MeetMatch: packedMeetMatchSchema,
+	Venue: packedVenueSchema,
+	UserLocation: packedUserLocationSchema,
 	QueueCount: packedQueueCountSchema,
 	QueueMetrics: packedQueueMetricsSchema,
 	QueueJob: packedQueueJobSchema,

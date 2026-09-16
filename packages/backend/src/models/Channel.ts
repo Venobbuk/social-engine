@@ -45,6 +45,13 @@ export class MiChannel {
 	})
 	public description: string | null;
 
+	@Index({ unique: true, where: '"externalRef" IS NOT NULL' })
+	@Column('varchar', {
+		length: 96, nullable: true,
+		comment: 'CLUB-SYNC-V1: the league club this channel mirrors, e.g. hkpl:<tenantId>:<clubId>.',
+	})
+	public externalRef: string | null;
+
 	@Column({
 		...id(),
 		nullable: true,
