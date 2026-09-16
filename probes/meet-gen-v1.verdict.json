@@ -1,0 +1,102 @@
+{
+  "probe": "meet-gen-v1",
+  "at": "2026-09-16T17:18:34.632Z",
+  "family": {
+    "found": 10,
+    "fixed": 10
+  },
+  "pass": 10,
+  "total": 10,
+  "verdict": "pass",
+  "condition_fired": true,
+  "evidence": "[\"meet created=ok {\\\"status\\\":200}\",\"8 confirmed players=ok {\\\"confirmed\\\":8}\",\"preview writes nothing and is deterministic for a seed=ok {\\\"status\\\":200,\\\"n\\\":10,\\\"saved\\\":0}\",\"persist: 10 rows, 5 rounds × 2 courts, no one twice in a round, everyone plays=ok {\\\"rows\\\":10,\\\"rounds\\\":5,\\\"players\\\":8}\",\"preview == save=ok\",\"no partnership repeats across 5 rounds=ok {\\\"distinctPairs\\\":20,\\\"maxRepeat\\\":1}\",\"singles: full round robin of 6 = 15 matches / 5 rounds; limitRounds=2 → 6=ok {\\\"full\\\":15,\\\"rounds\\\":5,\\\"limited\\\":6}\",\"reset kept the 2 scored rows, cleared the 8 unscored, wrote 1 ladder round=ok {\\\"total\\\":4,\\\"scoredKept\\\":2,\\\"ladder\\\":2}\",\"ladder run: court 1 seats the four winners=ok {\\\"court1\\\":[[\\\"ar7xif6dgbnt0004\\\",\\\"ar7xifchgbnt000o\\\"],[\\\"ar7xifdmgbnt000t\\\",\\\"ar7xifbegbnt000j\\\"]]}\",\"non-host is refused=ok {\\\"status\\\":400,\\\"code\\\":\\\"MEET_NOT_HOST\\\"}\"]",
+  "detail": "Reclub match generator on the live engine: preview/persist, rotating partners spread, singles round robin, ladder from standings, reset, host gate",
+  "checks": [
+    {
+      "name": "meet created",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "8 confirmed players",
+      "pass": true,
+      "detail": {
+        "confirmed": 8
+      }
+    },
+    {
+      "name": "preview writes nothing and is deterministic for a seed",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "n": 10,
+        "saved": 0
+      }
+    },
+    {
+      "name": "persist: 10 rows, 5 rounds × 2 courts, no one twice in a round, everyone plays",
+      "pass": true,
+      "detail": {
+        "rows": 10,
+        "rounds": 5,
+        "players": 8
+      }
+    },
+    {
+      "name": "preview == save",
+      "pass": true
+    },
+    {
+      "name": "no partnership repeats across 5 rounds",
+      "pass": true,
+      "detail": {
+        "distinctPairs": 20,
+        "maxRepeat": 1
+      }
+    },
+    {
+      "name": "singles: full round robin of 6 = 15 matches / 5 rounds; limitRounds=2 → 6",
+      "pass": true,
+      "detail": {
+        "full": 15,
+        "rounds": 5,
+        "limited": 6
+      }
+    },
+    {
+      "name": "reset kept the 2 scored rows, cleared the 8 unscored, wrote 1 ladder round",
+      "pass": true,
+      "detail": {
+        "total": 4,
+        "scoredKept": 2,
+        "ladder": 2
+      }
+    },
+    {
+      "name": "ladder run: court 1 seats the four winners",
+      "pass": true,
+      "detail": {
+        "court1": [
+          [
+            "ar7xif6dgbnt0004",
+            "ar7xifchgbnt000o"
+          ],
+          [
+            "ar7xifdmgbnt000t",
+            "ar7xifbegbnt000j"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "non-host is refused",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "code": "MEET_NOT_HOST"
+      }
+    }
+  ]
+}
