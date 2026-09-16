@@ -36,14 +36,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const user = await this.usersRepository.findOneByOrFail({ id: me.id });
 			if (user.isDeleted) return { deleted: true };
 			if (!/^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username)) throw new Error('use i/delete-account');   // adapter/sso usernameFor(): <iss>_<12 hex>
+			const uname = user.username;   // captured before the deletion job touches the row
 			await this.deleteAccountService.deleteAccount(me);
 			// the row stays as a tombstone (federation), so free the deterministic SSO username: the person's NEXT sign-in
 			// mints a fresh account instead of colliding with the deleted one (found by probes/safety-v1 7b: remint 500)
-			const freed = user.username + '_x' + Date.now().toString(36);
+			const freed = uname + '_x' + Date.now().toString(36);
 			await this.usersRepository.update(user.id, { username: freed, usernameLower: freed.toLowerCase() });
 			// the deletion job also parks the name in used_username (no reuse by strangers); for a host-minted name the
 			// only possible re-user IS the same person, so release it
-			await this.usedUsernamesRepository.delete({ username: user.usernameLower });
+			await this.usedUsernamesRepository.delete({ username: uname.toLowerCase() });
 			return { deleted: true };
 		});
 	}
