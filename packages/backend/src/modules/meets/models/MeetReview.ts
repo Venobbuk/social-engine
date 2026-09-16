@@ -35,8 +35,9 @@ export class MiMeetReview {
 	@Column(id())
 	public targetUserId: MiUser['id'];
 
+	// the column is targetUserId (migration meet-v4-reclub); a bare @JoinColumn() would look for targetId — SAFETY-V1 found it
 	@ManyToOne(() => MiUser, { onDelete: 'CASCADE' })
-	@JoinColumn()
+	@JoinColumn({ name: 'targetUserId' })
 	public target: MiUser | null;
 
 	@Column({ ...id(), nullable: true })
