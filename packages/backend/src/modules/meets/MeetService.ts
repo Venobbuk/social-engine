@@ -65,6 +65,12 @@ type Row = MiMeetParticipant;
  * GATE ORDER (Reclub footer-CTA table): cancelled/past → host blocked → private-not-invited → level/DUPR/gender/
  * age (MeetLevelService) → capacity, last.
  */
+/** Affected-row count of an em.query() UPDATE/DELETE: TypeORM (pg) returns [rows, rowCount]; a bare rows array otherwise. */
+function affectedRows(res: unknown): number {
+	if (Array.isArray(res) && res.length === 2 && Array.isArray(res[0]) && typeof res[1] === 'number') return res[1];
+	return Array.isArray(res) ? res.length : 0;
+}
+
 @Injectable()
 export class MeetService {
 	constructor(
@@ -142,13 +148,18 @@ export class MeetService {
 	/** Per-transaction queue of post-commit side effects (keyed by the transaction's own EntityManager). */
 	private readonly afterCommit = new WeakMap<EntityManager, Array<() => Promise<void> | void>>();
 
-	/** The claim. True iff a seat was taken. Zero rows = full, not active, or started — no separate read decided it. */
+	/**
+	 * The claim. True iff a seat was taken. Zero rows = full, not active, or started — no separate read decided it.
+	 * TypeORM returns [rows, rowCount] for UPDATE/DELETE (a 2-element array ALWAYS), so the affected count is read
+	 * explicitly — the first live probe (09-16) confirmed 22 rows against a counter of 5 because `.length > 0` was
+	 * true for every claim. The counter held; the rows did not. Both must.
+	 */
 	private async claimSeat(em: EntityManager, meetId: MiMeet['id']): Promise<boolean> {
-		const rows = await em.query(
+		const res = await em.query(
 			`UPDATE "meet" SET "confirmed" = "confirmed" + 1, "updatedAt" = now()
 			  WHERE "id" = $1 AND "status" = 'active' AND "startAt" > now() AND "confirmed" + 1 <= "capacity"
-			  RETURNING "confirmed"`, [meetId]) as unknown[];
-		return Array.isArray(rows) && rows.length > 0;
+			  RETURNING "confirmed"`, [meetId]) as unknown;
+		return affectedRows(res) > 0;
 	}
 
 	private async releaseSeat(em: EntityManager, meetId: MiMeet['id']): Promise<void> {
