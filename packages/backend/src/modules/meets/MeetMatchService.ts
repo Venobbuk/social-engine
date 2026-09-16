@@ -16,6 +16,7 @@ import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { bindThis } from '@/decorators.js';
+import { generate as runGenerator, type Scheme, type RankingCriteria, type PlayerStat } from '@/modules/meets/MeetMatchGenerator.js';
 
 /** Reclub DUPRMatchEligibilityErrorCode, verbatim. */
 export type DuprEligibilityCode = 'no_account' | 'no_scores' | 'not_connected' | 'not_singles_doubles' | 'uneven_teams';
@@ -156,6 +157,62 @@ export class MeetMatchService {
 			match = await this.submitDupr(meet, match, user);
 		}
 		return match;
+	}
+
+	// ------------------------------------------------------------------------------------------ MEET-GEN-V1
+	/** Per-participant tallies from the meet's scored matches: the generator's memory (partners, opponents, points). */
+	@bindThis
+	public async playerStats(meet: MiMeet): Promise<Record<string, PlayerStat>> {
+		const rows = await this.meetMatchesRepository.find({ where: { meetId: meet.id } });
+		const st: Record<string, PlayerStat> = {};
+		const get = (id: string) => st[id] ??= { id, played: 0, wins: 0, pointsFor: 0, pointsAgainst: 0, partners: {}, opponents: {} };
+		for (const m of rows) {
+			let w1 = 0, w2 = 0, p1 = 0, p2 = 0;
+			for (const [a, b] of m.scores) { if (a > b) w1++; else if (b > a) w2++; p1 += a; p2 += b; }
+			const scored = m.scores.length > 0;
+			[m.team1Ids, m.team2Ids].forEach((team, ti) => {
+				const other = ti === 0 ? m.team2Ids : m.team1Ids;
+				for (const id of team) {
+					const s = get(id); s.played++;
+					if (scored) { if ((ti === 0 ? w1 > w2 : w2 > w1)) s.wins++; s.pointsFor += ti === 0 ? p1 : p2; s.pointsAgainst += ti === 0 ? p2 : p1; }
+					for (const mate of team) if (mate !== id) s.partners[mate] = (s.partners[mate] ?? 0) + 1;
+					for (const o of other) s.opponents[o] = (s.opponents[o] ?? 0) + 1;
+				}
+			});
+		}
+		return st;
+	}
+
+	/**
+	 * Reclub's match generator (POST /matches/generate). Host only. persist=false previews; reset clears the
+	 * unscored, unsubmitted matches first; new rounds continue after the highest existing round.
+	 */
+	@bindThis
+	public async generate(meet: MiMeet, user: MiUser, o: { scheme: Scheme; courts: number; participantIds: string[] | null; limitRounds: number | null; persist: boolean; reset: boolean; prioritizeLeastMatches: boolean; rankingCriteria: RankingCriteria | null; seed: number | null }): Promise<{ persisted: boolean; matches: MiMeetMatch[]; rounds: number; fullRounds: number; players: number; warnings: string[] }> {
+		if (!(await this.isHost(meet, user))) throw this.err('not_host', 'Only a host can do that.');
+		const confirmed = await this.meetParticipantsRepository.find({ where: { meetId: meet.id, status: 'confirmed' }, order: { id: 'ASC' } });
+		const allowed = new Set(confirmed.map((p) => p.id));
+		const ids = (o.participantIds ?? confirmed.map((p) => p.id)).filter((id) => allowed.has(id));
+		if (o.participantIds && ids.length !== o.participantIds.length) throw this.err('no_such_participant', 'No such participant.');
+		// PRESET_TEAMS: a team is the participants sharing a teamKey
+		const teams: string[][] = [];
+		if (o.scheme === 'PRESET_TEAMS') { const by = new Map<string, string[]>(); for (const p of confirmed) if (p.teamKey && ids.includes(p.id)) by.set(p.teamKey, [...(by.get(p.teamKey) ?? []), p.id]); teams.push(...by.values()); }
+		const existing = await this.meetMatchesRepository.find({ where: { meetId: meet.id } });
+		const clearable = o.reset ? existing.filter((m) => m.scores.length === 0 && m.duprStatus !== 'submitted') : [];
+		const kept = existing.filter((m) => !clearable.includes(m));
+		const startRound = kept.reduce((n, m) => Math.max(n, m.round ?? 0), 0) + 1;
+		const stats = await this.playerStats(meet);
+		const seed = o.seed ?? Math.floor(Math.random() * 2 ** 31);
+		const gen = runGenerator({ scheme: o.scheme, participantIds: ids, teams, courts: o.courts, limitRounds: o.limitRounds, prioritizeLeastMatches: o.prioritizeLeastMatches, rankingCriteria: o.rankingCriteria ?? undefined, stats, startRound, seed });
+		const now = new Date();
+		const rows: MiMeetMatch[] = gen.matches.map((g) => ({
+			id: this.idService.gen(), meetId: meet.id, round: g.round, courtIndex: g.courtIndex, team1Ids: g.team1Ids, team2Ids: g.team2Ids, scores: [],
+			createdById: user.id, duprStatus: null, duprSubmittedById: null, duprSubmittedAt: null, duprRef: null, duprError: null, updatedAt: now,
+		} as unknown as MiMeetMatch));
+		if (!o.persist) return { persisted: false, matches: rows, rounds: gen.rounds, fullRounds: gen.fullRounds, players: gen.players, warnings: gen.warnings };
+		if (clearable.length) await this.meetMatchesRepository.delete(clearable.map((m) => m.id));
+		if (rows.length) await this.meetMatchesRepository.insert(rows);
+		return { persisted: true, matches: rows, rounds: gen.rounds, fullRounds: gen.fullRounds, players: gen.players, warnings: gen.warnings };
 	}
 
 	@bindThis
