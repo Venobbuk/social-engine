@@ -1,0 +1,8 @@
+{
+  "id": "sso-seam-v2",
+  "at": "2026-09-16T08:48:42.793Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": "{\"hasJti\":false,\"P1_redeem_shape\":true,\"P2_not_master_token\":true,\"P3_access_token_row\":true,\"P4_token_authenticates\":true,\"P5_replay\":true,\"P5_mode\":\"no jti (old mint) → admitted under transition flag; replay protection NOT exercised\",\"P6_lang_echoed\":true,\"P6_ratingSynced_bool\":true,\"r1_error\":null,\"r2_error\":null}",
+  "detail": "all seam checks held. no jti (old mint) → admitted under transition flag; replay protection NOT exercised"
+}
