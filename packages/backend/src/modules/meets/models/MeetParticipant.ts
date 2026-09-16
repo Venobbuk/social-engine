@@ -9,9 +9,10 @@ import { MiUser } from '@/models/User.js';
 import { MiMeet } from './Meet.js';
 
 // RSVP row. One per (meet, user) for real users; reserved slots and plus-ones have no user.
-export const meetParticipantStatuses = ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe', 'declined', 'removed', 'left'] as const;
+// MEET-V4: Reclub MeetParticipantStatus. removed/left are not states — the row is DELETED (Reclub fn#75239). spectator = a roster row holding no seat (host-only host).
+export const meetParticipantStatuses = ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe', 'declined', 'spectator'] as const;
 export const meetParticipantKinds = ['user', 'reserved', 'plusOne'] as const;
-export const meetParticipantTags = ['paid', 'unpaid', 'cash', 'digital', 'membership', 'punch', 'feeWaived', 'refunded', 'checkedIn', 'noShow', 'late', 'excused', 'guest'] as const;
+export const meetParticipantTags = ['paid', 'unpaid', 'cash', 'digital', 'membership', 'punch', 'feeWaived', 'refunded', 'checkedIn', 'noShow', 'late', 'excused', 'guest', 'dropper'] as const; // three independent groups: attendance / payment / method
 
 @Entity('meet_participant')
 @Index(['meetId', 'userId'], { unique: true, where: '"userId" IS NOT NULL' })
@@ -54,8 +55,6 @@ export class MiMeetParticipant {
 	@Column('integer', { nullable: true, comment: 'Position in the waitlist (1 = next).' })
 	public waitlistRank: number | null;
 
-	@Column('timestamp with time zone', { nullable: true, comment: 'When a hold (pay-by) expires and the spot is released.' })
-	public holdExpiresAt: Date | null;
 
 	@Column('boolean', { default: false })
 	public isHost: boolean;
@@ -78,8 +77,27 @@ export class MiMeetParticipant {
 	@Column('integer', { nullable: true })
 	public courtIndex: number | null;
 
-	@Column('timestamp with time zone', { nullable: true })
-	public statusChangedAt: Date | null;
+	@Column('timestamp with time zone', { default: () => 'now()' })
+	public statusChangedAt: Date; // Reclub lastStatusUpdatedAt — waitlist order and the 3-day invite auto-confirm run on it
+
+	// ---- MEET-V4-RECLUB: externalReference{gender, age} for reserved/+1 rows (name = displayName, level = declaredLevel) ----
+	@Column('varchar', { length: 8, nullable: true })
+	public extGender: string | null;
+
+	@Column('varchar', { length: 8, nullable: true })
+	public extAge: string | null;
+
+	@Column('varchar', { length: 32, nullable: true })
+	public positionId: string | null;
+
+	@Column('double precision', { nullable: true })
+	public forceSkill: number | null;
+
+	@Column('varchar', { length: 32, nullable: true })
+	public forcePosition: string | null;
+
+	@Column('varchar', { length: 16, nullable: true, comment: 'MeetParticipantPaymentType (cash = 1)' })
+	public paymentType: string | null;
 
 	@Column('timestamp with time zone', { nullable: true })
 	public checkedInAt: Date | null;

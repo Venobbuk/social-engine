@@ -5,7 +5,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { MeetService } from '@/modules/meets/MeetService.js';
+import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 
 // The signed-in player sets their own self rating / gender / age group for a sport (DUPR values come from the host adapter).
 export const meta = {
@@ -39,13 +39,13 @@ export const paramDef = {
 
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
-	constructor(private meetService: MeetService) {
+	constructor(private meetLevelService: MeetLevelService,) {
 		super(meta, paramDef, async (ps, me) => {
 			const patch: Record<string, unknown> = {};
 			if (ps.selfLevel !== undefined) patch.selfLevel = ps.selfLevel;
 			if (ps.gender !== undefined) patch.gender = ps.gender;
 			if (ps.ageGroup !== undefined) patch.ageGroup = ps.ageGroup;
-			const level = await this.meetService.upsertLevel(me.id, ps.sport, patch);
+			const level = await this.meetLevelService.upsertLevel(me.id, ps.sport, patch);
 			return {
 				sport: level.sport,
 				selfLevel: level.selfLevel,

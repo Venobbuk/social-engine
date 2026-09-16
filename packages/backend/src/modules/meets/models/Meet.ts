@@ -13,8 +13,10 @@ import { MiChatRoom } from '@/models/ChatRoom.js';
 // Field set follows docs/spec_meets.md §Y.2 (Reclub 2.45.12 model) reduced to what v1 needs.
 
 export const meetTypes = ['listing', 'managed'] as const;
-export const meetVisibilities = ['public', 'private', 'club'] as const;
-export const meetStatuses = ['active', 'cancelled'] as const;
+export const meetVisibilities = ['public', 'private'] as const; // MEET-V4: Reclub privacy is binary; club = private + meet_group
+export const meetStatuses = ['pending', 'active', 'cancelled'] as const; // MEET-V4: Reclub MeetStatus
+export const meetRosterVisibilities = ['show_gender', 'show_age_group', 'show_self_rating', 'show_participant_tags', 'show_club_tags', 'show_dupr_ratings', 'show_courts', 'show_friends', 'show_position'] as const;
+export const meetFlags = ['COMMUNITY_PROMOTED', 'GROUP_PROMOTED', 'PROXIMITY_PROMOTED'] as const;
 export const meetFeeTypes = ['none', 'free', 'perPax', 'autoSplit'] as const;
 export const meetGateTypes = ['guidance', 'autoApprove', 'strict'] as const;
 export const meetLevelBases = ['self', 'duprSingles', 'duprDoubles'] as const;
@@ -130,8 +132,6 @@ export class MiMeet {
 	@Column('varchar', { length: 512, nullable: true, comment: 'How to pay (PayMe link, FPS id…) shown to confirmed players.' })
 	public paymentInfo: string | null;
 
-	@Column('integer', { nullable: true, comment: 'Minutes a promoted/held player has to pay before the spot is released; null = no deadline.' })
-	public payByMinutes: number | null;
 
 	@Column('integer', { default: 0, comment: 'Hours before start after which players cannot cancel (0 = none).' })
 	public cancellationFreezeHours: number;
@@ -156,6 +156,38 @@ export class MiMeet {
 
 	@Column('boolean', { default: false, comment: 'Matches will be submitted to the rating provider (DUPR) by the host adapter.' })
 	public submitMatches: boolean;
+
+	// ---- MEET-V4-RECLUB (2026-09-16): Reclub 2.45.12 fields not previously carried ----
+	@Column('integer', { default: 0, comment: 'The ONE seat counter (Reclub numComfirmedReserved). CHECK confirmed <= capacity in the DB; moved only by MeetService.claimSeat/releaseSeat.' })
+	public confirmed: number;
+
+	@Column('varchar', { length: 16, default: 'guidance', comment: 'DUPRAccountGateType: guidance | autoApprove | strict — whether a DUPR-linked account is required.' })
+	public duprAccountGate: typeof meetGateTypes[number];
+
+	@Column('varchar', { length: 16, nullable: true })
+	public repeatInterval: string | null;
+
+	@Column('integer', { nullable: true })
+	public repeatCount: number | null;
+
+	@Column('integer', { nullable: true, comment: 'Teams are blind until this many minutes before start.' })
+	public blindTeamsMinutes: number | null;
+
+	@Column('boolean', { default: false })
+	public allowPlayerScoring: boolean;
+
+	@Column('boolean', { default: true })
+	public sendNotifications: boolean;
+
+	@Column('varchar', { length: 32, array: true, default: '{}', comment: 'VISIBILITY_TYPE[] — which roster columns the host shows.' })
+	public rosterVisibility: string[];
+
+	@Column('varchar', { length: 32, array: true, default: '{}' })
+	public flags: string[];
+
+	@Index()
+	@Column('varchar', { length: 32, nullable: true, comment: 'Venue entity (W4); venueName/venueAddress/lat/lng stay as the denormalised display.' })
+	public venueId: string | null;
 
 	@Column('varchar', { length: 32, nullable: true, comment: 'Series (recurring schedule) this meet was materialised from.' })
 	public seriesId: string | null;

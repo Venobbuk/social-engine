@@ -76,6 +76,8 @@ import { MiChannel } from '@/models/Channel.js';
 import { MiMeet } from '@/modules/meets/models/Meet.js';
 import { MiMeetParticipant } from '@/modules/meets/models/MeetParticipant.js';
 import { MiMeetPlayerLevel } from '@/modules/meets/models/MeetPlayerLevel.js';
+import { MiMeetGroup } from '@/modules/meets/models/MeetGroup.js';
+import { MiMeetReview } from '@/modules/meets/models/MeetReview.js';
 import { MiRetentionAggregation } from '@/models/RetentionAggregation.js';
 import { MiRole } from '@/models/Role.js';
 import { MiRoleAssignment } from '@/models/RoleAssignment.js';
@@ -237,6 +239,8 @@ export const entities = [
 	MiMeet,
 	MiMeetParticipant,
 	MiMeetPlayerLevel,
+	MiMeetGroup,
+	MiMeetReview,
 	MiChannelFollowing,
 	MiChannelFavorite,
 	MiChannelMuting,

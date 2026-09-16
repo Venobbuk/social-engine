@@ -22,6 +22,11 @@ export const meetErrors = {
 	plusOneNotAllowed: { message: 'Guests are not allowed on this meet.', code: 'MEET_PLUS_ONE_NOT_ALLOWED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a000000000c' },
 	guestLimit: { message: 'Too many guests.', code: 'MEET_GUEST_LIMIT', id: '6b1d0a3e-8f41-4c0b-9b7e-1a000000000d' },
 	accessDenied: { message: 'Access denied.', code: 'ACCESS_DENIED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a000000000e' },
+	// MEET-V4-RECLUB
+	blocked: { message: "You can't join this meet because the host(s) has blocked you", code: 'MEET_BLOCKED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a000000000f' },
+	private: { message: 'This is a private meet, only invited people and participants can see.', code: 'MEET_PRIVATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000010' },
+	capacityBelowConfirmed: { message: 'Capacity cannot be below the confirmed count.', code: 'MEET_CAPACITY_BELOW_CONFIRMED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000011' },
+	hostNeedsSeat: { message: 'The host cannot take a seat in a full meet.', code: 'MEET_HOST_NEEDS_SEAT', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000012' },
 } as const;
 
 const map: Record<string, keyof typeof meetErrors> = {
@@ -36,6 +41,11 @@ const map: Record<string, keyof typeof meetErrors> = {
 	'meet:invalid_transition': 'invalidTransition',
 	'meet:plus_one_not_allowed': 'plusOneNotAllowed',
 	'meet:guest_limit': 'guestLimit',
+	'meet:blocked': 'blocked',
+	'meet:private': 'private',
+	'meet:capacity_below_confirmed': 'capacityBelowConfirmed',
+	'meet:host_needs_seat': 'hostNeedsSeat',
+	'meet:meet_not_found': 'noSuchMeet',
 };
 
 export function parseIsoDate(v: string | undefined | null): Date | null {
@@ -46,7 +56,8 @@ export function parseIsoDate(v: string | undefined | null): Date | null {
 
 export function toApiError(e: unknown): never {
 	if (e instanceof IdentifiableError && map[e.id]) {
-		throw new ApiError(meetErrors[map[e.id]]);
+		// carry the service's message: it is Reclub's own copy (freeze hours, host name, capacity), not the static default
+		throw new ApiError({ ...meetErrors[map[e.id]], message: e.message || meetErrors[map[e.id]].message });
 	}
 	throw e;
 }
@@ -68,15 +79,20 @@ export const meetParamProps = {
 	venueRef: { type: 'string', nullable: true, maxLength: 64 },
 	capacity: { type: 'integer', minimum: 1, maximum: 500 },
 	hostPlays: { type: 'boolean' },
-	visibility: { type: 'string', enum: ['public', 'private', 'club'] },
+	visibility: { type: 'string', enum: ['public', 'private'] }, // MEET-V4: binary, as Reclub; a club meet = private + groups
 	autoApprove: { type: 'boolean' },
 	allowPlusOne: { type: 'boolean' },
-	guestsPerMember: { type: 'integer', minimum: 0, maximum: 5 },
 	feeType: { type: 'string', enum: ['none', 'free', 'perPax', 'autoSplit'] },
 	feeAmount: { type: 'integer', nullable: true, minimum: 0 },
 	feeCurrency: { type: 'string', minLength: 3, maxLength: 3 },
 	paymentInfo: { type: 'string', nullable: true, maxLength: 512 },
-	payByMinutes: { type: 'integer', nullable: true, minimum: 5, maximum: 20160 },
+	duprAccountGate: { type: 'string', enum: ['guidance', 'autoApprove', 'strict'] },
+	repeatInterval: { type: 'string', nullable: true, enum: ['weekly'] },
+	repeatCount: { type: 'integer', nullable: true, minimum: 1, maximum: 4 },
+	blindTeamsMinutes: { type: 'integer', nullable: true, minimum: 0, maximum: 10080 },
+	allowPlayerScoring: { type: 'boolean' },
+	sendNotifications: { type: 'boolean' },
+	rosterVisibility: { type: 'array', items: { type: 'string', enum: ['show_gender', 'show_age_group', 'show_self_rating', 'show_participant_tags', 'show_club_tags', 'show_dupr_ratings', 'show_courts', 'show_friends', 'show_position'] } },
 	cancellationFreezeHours: { type: 'integer', minimum: 0, maximum: 168 },
 	gateType: { type: 'string', enum: ['guidance', 'autoApprove', 'strict'] },
 	levelBasis: { type: 'string', enum: ['self', 'duprSingles', 'duprDoubles'] },

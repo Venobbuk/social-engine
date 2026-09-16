@@ -33,7 +33,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { UsersRepository, AccessTokensRepository } from '@/models/_.js';
 import { SignupService } from '@/core/SignupService.js';
 import { IdService } from '@/core/IdService.js';
-import { MeetService } from '@/modules/meets/MeetService.js';
+import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { secureRndstr } from '@/misc/secure-rndstr.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '@/server/api/error.js';
@@ -141,7 +141,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 		private signupService: SignupService,
 		private idService: IdService,
-		private meetService: MeetService,
+		private meetLevelService: MeetLevelService,
 		private loggerService: LoggerService,
 	) {
 		super(meta, paramDef, async (ps) => {
@@ -220,7 +220,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	private async syncLevel(userId: string, claims: Claims): Promise<boolean> {
 		if (claims.dupr_rating == null && claims.dupr_id == null) return true; // nothing to sync is not a failure
 		try {
-			await this.meetService.upsertLevel(userId, 'pickleball', {
+			await this.meetLevelService.upsertLevel(userId, 'pickleball', {
 				...(claims.dupr_rating != null ? { duprDoubles: Number(claims.dupr_rating) } : {}),
 				...(claims.dupr_id != null ? { duprId: String(claims.dupr_id) } : {}),
 				source: claims.iss,

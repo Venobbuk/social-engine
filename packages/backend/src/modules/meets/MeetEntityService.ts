@@ -14,6 +14,7 @@ import type { MiMeetParticipant } from '@/modules/meets/models/MeetParticipant.j
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
+import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 
@@ -33,6 +34,7 @@ export class MeetEntityService {
 		private userEntityService: UserEntityService,
 		private channelEntityService: ChannelEntityService,
 		private meetService: MeetService,
+		private meetLevelService: MeetLevelService,
 		private idService: IdService,
 	) {
 	}
@@ -52,7 +54,10 @@ export class MeetEntityService {
 			declaredLevel: p.declaredLevel,
 			status: p.status,
 			waitlistRank: p.waitlistRank,
-			holdExpiresAt: p.holdExpiresAt?.toISOString() ?? null,
+			extGender: p.extGender ?? null,
+			extAge: p.extAge ?? null,
+			positionId: p.positionId ?? null,
+			paymentType: p.paymentType ?? null,
 			isHost: p.isHost,
 			isCoach: p.isCoach,
 			isReferee: p.isReferee,
@@ -60,7 +65,7 @@ export class MeetEntityService {
 			tags: p.tags,
 			teamKey: p.teamKey,
 			courtIndex: p.courtIndex,
-			level: p.declaredLevel ?? this.meetService.levelValue(level, meet.levelBasis),
+			level: p.declaredLevel ?? this.meetLevelService.levelValue(level, meet.levelBasis),
 			statusChangedAt: p.statusChangedAt?.toISOString() ?? null,
 			checkedInAt: p.checkedInAt?.toISOString() ?? null,
 		};
@@ -74,7 +79,7 @@ export class MeetEntityService {
 	): Promise<Packed<'Meet'>> {
 		const meet = typeof src === 'object' ? src : await this.meetsRepository.findOneByOrFail({ id: src });
 		const counts = await this.meetService.counts(meet.id);
-		const spotsLeft = Math.max(0, meet.capacity - counts.confirmed - counts.hold);
+		const spotsLeft = Math.max(0, meet.capacity - meet.confirmed); // MEET-V4: the counter is the fact; hold never held a seat
 
 		let myStatus: Packed<'Meet'>['myStatus'] = null;
 		let myGate: Packed<'Meet'>['myGate'] = null;
@@ -84,7 +89,7 @@ export class MeetEntityService {
 			myStatus = mine?.status ?? null;
 			isHost = meet.hostId === me.id || (mine?.isHost ?? false);
 			const level = await this.meetPlayerLevelsRepository.findOneBy({ userId: me.id, sport: meet.sport });
-			myGate = this.meetService.gateVerdict(meet, level);
+			myGate = this.meetLevelService.gateVerdict(meet, level);
 		}
 
 		const host = await this.userEntityService.pack(meet.hostId, me);
@@ -130,12 +135,20 @@ export class MeetEntityService {
 			isPast: this.meetService.isPast(meet),
 			autoApprove: meet.autoApprove,
 			allowPlusOne: meet.allowPlusOne,
-			guestsPerMember: meet.guestsPerMember,
 			feeType: meet.feeType,
 			feeAmount: meet.feeAmount,
 			feeCurrency: meet.feeCurrency,
 			paymentInfo: (me && (isHost || myStatus === 'confirmed' || myStatus === 'hold')) ? meet.paymentInfo : null,
-			payByMinutes: meet.payByMinutes,
+			confirmed: meet.confirmed,
+			duprAccountGate: meet.duprAccountGate,
+			repeatInterval: meet.repeatInterval,
+			repeatCount: meet.repeatCount,
+			blindTeamsMinutes: meet.blindTeamsMinutes,
+			allowPlayerScoring: meet.allowPlayerScoring,
+			sendNotifications: meet.sendNotifications,
+			rosterVisibility: meet.rosterVisibility,
+			flags: meet.flags,
+			venueId: meet.venueId,
 			cancellationFreezeHours: meet.cancellationFreezeHours,
 			gateType: meet.gateType,
 			levelBasis: meet.levelBasis,

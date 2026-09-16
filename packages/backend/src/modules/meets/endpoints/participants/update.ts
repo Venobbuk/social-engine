@@ -27,17 +27,23 @@ export const paramDef = {
 	properties: {
 		meetId: { type: 'string', format: 'misskey:id' },
 		participantId: { type: 'string', format: 'misskey:id' },
-		status: { type: 'string', enum: ['confirmed', 'waitlisted', 'hold', 'declined', 'removed', 'invited'], nullable: true },
-		holdMinutes: { type: 'integer', nullable: true, minimum: 5, maximum: 20160 },
+		// MEET-V4: Reclub states. 'remove' DELETES the row (User/Reserved/PlusOne) — Reclub fn#75239. hold is manual, no minutes.
+		status: { type: 'string', enum: ['confirmed', 'waitlisted', 'hold', 'declined', 'invited', 'spectator', 'remove'], nullable: true },
 		isHost: { type: 'boolean', nullable: true },
 		isCoach: { type: 'boolean', nullable: true },
 		isReferee: { type: 'boolean', nullable: true },
 		isPaymentCollector: { type: 'boolean', nullable: true },
-		tags: { type: 'array', nullable: true, items: { type: 'string', enum: ['paid', 'unpaid', 'cash', 'digital', 'membership', 'punch', 'feeWaived', 'refunded', 'checkedIn', 'noShow', 'late', 'excused', 'guest'] } },
+		tags: { type: 'array', nullable: true, items: { type: 'string', enum: ['paid', 'unpaid', 'cash', 'digital', 'membership', 'punch', 'feeWaived', 'refunded', 'checkedIn', 'noShow', 'late', 'excused', 'guest', 'dropper'] } },
 		teamKey: { type: 'string', nullable: true, maxLength: 32 },
 		courtIndex: { type: 'integer', nullable: true, minimum: 0, maximum: 64 },
 		displayName: { type: 'string', nullable: true, maxLength: 128 },
 		declaredLevel: { type: 'number', nullable: true, minimum: 0, maximum: 10 },
+		extGender: { type: 'string', nullable: true, maxLength: 8 },
+		extAge: { type: 'string', nullable: true, maxLength: 8 },
+		positionId: { type: 'string', nullable: true, maxLength: 32 },
+		forceSkill: { type: 'number', nullable: true, minimum: 0, maximum: 10 },
+		forcePosition: { type: 'string', nullable: true, maxLength: 32 },
+		paymentType: { type: 'string', nullable: true, enum: ['cash'] },
 	},
 	required: ['meetId', 'participantId'],
 } as const;
@@ -60,14 +66,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			try {
 				await this.meetService.assertHost(meet, me);
 				const patch: Record<string, unknown> = {};
-				for (const k of ['isHost', 'isCoach', 'isReferee', 'isPaymentCollector', 'tags', 'teamKey', 'courtIndex', 'displayName', 'declaredLevel'] as const) {
+				for (const k of ['isHost', 'isCoach', 'isReferee', 'isPaymentCollector', 'tags', 'teamKey', 'courtIndex', 'displayName', 'declaredLevel', 'extGender', 'extAge', 'positionId', 'forceSkill', 'forcePosition', 'paymentType'] as const) {
 					if (ps[k] !== undefined && ps[k] !== null) patch[k] = ps[k];
 				}
 				if (ps.teamKey === null) patch.teamKey = null;
 				if (ps.courtIndex === null) patch.courtIndex = null;
-				let current = participant;
-				if (Object.keys(patch).length > 0) current = await this.meetService.hostUpdateParticipant(meet, current, patch);
-				if (ps.status) await this.meetService.hostSetStatus(meet, current, ps.status, ps.holdMinutes ?? undefined);
+				if (Object.keys(patch).length > 0) await this.meetService.hostUpdateParticipant(meet, participant.id, patch);
+				if (ps.status) await this.meetService.hostSetStatus(meet, participant.id, ps.status);
 				return await this.meetEntityService.pack(meet.id, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);

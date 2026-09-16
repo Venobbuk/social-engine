@@ -76,6 +76,7 @@ import { FeaturedService } from './FeaturedService.js';
 import { FanoutTimelineService } from './FanoutTimelineService.js';
 import { ChannelFollowingService } from './ChannelFollowingService.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
+import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { ChatService } from './ChatService.js';
 import { RegistryApiService } from './RegistryApiService.js';
 import { ReversiService } from './ReversiService.js';
@@ -229,6 +230,7 @@ const $FanoutTimelineService: Provider = { provide: 'FanoutTimelineService', use
 const $FanoutTimelineEndpointService: Provider = { provide: 'FanoutTimelineEndpointService', useExisting: FanoutTimelineEndpointService };
 const $ChannelFollowingService: Provider = { provide: 'ChannelFollowingService', useExisting: ChannelFollowingService };
 const $MeetService: Provider = { provide: 'MeetService', useExisting: MeetService };
+const $MeetLevelService: Provider = { provide: 'MeetLevelService', useExisting: MeetLevelService };
 const $ChannelMutingService: Provider = { provide: 'ChannelMutingService', useExisting: ChannelMutingService };
 const $ChatService: Provider = { provide: 'ChatService', useExisting: ChatService };
 const $RegistryApiService: Provider = { provide: 'RegistryApiService', useExisting: RegistryApiService };
@@ -384,6 +386,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		FanoutTimelineEndpointService,
 		ChannelFollowingService,
 		MeetService,
+		MeetLevelService,
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -537,6 +540,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$FanoutTimelineEndpointService,
 		$ChannelFollowingService,
 		$MeetService,
+		$MeetLevelService,
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,
@@ -690,6 +694,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		FanoutTimelineEndpointService,
 		ChannelFollowingService,
 		MeetService,
+		MeetLevelService,
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -841,6 +846,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$FanoutTimelineEndpointService,
 		$ChannelFollowingService,
 		$MeetService,
+		$MeetLevelService,
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,

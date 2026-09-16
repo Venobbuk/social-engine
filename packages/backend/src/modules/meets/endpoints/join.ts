@@ -28,7 +28,7 @@ export const paramDef = {
 	properties: {
 		meetId: { type: 'string', format: 'misskey:id' },
 		accessToken: { type: 'string', nullable: true, maxLength: 32 },
-		guests: { type: 'integer', minimum: 0, maximum: 5, default: 0 },
+		plusOnes: { type: 'integer', minimum: 0, maximum: 1, default: 0 }, // Reclub: one +1 request per player (allowPlusOne)
 	},
 	required: ['meetId'],
 } as const;
@@ -45,7 +45,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
 			if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
 			try {
-				await this.meetService.join(meet, me, { accessToken: ps.accessToken ?? null, guests: ps.guests });
+				await this.meetService.join(meet, me, { accessToken: ps.accessToken ?? null, plusOnes: ps.plusOnes });
 				return await this.meetEntityService.pack(meet.id, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);

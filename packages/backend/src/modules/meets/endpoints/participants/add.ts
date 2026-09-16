@@ -33,7 +33,9 @@ export const paramDef = {
 		userId: { type: 'string', format: 'misskey:id', nullable: true },
 		displayName: { type: 'string', nullable: true, maxLength: 128 },
 		declaredLevel: { type: 'number', nullable: true, minimum: 0, maximum: 10 },
-		status: { type: 'string', enum: ['confirmed', 'invited', 'waitlisted'], default: 'invited' },
+		extGender: { type: 'string', nullable: true, maxLength: 8 },
+		extAge: { type: 'string', nullable: true, maxLength: 8 },
+		status: { type: 'string', enum: ['confirmed', 'invited', 'waitlisted', 'hold'], default: 'invited' },
 	},
 	required: ['meetId'],
 } as const;
@@ -58,7 +60,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			try {
 				await this.meetService.assertHost(meet, me);
 				const status = ps.userId ? ps.status : (ps.status === 'invited' ? 'confirmed' : ps.status);
-				await this.meetService.hostAdd(meet, { userId: ps.userId ?? null, displayName: ps.displayName ?? null, declaredLevel: ps.declaredLevel ?? null, status });
+				await this.meetService.hostAdd(meet, { userId: ps.userId ?? null, displayName: ps.displayName ?? null, declaredLevel: ps.declaredLevel ?? null, extGender: ps.extGender ?? null, extAge: ps.extAge ?? null, status });
 				return await this.meetEntityService.pack(meet.id, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);

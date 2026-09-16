@@ -9,7 +9,7 @@ import { MeetService } from '@/modules/meets/MeetService.js';
 import { bindThis } from '@/decorators.js';
 import { QueueLoggerService } from '@/queue/QueueLoggerService.js';
 
-// Runs every minute from the system queue: expires holds, purges maybes, auto-confirms stale invitations.
+// Runs every minute from the system queue: purges maybes 2 h before start, auto-confirms 3-day-old invitations (MEET-V4: no holds to expire — Reclub has no hold timer).
 @Injectable()
 export class MeetSweepProcessorService {
 	private logger: Logger;
@@ -24,8 +24,8 @@ export class MeetSweepProcessorService {
 	@bindThis
 	public async process(): Promise<void> {
 		const r = await this.meetService.sweep();
-		if (r.expiredHolds || r.purgedMaybes || r.autoConfirmedInvites) {
-			this.logger.info(`meet sweep: holds expired ${r.expiredHolds}, maybes purged ${r.purgedMaybes}, invites auto-confirmed ${r.autoConfirmedInvites}`);
+		if (r.purgedMaybes || r.autoConfirmedInvites || r.waitlistedInvites) {
+			this.logger.info(`meet sweep: maybes purged ${r.purgedMaybes}, invites auto-confirmed ${r.autoConfirmedInvites}, invites waitlisted (meet full) ${r.waitlistedInvites}`);
 		}
 	}
 }

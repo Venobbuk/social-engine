@@ -71,6 +71,8 @@ export const DI = {
 	meetsRepository: Symbol('meetsRepository'),
 	meetParticipantsRepository: Symbol('meetParticipantsRepository'),
 	meetPlayerLevelsRepository: Symbol('meetPlayerLevelsRepository'),
+	meetGroupsRepository: Symbol('meetGroupsRepository'),
+	meetReviewsRepository: Symbol('meetReviewsRepository'),
 	channelFollowingsRepository: Symbol('channelFollowingsRepository'),
 	channelFavoritesRepository: Symbol('channelFavoritesRepository'),
 	channelMutingRepository: Symbol('channelMutingRepository'),
