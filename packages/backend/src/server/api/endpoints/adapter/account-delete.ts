@@ -35,6 +35,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (user.isDeleted) return { deleted: true };
 			if (!/^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username)) throw new Error('use i/delete-account');   // adapter/sso usernameFor(): <iss>_<12 hex>
 			await this.deleteAccountService.deleteAccount(me);
+			// the row stays as a tombstone (federation), so free the deterministic SSO username: the person's NEXT sign-in
+			// mints a fresh account instead of colliding with the deleted one (found by probes/safety-v1 7b: remint 500)
+			const freed = user.username + '_x' + Date.now().toString(36);
+			await this.usersRepository.update(user.id, { username: freed, usernameLower: freed.toLowerCase() });
 			return { deleted: true };
 		});
 	}
