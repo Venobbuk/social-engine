@@ -171,8 +171,8 @@ export class MeetMatchService {
 	// ------------------------------------------------------------------------------------------ MEET-GEN-V1
 	/** Per-participant tallies from the meet's scored matches: the generator's memory (partners, opponents, points). */
 	@bindThis
-	public async playerStats(meet: MiMeet): Promise<Record<string, PlayerStat>> {
-		const rows = await this.meetMatchesRepository.find({ where: { meetId: meet.id } });
+	public async playerStats(meet: MiMeet, only?: MiMeetMatch[]): Promise<Record<string, PlayerStat>> {
+		const rows = only ?? await this.meetMatchesRepository.find({ where: { meetId: meet.id } });
 		const st: Record<string, PlayerStat> = {};
 		const get = (id: string) => st[id] ??= { id, played: 0, wins: 0, pointsFor: 0, pointsAgainst: 0, partners: {}, opponents: {} };
 		for (const m of rows) {
@@ -210,7 +210,9 @@ export class MeetMatchService {
 		const clearable = o.reset ? existing.filter((m) => m.scores.length === 0 && m.duprStatus !== 'submitted') : [];
 		const kept = existing.filter((m) => !clearable.includes(m));
 		const startRound = kept.reduce((n, m) => Math.max(n, m.round ?? 0), 0) + 1;
-		const stats = await this.playerStats(meet);
+		// the history the generator balances against is what will REMAIN: a reset starts every count from zero
+		// (graded 2026-09-17: "Clear current matches keeps the old counts as the baseline")
+		const stats = await this.playerStats(meet, kept);
 		const seed = o.seed ?? Math.floor(Math.random() * 2 ** 31);
 		const gen = runGenerator({ scheme: o.scheme, participantIds: ids, teams, courts: o.courts, limitRounds: o.limitRounds, prioritizeLeastMatches: o.prioritizeLeastMatches, rankingCriteria: o.rankingCriteria ?? undefined, stats, startRound, seed });
 		const now = new Date();

@@ -84,10 +84,12 @@ export class ClubService {
 	}
 
 	// ------------------------------------------------------------------------------------- members
-	/** Members = channel followers, with role (owner / admin / member), tags, joinedAt. Admin-only (Reclub group-user). */
+	/** Members = channel followers, with role (owner / admin / member), tags, joinedAt. Members and admins may look
+	 *  (Reclub's group member list is visible to members); the tags column is the admins' — a member sees []. */
 	@bindThis
 	public async members(channel: MiChannel, viewer: MiUser, opts: { limit?: number; offset?: number; query?: string } = {}) {
-		await this.assertAdmin(channel, viewer.id);
+		const admin = await this.isAdmin(channel, viewer.id);
+		if (!admin && !(await this.isMember(channel.id, viewer.id))) throw this.err('not_member', 'Only members can see the member list.');
 		const s = await this.settings(channel.id);
 		const rows = await this.channelFollowingsRepository.find({ where: { followeeId: channel.id }, order: { id: 'ASC' } });
 		const ids = rows.map(r => r.followerId);
@@ -99,7 +101,7 @@ export class ClubService {
 			const u = byId.get(id); if (!u) continue;
 			if (opts.query && !`${u.name ?? ''} ${u.username}`.toLowerCase().includes(opts.query.toLowerCase())) continue;
 			const row = rows.find(r => r.followerId === id);
-			out.push({ user: await this.userEntityService.pack(u, viewer, { schema: 'UserLite' }), userId: id, role: channel.userId === id ? 'owner' : s.adminIds.includes(id) ? 'admin' : 'member', tags: s.memberTags[id] ?? [], joinedAt: row ? this.idService.parse(row.id).date.toISOString() : null });
+			out.push({ user: await this.userEntityService.pack(u, viewer, { schema: 'UserLite' }), userId: id, role: channel.userId === id ? 'owner' : s.adminIds.includes(id) ? 'admin' : 'member', tags: admin ? (s.memberTags[id] ?? []) : [], joinedAt: row ? this.idService.parse(row.id).date.toISOString() : null });
 		}
 		const total = out.length;
 		out = out.slice(opts.offset ?? 0, (opts.offset ?? 0) + (opts.limit ?? 100));
