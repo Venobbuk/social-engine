@@ -1,0 +1,79 @@
+{
+  "id": "batch-v10",
+  "at": "2026-09-17T05:57:33.029Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 6,
+  "total": 6,
+  "family": {
+    "found": 6,
+    "fixed": 6
+  },
+  "evidence": "[\"1 repeat weekly ×4 → 4 meets, 7 days apart, one seriesId=ok {\\\"seriesCount\\\":4,\\\"n\\\":4,\\\"gaps\\\":[7,7,7]}\",\"2 host marks paid · digital · checked in; a player cannot mark themself=ok {\\\"tags\\\":[\\\"paid\\\",\\\"digital\\\",\\\"checkedIn\\\"],\\\"self\\\":400}\",\"3 cancel series from the 2nd → 3 cancelled, the 1st stays active=ok {\\\"cancelled\\\":3,\\\"firstStatus\\\":\\\"active\\\"}\",\"4 poll posted in a club; a member votes; the timeline carries votes and isVoted=ok {\\\"votes\\\":[0,1]}\",\"5 a photo uploads to the drive and a post carries it=ok {\\\"upload\\\":200,\\\"type\\\":\\\"image/png\\\"}\",\"6 leaderboard ranks the endorsed player (3 kudos; 1 for \\\"On time\\\")=ok {\\\"count\\\":3,\\\"dims\\\":{\\\"Great partner\\\":2,\\\"On time\\\":1},\\\"onTime\\\":1}\"]",
+  "detail": "series, cancel-series, payment/attendance tags, polls, photos, kudos leaderboard on the live engine",
+  "checks": [
+    {
+      "name": "1 repeat weekly ×4 → 4 meets, 7 days apart, one seriesId",
+      "pass": true,
+      "detail": {
+        "seriesCount": 4,
+        "n": 4,
+        "gaps": [
+          7,
+          7,
+          7
+        ]
+      }
+    },
+    {
+      "name": "2 host marks paid · digital · checked in; a player cannot mark themself",
+      "pass": true,
+      "detail": {
+        "tags": [
+          "paid",
+          "digital",
+          "checkedIn"
+        ],
+        "self": 400
+      }
+    },
+    {
+      "name": "3 cancel series from the 2nd → 3 cancelled, the 1st stays active",
+      "pass": true,
+      "detail": {
+        "cancelled": 3,
+        "firstStatus": "active"
+      }
+    },
+    {
+      "name": "4 poll posted in a club; a member votes; the timeline carries votes and isVoted",
+      "pass": true,
+      "detail": {
+        "votes": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "5 a photo uploads to the drive and a post carries it",
+      "pass": true,
+      "detail": {
+        "upload": 200,
+        "type": "image/png"
+      }
+    },
+    {
+      "name": "6 leaderboard ranks the endorsed player (3 kudos; 1 for \"On time\")",
+      "pass": true,
+      "detail": {
+        "count": 3,
+        "dims": {
+          "Great partner": 2,
+          "On time": 1
+        },
+        "onTime": 1
+      }
+    }
+  ]
+}
