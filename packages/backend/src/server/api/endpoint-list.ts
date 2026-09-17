@@ -155,6 +155,7 @@ export * as 'meets/matches/submit-dupr' from '@/modules/meets/endpoints/matches/
 export * as 'meets/matches/generate' from '@/modules/meets/endpoints/matches/generate.js';
 export * as 'meets/reviews/upsert' from '@/modules/meets/endpoints/reviews/upsert.js';
 export * as 'meets/reviews/show' from '@/modules/meets/endpoints/reviews/show.js';
+export * as 'meets/reviews/leaderboard' from '@/modules/meets/endpoints/reviews/leaderboard.js';
 export * as 'venues/show' from '@/modules/venues/endpoints/show.js';
 export * as 'venues/search' from '@/modules/venues/endpoints/search.js';
 export * as 'venues/create' from '@/modules/venues/endpoints/create.js';

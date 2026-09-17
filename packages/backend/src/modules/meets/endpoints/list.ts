@@ -24,6 +24,7 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		scope: { type: 'string', enum: ['discover', 'mine', 'hosting', 'channel'], default: 'discover' },
+		seriesId: { type: 'string', format: 'misskey:id', nullable: true },   // SERIES-V1: one schedule's meets
 		channelId: { type: 'string', format: 'misskey:id', nullable: true },
 		sport: { type: 'string', nullable: true, maxLength: 32 },
 		from: { type: 'string', nullable: true, maxLength: 40 },
@@ -53,6 +54,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const q = this.meetsRepository.createQueryBuilder('meet');
 
 			if (!ps.includeCancelled) q.andWhere('meet.status = :active', { active: 'active' });
+			if (ps.seriesId) q.andWhere('meet.seriesId = :seriesId', { seriesId: ps.seriesId });   // SERIES-V1
 			if (ps.sport) q.andWhere('meet.sport = :sport', { sport: ps.sport });
 			const from = parseIsoDate(ps.from), to = parseIsoDate(ps.to);
 			if (from) q.andWhere('meet.startAt >= :from', { from });

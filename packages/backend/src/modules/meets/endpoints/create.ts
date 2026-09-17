@@ -31,7 +31,11 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: meetParamProps,
+	properties: {
+		...meetParamProps,
+		// SERIES-V1: a weekly / daily schedule (Reclub upsert-schedule) — the same meet repeated
+		repeat: { type: 'object', nullable: true, properties: { every: { type: 'string', enum: ['day', 'week'] }, count: { type: 'integer', minimum: 2, maximum: 26 } }, required: ['every', 'count'] },
+	},
 	required: ['name', 'startAt', 'durationMinutes', 'capacity'],
 } as const;
 
@@ -53,7 +57,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 			try {
 				const fields = pickMeetFields(ps as Record<string, unknown>) as Partial<MiMeet>;
-				const meet = await this.meetService.create(me, { ...fields, name: ps.name, durationMinutes: ps.durationMinutes, capacity: ps.capacity, startAt });
+				const data = { ...fields, name: ps.name, durationMinutes: ps.durationMinutes, capacity: ps.capacity, startAt };
+				if (ps.repeat) {
+					const series = await this.meetService.createSeries(me, data, { every: ps.repeat.every, count: ps.repeat.count });
+					const first = await this.meetEntityService.pack(series[0], me, { detailed: true });
+					return { ...first, seriesCount: series.length } as typeof first;
+				}
+				const meet = await this.meetService.create(me, data);
 				return await this.meetEntityService.pack(meet, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);

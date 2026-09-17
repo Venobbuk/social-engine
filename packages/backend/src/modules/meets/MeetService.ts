@@ -308,6 +308,45 @@ export class MeetService {
 	}
 
 	/** E9: the meet is cancelled; rows and their history stay. The counter is meaningless afterwards and untouched. */
+	/** SERIES-V1: the same meet, count times, every day or week, sharing a seriesId. Returns them in date order. */
+	@bindThis
+	public async createSeries(host: MiUser, data: Parameters<MeetService['create']>[1], repeat: { every: 'day' | 'week'; count: number }): Promise<MiMeet[]> {
+		const seriesId = this.idService.gen();
+		const out: MiMeet[] = [];
+		const step = repeat.every === 'day' ? 86_400_000 : 7 * 86_400_000;
+		for (let i = 0; i < Math.max(1, Math.min(26, repeat.count)); i++) {
+			out.push(await this.create(host, { ...data, seriesId, startAt: new Date(new Date(data.startAt).getTime() + i * step) }));
+		}
+		return out;
+	}
+
+	/** SERIES-V1: cancel this meet and every later meet of its series. */
+	@bindThis
+	public async cancelSeries(meet: MiMeet): Promise<number> {
+		if (!meet.seriesId) { await this.cancel(meet); return 1; }
+		const rows = await this.meetsRepository.find({ where: { seriesId: meet.seriesId, status: 'active' } });
+		let n = 0;
+		for (const m of rows) if (new Date(m.startAt).getTime() >= new Date(meet.startAt).getTime()) { await this.cancel(m); n++; }
+		return n;
+	}
+
+	/** KUDOS-LEADERBOARD-V1 (Reclub street-cred): players ranked by public endorsements received in a window. */
+	@bindThis
+	public async kudosLeaderboard(from: Date, to: Date, dimension: string | null, limit: number): Promise<{ userId: string; count: number; dims: Record<string, number> }[]> {
+		const rows = await this.db.query(
+			`SELECT r."targetUserId" AS "userId", r."body" FROM "meet_review" r WHERE r."type" = 'endorsement' AND r."archivedAt" IS NULL AND r."createdAt" >= $1 AND r."createdAt" < $2`, [from, to]) as { userId: string; body: string | null }[];
+		const by = new Map<string, { count: number; dims: Record<string, number> }>();
+		for (const r of rows) {
+			const dims = (r.body ?? '').split(',').map(x => x.trim()).filter(Boolean);
+			if (dimension && !dims.includes(dimension)) continue;
+			const e = by.get(r.userId) ?? { count: 0, dims: {} };
+			e.count += dimension ? 1 : Math.max(1, dims.length);
+			for (const d of dims) e.dims[d] = (e.dims[d] ?? 0) + 1;
+			by.set(r.userId, e);
+		}
+		return [...by.entries()].map(([userId, e]) => ({ userId, ...e })).sort((a, b) => b.count - a.count).slice(0, limit);
+	}
+
 	@bindThis
 	public async cancel(meet: MiMeet): Promise<void> {
 		await this.meetsRepository.update(meet.id, { status: 'cancelled', cancelledAt: new Date(), updatedAt: new Date() });

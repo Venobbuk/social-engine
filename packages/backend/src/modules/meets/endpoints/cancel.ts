@@ -23,7 +23,9 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { meetId: { type: 'string', format: 'misskey:id' } },
+	properties: { meetId: { type: 'string', format: 'misskey:id' },
+		// SERIES-V1: also cancel every later meet of this meet's series
+		series: { type: 'boolean', default: false }, },
 	required: ['meetId'],
 } as const;
 
@@ -40,7 +42,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
 			try {
 				await this.meetService.assertHost(meet, me);
-				await this.meetService.cancel(meet);
+				if (ps.series) await this.meetService.cancelSeries(meet); else await this.meetService.cancel(meet);
 				return await this.meetEntityService.pack(meet.id, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);
