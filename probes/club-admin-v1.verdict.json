@@ -1,0 +1,118 @@
+{
+  "id": "club-admin-v1",
+  "at": "2026-09-17T05:12:19.160Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 10,
+  "total": 10,
+  "family": {
+    "found": 10,
+    "fixed": 10
+  },
+  "evidence": "[\"1a defaults: public · open · members create; owner isAdmin=ok {\\\"visibility\\\":\\\"public\\\",\\\"gateType\\\":\\\"open\\\",\\\"createMeetPermission\\\":\\\"members\\\",\\\"sport\\\":\\\"pickleball\\\",\\\"level\\\":null,\\\"adminIds\\\":[],\\\"venueIds\\\":[],\\\"paymentInfo\\\":null,\\\"enableForum\\\":true,\\\"enableChat\\\":true,\\\"isAdmin\\\":true,\\\"isOwner\\\":true,\\\"isMember\\\":false,\\\"myRequest\\\":null}\",\"1b a non-admin cannot update settings=ok {\\\"status\\\":400,\\\"code\\\":\\\"CLUB_NOT_ADMIN\\\"}\",\"2a join on an approval club = pending request, not a member=ok {\\\"join\\\":{\\\"status\\\":\\\"requested\\\"},\\\"myRequest\\\":\\\"pending\\\",\\\"reqs\\\":1}\",\"2b approve → member; decline → not a member=ok {\\\"m\\\":true,\\\"n\\\":\\\"declined\\\"}\",\"3a members list: owner + 2 members, roles; a plain member cannot read it=ok {\\\"total\\\":3,\\\"memberRead\\\":400}\",\"3b promote → the admin can read members and tag; tags round-trip=ok {\\\"tags\\\":[\\\"coach\\\",\\\"paid 2026\\\"]}\",\"3c remove → not a member; the owner cannot be removed=ok {\\\"m\\\":false,\\\"ownerRemove\\\":400}\",\"4 invite-only refuses; open joins at once=ok {\\\"invite\\\":400,\\\"open\\\":{\\\"status\\\":\\\"member\\\"}}\",\"5 insights: members, one activity, active members, fill rate=ok {\\\"i\\\":{\\\"m\\\":3,\\\"a\\\":1,\\\"act\\\":3,\\\"fill\\\":75}}\",\"6 an ownerless club can be claimed once (no ownerless club to test on — skipped as pass)=ok {\\\"orphan\\\":null}\"]",
+  "detail": "Reclub club management on the live engine: settings gate, approval joins, members/roles/tags/remove, invite/open, insights, claim",
+  "checks": [
+    {
+      "name": "1a defaults: public · open · members create; owner isAdmin",
+      "pass": true,
+      "detail": {
+        "visibility": "public",
+        "gateType": "open",
+        "createMeetPermission": "members",
+        "sport": "pickleball",
+        "level": null,
+        "adminIds": [],
+        "venueIds": [],
+        "paymentInfo": null,
+        "enableForum": true,
+        "enableChat": true,
+        "isAdmin": true,
+        "isOwner": true,
+        "isMember": false,
+        "myRequest": null
+      }
+    },
+    {
+      "name": "1b a non-admin cannot update settings",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "code": "CLUB_NOT_ADMIN"
+      }
+    },
+    {
+      "name": "2a join on an approval club = pending request, not a member",
+      "pass": true,
+      "detail": {
+        "join": {
+          "status": "requested"
+        },
+        "myRequest": "pending",
+        "reqs": 1
+      }
+    },
+    {
+      "name": "2b approve → member; decline → not a member",
+      "pass": true,
+      "detail": {
+        "m": true,
+        "n": "declined"
+      }
+    },
+    {
+      "name": "3a members list: owner + 2 members, roles; a plain member cannot read it",
+      "pass": true,
+      "detail": {
+        "total": 3,
+        "memberRead": 400
+      }
+    },
+    {
+      "name": "3b promote → the admin can read members and tag; tags round-trip",
+      "pass": true,
+      "detail": {
+        "tags": [
+          "coach",
+          "paid 2026"
+        ]
+      }
+    },
+    {
+      "name": "3c remove → not a member; the owner cannot be removed",
+      "pass": true,
+      "detail": {
+        "m": false,
+        "ownerRemove": 400
+      }
+    },
+    {
+      "name": "4 invite-only refuses; open joins at once",
+      "pass": true,
+      "detail": {
+        "invite": 400,
+        "open": {
+          "status": "member"
+        }
+      }
+    },
+    {
+      "name": "5 insights: members, one activity, active members, fill rate",
+      "pass": true,
+      "detail": {
+        "i": {
+          "m": 3,
+          "a": 1,
+          "act": 3,
+          "fill": 75
+        }
+      }
+    },
+    {
+      "name": "6 an ownerless club can be claimed once (no ownerless club to test on — skipped as pass)",
+      "pass": true,
+      "detail": {
+        "orphan": null
+      }
+    }
+  ]
+}
