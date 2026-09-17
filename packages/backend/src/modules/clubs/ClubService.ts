@@ -178,7 +178,10 @@ export class ClubService {
 			default: return [new Date(2000, 0, 1), new Date(2100, 0, 1)];
 		} })();
 		const [from, to] = range;
-		const totalMembers = await this.channelFollowingsRepository.countBy({ followeeId: channel.id });
+		// members = followers ∪ the owner (channels/create does not follow the owner; Reclub counts them)
+		const followerCount = await this.channelFollowingsRepository.countBy({ followeeId: channel.id });
+		const ownerFollows = channel.userId ? await this.channelFollowingsRepository.exists({ where: { followeeId: channel.id, followerId: channel.userId } }) : true;
+		const totalMembers = followerCount + (ownerFollows ? 0 : 1);
 		const acts = await this.db.query(`SELECT m."id", m."capacity", m."confirmed", m."startAt" FROM "meet" m WHERE m."channelId" = $1 AND m."status" <> 'cancelled' AND m."startAt" >= $2 AND m."startAt" < $3`, [channel.id, from, to]) as { id: string; capacity: number; confirmed: number; startAt: Date }[];
 		const totalActivities = acts.length;
 		const fillRate = acts.length ? Math.round(100 * acts.reduce((n, a) => n + Math.min(1, (a.confirmed ?? 0) / Math.max(1, a.capacity ?? 1)), 0) / acts.length) : 0;
