@@ -153,6 +153,7 @@ export * as 'meets/matches/upsert' from '@/modules/meets/endpoints/matches/upser
 export * as 'meets/matches/delete' from '@/modules/meets/endpoints/matches/delete.js';
 export * as 'meets/matches/submit-dupr' from '@/modules/meets/endpoints/matches/submit-dupr.js';
 export * as 'meets/matches/generate' from '@/modules/meets/endpoints/matches/generate.js';
+export * as 'meets/matches/log-casual' from '@/modules/meets/endpoints/matches/log-casual.js';
 export * as 'meets/reviews/upsert' from '@/modules/meets/endpoints/reviews/upsert.js';
 export * as 'meets/reviews/show' from '@/modules/meets/endpoints/reviews/show.js';
 export * as 'meets/reviews/leaderboard' from '@/modules/meets/endpoints/reviews/leaderboard.js';

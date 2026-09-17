@@ -439,7 +439,7 @@ export class MeetService {
 					[this.idService.gen(), meet.id, user.id, `${user.name ?? user.username} +1`]) as Row[])[0];
 				if (autoConfirm) await this.confirmOrFallback(em, locked, guest, 'waitlisted');
 			}
-			if (!autoConfirm && meet.hostId !== user.id) this.notify(meet.hostId, meet, 'Request to join', `${user.name ?? user.username} has requested to join.`);
+			if (!autoConfirm && meet.hostId !== user.id) this.notify(meet.hostId, meet, 'Request to join', `${user.name ?? user.username} has requested to join ${meet.name}.`);
 			return row as MiMeetParticipant;
 		});
 	}
@@ -520,7 +520,7 @@ export class MeetService {
 			const r = await this.leaveConfirmed(em, locked, row, status);
 			if (row.status === 'confirmed') await this.promoteLocked(em, locked);
 			if (status === 'invited' && row.userId) this.notify(row.userId, meet, "You've been invited", `You've been invited to ${meet.name}.`);
-			if (status === 'hold' && row.userId) this.notify(row.userId, meet, 'On hold', 'You are on hold. Please message the host for more details.');
+			if (status === 'hold' && row.userId) this.notify(row.userId, meet, 'On hold', `You are on hold for ${meet.name}. Please message the host for more details.`);
 			return r as MiMeetParticipant;
 		});
 	}
@@ -695,7 +695,7 @@ export class MeetService {
 			} catch {
 				// chat is best-effort
 			}
-			if (p.userId !== meet.hostId) this.notify(p.userId, meet, 'You are confirmed', 'You are confirmed to play. Please be on time.');
+			if (p.userId !== meet.hostId) this.notify(p.userId, meet, 'You are confirmed', `You are confirmed to play ${meet.name}. Please be on time.`);
 		}
 	}
 
@@ -706,6 +706,7 @@ export class MeetService {
 			customBody: body,
 			customIcon: null,
 			appAccessTokenId: null,
+			customLink: 'meet:' + meet.id,
 		});
 	}
 }

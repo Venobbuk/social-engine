@@ -405,6 +405,10 @@ export const packedNotificationSchema = {
 				type: 'string',
 				optional: false, nullable: true,
 			},
+			link: {
+				type: 'string',
+				optional: true, nullable: true,
+			},
 		},
 	}, {
 		type: 'object',

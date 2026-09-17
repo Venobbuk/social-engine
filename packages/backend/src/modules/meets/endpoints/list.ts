@@ -35,6 +35,8 @@ export const paramDef = {
 		hideFull: { type: 'boolean', default: false },
 		includePast: { type: 'boolean', default: false },
 		includeCancelled: { type: 'boolean', default: false },
+		// CASUAL-V1: casual games (flag 'casual') are never in Discover; true lists only them (scope mine/hosting)
+		casual: { type: 'boolean', default: false },
 		limit: { type: 'integer', minimum: 1, maximum: 100, default: 30 },
 		offset: { type: 'integer', minimum: 0, default: 0 },
 	},
@@ -54,6 +56,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const q = this.meetsRepository.createQueryBuilder('meet');
 
 			if (!ps.includeCancelled) q.andWhere('meet.status = :active', { active: 'active' });
+			q.andWhere(ps.casual ? ':casual = ANY(meet.flags)' : 'NOT (:casual = ANY(meet.flags))', { casual: 'casual' });
 			if (ps.seriesId) q.andWhere('meet.seriesId = :seriesId', { seriesId: ps.seriesId });   // SERIES-V1
 			if (ps.sport) q.andWhere('meet.sport = :sport', { sport: ps.sport });
 			const from = parseIsoDate(ps.from), to = parseIsoDate(ps.to);

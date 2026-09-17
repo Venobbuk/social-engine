@@ -193,6 +193,7 @@ export class NotificationEntityService implements OnModuleInit {
 				body: notification.customBody,
 				header: notification.customHeader,
 				icon: notification.customIcon,
+				link: notification.customLink ?? null,
 			} : {}),
 		});
 	}

@@ -138,6 +138,11 @@ export type MiNotification = {
 	 * アプリ通知のアプリ(のトークン)
 	 */
 	appAccessTokenId: MiAccessToken['id'] | null;
+
+	/**
+	 * The in-app target this notification is about ("meet:<id>", "club:<id>"); null when there is none.
+	 */
+	customLink?: string | null;
 } | {
 	type: 'test';
 	id: string;

@@ -102,14 +102,18 @@ export function generate(input: GenInput): GenOutput {
 		const limit = input.limitRounds ?? Math.min(full, 8);
 		// running tallies, seeded from the meet's history so a second generation keeps spreading partners
 		const played: Record<string, number> = {}; const partner: Record<string, Record<string, number>> = {}; const opp: Record<string, Record<string, number>> = {};
-		for (const id of ids) { const s = stat(stats, id); played[id] = s.played; partner[id] = { ...s.partners }; opp[id] = { ...s.opponents }; }
+		// FAIR-SEATS-V1: who sits out rotates in BOTH modes — every round seats the players with the fewest matches so far,
+		// ties broken by a shuffle done BEFORE the sort (a random tie-break inside a comparator is inconsistent and biased
+		// the seating: 7 players, one seated 6/6 rounds and another 2/6 — graded 2026-09-17). prioritizeLeastMatches decides
+		// whether the meet's history counts too (Reclub's toggle) or only this generation.
+		for (const id of ids) { const s = stat(stats, id); played[id] = input.prioritizeLeastMatches ? s.played : 0; partner[id] = { ...s.partners }; opp[id] = { ...s.opponents }; }
 		const bump = (m: Record<string, Record<string, number>>, a: string, b: string) => { m[a][b] = (m[a][b] ?? 0) + 1; m[b][a] = (m[b][a] ?? 0) + 1; };
 		const matches: GenMatch[] = [];
 		for (let rd = 0; rd < limit; rd++) {
 			const seats = Math.min(ids.length - (ids.length % 4), courts * 4);
 			if (seats < 4) break;
 			// who plays this round: fewest matches first when asked (Reclub "Prioritize least matches"), else a shuffle
-			const order = input.prioritizeLeastMatches ? ids.slice().sort((a, b) => played[a] - played[b] || r() - 0.5) : shuffle(ids, r);
+			const order = shuffle(ids, r).sort((a, b) => played[a] - played[b]);   // stable: the shuffle decides ties
 			const pool = order.slice(0, seats);
 			// greedy groups of four: take the next player, then the three with the least history with the group
 			const left = pool.slice(); const groups: string[][] = [];
@@ -133,6 +137,9 @@ export function generate(input: GenInput): GenOutput {
 				for (const x of g) played[x]++;
 			});
 		}
+		// receipt: within this generation nobody sits out twice more than anyone else
+		const gen: Record<string, number> = {}; for (const m of matches) for (const x of [...m.team1Ids, ...m.team2Ids]) gen[x] = (gen[x] ?? 0) + 1;
+		const counts = ids.map((x) => gen[x] ?? 0); if (Math.max(...counts) - Math.min(...counts) > 1) warnings.push('uneven_seating');
 		return { matches, rounds: matches.length ? matches[matches.length - 1].round - input.startRound + 1 : 0, players: ids.length, warnings, fullRounds: full };
 	}
 

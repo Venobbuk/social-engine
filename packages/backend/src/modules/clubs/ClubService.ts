@@ -133,7 +133,7 @@ export class ClubService {
 		const existing = await this.clubJoinRequestsRepository.findOneBy({ channelId: channel.id, userId: user.id });
 		if (existing) { if (existing.status === 'pending') return { status: 'requested' }; await this.clubJoinRequestsRepository.update(existing.id, { status: 'pending', message, decidedById: null, decidedAt: null, createdAt: new Date() }); }
 		else await this.clubJoinRequestsRepository.insertOne({ id: this.idService.gen(), channelId: channel.id, userId: user.id, status: 'pending', message, decidedById: null, decidedAt: null, createdAt: new Date() });
-		for (const adminId of [channel.userId, ...s.adminIds].filter((x): x is string => !!x)) this.notify(adminId, 'New join request', `${user.name ?? user.username} asked to join ${channel.name}.`);
+		for (const adminId of [channel.userId, ...s.adminIds].filter((x): x is string => !!x)) this.notify(adminId, 'New join request', `${user.name ?? user.username} asked to join ${channel.name}.`, channel.id);
 		return { status: 'requested' };
 	}
 
@@ -153,7 +153,7 @@ export class ClubService {
 		if (!r) throw this.err('no_such_request', 'No such request.');
 		await this.clubJoinRequestsRepository.update(r.id, { status: approve ? 'approved' : 'declined', decidedById: by.id, decidedAt: new Date() });
 		if (approve) { const u = await this.usersRepository.findOneBy({ id: r.userId }); if (u) await this.channelFollowingService.follow(u as MiLocalUser, channel); }
-		this.notify(r.userId, approve ? 'Welcome to the club' : 'Join request declined', approve ? `You are now a member of ${channel.name}.` : `${channel.name} declined your request to join.`);
+		this.notify(r.userId, approve ? 'Welcome to the club' : 'Join request declined', approve ? `You are now a member of ${channel.name}.` : `${channel.name} declined your request to join.`, channel.id);
 	}
 
 	/** My own request state for a club (for the Join button). */
@@ -200,7 +200,7 @@ export class ClubService {
 		await this.channelsRepository.update(channel.id, { userId: user.id });
 	}
 
-	private notify(userId: string, header: string, body: string): void {
-		this.notificationService.createNotification(userId, 'app', { customHeader: header, customBody: body, customIcon: null, appAccessTokenId: null });
+	private notify(userId: string, header: string, body: string, channelId?: string): void {
+		this.notificationService.createNotification(userId, 'app', { customHeader: header, customBody: body, customIcon: null, appAccessTokenId: null, customLink: channelId ? 'club:' + channelId : null });
 	}
 }
