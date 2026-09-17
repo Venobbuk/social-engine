@@ -29,6 +29,7 @@ import { MiMeetReview } from '@/modules/meets/models/MeetReview.js';
 import { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import { MiVenue } from '@/modules/venues/models/Venue.js';
 import { MiUserLocation } from '@/modules/venues/models/UserLocation.js';
+import { MiClubSetting, MiClubJoinRequest } from '@/modules/clubs/models/ClubSetting.js';
 import { MiChannelFavorite } from '@/models/ChannelFavorite.js';
 import { MiChannelFollowing } from '@/models/ChannelFollowing.js';
 import { MiChannelMuting } from "@/models/ChannelMuting.js";
@@ -176,6 +177,8 @@ export {
 	MiMeetMatch,
 	MiVenue,
 	MiUserLocation,
+	MiClubSetting,
+	MiClubJoinRequest,
 	MiRetentionAggregation,
 	MiRole,
 	MiRoleAssignment,
@@ -264,6 +267,8 @@ export type MeetReviewsRepository = Repository<MiMeetReview> & MiRepository<MiMe
 export type MeetMatchesRepository = Repository<MiMeetMatch> & MiRepository<MiMeetMatch>;
 export type VenuesRepository = Repository<MiVenue> & MiRepository<MiVenue>;
 export type UserLocationsRepository = Repository<MiUserLocation> & MiRepository<MiUserLocation>;
+export type ClubSettingsRepository = Repository<MiClubSetting> & MiRepository<MiClubSetting>;
+export type ClubJoinRequestsRepository = Repository<MiClubJoinRequest> & MiRepository<MiClubJoinRequest>;
 export type RetentionAggregationsRepository = Repository<MiRetentionAggregation> & MiRepository<MiRetentionAggregation>;
 export type RolesRepository = Repository<MiRole> & MiRepository<MiRole>;
 export type RoleAssignmentsRepository = Repository<MiRoleAssignment> & MiRepository<MiRoleAssignment>;

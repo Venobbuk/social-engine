@@ -76,6 +76,8 @@ export const DI = {
 	meetMatchesRepository: Symbol('meetMatchesRepository'),
 	venuesRepository: Symbol('venuesRepository'),
 	userLocationsRepository: Symbol('userLocationsRepository'),
+	clubSettingsRepository: Symbol('clubSettingsRepository'),
+	clubJoinRequestsRepository: Symbol('clubJoinRequestsRepository'),
 	channelFollowingsRepository: Symbol('channelFollowingsRepository'),
 	channelFavoritesRepository: Symbol('channelFavoritesRepository'),
 	channelMutingRepository: Symbol('channelMutingRepository'),

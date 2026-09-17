@@ -79,6 +79,7 @@ import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { VenueService } from '@/modules/venues/VenueService.js';
+import { ClubService } from '@/modules/clubs/ClubService.js';
 import { ChatService } from './ChatService.js';
 import { RegistryApiService } from './RegistryApiService.js';
 import { ReversiService } from './ReversiService.js';
@@ -235,6 +236,7 @@ const $MeetService: Provider = { provide: 'MeetService', useExisting: MeetServic
 const $MeetLevelService: Provider = { provide: 'MeetLevelService', useExisting: MeetLevelService };
 const $MeetMatchService: Provider = { provide: 'MeetMatchService', useExisting: MeetMatchService };
 const $VenueService: Provider = { provide: 'VenueService', useExisting: VenueService };
+const $ClubService: Provider = { provide: 'ClubService', useExisting: ClubService };
 const $ChannelMutingService: Provider = { provide: 'ChannelMutingService', useExisting: ChannelMutingService };
 const $ChatService: Provider = { provide: 'ChatService', useExisting: ChatService };
 const $RegistryApiService: Provider = { provide: 'RegistryApiService', useExisting: RegistryApiService };
@@ -393,6 +395,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MeetLevelService,
 		MeetMatchService,
 		VenueService,
+		ClubService,
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -549,6 +552,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MeetLevelService,
 		$MeetMatchService,
 		$VenueService,
+		$ClubService,
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,
@@ -705,6 +709,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MeetLevelService,
 		MeetMatchService,
 		VenueService,
+		ClubService,
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -859,6 +864,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MeetLevelService,
 		$MeetMatchService,
 		$VenueService,
+		$ClubService,
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,

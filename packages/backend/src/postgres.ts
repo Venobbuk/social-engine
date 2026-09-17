@@ -81,6 +81,7 @@ import { MiMeetReview } from '@/modules/meets/models/MeetReview.js';
 import { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import { MiVenue } from '@/modules/venues/models/Venue.js';
 import { MiUserLocation } from '@/modules/venues/models/UserLocation.js';
+import { MiClubSetting, MiClubJoinRequest } from '@/modules/clubs/models/ClubSetting.js';
 import { MiRetentionAggregation } from '@/models/RetentionAggregation.js';
 import { MiRole } from '@/models/Role.js';
 import { MiRoleAssignment } from '@/models/RoleAssignment.js';
@@ -247,6 +248,8 @@ export const entities = [
 	MiMeetMatch,
 	MiVenue,
 	MiUserLocation,
+	MiClubSetting,
+	MiClubJoinRequest,
 	MiChannelFollowing,
 	MiChannelFavorite,
 	MiChannelMuting,

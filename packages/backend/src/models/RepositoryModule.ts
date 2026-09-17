@@ -13,6 +13,7 @@ import { MiMeetReview } from '@/modules/meets/models/MeetReview.js';
 import { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import { MiVenue } from '@/modules/venues/models/Venue.js';
 import { MiUserLocation } from '@/modules/venues/models/UserLocation.js';
+import { MiClubSetting, MiClubJoinRequest } from '@/modules/clubs/models/ClubSetting.js';
 import {
 	MiAbuseReportNotificationRecipient,
 	MiAbuseUserReport,
@@ -458,6 +459,16 @@ const $userLocationsRepository: Provider = {
 	useFactory: (db: DataSource) => db.getRepository(MiUserLocation).extend(miRepository as MiRepository<MiUserLocation>),
 	inject: [DI.db],
 };
+const $clubSettingsRepository: Provider = {
+	provide: DI.clubSettingsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiClubSetting).extend(miRepository as MiRepository<MiClubSetting>),
+	inject: [DI.db],
+};
+const $clubJoinRequestsRepository: Provider = {
+	provide: DI.clubJoinRequestsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiClubJoinRequest).extend(miRepository as MiRepository<MiClubJoinRequest>),
+	inject: [DI.db],
+};
 const $meetMatchesRepository: Provider = {
 	provide: DI.meetMatchesRepository,
 	useFactory: (db: DataSource) => db.getRepository(MiMeetMatch).extend(miRepository as MiRepository<MiMeetMatch>),
@@ -661,6 +672,8 @@ const $reversiGamesRepository: Provider = {
 		$meetMatchesRepository,
 		$venuesRepository,
 		$userLocationsRepository,
+		$clubSettingsRepository,
+		$clubJoinRequestsRepository,
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,
@@ -747,6 +760,8 @@ const $reversiGamesRepository: Provider = {
 		$meetMatchesRepository,
 		$venuesRepository,
 		$userLocationsRepository,
+		$clubSettingsRepository,
+		$clubJoinRequestsRepository,
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,

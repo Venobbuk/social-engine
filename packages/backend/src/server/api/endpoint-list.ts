@@ -165,6 +165,15 @@ export * as 'venues/locations/list' from '@/modules/venues/endpoints/locations-l
 export * as 'venues/locations/save' from '@/modules/venues/endpoints/locations-save.js';
 export * as 'venues/locations/delete' from '@/modules/venues/endpoints/locations-delete.js';
 export * as 'adapter/venues/sync' from '@/modules/venues/endpoints/sync.js';
+export * as 'clubs/settings/show' from '@/modules/clubs/endpoints/settings-show.js';
+export * as 'clubs/settings/update' from '@/modules/clubs/endpoints/settings-update.js';
+export * as 'clubs/members' from '@/modules/clubs/endpoints/members.js';
+export * as 'clubs/members/update' from '@/modules/clubs/endpoints/members-update.js';
+export * as 'clubs/join' from '@/modules/clubs/endpoints/join.js';
+export * as 'clubs/requests' from '@/modules/clubs/endpoints/requests.js';
+export * as 'clubs/requests/decide' from '@/modules/clubs/endpoints/requests-decide.js';
+export * as 'clubs/insights' from '@/modules/clubs/endpoints/insights.js';
+export * as 'clubs/claim' from '@/modules/clubs/endpoints/claim.js';
 export * as 'adapter/clubs/sync' from '@/modules/venues/endpoints/clubs-sync.js';
 export * as 'channels/favorite' from './endpoints/channels/favorite.js';
 export * as 'channels/featured' from './endpoints/channels/featured.js';
