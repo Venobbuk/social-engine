@@ -4,6 +4,7 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
+import { In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { MeetPlayerLevelsRepository } from '@/models/_.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
@@ -36,6 +37,13 @@ export class MeetLevelService {
 	@bindThis
 	public async getLevel(userId: MiUser['id'], sport: string): Promise<MiMeetPlayerLevel | null> {
 		return await this.meetPlayerLevelsRepository.findOneBy({ userId, sport });
+	}
+
+	/** LEVELS-V1: one query for many users' rows in a sport (the People list's rating chips). Users without a row are simply absent. */
+	@bindThis
+	public async getLevels(userIds: MiUser['id'][], sport: string): Promise<MiMeetPlayerLevel[]> {
+		if (userIds.length === 0) return [];
+		return await this.meetPlayerLevelsRepository.find({ where: { userId: In(userIds), sport } });
 	}
 
 	@bindThis

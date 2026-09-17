@@ -146,6 +146,7 @@ export * as 'meets/join' from '@/modules/meets/endpoints/join.js';
 export * as 'meets/leave' from '@/modules/meets/endpoints/leave.js';
 export * as 'meets/respond' from '@/modules/meets/endpoints/respond.js';
 export * as 'meets/level' from '@/modules/meets/endpoints/level.js';
+export * as 'meets/levels' from '@/modules/meets/endpoints/levels.js';
 export * as 'meets/participants/update' from '@/modules/meets/endpoints/participants/update.js';
 export * as 'meets/participants/add' from '@/modules/meets/endpoints/participants/add.js';
 export * as 'meets/matches/list' from '@/modules/meets/endpoints/matches/list.js';
