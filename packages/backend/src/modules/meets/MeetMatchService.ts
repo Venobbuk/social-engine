@@ -5,7 +5,7 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
-import type { MeetMatchesRepository, MeetParticipantsRepository } from '@/models/_.js';
+import type { MeetMatchesRepository, MeetParticipantsRepository, UsersRepository } from '@/models/_.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import type { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import type { MiMeetParticipant } from '@/modules/meets/models/MeetParticipant.js';
@@ -46,12 +46,17 @@ export class MeetMatchService {
 		@Inject(DI.meetParticipantsRepository)
 		private meetParticipantsRepository: MeetParticipantsRepository,
 
+		@Inject(DI.usersRepository)
+		private usersRepository: UsersRepository,
+
 		private idService: IdService,
 		private httpRequestService: HttpRequestService,
 		private meetService: MeetService,
 		private meetLevelService: MeetLevelService,
 	) {
 	}
+
+	private async usersRepositoryLite(id: string): Promise<MiUser | null> { return await this.usersRepository.findOneBy({ id }); }
 
 	private err(id: string, message: string): IdentifiableError {
 		return new IdentifiableError(`meet:${id}`, message);
@@ -63,7 +68,11 @@ export class MeetMatchService {
 		// lazily refresh the badge for rows hkpl is still draining (at most once a minute per row)
 		for (let i = 0; i < rows.length; i++) {
 			const r = rows[i];
-			if (r.duprStatus === 'queued' && Date.now() - new Date(r.updatedAt).getTime() > 60_000) rows[i] = await this.refreshDupr(r).catch(() => r);
+			if (r.duprStatus === 'queued' && Date.now() - new Date(r.updatedAt).getTime() > 60_000) {
+				// FAIL-SOFT-V1: a queued row WITHOUT a ref never reached hkpl — retry the submission; with a ref, ask hkpl how it went
+				const by = r.duprSubmittedById ? await this.usersRepositoryLite(r.duprSubmittedById) : null;
+				rows[i] = (!r.duprRef && by ? await this.submitDupr(meet, r, by).catch(() => r) : await this.refreshDupr(r).catch(() => r));
+			}
 		}
 		return rows;
 	}
@@ -304,7 +313,9 @@ export class MeetMatchService {
 				duprSubmittedAt: new Date(),
 			});
 		} catch (err) {
-			return await mark({ duprStatus: 'failed', duprError: `hkpl unreachable: ${(err as Error).message}`.slice(0, 512) });
+			// FAIL-SOFT-V1: the league server being down is not the player's failure — keep the row queued (no ref yet) and
+			// let list() retry it; the badge reads 'Submitting' until hkpl answers
+			return await mark({ duprStatus: 'queued', duprRef: null, duprSubmittedById: by.id, duprSubmittedAt: new Date(), duprError: `hkpl unreachable: ${(err as Error).message}`.slice(0, 512) });
 		}
 	}
 
