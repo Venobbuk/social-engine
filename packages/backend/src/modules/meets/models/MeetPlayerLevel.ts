@@ -49,4 +49,8 @@ export class MiMeetPlayerLevel {
 
 	@Column('timestamp with time zone', { nullable: true })
 	public updatedAt: Date | null;
+
+	// ONBOARDED-V1: set once when the player finishes the app's onboarding for this sport; never cleared by the app.
+	@Column('timestamp with time zone', { nullable: true })
+	public onboardedAt: Date | null;
 }

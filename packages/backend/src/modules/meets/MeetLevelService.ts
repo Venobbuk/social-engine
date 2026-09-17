@@ -69,7 +69,7 @@ export class MeetLevelService {
 	}
 
 	@bindThis
-	public async upsertLevel(userId: MiUser['id'], sport: string, patch: Partial<Pick<MiMeetPlayerLevel, 'selfLevel' | 'duprSingles' | 'duprDoubles' | 'duprId' | 'gender' | 'ageGroup' | 'source'>>): Promise<MiMeetPlayerLevel> {
+	public async upsertLevel(userId: MiUser['id'], sport: string, patch: Partial<Pick<MiMeetPlayerLevel, 'selfLevel' | 'duprSingles' | 'duprDoubles' | 'duprId' | 'gender' | 'ageGroup' | 'source' | 'onboardedAt'>>): Promise<MiMeetPlayerLevel> {
 		const existing = await this.meetPlayerLevelsRepository.findOneBy({ userId, sport });
 		if (existing) {
 			await this.meetPlayerLevelsRepository.update(existing.id, { ...patch, updatedAt: new Date() });
@@ -86,6 +86,7 @@ export class MeetLevelService {
 			gender: patch.gender ?? null,
 			ageGroup: patch.ageGroup ?? null,
 			source: patch.source ?? null,
+			onboardedAt: patch.onboardedAt ?? null,
 			updatedAt: new Date(),
 		});
 	}

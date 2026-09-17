@@ -22,6 +22,7 @@ export const meta = {
 			duprDoubles: { type: 'number', optional: false, nullable: true },
 			gender: { type: 'string', optional: false, nullable: true },
 			ageGroup: { type: 'string', optional: false, nullable: true },
+			onboarded: { type: 'boolean', optional: false, nullable: false },
 		},
 	},
 } as const;
@@ -33,6 +34,8 @@ export const paramDef = {
 		selfLevel: { type: 'number', nullable: true, minimum: 0, maximum: 10 },
 		gender: { type: 'string', nullable: true, enum: ['male', 'female', 'nonbinary'] },
 		ageGroup: { type: 'string', nullable: true, enum: ['junior', 'adult', 'senior'] },
+		// ONBOARDED-V1: true stamps onboardedAt (once; later trues keep the first stamp). false/absent leaves it alone.
+		onboarded: { type: 'boolean' },
 	},
 	required: [],
 } as const;
@@ -45,6 +48,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (ps.selfLevel !== undefined) patch.selfLevel = ps.selfLevel;
 			if (ps.gender !== undefined) patch.gender = ps.gender;
 			if (ps.ageGroup !== undefined) patch.ageGroup = ps.ageGroup;
+			if (ps.onboarded === true) {
+				const current = await this.meetLevelService.getLevel(me.id, ps.sport);
+				if (current?.onboardedAt == null) patch.onboardedAt = new Date();
+			}
 			const level = await this.meetLevelService.upsertLevel(me.id, ps.sport, patch);
 			return {
 				sport: level.sport,
@@ -53,6 +60,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				duprDoubles: level.duprDoubles,
 				gender: level.gender,
 				ageGroup: level.ageGroup,
+				onboarded: !!level.onboardedAt,
 			};
 		});
 	}
