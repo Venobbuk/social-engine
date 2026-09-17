@@ -1,0 +1,97 @@
+{
+  "id": "partials-v1",
+  "at": "2026-09-17T12:24:56.962Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 9,
+  "total": 9,
+  "evidence": "[\"1 Discover: typing the join code opens the meet=ok {\\\"code\\\":\\\"qbpb4g92\\\",\\\"url\\\":\\\"//social.silkvo.com/app/pages/meet/index?id=ar7qrfpjs64a00mi\\\"}\",\"2 Duplicate: meet-create prefilled with the name, date left empty=ok {\\\"name\\\":\\\"Tester Tuesday Doubles\\\",\\\"date\\\":\\\"Pick a date\\\"}\",\"3 Player ⋯ › Save → My network › Saved lists Jason=ok {\\\"labels\\\":[\\\"Unsave\\\",\\\"Block\\\",\\\"Mute\\\"],\\\"savedRows\\\":[\\\"Jason 張@demo_jasonFollowing\\\"]}\",\"4 feed?note= shows the one post with its replies open=ok {\\\"posts\\\":1,\\\"replies\\\":true,\\\"title\\\":\\\"Post\\\"}\",\"5 Settings: DUPR shows Connected; Display has Appearance + Text size=ok {\\\"dupr\\\":true,\\\"display\\\":true,\\\"seg\\\":4}\",\"6 Profile: tapping the name opens Edit profile with the name filled=ok {\\\"sheet\\\":true,\\\"input\\\":true,\\\"value\\\":\\\"波友測試 2\\\"}\",\"7 Discover › Comps: Standings · Schedule · Playoffs · Results tiles=ok {\\\"comps\\\":[\\\"Standings\\\",\\\"Schedule\\\",\\\"Playoffs\\\",\\\"Results\\\"]}\",\"8 Meet share → sheet with a QR and the link=ok {\\\"sheet\\\":true,\\\"qr\\\":true,\\\"url\\\":\\\"social.silkvo.com/app/pages/meet/index?id=ar7qrfpjs64a00mi\\\"}\",\"9 no page errors=ok {\\\"errs\\\":[]}\"]",
+  "detail": "join by code, duplicate, saved players, post detail, DUPR connect, edit profile, comps, share QR — live app as tester2",
+  "checks": [
+    {
+      "name": "1 Discover: typing the join code opens the meet",
+      "pass": true,
+      "detail": {
+        "code": "qbpb4g92",
+        "url": "//social.silkvo.com/app/pages/meet/index?id=ar7qrfpjs64a00mi"
+      }
+    },
+    {
+      "name": "2 Duplicate: meet-create prefilled with the name, date left empty",
+      "pass": true,
+      "detail": {
+        "name": "Tester Tuesday Doubles",
+        "date": "Pick a date"
+      }
+    },
+    {
+      "name": "3 Player ⋯ › Save → My network › Saved lists Jason",
+      "pass": true,
+      "detail": {
+        "labels": [
+          "Unsave",
+          "Block",
+          "Mute"
+        ],
+        "savedRows": [
+          "Jason 張@demo_jasonFollowing"
+        ]
+      }
+    },
+    {
+      "name": "4 feed?note= shows the one post with its replies open",
+      "pass": true,
+      "detail": {
+        "posts": 1,
+        "replies": true,
+        "title": "Post"
+      }
+    },
+    {
+      "name": "5 Settings: DUPR shows Connected; Display has Appearance + Text size",
+      "pass": true,
+      "detail": {
+        "dupr": true,
+        "display": true,
+        "seg": 4
+      }
+    },
+    {
+      "name": "6 Profile: tapping the name opens Edit profile with the name filled",
+      "pass": true,
+      "detail": {
+        "sheet": true,
+        "input": true,
+        "value": "波友測試 2"
+      }
+    },
+    {
+      "name": "7 Discover › Comps: Standings · Schedule · Playoffs · Results tiles",
+      "pass": true,
+      "detail": {
+        "comps": [
+          "Standings",
+          "Schedule",
+          "Playoffs",
+          "Results"
+        ]
+      }
+    },
+    {
+      "name": "8 Meet share → sheet with a QR and the link",
+      "pass": true,
+      "detail": {
+        "sheet": true,
+        "qr": true,
+        "url": "social.silkvo.com/app/pages/meet/index?id=ar7qrfpjs64a00mi"
+      }
+    },
+    {
+      "name": "9 no page errors",
+      "pass": true,
+      "detail": {
+        "errs": []
+      }
+    }
+  ]
+}

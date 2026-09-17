@@ -1,0 +1,85 @@
+{
+  "id": "grade-v2",
+  "at": "2026-09-17T12:23:37.294Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 7,
+  "total": 7,
+  "evidence": "[\"E1 reset generation: 7 rounds × 1 court over 8 players (28 seats) → 3 or 4 each (spread ≤ 1), only the new rounds remain=ok {\\\"counts\\\":[3,4,3,4,3,3,4,4],\\\"total\\\":7}\",\"E2 clubs/members: a member sees the list, a non-member is refused=ok {\\\"member\\\":200,\\\"total\\\":2,\\\"nonMember\\\":400}\",\"P1 signed-out Home: silhouette avatar, no \\\"?\\\" text, GripBat brand + mark=ok {\\\"q\\\":0,\\\"avatarImg\\\":true,\\\"brand\\\":\\\"GripBat\\\",\\\"title\\\":\\\"GripBat\\\",\\\"icon\\\":\\\"https://social.silkvo.com/app/static/boyau/gripbat-icon-512.png\\\"}\",\"P2 zh Home: brand 抓拍, \\\"我的抓拍\\\", club is 球會 not 俱樂部=ok {\\\"brand\\\":\\\"抓拍\\\",\\\"title\\\":\\\"抓拍\\\",\\\"mine\\\":true,\\\"club\\\":false}\",\"P3 feed composer takes the page face (not monospace)=ok {\\\"font\\\":\\\"\\\\\\\"Albert Sans\\\\\\\", \\\\\\\"Noto Sans TC\\\\\\\", \\\\\\\"Noto Sans SC\\\\\\\", -apple-system, sans-serif\\\",\\\"size\\\":\\\"15px\\\"}\",\"P4 a meet notification row opens its meet (or, for a row minted before it carried a name, My activities)=ok {\\\"rows\\\":5,\\\"text\\\":\\\"You are confirmedYou are confirmed to play. Please be on tim\\\",\\\"url\\\":\\\"https://social.silkvo.com/app/pages/meets/index?mine=1\\\"}\",\"P5 inbox direct threads are titled with the other person (not 波友測試 2)=ok {\\\"direct\\\":[\\\"Jason 張Jason 張: 好呀！7 點 HKFC 見 🏓17 Sept\\\"]}\"]",
+  "detail": "reset baseline + members on the live engine; GripBat brand, silhouette avatar, composer font, notification deep-link, inbox titles in headless Chrome",
+  "checks": [
+    {
+      "name": "E1 reset generation: 7 rounds × 1 court over 8 players (28 seats) → 3 or 4 each (spread ≤ 1), only the new rounds remain",
+      "pass": true,
+      "detail": {
+        "counts": [
+          3,
+          4,
+          3,
+          4,
+          3,
+          3,
+          4,
+          4
+        ],
+        "total": 7
+      }
+    },
+    {
+      "name": "E2 clubs/members: a member sees the list, a non-member is refused",
+      "pass": true,
+      "detail": {
+        "member": 200,
+        "total": 2,
+        "nonMember": 400
+      }
+    },
+    {
+      "name": "P1 signed-out Home: silhouette avatar, no \"?\" text, GripBat brand + mark",
+      "pass": true,
+      "detail": {
+        "q": 0,
+        "avatarImg": true,
+        "brand": "GripBat",
+        "title": "GripBat",
+        "icon": "https://social.silkvo.com/app/static/boyau/gripbat-icon-512.png"
+      }
+    },
+    {
+      "name": "P2 zh Home: brand 抓拍, \"我的抓拍\", club is 球會 not 俱樂部",
+      "pass": true,
+      "detail": {
+        "brand": "抓拍",
+        "title": "抓拍",
+        "mine": true,
+        "club": false
+      }
+    },
+    {
+      "name": "P3 feed composer takes the page face (not monospace)",
+      "pass": true,
+      "detail": {
+        "font": "\"Albert Sans\", \"Noto Sans TC\", \"Noto Sans SC\", -apple-system, sans-serif",
+        "size": "15px"
+      }
+    },
+    {
+      "name": "P4 a meet notification row opens its meet (or, for a row minted before it carried a name, My activities)",
+      "pass": true,
+      "detail": {
+        "rows": 5,
+        "text": "You are confirmedYou are confirmed to play. Please be on tim",
+        "url": "https://social.silkvo.com/app/pages/meets/index?mine=1"
+      }
+    },
+    {
+      "name": "P5 inbox direct threads are titled with the other person (not 波友測試 2)",
+      "pass": true,
+      "detail": {
+        "direct": [
+          "Jason 張Jason 張: 好呀！7 點 HKFC 見 🏓17 Sept"
+        ]
+      }
+    }
+  ]
+}

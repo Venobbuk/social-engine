@@ -1,0 +1,71 @@
+{
+  "id": "club-page-v2",
+  "at": "2026-09-17T12:23:52.354Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 7,
+  "total": 7,
+  "evidence": "[\"E1 clubs/chat: one room for member and owner, a non-member is refused, a member's line reaches the owner=ok {\\\"member\\\":200,\\\"owner\\\":200,\\\"same\\\":true,\\\"nonMember\\\":400,\\\"seen\\\":1}\",\"P1 club page: three tappable stat tiles=ok {\\\"tiles\\\":3}\",\"P2 Members tile → Members pane lists people with roles=ok {\\\"roleLabels\\\":19}\",\"P3 Chat tab → the thread with a composer=ok {\\\"thread\\\":true,\\\"composer\\\":true,\\\"empty\\\":true}\",\"P4 a sent line renders as mine, on the right=ok {\\\"found\\\":true,\\\"mine\\\":true,\\\"justify\\\":\\\"flex-end\\\",\\\"right\\\":true}\",\"P5 \\\"+\\\" → a create-club form (name + description)=ok {\\\"form\\\":true,\\\"inputs\\\":2}\",\"P6 no page errors across the walk=ok {\\\"errs\\\":[]}\"]",
+  "detail": "clubs/chat on the live engine + the club page panes in headless Chrome as tester2",
+  "checks": [
+    {
+      "name": "E1 clubs/chat: one room for member and owner, a non-member is refused, a member's line reaches the owner",
+      "pass": true,
+      "detail": {
+        "member": 200,
+        "owner": 200,
+        "same": true,
+        "nonMember": 400,
+        "seen": 1
+      }
+    },
+    {
+      "name": "P1 club page: three tappable stat tiles",
+      "pass": true,
+      "detail": {
+        "tiles": 3
+      }
+    },
+    {
+      "name": "P2 Members tile → Members pane lists people with roles",
+      "pass": true,
+      "detail": {
+        "roleLabels": 19
+      }
+    },
+    {
+      "name": "P3 Chat tab → the thread with a composer",
+      "pass": true,
+      "detail": {
+        "thread": true,
+        "composer": true,
+        "empty": true
+      }
+    },
+    {
+      "name": "P4 a sent line renders as mine, on the right",
+      "pass": true,
+      "detail": {
+        "found": true,
+        "mine": true,
+        "justify": "flex-end",
+        "right": true
+      }
+    },
+    {
+      "name": "P5 \"+\" → a create-club form (name + description)",
+      "pass": true,
+      "detail": {
+        "form": true,
+        "inputs": 2
+      }
+    },
+    {
+      "name": "P6 no page errors across the walk",
+      "pass": true,
+      "detail": {
+        "errs": []
+      }
+    }
+  ]
+}

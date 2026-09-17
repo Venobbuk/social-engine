@@ -1,0 +1,24 @@
+'use strict';
+const fs = require('fs');
+const puppeteer = require('/root/hkpl-server/node_modules/puppeteer-core');
+const BASE = 'https://social.silkvo.com';
+const T = JSON.parse(fs.readFileSync('/root/boyau-test-accounts.json', 'utf8'))[1];
+const CLUB = 'ar7o90b5s64a0010';
+(async () => {
+  const r = await fetch(BASE + '/api/v1/auth/password/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: T.email, password: T.password }) });
+  const cookieRaw = (r.headers.get('set-cookie') || '').split(';')[0]; const [cname, cval] = cookieRaw.split('=');
+  const browser = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome', headless: 'new', args: ['--no-sandbox', '--disable-gpu'] });
+  const page = await browser.newPage(); await page.setViewport({ width: 412, height: 915 });
+  await page.setCookie({ name: cname, value: cval, domain: 'social.silkvo.com', path: '/', secure: true });
+  page.on('response', async (res) => { const u = res.url(); if (/\/api\/(clubs\/chat|chat\/)/.test(u)) { let b = ''; try { b = (await res.text()).slice(0, 200); } catch {} console.log('[http]', res.status(), u.replace(BASE, ''), b); } });
+  page.on('console', (m) => { if (m.type() === 'error') console.log('[console]', m.text().slice(0, 200)); });
+  const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+  await page.goto(BASE + '/app/pages/community/index?id=' + CLUB + '&pane=chat&lang=en', { waitUntil: 'networkidle2', timeout: 45000 }); await wait(3000);
+  console.log('composer', await page.evaluate(() => ({ input: !!document.querySelector('.ct-input'), tag: document.querySelector('.ct-input') && document.querySelector('.ct-input').tagName, lines: document.querySelectorAll('.ct-line').length })));
+  await page.click('.ct-input'); await page.keyboard.type('dbg ' + Date.now().toString(36), { delay: 30 });
+  console.log('value', await page.evaluate(() => (document.querySelector('.ct-input') || {}).value));
+  await page.click('.ct-send'); await wait(3000);
+  console.log('after', await page.evaluate(() => ({ lines: document.querySelectorAll('.ct-line').length, toast: [...document.querySelectorAll('.taro__toast, .weui-toast__content')].map((t) => t.innerText).join('|'), last: (document.querySelector('.ct-line:last-child') || {}).className })));
+  await page.screenshot({ path: '/root/walk/_clubchat.png' });
+  await browser.close();
+})();

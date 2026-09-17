@@ -1,0 +1,84 @@
+{
+  "id": "shine-v1",
+  "at": "2026-09-17T12:24:15.111Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 6,
+  "total": 6,
+  "evidence": "[\"1 Statistics: DUPR card with a doubles rating, a sparkline and the facts=ok {\\\"url\\\":\\\"/app/pages/my-stats/index\\\",\\\"card\\\":true,\\\"ratings\\\":[\\\"3.12\\\",\\\"—\\\"],\\\"spark\\\":false,\\\"facts\\\":[\\\"0\\\",\\\"0\\\",\\\"U7DB3C\\\"]}\",\"2 Feed: the picker sets a reaction on the first post and its chip is mine=ok {\\\"before\\\":{\\\"posts\\\":16,\\\"chips\\\":2},\\\"want\\\":\\\"❤️\\\",\\\"picked\\\":{\\\"chips\\\":[\\\"❤ 1\\\"],\\\"mine\\\":true,\\\"label\\\":\\\"❤ Reacted\\\"}}\",\"3 Club › Photos pane renders (a grid, or the empty state with a CTA)=ok {\\\"grid\\\":false,\\\"n\\\":0,\\\"empty\\\":true}\",\"4 a scored match offers Share=ok {\\\"share\\\":{\\\"shares\\\":3,\\\"scored\\\":18},\\\"drawn\\\":\\\"no-module\\\"}\",\"5 the share card draws (1080×1080 PNG, non-blank)=ok {\\\"w\\\":1080,\\\"h\\\":1080,\\\"size\\\":222379}\",\"6 no page errors=ok {\\\"errs\\\":[]}\"]",
+  "detail": "DUPR card, emoji reactions, club photos, share card on the live app as tester2",
+  "checks": [
+    {
+      "name": "1 Statistics: DUPR card with a doubles rating, a sparkline and the facts",
+      "pass": true,
+      "detail": {
+        "url": "/app/pages/my-stats/index",
+        "card": true,
+        "ratings": [
+          "3.12",
+          "—"
+        ],
+        "spark": false,
+        "facts": [
+          "0",
+          "0",
+          "U7DB3C"
+        ]
+      }
+    },
+    {
+      "name": "2 Feed: the picker sets a reaction on the first post and its chip is mine",
+      "pass": true,
+      "detail": {
+        "before": {
+          "posts": 16,
+          "chips": 2
+        },
+        "want": "❤️",
+        "picked": {
+          "chips": [
+            "❤ 1"
+          ],
+          "mine": true,
+          "label": "❤ Reacted"
+        }
+      }
+    },
+    {
+      "name": "3 Club › Photos pane renders (a grid, or the empty state with a CTA)",
+      "pass": true,
+      "detail": {
+        "grid": false,
+        "n": 0,
+        "empty": true
+      }
+    },
+    {
+      "name": "4 a scored match offers Share",
+      "pass": true,
+      "detail": {
+        "share": {
+          "shares": 3,
+          "scored": 18
+        },
+        "drawn": "no-module"
+      }
+    },
+    {
+      "name": "5 the share card draws (1080×1080 PNG, non-blank)",
+      "pass": true,
+      "detail": {
+        "w": 1080,
+        "h": 1080,
+        "size": 222379
+      }
+    },
+    {
+      "name": "6 no page errors",
+      "pass": true,
+      "detail": {
+        "errs": []
+      }
+    }
+  ]
+}

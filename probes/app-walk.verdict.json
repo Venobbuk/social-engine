@@ -1,78 +1,11 @@
 {
   "id": "app-walk",
-  "at": "2026-09-17T07:31:03.731Z",
+  "at": "2026-09-17T13:17:14.871Z",
   "condition_fired": true,
-  "verdict": "fail",
-  "pages": 280,
-  "findings": 6,
-  "evidence": "[\"discover-mine/signed/en/phone: console: Failed to load resource: the server responded with a status of 502 () | api: 502 /api/venues/locations/list ; 502 /api/meets/list\",\"meet/signed/en/phone: console: Failed to load resource: the server responded with a status of 502 () | api: 502 /api/i ; 502 /api/meets/show\",\"meet-participants/signed/en/phone: console: Failed to load resource: the server responded with a status of 502 () | api: 502 /api/meets/show ; 502 /api/i\",\"meet-matches/signed/en/phone: console: Failed to load resource: the server responded with a status of 502 () | api: 502 /api/meets/matches/list ; 502 /api/i ; 502 /api/meets/show\",\"profile/signed/zh_Hant/desktop: console: Failed to load resource: the server responded with a status of 502 () | api: 502 /api/meets/level\",\"open-play/signed/zh_Hant/desktop: console: Failed to load resource: the server responded with a status of 502 () | api: 502 /css/fonts-local-cjk.css\"]",
-  "detail": "280 page renders walked (routes × anon/signed × en/zh × phone/desktop); 6 with findings; screenshots /root/walk/",
-  "list": [
-    {
-      "page": "discover-mine",
-      "state": "signed",
-      "lang": "en",
-      "vp": "phone",
-      "findings": [
-        "console: Failed to load resource: the server responded with a status of 502 ()",
-        "api: 502 /api/venues/locations/list ; 502 /api/meets/list"
-      ],
-      "shot": "/root/walk/discover-mine-signed-en-phone.png"
-    },
-    {
-      "page": "meet",
-      "state": "signed",
-      "lang": "en",
-      "vp": "phone",
-      "findings": [
-        "console: Failed to load resource: the server responded with a status of 502 ()",
-        "api: 502 /api/i ; 502 /api/meets/show"
-      ],
-      "shot": "/root/walk/meet-signed-en-phone.png"
-    },
-    {
-      "page": "meet-participants",
-      "state": "signed",
-      "lang": "en",
-      "vp": "phone",
-      "findings": [
-        "console: Failed to load resource: the server responded with a status of 502 ()",
-        "api: 502 /api/meets/show ; 502 /api/i"
-      ],
-      "shot": "/root/walk/meet-participants-signed-en-phone.png"
-    },
-    {
-      "page": "meet-matches",
-      "state": "signed",
-      "lang": "en",
-      "vp": "phone",
-      "findings": [
-        "console: Failed to load resource: the server responded with a status of 502 ()",
-        "api: 502 /api/meets/matches/list ; 502 /api/i ; 502 /api/meets/show"
-      ],
-      "shot": "/root/walk/meet-matches-signed-en-phone.png"
-    },
-    {
-      "page": "profile",
-      "state": "signed",
-      "lang": "zh_Hant",
-      "vp": "desktop",
-      "findings": [
-        "console: Failed to load resource: the server responded with a status of 502 ()",
-        "api: 502 /api/meets/level"
-      ],
-      "shot": "/root/walk/profile-signed-zh_Hant-desktop.png"
-    },
-    {
-      "page": "open-play",
-      "state": "signed",
-      "lang": "zh_Hant",
-      "vp": "desktop",
-      "findings": [
-        "console: Failed to load resource: the server responded with a status of 502 ()",
-        "api: 502 /css/fonts-local-cjk.css"
-      ],
-      "shot": "/root/walk/open-play-signed-zh_Hant-desktop.png"
-    }
-  ]
+  "verdict": "pass",
+  "pages": 376,
+  "findings": 0,
+  "evidence": "[]",
+  "detail": "376 page renders walked (routes × anon/signed × en/zh × phone/desktop); 0 with findings; screenshots /root/walk/",
+  "list": []
 }

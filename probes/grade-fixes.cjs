@@ -11,8 +11,7 @@ const T = JSON.parse(fs.readFileSync('/root/boyau-test-accounts.json', 'utf8'))[
 const BASE = 'https://social.silkvo.com';
 const checks = []; const ok = (n, p, d) => { checks.push({ name: n, pass: !!p, detail: d }); console.log((p ? 'PASS ' : 'FAIL ') + n + ' — ' + JSON.stringify(d).slice(0, 240)); };
 (async () => {
-  const r = await fetch(BASE + '/api/v1/auth/password/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: T.email, password: T.password }) });
-  const cookieRaw = (r.headers.get('set-cookie') || '').split(';')[0]; const [cname, cval] = cookieRaw.split('=');
+  const { name: cname, value: cval } = await require('./_session.cjs').getSession(1);
   const browser = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome', headless: 'new', args: ['--no-sandbox', '--disable-gpu'] });
   const ctx = await browser.createBrowserContext(); const page = await ctx.newPage(); await page.setViewport({ width: 412, height: 915 });
   await page.setCookie({ name: cname, value: cval, domain: 'social.silkvo.com', path: '/', secure: true });
