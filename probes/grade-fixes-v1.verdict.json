@@ -1,0 +1,59 @@
+{
+  "id": "grade-fixes-v1",
+  "at": "2026-09-17T07:12:45.603Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 5,
+  "total": 5,
+  "evidence": "[\"2 ?lang=zh_Hant wins over the account's chosen \\\"en\\\"=ok {\\\"htmlLang\\\":\\\"zh-Hant\\\",\\\"zhText\\\":true}\",\"1 typing keeps focus and value in Create meet Name=ok {\\\"value\\\":\\\"Grader\\\",\\\"active\\\":\\\"weui-input\\\"}\",\"5 accessible names keep their letters=ok {\\\"labels\\\":7,\\\"withS\\\":5,\\\"broken\\\":[],\\\"sample\\\":[\\\"I am playingOff: you host without taking a seat\\\",\\\"Auto-approveOff: every join is a request you confirm\\\"]}\",\"3 action sheet is the kit's, Cancel in the reader's language=ok {\\\"menuFound\\\":true,\\\"cancelWord\\\":{\\\"kit\\\":\\\"取消\\\",\\\"weui\\\":false}}\",\"4 signed-out community page sends no credential-only request=ok {\\\"bad\\\":[]}\"]",
+  "detail": "headless Chrome on the live app as tester2 (chosen language en): create-meet focus, ?lang priority, kit action sheet, private door, a11y names",
+  "checks": [
+    {
+      "name": "2 ?lang=zh_Hant wins over the account's chosen \"en\"",
+      "pass": true,
+      "detail": {
+        "htmlLang": "zh-Hant",
+        "zhText": true
+      }
+    },
+    {
+      "name": "1 typing keeps focus and value in Create meet Name",
+      "pass": true,
+      "detail": {
+        "value": "Grader",
+        "active": "weui-input"
+      }
+    },
+    {
+      "name": "5 accessible names keep their letters",
+      "pass": true,
+      "detail": {
+        "labels": 7,
+        "withS": 5,
+        "broken": [],
+        "sample": [
+          "I am playingOff: you host without taking a seat",
+          "Auto-approveOff: every join is a request you confirm"
+        ]
+      }
+    },
+    {
+      "name": "3 action sheet is the kit's, Cancel in the reader's language",
+      "pass": true,
+      "detail": {
+        "menuFound": true,
+        "cancelWord": {
+          "kit": "取消",
+          "weui": false
+        }
+      }
+    },
+    {
+      "name": "4 signed-out community page sends no credential-only request",
+      "pass": true,
+      "detail": {
+        "bad": []
+      }
+    }
+  ]
+}
