@@ -55,6 +55,9 @@ export class MiClubSetting {
 	@Column('boolean', { default: true })
 	public enableChat: boolean;
 
+	@Column('varchar', { length: 32, nullable: true, comment: 'the club\'s chat room (CLUB-CHAT-V1), minted on first open' })
+	public chatRoomId: string | null;
+
 	@Column('timestamp with time zone', { default: () => 'now()' })
 	public updatedAt: Date;
 }

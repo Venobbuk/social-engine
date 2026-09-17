@@ -172,6 +172,7 @@ export * as 'clubs/settings/update' from '@/modules/clubs/endpoints/settings-upd
 export * as 'clubs/members' from '@/modules/clubs/endpoints/members.js';
 export * as 'clubs/members/update' from '@/modules/clubs/endpoints/members-update.js';
 export * as 'clubs/join' from '@/modules/clubs/endpoints/join.js';
+export * as 'clubs/chat' from '@/modules/clubs/endpoints/chat.js';
 export * as 'clubs/requests' from '@/modules/clubs/endpoints/requests.js';
 export * as 'clubs/requests/decide' from '@/modules/clubs/endpoints/requests-decide.js';
 export * as 'clubs/insights' from '@/modules/clubs/endpoints/insights.js';

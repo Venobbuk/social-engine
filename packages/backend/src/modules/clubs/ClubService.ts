@@ -12,6 +12,7 @@ import type { MiUser, MiLocalUser } from '@/models/User.js';
 import type { MiClubSetting, MiClubJoinRequest } from '@/modules/clubs/models/ClubSetting.js';
 import { IdService } from '@/core/IdService.js';
 import { NotificationService } from '@/core/NotificationService.js';
+import { ChatService } from '@/core/ChatService.js';
 import { ChannelFollowingService } from '@/core/ChannelFollowingService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
@@ -34,6 +35,7 @@ export class ClubService {
 		@Inject(DI.usersRepository) private usersRepository: UsersRepository,
 		private idService: IdService,
 		private notificationService: NotificationService,
+		private chatService: ChatService,
 		private channelFollowingService: ChannelFollowingService,
 		private userEntityService: UserEntityService,
 	) {}
@@ -52,7 +54,7 @@ export class ClubService {
 	public async settings(channelId: string): Promise<MiClubSetting> {
 		const s = await this.clubSettingsRepository.findOneBy({ channelId });
 		if (s) return s;
-		return await this.clubSettingsRepository.insertOne({ channelId, visibility: 'public', gateType: 'open', createMeetPermission: 'members', sport: 'pickleball', level: null, adminIds: [], memberTags: {}, venueIds: [], paymentInfo: null, enableForum: true, enableChat: true, updatedAt: new Date() });
+		return await this.clubSettingsRepository.insertOne({ channelId, visibility: 'public', gateType: 'open', createMeetPermission: 'members', sport: 'pickleball', level: null, adminIds: [], memberTags: {}, venueIds: [], paymentInfo: null, enableForum: true, enableChat: true, chatRoomId: null, updatedAt: new Date() });
 	}
 
 	@bindThis
@@ -198,6 +200,27 @@ export class ClubService {
 		if (channel.userId) throw this.err('has_owner', 'This club already has an owner.');
 		if (!(await this.isMember(channel.id, user.id))) throw this.err('not_member', 'Join the club first.');
 		await this.channelsRepository.update(channel.id, { userId: user.id });
+	}
+
+	/** CLUB-CHAT-V1: the club's chat room for a member — minted on first open (owned by the club owner, else the
+	 *  opener), and the member is added to it. Members only; off when the admins disabled chat. */
+	@bindThis
+	public async chatRoom(channel: MiChannel, user: MiUser): Promise<{ roomId: string }> {
+		if (!(await this.isMember(channel.id, user.id)) && !(await this.isAdmin(channel, user.id))) throw this.err('not_member', 'Only members can open the club chat.');
+		const s = await this.settings(channel.id);
+		if (!s.enableChat) throw this.err('chat_off', 'This club has turned its chat off.');
+		let room = s.chatRoomId ? await this.chatService.findRoomById(s.chatRoomId) : null;
+		if (!room) {
+			const ownerId = channel.userId ?? user.id;
+			const owner = await this.usersRepository.findOneByOrFail({ id: ownerId });
+			room = await this.chatService.createRoom(owner, { name: channel.name, description: 'Club chat' });
+			await this.clubSettingsRepository.update({ channelId: channel.id }, { chatRoomId: room.id });
+		}
+		if (room.ownerId !== user.id && !(await this.chatService.isRoomMember(room, user.id))) {
+			await this.chatService.createRoomInvitation(room.ownerId, room.id, user.id);
+			await this.chatService.joinToRoom(user.id, room.id);
+		}
+		return { roomId: room.id };
 	}
 
 	private notify(userId: string, header: string, body: string, channelId?: string): void {
