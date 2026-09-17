@@ -62,7 +62,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const from = parseIsoDate(ps.from), to = parseIsoDate(ps.to);
 			if (from) q.andWhere('meet.startAt >= :from', { from });
 			if (to) q.andWhere('meet.startAt <= :to', { to });
-			if (!ps.includePast && !ps.from) q.andWhere('meet.startAt + (meet.durationMinutes * interval \'1 minute\') >= :now', { now: new Date() });
+			// a meet that has ended is past even inside a from/to window (Discover's day strip passes one): only includePast keeps it
+			if (!ps.includePast) q.andWhere('meet.startAt + (meet.durationMinutes * interval \'1 minute\') >= :now', { now: new Date() });
 
 			switch (ps.scope) {
 				case 'mine': {

@@ -67,10 +67,12 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (new Set(ids).size !== ids.length) throw new ApiError(meta.errors.badTeams);
 			const mePlays = ids.includes(me.id);
 			try {
-				const meet = await this.meetService.create(me, {
+				// seats are claimed only on a meet that has not started: the game is created one minute ahead, filled, scored,
+				// then dated to when it was played
+				let meet = await this.meetService.create(me, {
 					name: ps.name?.trim() || (ps.team1.length === 1 ? 'Casual singles' : 'Casual doubles'),
 					sport: 'pickleball',
-					startAt: playedAt,
+					startAt: new Date(Date.now() + 60_000),
 					durationMinutes: 60,
 					capacity: everyone.length,
 					hostPlays: mePlays,
@@ -92,6 +94,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const team1Ids: string[] = []; for (const p of ps.team1) team1Ids.push(await rowFor(p));
 				const team2Ids: string[] = []; for (const p of ps.team2) team2Ids.push(await rowFor(p));
 				let match = await this.meetMatchService.upsert(meet, me, { round: 1, courtIndex: 0, team1Ids, team2Ids, scores: ps.scores });
+				meet = await this.meetService.update(meet, { startAt: playedAt });
 				if (ps.submitDupr) match = await this.meetMatchService.submitDupr(meet, match, me);
 				const packedMeet = await this.meetEntityService.pack(meet, me, { detailed: true });
 				const packedMatch = await this.meetEntityService.packMatch(match, meet, me, { eligibility: true });
