@@ -205,6 +205,14 @@ export * as 'clubs/requests' from '@/modules/clubs/endpoints/requests.js';
 export * as 'clubs/requests/decide' from '@/modules/clubs/endpoints/requests-decide.js';
 export * as 'clubs/insights' from '@/modules/clubs/endpoints/insights.js';
 export * as 'clubs/claim' from '@/modules/clubs/endpoints/claim.js';
+export * as 'clubs/posts/announce' from '@/modules/clubs/endpoints/posts-announce.js'; // CLUB-V3
+export * as 'clubs/admins/chat' from '@/modules/clubs/endpoints/admins-chat.js'; // CLUB-V3
+export * as 'clubs/schedules/list' from '@/modules/clubs/endpoints/schedules-list.js'; // CLUB-V3
+export * as 'clubs/schedules/show' from '@/modules/clubs/endpoints/schedules-show.js'; // CLUB-V3
+export * as 'clubs/schedules/create' from '@/modules/clubs/endpoints/schedules-create.js'; // CLUB-V3
+export * as 'clubs/schedules/update' from '@/modules/clubs/endpoints/schedules-update.js'; // CLUB-V3
+export * as 'clubs/schedules/delete' from '@/modules/clubs/endpoints/schedules-delete.js'; // CLUB-V3
+export * as 'clubs/schedules/run' from '@/modules/clubs/endpoints/schedules-run.js'; // CLUB-V3
 export * as 'clubs/mine' from '@/modules/clubs/endpoints/mine.js'; // CLUB-V3
 export * as 'clubs/me/update' from '@/modules/clubs/endpoints/me-update.js'; // CLUB-V3
 export * as 'clubs/by-code' from '@/modules/clubs/endpoints/by-code.js'; // CLUB-V3

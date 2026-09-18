@@ -34,7 +34,7 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { channelId: { type: 'string', format: 'misskey:id' }, message: { type: 'string', nullable: true, maxLength: 512 } },
+	properties: { channelId: { type: 'string', format: 'misskey:id' }, message: { type: 'string', nullable: true, maxLength: 512 }, accessToken: { type: 'string', nullable: true, maxLength: 32 } },
 	required: ['channelId'],
 } as const;
 
@@ -44,7 +44,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				const c = await this.clubService.channel(ps.channelId);
-			return await this.clubService.join(c, me, ps.message ?? null);
+			return await this.clubService.join(c, me, ps.message ?? null, ps.accessToken ?? null); // CLUB-V3: ?at= token
 			} catch (e) {
 				return toApiError(e);
 			}

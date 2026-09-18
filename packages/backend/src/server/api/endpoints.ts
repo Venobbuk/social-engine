@@ -130,7 +130,7 @@ export interface IEndpoint {
 	params: Schema;
 }
 
-const endpoints: IEndpoint[] = Object.entries(endpointsObject).map(([name, ep]) => {
+const endpoints: IEndpoint[] = Object.entries(endpointsObject as Record<string, { meta?: IEndpointMeta; paramDef: Schema }>).map(([name, ep]) => { // CLUB-V3: the element shape is declared once (the union of every door's meta type outgrew tsc)
 	return {
 		name: name,
 		get meta() {

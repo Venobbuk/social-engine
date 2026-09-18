@@ -43,6 +43,7 @@ import { ResyncChartsProcessorService } from './processors/ResyncChartsProcessor
 import { CleanChartsProcessorService } from './processors/CleanChartsProcessorService.js';
 import { CheckExpiredMutingsProcessorService } from './processors/CheckExpiredMutingsProcessorService.js';
 import { MeetSweepProcessorService } from '@/modules/meets/MeetSweepProcessorService.js';
+import { ClubScheduleSweepProcessorService } from '@/modules/clubs/ClubScheduleSweepProcessorService.js'; // CLUB-V3
 import { BakeBufferedReactionsProcessorService } from './processors/BakeBufferedReactionsProcessorService.js';
 import { CleanProcessorService } from './processors/CleanProcessorService.js';
 import { AggregateRetentionProcessorService } from './processors/AggregateRetentionProcessorService.js';
@@ -128,6 +129,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		private aggregateRetentionProcessorService: AggregateRetentionProcessorService,
 		private checkExpiredMutingsProcessorService: CheckExpiredMutingsProcessorService,
 		private meetSweepProcessorService: MeetSweepProcessorService,
+		private clubScheduleSweepProcessorService: ClubScheduleSweepProcessorService, // CLUB-V3
 		private bakeBufferedReactionsProcessorService: BakeBufferedReactionsProcessorService,
 		private checkModeratorsActivityProcessorService: CheckModeratorsActivityProcessorService,
 		private cleanProcessorService: CleanProcessorService,
@@ -172,6 +174,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 					case 'aggregateRetention': return this.aggregateRetentionProcessorService.process();
 					case 'checkExpiredMutings': return this.checkExpiredMutingsProcessorService.process();
 					case 'meetSweep': return this.meetSweepProcessorService.process();
+					case 'clubScheduleSweep': return this.clubScheduleSweepProcessorService.process(); // CLUB-V3
 					case 'bakeBufferedReactions': return this.bakeBufferedReactionsProcessorService.process();
 					case 'checkModeratorsActivity': return this.checkModeratorsActivityProcessorService.process();
 					case 'clean': return this.cleanProcessorService.process();

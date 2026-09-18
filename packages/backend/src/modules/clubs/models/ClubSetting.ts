@@ -11,6 +11,11 @@ import { MiUser } from '@/models/User.js';
 export const clubVisibilities = ['public', 'private'] as const;
 export const clubGateTypes = ['open', 'approval', 'invite'] as const;
 export const clubCreateMeetPermissions = ['admins', 'members'] as const;
+export const clubTagVisibilities = ['all', 'admins'] as const;
+/** CLUB-V3: Reclub GroupTag — a named tag with a visibility, an order, and per-member expiry (GroupTagUser.expiredAt). */
+export interface ClubTag { id: string; name: string; visibility: typeof clubTagVisibilities[number]; order: number; members: Record<string, string | null> }
+/** CLUB-V3: one award on the club's showcase (a tournament placement, a league title…). */
+export interface ClubAward { title: string; event: string | null; date: string | null; placement: string | null }
 
 /**
  * CLUB-ADMIN-V1: Reclub's Group settings on top of a Misskey channel (the club). Membership stays channel_following;
@@ -57,6 +62,46 @@ export class MiClubSetting {
 
 	@Column('varchar', { length: 32, nullable: true, comment: 'the club\'s chat room (CLUB-CHAT-V1), minted on first open' })
 	public chatRoomId: string | null;
+
+	// ---- CLUB-V3 ----
+	@Column('varchar', { length: 8, nullable: true, comment: 'CLUB-V3: the six-char club code (Reclub "ID: <refCode>", join by code)' })
+	public refCode: string | null;
+
+	@Column('varchar', { length: 32, nullable: true, comment: 'CLUB-V3: the ?at= invite token — lets a person join a private / invite-only club from the link' })
+	public accessToken: string | null;
+
+	@Column('jsonb', { default: [], comment: 'CLUB-V3: Reclub GroupTag list — { id, name, visibility: all|admins, order, members: { userId: expiresAt|null } }' })
+	public tags: ClubTag[];
+
+	@Column('jsonb', { default: [], comment: 'CLUB-V3: the club\'s awards showcase — [{ title, event, date, placement }]' })
+	public awards: ClubAward[];
+
+	@Column('timestamp with time zone', { default: () => 'now()' })
+	public updatedAt: Date;
+}
+
+/** CLUB-V3: what one member set for one club — Pin to home, Take a break, the "Message admins" thread. */
+@Entity('club_member_state')
+@Index(['channelId', 'userId'], { unique: true })
+export class MiClubMemberState {
+	@PrimaryColumn(id())
+	public id: string;
+
+	@Column(id())
+	public channelId: MiChannel['id'];
+
+	@Index()
+	@Column(id())
+	public userId: MiUser['id'];
+
+	@Column('timestamp with time zone', { nullable: true, comment: 'Reclub is_pinned: the club sits on the Home pinned row' })
+	public pinnedAt: Date | null;
+
+	@Column('timestamp with time zone', { nullable: true, comment: 'Reclub is_active=false ("Take a break"): hidden from rosters, no club notifications, no auto-invites until resumed' })
+	public pausedAt: Date | null;
+
+	@Column('varchar', { length: 32, nullable: true, comment: 'the chat room with the club\'s admins ("Message admins"), minted on first open' })
+	public adminRoomId: string | null;
 
 	@Column('timestamp with time zone', { default: () => 'now()' })
 	public updatedAt: Date;

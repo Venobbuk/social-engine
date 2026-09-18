@@ -34,7 +34,7 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { channelId: { type: 'string', format: 'misskey:id' }, visibility: { type: 'string', enum: ['public', 'private'] }, gateType: { type: 'string', enum: ['open', 'approval', 'invite'] }, createMeetPermission: { type: 'string', enum: ['admins', 'members'] }, sport: { type: 'string', maxLength: 32 }, level: { type: 'string', nullable: true, maxLength: 64 }, venueIds: { type: 'array', items: { type: 'string' }, maxItems: 20 }, paymentInfo: { type: 'string', nullable: true, maxLength: 512 }, enableForum: { type: 'boolean' }, enableChat: { type: 'boolean' } },
+	properties: { channelId: { type: 'string', format: 'misskey:id' }, visibility: { type: 'string', enum: ['public', 'private'] }, gateType: { type: 'string', enum: ['open', 'approval', 'invite'] }, createMeetPermission: { type: 'string', enum: ['admins', 'members'] }, sport: { type: 'string', maxLength: 32 }, level: { type: 'string', nullable: true, maxLength: 64 }, venueIds: { type: 'array', items: { type: 'string' }, maxItems: 20 }, paymentInfo: { type: 'string', nullable: true, maxLength: 512 }, enableForum: { type: 'boolean' }, enableChat: { type: 'boolean' }, awards: { type: 'array', items: { type: 'object' }, maxItems: 50 } },
 	required: ['channelId'],
 } as const;
 
@@ -46,6 +46,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const c = await this.clubService.channel(ps.channelId);
 			const patch: Record<string, unknown> = {};
 			for (const k of ['visibility', 'gateType', 'createMeetPermission', 'sport', 'level', 'venueIds', 'paymentInfo', 'enableForum', 'enableChat'] as const) if (ps[k] !== undefined) patch[k] = ps[k];
+			if (ps.awards !== undefined) patch.awards = this.clubService.cleanAwards(ps.awards); // CLUB-V3: the awards showcase
 			const s = await this.clubService.updateSettings(c, me, patch);
 			return { ...s, updatedAt: s.updatedAt.toISOString() };
 			} catch (e) {

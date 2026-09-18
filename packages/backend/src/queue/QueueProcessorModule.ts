@@ -16,6 +16,7 @@ import { UserWebhookDeliverProcessorService } from './processors/UserWebhookDeli
 import { SystemWebhookDeliverProcessorService } from './processors/SystemWebhookDeliverProcessorService.js';
 import { CheckExpiredMutingsProcessorService } from './processors/CheckExpiredMutingsProcessorService.js';
 import { MeetSweepProcessorService } from '@/modules/meets/MeetSweepProcessorService.js';
+import { ClubScheduleSweepProcessorService } from '@/modules/clubs/ClubScheduleSweepProcessorService.js'; // CLUB-V3
 import { BakeBufferedReactionsProcessorService } from './processors/BakeBufferedReactionsProcessorService.js';
 import { CleanChartsProcessorService } from './processors/CleanChartsProcessorService.js';
 import { CleanProcessorService } from './processors/CleanProcessorService.js';
@@ -57,6 +58,7 @@ import { RelationshipProcessorService } from './processors/RelationshipProcessor
 		CleanChartsProcessorService,
 		CheckExpiredMutingsProcessorService,
 		MeetSweepProcessorService,
+		ClubScheduleSweepProcessorService, // CLUB-V3
 		BakeBufferedReactionsProcessorService,
 		CleanProcessorService,
 		DeleteDriveFilesProcessorService,
@@ -88,6 +90,7 @@ import { RelationshipProcessorService } from './processors/RelationshipProcessor
 		AggregateRetentionProcessorService,
 		CheckExpiredMutingsProcessorService,
 		MeetSweepProcessorService,
+		ClubScheduleSweepProcessorService, // CLUB-V3
 		CheckModeratorsActivityProcessorService,
 		CleanRemoteNotesProcessorService,
 		QueueProcessorService,

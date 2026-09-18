@@ -255,6 +255,8 @@ export const entities = [
 	MiVenue,
 	MiUserLocation,
 	MiClubSetting,
+	MiClubMemberState, // CLUB-V3
+	MiClubSchedule, // CLUB-V3
 	MiClubJoinRequest,
 	MiChannelFollowing,
 	MiChannelFavorite,

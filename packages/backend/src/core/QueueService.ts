@@ -76,6 +76,9 @@ const REPEATABLE_SYSTEM_JOB_DEF = [{
 	name: 'meetSweep',
 	pattern: '* * * * *',
 }, {
+	name: 'clubScheduleSweep', // CLUB-V3
+	pattern: '*/5 * * * *',
+}, {
 	name: 'bakeBufferedReactions',
 	pattern: '0 0 * * *',
 }, {

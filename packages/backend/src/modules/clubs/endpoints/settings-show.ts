@@ -27,13 +27,13 @@ function toApiError(e: unknown): never {
 export const meta = {
 	tags: ['clubs'],
 	requireCredential: false,
-	res: { type: 'object', optional: false, nullable: false, properties: { visibility: { type: 'string', optional: false, nullable: false }, gateType: { type: 'string', optional: false, nullable: false }, createMeetPermission: { type: 'string', optional: false, nullable: false }, sport: { type: 'string', optional: false, nullable: false }, level: { type: 'string', optional: false, nullable: true }, adminIds: { type: 'array', optional: false, nullable: false, items: { type: 'string' } }, venueIds: { type: 'array', optional: false, nullable: false, items: { type: 'string' } }, paymentInfo: { type: 'string', optional: false, nullable: true }, enableForum: { type: 'boolean', optional: false, nullable: false }, enableChat: { type: 'boolean', optional: false, nullable: false }, isAdmin: { type: 'boolean', optional: false, nullable: false }, isOwner: { type: 'boolean', optional: false, nullable: false }, isMember: { type: 'boolean', optional: false, nullable: false }, myRequest: { type: 'string', optional: false, nullable: true } } },
+	res: { type: 'object', optional: false, nullable: false, properties: { refCode: { type: 'string', optional: false, nullable: true }, accessToken: { type: 'string', optional: false, nullable: true }, venues: { type: 'array', optional: false, nullable: false, items: { type: 'object', optional: false, nullable: false } }, tags: { type: 'array', optional: false, nullable: false, items: { type: 'object', optional: false, nullable: false } }, awards: { type: 'array', optional: false, nullable: false, items: { type: 'object', optional: false, nullable: false } }, myPinned: { type: 'boolean', optional: false, nullable: false }, myPaused: { type: 'boolean', optional: false, nullable: false }, pinnedNoteIds: { type: 'array', optional: false, nullable: false, items: { type: 'string' } }, hasAccess: { type: 'boolean', optional: false, nullable: false }, visibility: { type: 'string', optional: false, nullable: false }, gateType: { type: 'string', optional: false, nullable: false }, createMeetPermission: { type: 'string', optional: false, nullable: false }, sport: { type: 'string', optional: false, nullable: false }, level: { type: 'string', optional: false, nullable: true }, adminIds: { type: 'array', optional: false, nullable: false, items: { type: 'string' } }, venueIds: { type: 'array', optional: false, nullable: false, items: { type: 'string' } }, paymentInfo: { type: 'string', optional: false, nullable: true }, enableForum: { type: 'boolean', optional: false, nullable: false }, enableChat: { type: 'boolean', optional: false, nullable: false }, isAdmin: { type: 'boolean', optional: false, nullable: false }, isOwner: { type: 'boolean', optional: false, nullable: false }, isMember: { type: 'boolean', optional: false, nullable: false }, myRequest: { type: 'string', optional: false, nullable: true } } },
 	errors: clubErrors,
 } as const;
 
 export const paramDef = {
 	type: 'object',
-	properties: { channelId: { type: 'string', format: 'misskey:id' } },
+	properties: { channelId: { type: 'string', format: 'misskey:id' }, accessToken: { type: 'string', nullable: true, maxLength: 32 } },
 	required: ['channelId'],
 } as const;
 
@@ -42,9 +42,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(private clubService: ClubService) {
 		super(meta, paramDef, async (ps, me) => {
 			try {
-				const c = await this.clubService.channel(ps.channelId); const s = await this.clubService.settings(c.id);
+				const c = await this.clubService.channel(ps.channelId); const s = await this.clubService.ensureCodes(await this.clubService.settings(c.id));
 			const isAdmin = me ? await this.clubService.isAdmin(c, me.id) : false;
-			return { visibility: s.visibility, gateType: s.gateType, createMeetPermission: s.createMeetPermission, sport: s.sport, level: s.level, adminIds: isAdmin ? s.adminIds : [], venueIds: s.venueIds, paymentInfo: s.paymentInfo, enableForum: s.enableForum, enableChat: s.enableChat, isAdmin, isOwner: !!me && c.userId === me.id, isMember: me ? await this.clubService.isMember(c.id, me.id) : false, myRequest: me ? await this.clubService.myRequest(c.id, me.id) : null };
+			const isMember = me ? await this.clubService.isMember(c.id, me.id) : false;
+			// CLUB-V3: the link token is the members' to share; a private club's page is readable with it (Reclub ?at=)
+			const tokenOk = !!ps.accessToken && ps.accessToken === s.accessToken;
+			const st = me ? await this.clubService.myState(c.id, me.id) : null;
+			const tagsVisible = s.tags.filter(t => isAdmin || t.visibility === 'all').sort((a, b) => a.order - b.order).map(t => ({ id: t.id, name: t.name, visibility: t.visibility, order: t.order, count: Object.keys(t.members).length }));
+			return { refCode: s.refCode, accessToken: isAdmin || isMember || tokenOk ? s.accessToken : null, venues: await this.clubService.venues(s), tags: tagsVisible, awards: s.awards, myPinned: !!(st && st.pinnedAt), myPaused: !!(st && st.pausedAt), pinnedNoteIds: c.pinnedNoteIds, hasAccess: s.visibility === 'public' || isAdmin || isMember || tokenOk, visibility: s.visibility, gateType: s.gateType, createMeetPermission: s.createMeetPermission, sport: s.sport, level: s.level, adminIds: isAdmin ? s.adminIds : [], venueIds: s.venueIds, paymentInfo: s.paymentInfo, enableForum: s.enableForum, enableChat: s.enableChat, isAdmin, isOwner: !!me && c.userId === me.id, isMember, myRequest: me ? await this.clubService.myRequest(c.id, me.id) : null };
 			} catch (e) {
 				return toApiError(e);
 			}
