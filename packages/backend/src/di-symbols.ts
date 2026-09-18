@@ -78,6 +78,13 @@ export const DI = {
 	userLocationsRepository: Symbol('userLocationsRepository'),
 	clubSettingsRepository: Symbol('clubSettingsRepository'),
 	clubJoinRequestsRepository: Symbol('clubJoinRequestsRepository'),
+	// TOURNAMENT-V1
+	competitionsRepository: Symbol('competitionsRepository'),
+	competitionEntriesRepository: Symbol('competitionEntriesRepository'),
+	competitionMatchesRepository: Symbol('competitionMatchesRepository'),
+	competitionAwardsRepository: Symbol('competitionAwardsRepository'),
+	clubMemberStatesRepository: Symbol('clubMemberStatesRepository'), // CLUB-V3
+	clubSchedulesRepository: Symbol('clubSchedulesRepository'), // CLUB-V3
 	channelFollowingsRepository: Symbol('channelFollowingsRepository'),
 	channelFavoritesRepository: Symbol('channelFavoritesRepository'),
 	channelMutingRepository: Symbol('channelMutingRepository'),
@@ -98,6 +105,7 @@ export const DI = {
 	chatRoomsRepository: Symbol('chatRoomsRepository'),
 	chatRoomMembershipsRepository: Symbol('chatRoomMembershipsRepository'),
 	chatRoomInvitationsRepository: Symbol('chatRoomInvitationsRepository'),
+	notificationMutesRepository: Symbol('notificationMutesRepository'),
 	bubbleGameRecordsRepository: Symbol('bubbleGameRecordsRepository'),
 	reversiGamesRepository: Symbol('reversiGamesRepository'),
 	noteDraftsRepository: Symbol('noteDraftsRepository'),

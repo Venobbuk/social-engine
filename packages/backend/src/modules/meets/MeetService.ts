@@ -16,6 +16,7 @@ import { IdService } from '@/core/IdService.js';
 import { ChatService } from '@/core/ChatService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
+import { meetSystemLine, meetUpdateSystemKey, sweepEndedMeetChats } from '@/modules/meets/MeetChatSystem.js';
 import { bindThis } from '@/decorators.js';
 import type { Packed } from '@/misc/json-schema.js';
 import type { UserEntityService } from '@/core/entities/UserEntityService.js';
@@ -282,7 +283,8 @@ export class MeetService {
 
 	@bindThis
 	public async update(meet: MiMeet, patch: Partial<MiMeet>): Promise<MiMeet> {
-		return await this.withMeetLock(meet.id, async (em, locked) => {
+		const systemKey = meetUpdateSystemKey(meet, patch); // CHAT-V2: what Reclub announces in the room (time / venue / fee)
+		const updated = await this.withMeetLock(meet.id, async (em, locked) => {
 			// E5: capacity may not drop below the confirmed count (Reclub disables the minus control there)
 			if (patch.capacity != null && patch.capacity < locked.confirmed) {
 				throw this.err('capacity_below_confirmed', `Capacity cannot be below the ${locked.confirmed} confirmed players.`);
@@ -305,6 +307,11 @@ export class MeetService {
 			if (patch.capacity != null && patch.capacity > locked.capacity) await this.promoteLocked(em, fresh);
 			return fresh;
 		});
+		if (systemKey) {
+			const host = await this.usersRepository.findOneBy({ id: meet.hostId });
+			void meetSystemLine(this.chatService, updated, systemKey, { name: host?.name ?? host?.username ?? null, userId: meet.hostId });
+		}
+		return updated;
 	}
 
 	/** E9: the meet is cancelled; rows and their history stay. The counter is meaningless afterwards and untouched. */
@@ -350,6 +357,7 @@ export class MeetService {
 	@bindThis
 	public async cancel(meet: MiMeet): Promise<void> {
 		await this.meetsRepository.update(meet.id, { status: 'cancelled', cancelledAt: new Date(), updatedAt: new Date() });
+		void meetSystemLine(this.chatService, meet, 'cancelled'); // CHAT-V2 system line in the room
 		const rows = await this.meetParticipantsRepository.findBy({ meetId: meet.id, status: In(['confirmed', 'waitlisted', 'requested', 'invited', 'hold', 'maybe']) });
 		for (const p of rows) if (p.userId && p.userId !== meet.hostId) this.notify(p.userId, meet, 'Cancelled', `${meet.name} has been cancelled by the host.`);
 	}
@@ -404,6 +412,7 @@ export class MeetService {
 	 */
 	@bindThis
 	public async join(meet: MiMeet, user: MiUser, opts: { accessToken?: string | null; plusOnes?: number } = {}): Promise<MiMeetParticipant> {
+		if (meet.type === 'listing') throw this.err('invalid_transition', 'This meet is a listing and only contains information. Contact the host directly.'); // MEET-EXTRAS-V1
 		if (meet.status !== 'active') throw this.err('meet_not_active', 'This meet is not active.');
 		if (this.hasStarted(meet)) throw this.err('meet_started', 'This meet has already started.');
 		if (await this.isBlockedWithHosts(meet, user.id)) throw this.err('blocked', "You can't join this meet because the host(s) has blocked you");
@@ -608,6 +617,7 @@ export class MeetService {
 				}
 			});
 		}
+		await sweepEndedMeetChats(this.db, this.chatService, now).catch(() => 0); // CHAT-V2: "This meet has ended" + the 14-day archive clock
 		return { purgedMaybes, autoConfirmedInvites, waitlistedInvites };
 	}
 
@@ -691,6 +701,9 @@ export class MeetService {
 				if (room && !(await this.chatService.isRoomMember(room, p.userId))) {
 					await this.chatService.createRoomInvitation(meet.hostId, room.id, p.userId);
 					await this.chatService.joinToRoom(p.userId, room.id);
+					// CHAT-V2: "{name} has joined the conversation." (Reclub gate line)
+					const joined = await this.usersRepository.findOneBy({ id: p.userId });
+					await meetSystemLine(this.chatService, meet, 'joined', { name: joined?.name ?? joined?.username ?? null, userId: p.userId });
 					if (p.chatMuted) await this.chatService.muteRoom(p.userId, room.id, true).catch(() => undefined); // HOST-TOOLS-V1
 				}
 			} catch {

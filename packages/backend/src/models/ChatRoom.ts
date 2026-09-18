@@ -38,4 +38,10 @@ export class MiChatRoom {
 		default: false,
 	})
 	public isArchived: boolean;
+
+	/** CHAT-V2 archive rule: after this instant the room takes no new message (meet chat: end + 14 d). NULL = open. */
+	@Column('timestamp with time zone', {
+		nullable: true,
+	})
+	public readOnlyAt: Date | null;
 }

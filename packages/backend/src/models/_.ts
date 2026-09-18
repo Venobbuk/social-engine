@@ -30,6 +30,12 @@ import { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import { MiVenue } from '@/modules/venues/models/Venue.js';
 import { MiUserLocation } from '@/modules/venues/models/UserLocation.js';
 import { MiClubSetting, MiClubJoinRequest } from '@/modules/clubs/models/ClubSetting.js';
+import { MiCompetition } from '@/modules/competitions/models/Competition.js'; // TOURNAMENT-V1
+import { MiCompetitionEntry } from '@/modules/competitions/models/CompetitionEntry.js';
+import { MiCompetitionMatch } from '@/modules/competitions/models/CompetitionMatch.js';
+import { MiCompetitionAward } from '@/modules/competitions/models/CompetitionAward.js';
+import { MiClubMemberState } from '@/modules/clubs/models/ClubSetting.js'; // CLUB-V3
+import { MiClubSchedule } from '@/modules/clubs/models/ClubSchedule.js'; // CLUB-V3
 import { MiChannelFavorite } from '@/models/ChannelFavorite.js';
 import { MiChannelFollowing } from '@/models/ChannelFollowing.js';
 import { MiChannelMuting } from "@/models/ChannelMuting.js";
@@ -37,6 +43,7 @@ import { MiChatApproval } from '@/models/ChatApproval.js';
 import { MiChatMessage } from '@/models/ChatMessage.js';
 import { MiChatRoom } from '@/models/ChatRoom.js';
 import { MiChatRoomInvitation } from '@/models/ChatRoomInvitation.js';
+import { MiNotificationMute } from '@/models/NotificationMute.js';
 import { MiChatRoomMembership } from '@/models/ChatRoomMembership.js';
 import { MiClip } from '@/models/Clip.js';
 import { MiClipFavorite } from '@/models/ClipFavorite.js';
@@ -178,7 +185,13 @@ export {
 	MiVenue,
 	MiUserLocation,
 	MiClubSetting,
+	MiClubMemberState, // CLUB-V3
+	MiClubSchedule, // CLUB-V3
 	MiClubJoinRequest,
+	MiCompetition, // TOURNAMENT-V1
+	MiCompetitionEntry,
+	MiCompetitionMatch,
+	MiCompetitionAward,
 	MiRetentionAggregation,
 	MiRole,
 	MiRoleAssignment,
@@ -190,6 +203,7 @@ export {
 	MiChatRoomMembership,
 	MiChatRoomInvitation,
 	MiChatApproval,
+	MiNotificationMute,
 	MiBubbleGameRecord,
 	MiReversiGame,
 };
@@ -269,6 +283,12 @@ export type VenuesRepository = Repository<MiVenue> & MiRepository<MiVenue>;
 export type UserLocationsRepository = Repository<MiUserLocation> & MiRepository<MiUserLocation>;
 export type ClubSettingsRepository = Repository<MiClubSetting> & MiRepository<MiClubSetting>;
 export type ClubJoinRequestsRepository = Repository<MiClubJoinRequest> & MiRepository<MiClubJoinRequest>;
+export type CompetitionsRepository = Repository<MiCompetition> & MiRepository<MiCompetition>; // TOURNAMENT-V1
+export type CompetitionEntriesRepository = Repository<MiCompetitionEntry> & MiRepository<MiCompetitionEntry>;
+export type CompetitionMatchesRepository = Repository<MiCompetitionMatch> & MiRepository<MiCompetitionMatch>;
+export type CompetitionAwardsRepository = Repository<MiCompetitionAward> & MiRepository<MiCompetitionAward>;
+export type ClubMemberStatesRepository = Repository<MiClubMemberState> & MiRepository<MiClubMemberState>; // CLUB-V3
+export type ClubSchedulesRepository = Repository<MiClubSchedule> & MiRepository<MiClubSchedule>; // CLUB-V3
 export type RetentionAggregationsRepository = Repository<MiRetentionAggregation> & MiRepository<MiRetentionAggregation>;
 export type RolesRepository = Repository<MiRole> & MiRepository<MiRole>;
 export type RoleAssignmentsRepository = Repository<MiRoleAssignment> & MiRepository<MiRoleAssignment>;
@@ -279,6 +299,7 @@ export type ChatMessagesRepository = Repository<MiChatMessage> & MiRepository<Mi
 export type ChatRoomsRepository = Repository<MiChatRoom> & MiRepository<MiChatRoom>;
 export type ChatRoomMembershipsRepository = Repository<MiChatRoomMembership> & MiRepository<MiChatRoomMembership>;
 export type ChatRoomInvitationsRepository = Repository<MiChatRoomInvitation> & MiRepository<MiChatRoomInvitation>;
+export type NotificationMutesRepository = Repository<MiNotificationMute> & MiRepository<MiNotificationMute>;
 export type ChatApprovalsRepository = Repository<MiChatApproval> & MiRepository<MiChatApproval>;
 export type BubbleGameRecordsRepository = Repository<MiBubbleGameRecord> & MiRepository<MiBubbleGameRecord>;
 export type ReversiGamesRepository = Repository<MiReversiGame> & MiRepository<MiReversiGame>;

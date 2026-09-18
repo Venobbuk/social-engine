@@ -40,5 +40,9 @@ export const packedChatRoomSchema = {
 			type: 'boolean',
 			optional: true, nullable: false,
 		},
+		readOnlyAt: {
+			type: 'string',
+			optional: true, nullable: true,
+		},
 	},
 } as const;

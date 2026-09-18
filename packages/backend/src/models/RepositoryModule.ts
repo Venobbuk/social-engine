@@ -14,6 +14,12 @@ import { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import { MiVenue } from '@/modules/venues/models/Venue.js';
 import { MiUserLocation } from '@/modules/venues/models/UserLocation.js';
 import { MiClubSetting, MiClubJoinRequest } from '@/modules/clubs/models/ClubSetting.js';
+import { MiCompetition } from '@/modules/competitions/models/Competition.js'; // TOURNAMENT-V1
+import { MiCompetitionEntry } from '@/modules/competitions/models/CompetitionEntry.js';
+import { MiCompetitionMatch } from '@/modules/competitions/models/CompetitionMatch.js';
+import { MiCompetitionAward } from '@/modules/competitions/models/CompetitionAward.js';
+import { MiClubMemberState } from '@/modules/clubs/models/ClubSetting.js'; // CLUB-V3
+import { MiClubSchedule } from '@/modules/clubs/models/ClubSchedule.js'; // CLUB-V3
 import {
 	MiAbuseReportNotificationRecipient,
 	MiAbuseUserReport,
@@ -91,6 +97,7 @@ import {
 	MiChatMessage,
 	MiChatRoom,
 	MiChatRoomMembership,
+	MiNotificationMute,
 	MiChatRoomInvitation,
 	MiChatApproval,
 } from './_.js';
@@ -469,6 +476,37 @@ const $clubJoinRequestsRepository: Provider = {
 	useFactory: (db: DataSource) => db.getRepository(MiClubJoinRequest).extend(miRepository as MiRepository<MiClubJoinRequest>),
 	inject: [DI.db],
 };
+// TOURNAMENT-V1
+const $competitionsRepository: Provider = {
+	provide: DI.competitionsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiCompetition).extend(miRepository as MiRepository<MiCompetition>),
+	inject: [DI.db],
+};
+const $competitionEntriesRepository: Provider = {
+	provide: DI.competitionEntriesRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiCompetitionEntry).extend(miRepository as MiRepository<MiCompetitionEntry>),
+	inject: [DI.db],
+};
+const $competitionMatchesRepository: Provider = {
+	provide: DI.competitionMatchesRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiCompetitionMatch).extend(miRepository as MiRepository<MiCompetitionMatch>),
+	inject: [DI.db],
+};
+const $competitionAwardsRepository: Provider = {
+	provide: DI.competitionAwardsRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiCompetitionAward).extend(miRepository as MiRepository<MiCompetitionAward>),
+	inject: [DI.db],
+};
+const $clubMemberStatesRepository: Provider = { // CLUB-V3
+	provide: DI.clubMemberStatesRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiClubMemberState).extend(miRepository as MiRepository<MiClubMemberState>),
+	inject: [DI.db],
+};
+const $clubSchedulesRepository: Provider = { // CLUB-V3
+	provide: DI.clubSchedulesRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiClubSchedule).extend(miRepository as MiRepository<MiClubSchedule>),
+	inject: [DI.db],
+};
 const $meetMatchesRepository: Provider = {
 	provide: DI.meetMatchesRepository,
 	useFactory: (db: DataSource) => db.getRepository(MiMeetMatch).extend(miRepository as MiRepository<MiMeetMatch>),
@@ -582,6 +620,12 @@ const $chatRoomMembershipsRepository: Provider = {
 	inject: [DI.db],
 };
 
+const $notificationMutesRepository: Provider = {
+	provide: DI.notificationMutesRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiNotificationMute).extend(miRepository as MiRepository<MiNotificationMute>),
+	inject: [DI.db],
+};
+
 const $chatRoomInvitationsRepository: Provider = {
 	provide: DI.chatRoomInvitationsRepository,
 	useFactory: (db: DataSource) => db.getRepository(MiChatRoomInvitation).extend(miRepository as MiRepository<MiChatRoomInvitation>),
@@ -674,6 +718,12 @@ const $reversiGamesRepository: Provider = {
 		$userLocationsRepository,
 		$clubSettingsRepository,
 		$clubJoinRequestsRepository,
+		$competitionsRepository, // TOURNAMENT-V1
+		$competitionEntriesRepository,
+		$competitionMatchesRepository,
+		$competitionAwardsRepository,
+		$clubMemberStatesRepository, // CLUB-V3
+		$clubSchedulesRepository, // CLUB-V3
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,
@@ -693,6 +743,7 @@ const $reversiGamesRepository: Provider = {
 		$chatRoomMembershipsRepository,
 		$chatRoomInvitationsRepository,
 		$chatApprovalsRepository,
+		$notificationMutesRepository,
 		$bubbleGameRecordsRepository,
 		$reversiGamesRepository,
 	],
@@ -762,6 +813,12 @@ const $reversiGamesRepository: Provider = {
 		$userLocationsRepository,
 		$clubSettingsRepository,
 		$clubJoinRequestsRepository,
+		$competitionsRepository, // TOURNAMENT-V1
+		$competitionEntriesRepository,
+		$competitionMatchesRepository,
+		$competitionAwardsRepository,
+		$clubMemberStatesRepository, // CLUB-V3
+		$clubSchedulesRepository, // CLUB-V3
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,
@@ -781,6 +838,7 @@ const $reversiGamesRepository: Provider = {
 		$chatRoomMembershipsRepository,
 		$chatRoomInvitationsRepository,
 		$chatApprovalsRepository,
+		$notificationMutesRepository,
 		$bubbleGameRecordsRepository,
 		$reversiGamesRepository,
 	],

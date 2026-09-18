@@ -16,7 +16,8 @@ import { ChatEntityService } from '@/core/entities/ChatEntityService.js';
 import { ApRendererService } from '@/core/activitypub/ApRendererService.js';
 import { PushNotificationService } from '@/core/PushNotificationService.js';
 import { bindThis } from '@/decorators.js';
-import type { ChatApprovalsRepository, ChatMessagesRepository, ChatRoomInvitationsRepository, ChatRoomMembershipsRepository, ChatRoomsRepository, MiChatMessage, MiChatRoom, MiChatRoomMembership, MiDriveFile, MiUser, MutingsRepository, UsersRepository } from '@/models/_.js';
+import type { ChatApprovalsRepository, ChatMessagesRepository, ChatRoomInvitationsRepository, ChatRoomMembershipsRepository, ChatRoomsRepository, MiChatMessage, MiChatRoom, MiChatRoomMembership, MiDriveFile, MiUser, MutingsRepository, NotificationMutesRepository, UsersRepository } from '@/models/_.js';
+import type { NotificationMuteScope } from '@/models/NotificationMute.js';
 import { UserBlockingService } from '@/core/UserBlockingService.js';
 import { QueryService } from '@/core/QueryService.js';
 import { RoleService } from '@/core/RoleService.js';
@@ -77,6 +78,9 @@ export class ChatService {
 		@Inject(DI.mutingsRepository)
 		private mutingsRepository: MutingsRepository,
 
+		@Inject(DI.notificationMutesRepository)
+		private notificationMutesRepository: NotificationMutesRepository,
+
 		private userEntityService: UserEntityService,
 		private chatEntityService: ChatEntityService,
 		private idService: IdService,
@@ -133,6 +137,7 @@ export class ChatService {
 		text?: string | null;
 		file?: MiDriveFile | null;
 		uri?: string | null;
+		attachment?: Record<string, any> | null;
 	}): Promise<Packed<'ChatMessageLiteFor1on1'>> {
 		if (fromUser.id === toUser.id) {
 			throw new Error('yourself');
@@ -191,6 +196,8 @@ export class ChatService {
 			fileId: params.file ? params.file.id : null,
 			reads: [],
 			uri: params.uri ?? null,
+			attachment: params.attachment ?? null,
+			system: null,
 		} satisfies Partial<MiChatMessage>;
 
 		const inserted = await this.chatMessagesRepository.insertOne(message);
@@ -230,6 +237,9 @@ export class ChatService {
 
 				if (marker == null) return; // 既読
 
+				// CHAT-V2: the recipient muted this thread (or every chat) — the unread marker stays, the notification does not go out
+				if (await this.isNotificationMuted(toUser.id, 'user', fromUser.id)) return;
+
 				const packedMessageForTo = await this.chatEntityService.packMessageDetailed(inserted, toUser);
 				this.globalEventService.publishMainStream(toUser.id, 'newChatMessage', packedMessageForTo);
 				this.pushNotificationService.pushNotification(toUser.id, 'newChatMessage', packedMessageForTo);
@@ -244,6 +254,9 @@ export class ChatService {
 		text?: string | null;
 		file?: MiDriveFile | null;
 		uri?: string | null;
+		attachment?: Record<string, any> | null;
+		/** CHAT-V2 a system line: stored on the message, no push, the room's read-only gate skipped (the engine speaks even in an archived room) */
+		system?: Record<string, any> | null;
 	}): Promise<Packed<'ChatMessageLiteForRoom'>> {
 		const ownerMuted = (await this.redisClient.get(`chatRoomOwnerMuted:${toRoom.id}`)) === '1'; // HOST-TOOLS-V1: the owner's mute (muteRoom below)
 		const memberships = (await this.chatRoomMembershipsRepository.findBy({ roomId: toRoom.id })).map(m => ({
@@ -258,6 +271,11 @@ export class ChatService {
 			throw new Error('you are not a member of the room');
 		}
 
+		// CHAT-V2 archive rule: a room past its readOnlyAt takes no user message (system lines still land)
+		if (params.system == null && toRoom.readOnlyAt != null && toRoom.readOnlyAt.getTime() <= Date.now()) {
+			throw new Error('ROOM_READ_ONLY');
+		}
+
 		const membershipsOtherThanMe = memberships.filter(member => member.userId !== fromUser.id);
 
 		const message = {
@@ -268,6 +286,8 @@ export class ChatService {
 			fileId: params.file ? params.file.id : null,
 			reads: [],
 			uri: params.uri ?? null,
+			attachment: params.attachment ?? null,
+			system: params.system ?? null,
 		} satisfies Partial<MiChatMessage>;
 
 		const inserted = await this.chatMessagesRepository.insertOne(message);
@@ -298,9 +318,14 @@ export class ChatService {
 
 			const packedMessageForTo = await this.chatEntityService.packMessageDetailed(inserted);
 
+			// CHAT-V2: a system line never pushes; a member who muted this room (or every chat) keeps the unread marker and gets no notification
+			if (params.system != null) return;
+			const mutedIds = await this.mutedUserIdsForRoom(toRoom.id, membershipsOtherThanMe.map(m => m.userId));
+
 			for (let i = 0; i < membershipsOtherThanMe.length; i++) {
 				const marker = markers[i][1];
 				if (marker == null) continue;
+				if (mutedIds.has(membershipsOtherThanMe[i].userId)) continue;
 
 				this.globalEventService.publishMainStream(membershipsOtherThanMe[i].userId, 'newChatMessage', packedMessageForTo);
 				this.pushNotificationService.pushNotification(membershipsOtherThanMe[i].userId, 'newChatMessage', packedMessageForTo);
@@ -884,11 +909,10 @@ export class ChatService {
 
 		const message = await this.chatMessagesRepository.findOneByOrFail({ id: messageId });
 
-		if (message.fromUserId === userId) {
-			throw new Error('cannot react to own message');
-		}
+		// CHAT-V2: reacting to your own message is allowed (Reclub / every messenger); the same reaction twice is a no-op
+		if (message.reactions.includes(`${userId}/${reaction}`)) return;
 
-		if (message.toRoomId === null && message.toUserId !== userId) {
+		if (message.toRoomId === null && message.toUserId !== userId && message.fromUserId !== userId) {
 			throw new Error('cannot react to others message');
 		}
 
@@ -983,5 +1007,67 @@ export class ChatService {
 		const memberships = await query.take(limit).getMany();
 
 		return memberships;
+	}
+
+	// ------------------------------------------------------------------------------------------ CHAT-V2
+	/** A system line in a room (Reclub ChannelMessageType.System): "X joined", "meet cancelled"… The room owner is the
+	 *  nominal sender (the packer needs one); the client draws it centred from `system`, never as the owner's bubble. */
+	@bindThis
+	public async createSystemMessageToRoom(roomId: MiChatRoom['id'], system: Record<string, any>): Promise<Packed<'ChatMessageLiteForRoom'> | null> {
+		const room = await this.chatRoomsRepository.findOneBy({ id: roomId });
+		if (room == null) return null;
+		const owner = await this.usersRepository.findOneBy({ id: room.ownerId });
+		if (owner == null) return null;
+		return await this.createMessageToRoom(owner, room, { text: null, system });
+	}
+
+	/** The archive rule's clock: after `at` nobody sends in the room (null re-opens it). */
+	@bindThis
+	public async setRoomReadOnlyAt(roomId: MiChatRoom['id'], at: Date | null): Promise<void> {
+		await this.chatRoomsRepository.update(roomId, { readOnlyAt: at });
+	}
+
+	@bindThis
+	public async setNotificationMute(userId: MiUser['id'], scope: NotificationMuteScope, targetId: string, muted: boolean): Promise<void> {
+		const existing = await this.notificationMutesRepository.findOneBy({ userId, scope, targetId });
+		if (muted && existing == null) {
+			await this.notificationMutesRepository.insertOne({ id: this.idService.gen(), userId, scope, targetId, createdAt: new Date() });
+		} else if (!muted && existing != null) {
+			await this.notificationMutesRepository.delete(existing.id);
+		}
+	}
+
+	/** Muted for this thread, or for every chat (the settings toggle). */
+	@bindThis
+	public async isNotificationMuted(userId: MiUser['id'], scope: 'room' | 'user', targetId: string): Promise<boolean> {
+		const rows = await this.notificationMutesRepository.createQueryBuilder('m')
+			.where('m.userId = :userId', { userId })
+			.andWhere(new Brackets(qb => {
+				qb.where('m.scope = :scope AND m.targetId = :targetId', { scope, targetId })
+					.orWhere("m.scope = 'chat'");
+			}))
+			.take(1).getMany();
+		return rows.length > 0;
+	}
+
+	/** Of `userIds`, the ones who muted this room or every chat. */
+	@bindThis
+	public async mutedUserIdsForRoom(roomId: MiChatRoom['id'], userIds: MiUser['id'][]): Promise<Set<string>> {
+		if (userIds.length === 0) return new Set();
+		const rows = await this.notificationMutesRepository.createQueryBuilder('m')
+			.select('m.userId', 'userId')
+			.where('m.userId IN (:...userIds)', { userIds })
+			.andWhere(new Brackets(qb => {
+				qb.where("m.scope = 'room' AND m.targetId = :roomId", { roomId })
+					.orWhere("m.scope = 'chat'");
+			}))
+			.getRawMany<{ userId: string }>();
+		return new Set(rows.map(r => r.userId));
+	}
+
+	@bindThis
+	public async notificationMutesOf(userId: MiUser['id']): Promise<{ scope: NotificationMuteScope; targetId: string }[]> {
+		const rows = await this.notificationMutesRepository.findBy({ userId });
+		return rows.map(r => ({ scope: r.scope, targetId: r.targetId }));
 	}
 }

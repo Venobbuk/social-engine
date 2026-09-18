@@ -10,7 +10,7 @@ import { GetterService } from '@/server/api/GetterService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '@/server/api/error.js';
 import { ChatService } from '@/core/ChatService.js';
-import type { DriveFilesRepository, MiUser } from '@/models/_.js';
+import type { DriveFilesRepository, MeetsRepository, MiUser } from '@/models/_.js';
 
 export const meta = {
 	tags: ['chat'],
@@ -51,6 +51,12 @@ export const meta = {
 			id: '4372b8e2-185d-4146-8749-2f68864a3e5f',
 		},
 
+		noSuchMeet: {
+			message: 'No such meet.',
+			code: 'NO_SUCH_MEET',
+			id: 'c2a1d5e0-5c1b-4f7e-9a3c-7e1b2c3d4e51',
+		},
+
 		contentRequired: {
 			message: 'Content required. You need to set text or fileId.',
 			code: 'CONTENT_REQUIRED',
@@ -70,6 +76,8 @@ export const paramDef = {
 	properties: {
 		text: { type: 'string', nullable: true, maxLength: 2000 },
 		fileId: { type: 'string', format: 'misskey:id' },
+		/** CHAT-V2: share a meet — the message carries a card snapshot of it (attachment.kind = 'meet') */
+		meetId: { type: 'string', format: 'misskey:id' },
 		toUserId: { type: 'string', format: 'misskey:id' },
 	},
 	required: ['toUserId'],
@@ -80,6 +88,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		@Inject(DI.driveFilesRepository)
 		private driveFilesRepository: DriveFilesRepository,
+
+		@Inject(DI.meetsRepository)
+		private meetsRepository: MeetsRepository,
 
 		private getterService: GetterService,
 		private chatService: ChatService,
@@ -99,8 +110,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 			}
 
+			// CHAT-V2: a meet card — a snapshot at send time (name / when / where), the id opens the live meet
+			let attachment: Record<string, any> | null = null;
+			if (ps.meetId != null) {
+				const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
+				if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
+				attachment = { kind: 'meet', meetId: meet.id, name: meet.name, startAt: meet.startAt.toISOString(), durationMinutes: meet.durationMinutes, venueName: meet.venueName, status: meet.status };
+			}
+
 			// テキストが無いかつ添付ファイルも無かったらエラー
-			if (ps.text == null && file == null) {
+			if (ps.text == null && file == null && attachment == null) {
 				throw new ApiError(meta.errors.contentRequired);
 			}
 
@@ -117,6 +136,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			return await this.chatService.createMessageToUser(me, toUser, {
 				text: ps.text,
 				file: file,
+				attachment,
 			});
 		});
 	}

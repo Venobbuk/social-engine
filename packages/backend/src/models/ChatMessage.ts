@@ -82,4 +82,16 @@ export class MiChatMessage {
 		length: 1024, array: true, default: '{}',
 	})
 	public reactions: string[];
+
+	/** CHAT-V2: a card riding on the message — { kind: 'meet', meetId, name, startAt, venueName } (null = plain). */
+	@Column('jsonb', {
+		nullable: true,
+	})
+	public attachment: Record<string, any> | null;
+
+	/** CHAT-V2: a system line (Reclub ChannelMessageType.System) — { key, name?, meetId? }; the sender is the room owner. */
+	@Column('jsonb', {
+		nullable: true,
+	})
+	public system: Record<string, any> | null;
 }

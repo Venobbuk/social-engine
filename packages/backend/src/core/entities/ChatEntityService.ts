@@ -78,6 +78,8 @@ export class ChatEntityService {
 			fileId: message.fileId,
 			file: message.fileId ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
 			reactions: reactions.filter((r): r is { user: Packed<'UserLite'>; reaction: string; } => r.user != null),
+			attachment: message.attachment ?? null,
+			system: message.system ?? null,
 		};
 	}
 
@@ -135,12 +137,14 @@ export class ChatEntityService {
 
 		const message = typeof src === 'object' ? src : await this.chatMessagesRepository.findOneByOrFail({ id: src });
 
-		const reactions: { reaction: string; }[] = [];
+		// CHAT-V2: the reactor's id rides along so a client can tell its own reaction from the other party's
+		const reactions: { reaction: string; userId: string; }[] = [];
 
 		for (const record of message.reactions) {
-			const [, reaction] = record.split('/');
+			const [userId, reaction] = record.split('/');
 			reactions.push({
 				reaction,
+				userId,
 			});
 		}
 
@@ -153,6 +157,8 @@ export class ChatEntityService {
 			fileId: message.fileId,
 			file: message.fileId ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
 			reactions,
+			attachment: message.attachment ?? null,
+			system: message.system ?? null,
 		};
 	}
 
@@ -206,6 +212,8 @@ export class ChatEntityService {
 			fileId: message.fileId,
 			file: message.fileId ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
 			reactions: reactions.filter((r): r is { user: Packed<'UserLite'>; reaction: string; } => r.user != null),
+			attachment: message.attachment ?? null,
+			system: message.system ?? null,
 		};
 	}
 
@@ -260,6 +268,7 @@ export class ChatEntityService {
 			owner: options?._hint_?.packedOwners.get(room.ownerId) ?? (await this.userEntityService.pack(room.owner ?? room.ownerId, me)),
 			isMuted: membership != null ? membership.isMuted : false,
 			invitationExists: invitation != null,
+			readOnlyAt: room.readOnlyAt ? room.readOnlyAt.toISOString() : null,
 		};
 	}
 

@@ -59,6 +59,14 @@ export const packedChatMessageSchema = {
 			type: 'boolean',
 			optional: true, nullable: false,
 		},
+		attachment: {
+			type: 'object',
+			optional: true, nullable: true,
+		},
+		system: {
+			type: 'object',
+			optional: true, nullable: true,
+		},
 		reactions: {
 			type: 'array',
 			optional: false, nullable: false,
@@ -123,6 +131,14 @@ export const packedChatMessageLiteSchema = {
 			optional: true, nullable: true,
 			ref: 'DriveFile',
 		},
+		attachment: {
+			type: 'object',
+			optional: true, nullable: true,
+		},
+		system: {
+			type: 'object',
+			optional: true, nullable: true,
+		},
 		reactions: {
 			type: 'array',
 			optional: false, nullable: false,
@@ -178,6 +194,14 @@ export const packedChatMessageLiteFor1on1Schema = {
 			optional: true, nullable: true,
 			ref: 'DriveFile',
 		},
+		attachment: {
+			type: 'object',
+			optional: true, nullable: true,
+		},
+		system: {
+			type: 'object',
+			optional: true, nullable: true,
+		},
 		reactions: {
 			type: 'array',
 			optional: false, nullable: false,
@@ -188,6 +212,10 @@ export const packedChatMessageLiteFor1on1Schema = {
 					reaction: {
 						type: 'string',
 						optional: false, nullable: false,
+					},
+					userId: {
+						type: 'string',
+						optional: true, nullable: false,
 					},
 				},
 			},
@@ -232,6 +260,14 @@ export const packedChatMessageLiteForRoomSchema = {
 			type: 'object',
 			optional: true, nullable: true,
 			ref: 'DriveFile',
+		},
+		attachment: {
+			type: 'object',
+			optional: true, nullable: true,
+		},
+		system: {
+			type: 'object',
+			optional: true, nullable: true,
 		},
 		reactions: {
 			type: 'array',

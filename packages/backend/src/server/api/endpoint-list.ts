@@ -158,6 +158,14 @@ export * as 'meets/matches/log-casual' from '@/modules/meets/endpoints/matches/l
 export * as 'meets/reviews/upsert' from '@/modules/meets/endpoints/reviews/upsert.js';
 export * as 'meets/reviews/show' from '@/modules/meets/endpoints/reviews/show.js';
 export * as 'meets/reviews/leaderboard' from '@/modules/meets/endpoints/reviews/leaderboard.js';
+// MEET-EXTRAS-V1
+export * as 'meets/promote' from '@/modules/meets/endpoints/promote.js';
+export * as 'meets/summary' from '@/modules/meets/endpoints/summary.js';
+export * as 'meets/extras/update' from '@/modules/meets/endpoints/extras-update.js';
+export * as 'meets/media/list' from '@/modules/meets/endpoints/media/list.js';
+export * as 'meets/media/add' from '@/modules/meets/endpoints/media/add.js';
+export * as 'meets/media/delete' from '@/modules/meets/endpoints/media/delete.js';
+export * as 'meets/matches/forfeit' from '@/modules/meets/endpoints/matches/forfeit.js';
 // HOST-TOOLS-V1 (2026-09-19): the host's roster tools
 export * as 'meets/participants/bulk' from '@/modules/meets/endpoints/participants/bulk.js';
 export * as 'meets/participants/generate-teams' from '@/modules/meets/endpoints/participants/generate-teams.js';
@@ -174,6 +182,18 @@ export * as 'venues/staff-update' from '@/modules/venues/endpoints/staff-update.
 export * as 'venues/locations/list' from '@/modules/venues/endpoints/locations-list.js';
 export * as 'venues/locations/save' from '@/modules/venues/endpoints/locations-save.js';
 export * as 'venues/locations/delete' from '@/modules/venues/endpoints/locations-delete.js';
+// DISCOVER-V3: venue feedback + owner claim, coach profile, stats (DUPR rankings, pairings, h2h, street cred)
+export * as 'venues/feedback' from '@/modules/venues/endpoints/feedback-create.js';
+export * as 'venues/feedback/list' from '@/modules/venues/endpoints/feedback-list.js';
+export * as 'venues/claim' from '@/modules/venues/endpoints/claim.js';
+export * as 'coaches/show' from '@/modules/coaches/endpoints/show.js';
+export * as 'coaches/update' from '@/modules/coaches/endpoints/update.js';
+export * as 'coaches/list' from '@/modules/coaches/endpoints/list.js';
+export * as 'stats/dupr-rankings' from '@/modules/stats/endpoints/dupr-rankings.js';
+export * as 'stats/pairings' from '@/modules/stats/endpoints/pairings.js';
+export * as 'stats/h2h' from '@/modules/stats/endpoints/h2h.js';
+export * as 'stats/street-cred' from '@/modules/stats/endpoints/street-cred.js';
+export * as 'stats/kudos-by-activity' from '@/modules/stats/endpoints/kudos-by-activity.js';
 export * as 'adapter/venues/sync' from '@/modules/venues/endpoints/sync.js';
 export * as 'clubs/settings/show' from '@/modules/clubs/endpoints/settings-show.js';
 export * as 'clubs/settings/update' from '@/modules/clubs/endpoints/settings-update.js';
@@ -185,6 +205,13 @@ export * as 'clubs/requests' from '@/modules/clubs/endpoints/requests.js';
 export * as 'clubs/requests/decide' from '@/modules/clubs/endpoints/requests-decide.js';
 export * as 'clubs/insights' from '@/modules/clubs/endpoints/insights.js';
 export * as 'clubs/claim' from '@/modules/clubs/endpoints/claim.js';
+export * as 'clubs/mine' from '@/modules/clubs/endpoints/mine.js'; // CLUB-V3
+export * as 'clubs/me/update' from '@/modules/clubs/endpoints/me-update.js'; // CLUB-V3
+export * as 'clubs/by-code' from '@/modules/clubs/endpoints/by-code.js'; // CLUB-V3
+export * as 'clubs/tags/list' from '@/modules/clubs/endpoints/tags-list.js'; // CLUB-V3
+export * as 'clubs/tags/upsert' from '@/modules/clubs/endpoints/tags-upsert.js'; // CLUB-V3
+export * as 'clubs/tags/delete' from '@/modules/clubs/endpoints/tags-delete.js'; // CLUB-V3
+export * as 'clubs/tags/member' from '@/modules/clubs/endpoints/tags-member.js'; // CLUB-V3
 export * as 'adapter/clubs/sync' from '@/modules/venues/endpoints/clubs-sync.js';
 export * as 'channels/favorite' from './endpoints/channels/favorite.js';
 export * as 'channels/featured' from './endpoints/channels/featured.js';
@@ -479,6 +506,11 @@ export * as 'chat/messages/delete' from './endpoints/chat/messages/delete.js';
 export * as 'chat/messages/show' from './endpoints/chat/messages/show.js';
 export * as 'chat/messages/react' from './endpoints/chat/messages/react.js';
 export * as 'chat/messages/unreact' from './endpoints/chat/messages/unreact.js';
+export * as 'chat/messages/report' from './endpoints/chat/messages/report.js';
+export * as 'chat/threads/show' from './endpoints/chat/threads/show.js';
+export * as 'chat/threads/mute' from './endpoints/chat/threads/mute.js';
+export * as 'chat/notification-prefs/show' from './endpoints/chat/notification-prefs/show.js';
+export * as 'chat/notification-prefs/update' from './endpoints/chat/notification-prefs/update.js';
 export * as 'chat/messages/user-timeline' from './endpoints/chat/messages/user-timeline.js';
 export * as 'chat/messages/room-timeline' from './endpoints/chat/messages/room-timeline.js';
 export * as 'chat/messages/search' from './endpoints/chat/messages/search.js';
@@ -499,15 +531,3 @@ export * as 'chat/rooms/invitations/outbox' from './endpoints/chat/rooms/invitat
 export * as 'chat/history' from './endpoints/chat/history.js';
 export * as 'chat/read-all' from './endpoints/chat/read-all.js';
 export * as 'v2/admin/emoji/list' from './endpoints/v2/admin/emoji/list.js';
-// DISCOVER-V3: venue feedback + owner claim, coach profile, stats (DUPR rankings, pairings, h2h, street cred)
-export * as 'venues/feedback' from '@/modules/venues/endpoints/feedback-create.js';
-export * as 'venues/feedback/list' from '@/modules/venues/endpoints/feedback-list.js';
-export * as 'venues/claim' from '@/modules/venues/endpoints/claim.js';
-export * as 'coaches/show' from '@/modules/coaches/endpoints/show.js';
-export * as 'coaches/update' from '@/modules/coaches/endpoints/update.js';
-export * as 'coaches/list' from '@/modules/coaches/endpoints/list.js';
-export * as 'stats/dupr-rankings' from '@/modules/stats/endpoints/dupr-rankings.js';
-export * as 'stats/pairings' from '@/modules/stats/endpoints/pairings.js';
-export * as 'stats/h2h' from '@/modules/stats/endpoints/h2h.js';
-export * as 'stats/street-cred' from '@/modules/stats/endpoints/street-cred.js';
-export * as 'stats/kudos-by-activity' from '@/modules/stats/endpoints/kudos-by-activity.js';
