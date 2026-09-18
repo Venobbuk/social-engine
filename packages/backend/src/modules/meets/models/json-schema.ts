@@ -30,6 +30,15 @@ export const packedMeetParticipantSchema = {
 		level: { type: 'number', optional: false, nullable: true },
 		statusChangedAt: { type: 'string', optional: false, nullable: true, format: 'date-time' },
 		checkedInAt: { type: 'string', optional: false, nullable: true, format: 'date-time' },
+		// HOST-TOOLS-V1: chat mute, receipt, the three ratings the roster sorts on (Skill / DUPR singles / DUPR doubles), DUPR-connected
+		chatMuted: { type: 'boolean', optional: true, nullable: false },
+		receiptUrl: { type: 'string', optional: true, nullable: true },
+		receiptAt: { type: 'string', optional: true, nullable: true },
+		receiptById: { type: 'string', optional: true, nullable: true },
+		selfLevel: { type: 'number', optional: true, nullable: true },
+		duprSingles: { type: 'number', optional: true, nullable: true },
+		duprDoubles: { type: 'number', optional: true, nullable: true },
+		duprConnected: { type: 'boolean', optional: true, nullable: false },
 	},
 } as const;
 
@@ -97,6 +106,7 @@ export const packedMeetSchema = {
 		myStatus: { type: 'string', optional: false, nullable: true, enum: ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe', 'declined', 'spectator'] },
 		myGate: { type: 'string', optional: false, nullable: true, enum: ['approved', 'requestOnly', 'denied'] },
 		isHost: { type: 'boolean', optional: false, nullable: false },
+		chatMuted: { type: 'boolean', optional: true, nullable: false }, // HOST-TOOLS-V1: my per-meet chat mute
 		participants: { type: 'array', optional: true, nullable: false, items: { type: 'object', optional: false, nullable: false, ref: 'MeetParticipant' } },
 	},
 } as const;

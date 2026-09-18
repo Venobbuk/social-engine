@@ -691,6 +691,7 @@ export class MeetService {
 				if (room && !(await this.chatService.isRoomMember(room, p.userId))) {
 					await this.chatService.createRoomInvitation(meet.hostId, room.id, p.userId);
 					await this.chatService.joinToRoom(p.userId, room.id);
+					if (p.chatMuted) await this.chatService.muteRoom(p.userId, room.id, true).catch(() => undefined); // HOST-TOOLS-V1
 				}
 			} catch {
 				// chat is best-effort

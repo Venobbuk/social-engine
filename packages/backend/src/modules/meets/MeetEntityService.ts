@@ -71,6 +71,15 @@ export class MeetEntityService {
 			level: p.declaredLevel ?? this.meetLevelService.levelValue(level, meet.levelBasis),
 			statusChangedAt: p.statusChangedAt?.toISOString() ?? null,
 			checkedInAt: p.checkedInAt?.toISOString() ?? null,
+			// HOST-TOOLS-V1
+			chatMuted: p.chatMuted ?? false,
+			receiptUrl: p.receiptUrl ?? null,
+			receiptAt: p.receiptAt ? new Date(p.receiptAt).toISOString() : null,
+			receiptById: p.receiptById ?? null,
+			selfLevel: level?.selfLevel ?? null,
+			duprSingles: level?.duprSingles ?? null,
+			duprDoubles: level?.duprDoubles ?? null,
+			duprConnected: !!(level && level.duprId),
 		};
 	}
 
@@ -87,9 +96,11 @@ export class MeetEntityService {
 		let myStatus: Packed<'Meet'>['myStatus'] = null;
 		let myGate: Packed<'Meet'>['myGate'] = null;
 		let isHost = false;
+		let chatMuted = false; // HOST-TOOLS-V1
 		if (me) {
 			const mine = await this.meetParticipantsRepository.findOneBy({ meetId: meet.id, userId: me.id });
 			myStatus = mine?.status ?? null;
+			chatMuted = mine?.chatMuted ?? false; // HOST-TOOLS-V1
 			isHost = meet.hostId === me.id || (mine?.isHost ?? false);
 			const level = await this.meetPlayerLevelsRepository.findOneBy({ userId: me.id, sport: meet.sport });
 			myGate = this.meetLevelService.gateVerdict(meet, level);
@@ -105,6 +116,10 @@ export class MeetEntityService {
 				order: { isHost: 'DESC', statusChangedAt: 'ASC' },
 			});
 			participants = await Promise.all(rows.map(r => this.packParticipant(r, meet, me)));
+			// HOST-TOOLS-V1 — Reclub blind teams: a player sees no team until blindTeamsMinutes before start (the host always does)
+			if (!isHost && meet.blindTeamsMinutes != null && Date.now() < new Date(meet.startAt).getTime() - meet.blindTeamsMinutes * 60_000) {
+				participants = participants.map(p => ({ ...p, teamKey: null }));
+			}
 		}
 
 		return {
@@ -168,6 +183,7 @@ export class MeetEntityService {
 			myStatus,
 			myGate,
 			isHost,
+			chatMuted, // HOST-TOOLS-V1
 			participants,
 			safety: me ? await this.meetService.safetyContext(meet, me.id).catch(() => null) : null,
 		};

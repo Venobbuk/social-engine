@@ -101,4 +101,20 @@ export class MiMeetParticipant {
 
 	@Column('timestamp with time zone', { nullable: true })
 	public checkedInAt: Date | null;
+
+	// ---- HOST-TOOLS-V1 (2026-09-19): per-meet chat mute (Reclub kebab "Turn off chat notifications") + proof of payment (a drive file) ----
+	@Column('boolean', { default: false })
+	public chatMuted: boolean;
+
+	@Column('varchar', { length: 32, nullable: true })
+	public receiptFileId: string | null;
+
+	@Column('varchar', { length: 1024, nullable: true })
+	public receiptUrl: string | null;
+
+	@Column('timestamp with time zone', { nullable: true })
+	public receiptAt: Date | null;
+
+	@Column('varchar', { length: 32, nullable: true })
+	public receiptById: string | null;
 }

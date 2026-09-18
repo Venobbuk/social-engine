@@ -245,12 +245,13 @@ export class ChatService {
 		file?: MiDriveFile | null;
 		uri?: string | null;
 	}): Promise<Packed<'ChatMessageLiteForRoom'>> {
+		const ownerMuted = (await this.redisClient.get(`chatRoomOwnerMuted:${toRoom.id}`)) === '1'; // HOST-TOOLS-V1: the owner's mute (muteRoom below)
 		const memberships = (await this.chatRoomMembershipsRepository.findBy({ roomId: toRoom.id })).map(m => ({
 			userId: m.userId,
 			isMuted: m.isMuted,
 		})).concat({ // ownerはmembershipレコードを作らないため
 			userId: toRoom.ownerId,
-			isMuted: false,
+			isMuted: ownerMuted,
 		});
 
 		if (!memberships.some(member => member.userId === fromUser.id)) {
@@ -767,7 +768,14 @@ export class ChatService {
 
 	@bindThis
 	public async muteRoom(userId: MiUser['id'], roomId: MiChatRoom['id'], mute: boolean) {
-		const membership = await this.chatRoomMembershipsRepository.findOneByOrFail({ roomId, userId });
+		// HOST-TOOLS-V1: the owner has no membership row (Misskey convention) — their mute lives in redis, read by createMessageToRoom
+		const membership = await this.chatRoomMembershipsRepository.findOneBy({ roomId, userId });
+		if (membership == null) {
+			const room = await this.chatRoomsRepository.findOneBy({ id: roomId, ownerId: userId });
+			if (room == null) throw new Error('not a member of the room');
+			if (mute) await this.redisClient.set(`chatRoomOwnerMuted:${roomId}`, '1'); else await this.redisClient.del(`chatRoomOwnerMuted:${roomId}`);
+			return;
+		}
 		await this.chatRoomMembershipsRepository.update(membership.id, { isMuted: mute });
 	}
 

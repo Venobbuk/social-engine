@@ -158,6 +158,13 @@ export * as 'meets/matches/log-casual' from '@/modules/meets/endpoints/matches/l
 export * as 'meets/reviews/upsert' from '@/modules/meets/endpoints/reviews/upsert.js';
 export * as 'meets/reviews/show' from '@/modules/meets/endpoints/reviews/show.js';
 export * as 'meets/reviews/leaderboard' from '@/modules/meets/endpoints/reviews/leaderboard.js';
+// HOST-TOOLS-V1 (2026-09-19): the host's roster tools
+export * as 'meets/participants/bulk' from '@/modules/meets/endpoints/participants/bulk.js';
+export * as 'meets/participants/generate-teams' from '@/modules/meets/endpoints/participants/generate-teams.js';
+export * as 'meets/participants/receipt' from '@/modules/meets/endpoints/participants/receipt.js';
+export * as 'meets/dupr-manager' from '@/modules/meets/endpoints/dupr-manager.js';
+export * as 'meets/matches/submit-dupr-all' from '@/modules/meets/endpoints/matches/submit-dupr-all.js';
+export * as 'meets/chat-mute' from '@/modules/meets/endpoints/chat-mute.js';
 export * as 'venues/show' from '@/modules/venues/endpoints/show.js';
 export * as 'venues/search' from '@/modules/venues/endpoints/search.js';
 export * as 'venues/create' from '@/modules/venues/endpoints/create.js';
