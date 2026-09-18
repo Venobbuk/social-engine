@@ -27,6 +27,7 @@ import type {
 	ClipsRepository,
 	FlashsRepository,
 	GalleryPostsRepository,
+	MeetsRepository,
 	MiMeta,
 	NotesRepository,
 	PagesRepository,
@@ -41,7 +42,10 @@ import { bindThis } from '@/decorators.js';
 import { FlashEntityService } from '@/core/entities/FlashEntityService.js';
 import { ReversiGameEntityService } from '@/core/entities/ReversiGameEntityService.js';
 import { AnnouncementEntityService } from '@/core/entities/AnnouncementEntityService.js';
+import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
 import { FeedService } from './FeedService.js';
+import { clubArtPath, formatMeetStart, initialAvatarSvg, meetArtPath, renderShareHtml, truncate } from './share-preview.js';
+import type { ShareCard } from './share-preview.js';
 import { UrlPreviewService } from './UrlPreviewService.js';
 import { ClientLoggerService } from './ClientLoggerService.js';
 import { HtmlTemplateService } from './HtmlTemplateService.js';
@@ -114,6 +118,10 @@ export class ClientServerService {
 		@Inject(DI.announcementsRepository)
 		private announcementsRepository: AnnouncementsRepository,
 
+		@Inject(DI.meetsRepository)
+		private meetsRepository: MeetsRepository,
+
+		private meetEntityService: MeetEntityService,
 		private flashEntityService: FlashEntityService,
 		private userEntityService: UserEntityService,
 		private noteEntityService: NoteEntityService,
@@ -739,6 +747,89 @@ export class ClientServerService {
 			} else {
 				return await renderBase(reply);
 			}
+		});
+
+		// OG-SHARE-V1: the share-link preview card for the GripBat app (see share-preview.ts). nginx sends crawlers
+		// hitting /app/pages/{meet,community,player}/index?id= here; everything is read the way the anonymous API
+		// reads it (no viewer, no token), so nothing a stranger could not already fetch is on the card.
+		const shareIdRe = /^[a-z0-9]{1,32}$/;
+		const shareNotFound = (reply: FastifyReply) => {
+			reply.code(404);
+			reply.header('Content-Type', 'text/plain; charset=utf-8');
+			return reply.send('not found');
+		};
+		fastify.get<{ Params: { kind: string; id: string; } }>('/share/:kind/:id', async (request, reply) => {
+			const { kind, id } = request.params;
+			if (!shareIdRe.test(id)) return shareNotFound(reply);
+			const base = this.config.url;
+			let card: ShareCard | null = null;
+
+			if (kind === 'meet') {
+				const meet = await this.meetsRepository.findOneBy({ id });
+				if (meet == null) return shareNotFound(reply);
+				const m = await this.meetEntityService.pack(meet, null, { detailed: false });
+				const isPrivate = m.visibility !== 'public' || meet.accessToken != null;
+				const parts = isPrivate ? [] : [
+					formatMeetStart(m.startAt, m.timezone),
+					m.venueName,
+					`${m.confirmed}/${m.capacity} going`,
+					m.host ? (m.host.name ?? m.host.username) : null,
+				];
+				card = {
+					title: m.name,
+					description: isPrivate ? null : parts.filter((p): p is string => p != null && p !== '').join(' · '),
+					image: base + meetArtPath(m.id),
+					url: `${base}/app/pages/meet/index?id=${m.id}`,
+					card: 'summary_large_image',
+				};
+			} else if (kind === 'club') {
+				const channel = await this.channelsRepository.findOneBy({ id });
+				if (channel == null) return shareNotFound(reply);
+				const c = await this.channelEntityService.pack(channel);
+				const parts = [
+					c.description ? truncate(c.description, 160) : null,
+					`${c.usersCount} members`,
+				];
+				card = {
+					title: c.name,
+					description: parts.filter((p): p is string => p != null).join(' · '),
+					image: c.bannerUrl ?? (base + clubArtPath(c.id)),
+					url: `${base}/app/pages/community/index?id=${c.id}`,
+					card: 'summary_large_image',
+				};
+			} else if (kind === 'player') {
+				const user = await this.usersRepository.findOneBy({ id, host: IsNull(), isSuspended: false });
+				if (user == null) return shareNotFound(reply);
+				const u = await this.userEntityService.pack(user, null, { schema: 'UserLite' });
+				const profile = await this.userProfilesRepository.findOneBy({ userId: user.id });
+				const parts = [
+					`@${u.username} · GripBat player`,
+					profile?.description ? truncate(profile.description, 160) : null,
+				];
+				card = {
+					title: u.name ?? u.username,
+					description: parts.filter((p): p is string => p != null).join(' · '),
+					image: user.avatarId != null && user.avatarUrl ? user.avatarUrl : `${base}/share/avatar/${u.id}.svg`,
+					url: `${base}/app/pages/player/index?id=${u.id}`,
+					card: 'summary',
+				};
+			} else {
+				return shareNotFound(reply);
+			}
+
+			reply.header('Cache-Control', 'public, max-age=300');
+			return await HtmlTemplateService.replyHtml(reply, renderShareHtml(card));
+		});
+
+		// OG-SHARE-V1: the initials avatar for a player without a photo (boyau-art.ts initialAvatar, 256×256).
+		fastify.get<{ Params: { id: string; } }>('/share/avatar/:id.svg', async (request, reply) => {
+			const { id } = request.params;
+			if (!shareIdRe.test(id)) return shareNotFound(reply);
+			const user = await this.usersRepository.findOneBy({ id, host: IsNull(), isSuspended: false });
+			if (user == null) return shareNotFound(reply);
+			reply.header('Content-Type', 'image/svg+xml; charset=utf-8');
+			reply.header('Cache-Control', 'public, max-age=300');
+			return reply.send(initialAvatarSvg(user.id, user.name ?? user.username));
 		});
 
 		// Reversi game
