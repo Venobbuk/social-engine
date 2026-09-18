@@ -702,7 +702,8 @@ export class MeetService {
 			try {
 				const room = await this.chatService.findRoomById(meet.chatRoomId);
 				if (room && !(await this.chatService.isRoomMember(room, p.userId))) {
-					await this.chatService.createRoomInvitation(meet.hostId, room.id, p.userId);
+					// an earlier stint on this meet leaves an invitation row: "already invited" must not skip the join (chat-v2 E8)
+					await this.chatService.createRoomInvitation(meet.hostId, room.id, p.userId).catch((e: any) => { if (!/already invited/.test(String(e && e.message))) throw e; });
 					await this.chatService.joinToRoom(p.userId, room.id);
 					// CHAT-V2: "{name} has joined the conversation." (Reclub gate line)
 					const joined = await this.usersRepository.findOneBy({ id: p.userId });
