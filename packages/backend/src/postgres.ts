@@ -98,6 +98,7 @@ import { MiChatMessage } from '@/models/ChatMessage.js';
 import { MiChatRoom } from '@/models/ChatRoom.js';
 import { MiChatRoomMembership } from '@/models/ChatRoomMembership.js';
 import { MiChatRoomInvitation } from '@/models/ChatRoomInvitation.js';
+import { MiNotificationMute } from '@/models/NotificationMute.js'; // CHAT-V2 (orchestrator: entity was registered in RepositoryModule but not here)
 import { MiBubbleGameRecord } from '@/models/BubbleGameRecord.js';
 import { MiReversiGame } from '@/models/ReversiGame.js';
 import { MiChatApproval } from '@/models/ChatApproval.js';
@@ -282,6 +283,7 @@ export const entities = [
 	MiChatRoom,
 	MiChatRoomMembership,
 	MiChatRoomInvitation,
+	MiNotificationMute, // CHAT-V2
 	MiChatApproval,
 	MiBubbleGameRecord,
 	MiReversiGame,
