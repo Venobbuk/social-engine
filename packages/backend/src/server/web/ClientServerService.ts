@@ -832,6 +832,11 @@ export class ClientServerService {
 			return reply.send(initialAvatarSvg(user.id, user.name ?? user.username));
 		});
 
+		// OG-SHARE-V1: anything else under /share/ (an empty id: nginx's `$arg_id` on a link without ?id=) is a 404, not
+		// the engine's client page.
+		fastify.get('/share/*', async (request, reply) => shareNotFound(reply));
+		fastify.get('/share', async (request, reply) => shareNotFound(reply));
+
 		// Reversi game
 		fastify.get<{ Params: { game: string; } }>('/reversi/g/:game', async (request, reply) => {
 			const game = await this.reversiGamesRepository.findOneBy({
