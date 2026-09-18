@@ -1,0 +1,337 @@
+{
+ "id": "discover-v3",
+ "at": "2026-09-18T17:25:35.649Z",
+ "base": "https://uat.social.silkvo.com",
+ "condition_fired": true,
+ "verdict": "fail",
+ "evidence": [
+  {
+   "name": "1a meets/list times=[mornings] is a subset and every row starts 04:00-10:59 HKT",
+   "pass": false,
+   "detail": {
+    "all": 51,
+    "mornings": 51,
+    "hours": [
+     7,
+     9,
+     14,
+     19,
+     21,
+     10,
+     20,
+     12,
+     18,
+     8
+    ]
+   }
+  },
+  {
+   "name": "1b hideEmpty / verifiedOnly / friendsOnly are accepted (200) and never grow the list",
+   "pass": true,
+   "detail": {
+    "hideEmpty": 51,
+    "verifiedOnly": 51,
+    "friendsOnly": 51,
+    "friendsStatus": 200
+   }
+  },
+  {
+   "name": "3a venues/locations/save answers the row",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "id": "arasl2e8izsc00b3"
+   }
+  },
+  {
+   "name": "4a venues/create → status under_review; listed only with includeUnderReview (pending curation)",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "venue": {
+     "id": "arasl2efizsc00b4",
+     "status": "under_review",
+     "source": "community"
+    },
+    "listed": 4,
+    "hiddenWhenVerifiedOnly": 0
+   }
+  },
+  {
+   "name": "5a venues/claim → pending, idempotent (same claimId), visible in venues/feedback/list as owner_claim",
+   "pass": false,
+   "detail": {
+    "claim": {
+     "message": "Route POST:/api/venues/claim not found",
+     "error": "Not Found",
+     "statusCode": 404
+    }
+   }
+  },
+  {
+   "name": "6a stats/dupr-rankings answers rows ordered by doubles desc",
+   "pass": false,
+   "detail": {
+    "status": 404,
+    "first": {
+     "message": "Route POST:/api/stats/dupr-rankings not found",
+     "error": "Not Found",
+     "statusCode": 404
+    }
+   }
+  },
+  {
+   "name": "6b stats/street-cred answers rows (dimension × timeframe × gender accepted)",
+   "pass": false,
+   "detail": {
+    "status": 404,
+    "rows": {
+     "message": "Route POST:/api/stats/street-cred not found",
+     "error": "Not Found",
+     "statusCode": 404
+    },
+    "top": null,
+    "yearFiltered": 404
+   }
+  },
+  {
+   "name": "6c stats/pairings + stats/h2h answer (rows when amy has scored matches; the shape either way)",
+   "pass": false,
+   "detail": {
+    "h2h": null
+   }
+  },
+  {
+   "name": "6d stats/kudos-by-activity answers activities + categories for the signed-in player",
+   "pass": false,
+   "detail": {
+    "activities": 404,
+    "categories": 404
+   }
+  },
+  {
+   "name": "6e coaches/update creates ken's profile; coaches/show answers it publicly",
+   "pass": false,
+   "detail": {
+    "update": {
+     "message": "Route POST:/api/coaches/update not found",
+     "error": "Not Found",
+     "statusCode": 404
+    },
+    "show": null
+   }
+  },
+  {
+   "name": "1c the filter sheet has the Reclub set (Sports · Mornings/Afternoons/Evenings · Not full · Friends only · Hide empty · Verified venues only) and the Mornings chip re-queries meets/list with times",
+   "pass": false,
+   "detail": {
+    "showBefore": "Show 5 meets",
+    "showAfter": "Show 5 meets",
+    "chips": []
+   }
+  },
+  {
+   "name": "1d the \"Show {n} meets\" count changed after the chip (or both equal 0 because no morning meet exists today — see counts)",
+   "pass": false,
+   "detail": {
+    "showBefore": "Show 5 meets",
+    "showAfter": "Show 5 meets"
+   }
+  },
+  {
+   "name": "2 the Map toggle renders the live map: ≥ 1 meet pin (.dmap-pin-meet), the locate-me button, OSM tiles",
+   "pass": false,
+   "detail": {
+    "toggle": null,
+    "pins": 0,
+    "locate": 0,
+    "tiles": 0
+   }
+  },
+  {
+   "name": "2b locate-me recentres and sets \"Near Current location\" (geolocation granted)",
+   "pass": false,
+   "detail": {
+    "header": "Everywhere",
+    "lastList": {}
+   }
+  },
+  {
+   "name": "3b the picker lists the saved location; choosing it re-queries meets/list with its lat/lng and the header reads \"Near <label>\"",
+   "pass": true,
+   "detail": {
+    "options": [
+     "Current location",
+     "Probe office 9t25",
+     "Home (probe)",
+     "Everywhere"
+    ],
+    "picked": "Probe office 9t25",
+    "header": "Probe office 9t25 · 20 km",
+    "req": {
+     "lat": 22.2855,
+     "lng": 114.1577,
+     "radiusKm": 20
+    }
+   }
+  },
+  {
+   "name": "3c the picker links to the Locations page, which lists the saved place",
+   "pass": false,
+   "detail": {
+    "url": "https://uat.social.silkvo.com/app/pages/meets/index?lang=en",
+    "rows": [
+     "Weekend Warriors",
+     "Advanced Drills 4.0+ (approval)"
+    ],
+    "link": null
+   }
+  },
+  {
+   "name": "4b the new venue page says Under review (and Claim pending after the API claim)",
+   "pass": false,
+   "detail": {
+    "meta": [
+     ""
+    ],
+    "review": []
+   }
+  },
+  {
+   "name": "5b the feedback form (Reclub categories) posts venues/feedback → 200 and the row is stored",
+   "pass": false,
+   "detail": {
+    "categories": [],
+    "post": [],
+    "stored": {
+     "message": "Route POST:/api/venues/feedback/list not found",
+     "error": "Not Found",
+     "statusCode": 404
+    },
+    "thanks": []
+   }
+  },
+  {
+   "name": "6f the DUPR Rankings pane renders rows with the gender / sort chips and the Current Rank card",
+   "pass": false,
+   "detail": {
+    "rows": 0,
+    "head": [],
+    "chips": []
+   }
+  },
+  {
+   "name": "6g the Street Cred pane renders leaderboard rows, re-queries on the timeframe chip, and By activity renders",
+   "pass": false,
+   "detail": {
+    "rows3m": 0,
+    "rowsYear": 0,
+    "byActivity": 1
+   }
+  },
+  {
+   "name": "6h the Matchups pane renders Teammates / Opponents with the Reclub categories",
+   "pass": false,
+   "detail": {
+    "chips": [],
+    "rows": 0
+   }
+  },
+  {
+   "name": "6i Opponents shows Rivals / Easy Money / Challengers",
+   "pass": false,
+   "detail": {
+    "chips": []
+   }
+  },
+  {
+   "name": "7 /pages/safety answers 200 in en / zh_Hant / zh_Hans with sections and the intro in the language",
+   "pass": false,
+   "detail": {
+    "en": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    },
+    "zh_Hant": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    },
+    "zh_Hans": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    }
+   }
+  },
+  {
+   "name": "7 /pages/standards answers 200 in en / zh_Hant / zh_Hans with sections and the intro in the language",
+   "pass": false,
+   "detail": {
+    "en": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    },
+    "zh_Hant": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    },
+    "zh_Hans": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    }
+   }
+  },
+  {
+   "name": "7 /pages/charter answers 200 in en / zh_Hant / zh_Hans with sections and the intro in the language",
+   "pass": false,
+   "detail": {
+    "en": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    },
+    "zh_Hant": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    },
+    "zh_Hans": {
+     "status": 200,
+     "secs": 0,
+     "intro": "",
+     "zh": false
+    }
+   }
+  },
+  {
+   "name": "7b Help lists the Policies (Safety Center · Community Standards · Our Charter)",
+   "pass": false,
+   "detail": {
+    "rows": []
+   }
+  }
+ ],
+ "info": [
+  {
+   "name": "cleanup: location deleted",
+   "detail": 204
+  },
+  {
+   "name": "cleanup: the probe venue stays Under Review for staff (venues/staff-update status closed)",
+   "detail": "arasl2efizsc00b4"
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "tournament-v1",
+  "at": "2026-09-18T17:25:58.929Z",
+  "condition_fired": true,
+  "verdict": "fail",
+  "pass": 1,
+  "total": 2,
+  "crash": "Waiting for selector `.tw-form` failed: Waiting failed: 10000ms exceeded",
+  "evidence": [
+    "0 engine tokens for ken / amy / tom / mei through the SSO seam=ok {\"ken\":\"arai4h1qizsc0003\",\"amy\":\"arai4g7uizsc0001\"}",
+    "1 wizard opens on the introduction panel (Registration / Drawing → Continue)=FAIL {\"intro\":false}"
+  ],
+  "checks": [
+    {
+      "name": "0 engine tokens for ken / amy / tom / mei through the SSO seam",
+      "pass": true,
+      "detail": {
+        "ken": "arai4h1qizsc0003",
+        "amy": "arai4g7uizsc0001"
+      }
+    },
+    {
+      "name": "1 wizard opens on the introduction panel (Registration / Drawing → Continue)",
+      "pass": false,
+      "detail": {
+        "intro": false
+      }
+    }
+  ]
+}

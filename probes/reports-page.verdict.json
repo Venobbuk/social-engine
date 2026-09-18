@@ -1,0 +1,20 @@
+{
+ "id": "reports-page",
+ "at": "2026-09-18T15:10:30.061Z",
+ "base": "https://uat.social.silkvo.com",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "PASS 0 QA door signs tester1 in (302 + hkpl_sid) — status 302 sid ngiwG6…",
+  "PASS 1a whoami is an admin role — 200 TENANT_ADMIN boyau.tester1@silkvo.com",
+  "PASS 1b GET /api/v1/admin/feedback has >= 1 row — 200 rows 12",
+  "PASS 1c GET /api/v1/admin/feedback/stats answers { feedback_new, feedback_total } (route-order fix, server side) — 200 {\"feedback_new\":10,\"feedback_total\":12,\"reports_open\":0,\"ai_turns_total\":0}",
+  "PASS 2a /app/pages/reports/index renders the Bug reports list with >= 1 row — rows 12 · url /app/pages/reports/index · text \"Back Bug reports Refresh 10 NEWLY FILED 12 FILED IN TOTAL All Newly filed Triaged In progress Resolved Won't fix grader8 test report — Thurs\"",
+  "PASS 2b the first row is the API's first row — ui cmu70macc00tdt10g4yn44ljr api cmu70macc00tdt10g4yn44ljr",
+  "PASS 3a tapping the row opens the detail with the message — \"grader8 test report — Thursday Open Play roster: checking the send path from the meet page (please ignore) Reported by grader8@silkvo.test · grader8@silkvo.test\"",
+  "PASS 3b the in_progress chip is selectable — hit true on true",
+  "PASS 3c Save tapped — true",
+  "PASS 4 GET /api/v1/admin/feedback/:id reflects the status picked in the UI — cmu70macc00tdt10g4yn44ljr triaged -> in_progress (wanted in_progress)",
+  "INFO restored cmu70macc00tdt10g4yn44ljr to triaged -> 403"
+ ]
+}

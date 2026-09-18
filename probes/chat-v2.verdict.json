@@ -1,0 +1,174 @@
+{
+  "id": "chat-v2",
+  "at": "2026-09-18T17:11:23.883Z",
+  "condition_fired": true,
+  "verdict": "fail",
+  "error": "Error: No element found for selector: .ct-meet\n    at assert (/root/hkpl-server/node_modules/puppeteer-core/lib/cjs/puppeteer/util/assert.js:18:15)\n    at CdpFrame.click (/root/hkpl-server/node_modules/puppeteer-core/lib/cjs/puppeteer/api/Frame.js:739:40)\n    at async /root/social-engine/probes/chat-v2.probe.cjs:177:3",
+  "evidence": [
+    "E1 tom → mei: the text lands on mei's timeline=ok",
+    "E2 mei reacts ❤️ → tom's copy carries 1 heart with mei's userId=FAIL",
+    "E2b the same reaction twice is one (dedupe)=FAIL",
+    "E3 a photo message carries the drive file=ok",
+    "E4 a shared meet rides as attachment.kind = meet with the snapshot=FAIL",
+    "E4b an unknown meet is refused (NO_SUCH_MEET)=FAIL",
+    "E5a delete my own message → gone from the timeline=ok",
+    "E5b report mei's message is accepted; deleting it is refused; reporting your own is refused=FAIL",
+    "E6a muted: mei's message raises no newChatMessage on tom's main stream (6 s)=FAIL",
+    "E6b muted, but the thread still reads UNREAD in the inbox (the marker stays)=ok",
+    "E6c control — unmuted, the same message DOES raise newChatMessage within 6 s=ok",
+    "E7a mei's chat/history: the tom thread is unread=ok",
+    "E8 amy joins → the meet room carries a { system: joined } line naming her=FAIL",
+    "E9 notification-prefs: chat off → show false → on again=FAIL",
+    "P1a tom's thread renders the \"+\" attach button, a meet card, a photo bubble and a reaction pill=FAIL",
+    "P1b long-press on my bubble → the sheet: 6 reactions + Copy + Delete (no Report on my own)=FAIL"
+  ],
+  "checks": [
+    {
+      "name": "E1 tom → mei: the text lands on mei's timeline",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "seen": 1
+      }
+    },
+    {
+      "name": "E2 mei reacts ❤️ → tom's copy carries 1 heart with mei's userId",
+      "pass": false,
+      "detail": {
+        "status": 204,
+        "reactions": [
+          {
+            "reaction": "❤"
+          }
+        ]
+      }
+    },
+    {
+      "name": "E2b the same reaction twice is one (dedupe)",
+      "pass": false,
+      "detail": {
+        "status": 204,
+        "n": 2
+      }
+    },
+    {
+      "name": "E3 a photo message carries the drive file",
+      "pass": true,
+      "detail": {
+        "upload": 200,
+        "msg": 200,
+        "file": "image/png"
+      }
+    },
+    {
+      "name": "E4 a shared meet rides as attachment.kind = meet with the snapshot",
+      "pass": false,
+      "detail": {
+        "status": 400
+      }
+    },
+    {
+      "name": "E4b an unknown meet is refused (NO_SUCH_MEET)",
+      "pass": false,
+      "detail": {
+        "status": 400,
+        "code": "CONTENT_REQUIRED"
+      }
+    },
+    {
+      "name": "E5a delete my own message → gone from the timeline",
+      "pass": true,
+      "detail": {
+        "status": 204
+      }
+    },
+    {
+      "name": "E5b report mei's message is accepted; deleting it is refused; reporting your own is refused",
+      "pass": false,
+      "detail": {
+        "report": 404,
+        "deleteTheirs": 400,
+        "reportOwn": 404
+      }
+    },
+    {
+      "name": "E6a muted: mei's message raises no newChatMessage on tom's main stream (6 s)",
+      "pass": false,
+      "detail": {
+        "mute": 404,
+        "events": [
+          "probe mu77t6x3 from mei",
+          "probe mu77t6x3 muted ping"
+        ]
+      }
+    },
+    {
+      "name": "E6b muted, but the thread still reads UNREAD in the inbox (the marker stays)",
+      "pass": true,
+      "detail": {
+        "isRead": false
+      }
+    },
+    {
+      "name": "E6c control — unmuted, the same message DOES raise newChatMessage within 6 s",
+      "pass": true,
+      "detail": {
+        "events": [
+          "probe mu77t6x3 loud ping"
+        ]
+      }
+    },
+    {
+      "name": "E7a mei's chat/history: the tom thread is unread",
+      "pass": true,
+      "detail": {
+        "isRead": false,
+        "text": "probe mu77t6x3 loud ping"
+      }
+    },
+    {
+      "name": "E8 amy joins → the meet room carries a { system: joined } line naming her",
+      "pass": false,
+      "detail": {
+        "join": 200,
+        "roomMsgs": 0
+      }
+    },
+    {
+      "name": "E9 notification-prefs: chat off → show false → on again",
+      "pass": false,
+      "detail": {
+        "prefs": {
+          "message": "Route POST:/api/chat/notification-prefs/show not found",
+          "error": "Not Found",
+          "statusCode": 404
+        },
+        "prefs2": {
+          "message": "Route POST:/api/chat/notification-prefs/show not found",
+          "error": "Not Found",
+          "statusCode": 404
+        }
+      }
+    },
+    {
+      "name": "P1a tom's thread renders the \"+\" attach button, a meet card, a photo bubble and a reaction pill",
+      "pass": false,
+      "detail": {
+        "thread": true,
+        "plus": false,
+        "card": false,
+        "photo": false,
+        "pills": 0,
+        "sys": 0
+      }
+    },
+    {
+      "name": "P1b long-press on my bubble → the sheet: 6 reactions + Copy + Delete (no Report on my own)",
+      "pass": false,
+      "detail": {
+        "rxrow": 0,
+        "acts": []
+      }
+    }
+  ]
+}

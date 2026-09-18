@@ -1,0 +1,16 @@
+{
+ "id": "gb-admin-v1",
+ "at": "2026-09-18T17:15:36.354Z",
+ "condition_fired": true,
+ "verdict": "fail",
+ "evidence": [
+  "PASS tester1 is TENANT_ADMIN on uat.social.silkvo.com — TENANT_ADMIN",
+  "PASS Amy found through the API — e3654c7e-aaa3-4637-88ef-f32dcd1ad9c6 role PLAYER",
+  "PASS btn_back row in the translations API — override \"返回\" default \"上一步\"",
+  "FAIL console renders for tester1 (#gba)",
+  "FAIL tabs: ",
+  "FAIL GripBat-branded — header \" · \", no hkpl name in the chrome or the tabs",
+  "FAIL Users tab lists 0 rows from GET /admin/users-list",
+  "FAIL crashed: No element found for selector: .gba-search input"
+ ]
+}

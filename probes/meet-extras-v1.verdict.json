@@ -1,0 +1,195 @@
+{
+ "id": "meet-extras-v1",
+ "at": "2026-09-18T17:23:11.534Z",
+ "base": "https://uat.social.silkvo.com",
+ "condition_fired": true,
+ "verdict": "fail",
+ "evidence": [
+  {
+   "name": "1a form: name typed, the sport section shows the format chips and Doubles is on",
+   "pass": false,
+   "detail": {
+    "typed": "[probe mx] doubles mu782gbr",
+    "chipFormat": null,
+    "chipsOn": [
+     "None",
+     "Public",
+     "2 h",
+     "Any",
+     "Any",
+     "Self rating",
+     "Any",
+     "Any",
+     "Guidance",
+     "Not required",
+     "Free",
+     "Off",
+     "Once"
+    ]
+   }
+  },
+  {
+   "name": "1b date picked (tomorrow) through the picker",
+   "pass": true,
+   "detail": {
+    "dateTxt": [
+     "2026-09-21",
+     "19:00"
+    ]
+   }
+  },
+  {
+   "name": "1c invite sheet: rows listed, tom + mei picked, \"2 selected\", the strip names them",
+   "pass": false,
+   "detail": {
+    "invBtn": null,
+    "rowsN": 0,
+    "pickedTom": null,
+    "pickedMei": null,
+    "selected": [],
+    "strip": []
+   }
+  },
+  {
+   "name": "1d engine: the meet holds format Doubles, type managed, and tom + mei as invited rows",
+   "pass": false,
+   "detail": {
+    "idA": "arase6lmizsc009e",
+    "format": null,
+    "type": "managed",
+    "invited": 0,
+    "url": "https://uat.social.silkvo.com/app/pages/meet/index?id=arase6lmizsc009e"
+   }
+  },
+  {
+   "name": "2a listing form: \"Create a listing\", the Listing details section, no roster / level / fee sections",
+   "pass": false,
+   "detail": {
+    "title": [
+     "Create a meet"
+    ],
+    "hasLink": 0,
+    "hasPlayers": 0,
+    "linkTyped": null
+   }
+  },
+  {
+   "name": "2b engine: type listing with extras.externalUrl; the page shows the listing note; amy's RSVP is refused",
+   "pass": false,
+   "detail": {
+    "idL": "",
+    "type": null,
+    "externalUrl": null,
+    "listingNote": 0,
+    "join": [
+     0,
+     null
+    ]
+   }
+  },
+  {
+   "name": "3 promote: preview counts amy, the push reaches her (notification row with the meet link), a second push is refused",
+   "pass": false,
+   "detail": {
+    "preview": {
+     "message": "Route POST:/api/meets/promote not found",
+     "error": "Not Found",
+     "statusCode": 404
+    },
+    "sent": {},
+    "again": [
+     404,
+     null
+    ]
+   }
+  },
+  {
+   "name": "4 photos: the upload lands (media/add 200, list 1), the Details tab renders the grid with \"Add photo\" for the host",
+   "pass": false,
+   "detail": {
+    "upload": 200,
+    "add": 404,
+    "listed": null,
+    "grid": 0,
+    "head": [],
+    "addLink": []
+   }
+  },
+  {
+   "name": "5a engine: amy joined, tom accepted, 2 matches scored; standings win-loss = ken · amy · tom, total-score = amy first",
+   "pass": false,
+   "detail": {
+    "join": 200,
+    "respond": 400,
+    "m1": 200,
+    "m2": 0,
+    "order1": [],
+    "order2": []
+   }
+  },
+  {
+   "name": "5b app: the Matches tab shows the rules row + host gear; \"Share summary\" opens the sheet with 3 standings rows and 2 matches, ken first",
+   "pass": false,
+   "detail": {
+    "rulesTxt": [],
+    "gear": 0,
+    "shareBtn": null,
+    "srows": 0,
+    "mrows": 0,
+    "first": []
+   }
+  },
+  {
+   "name": "6 reminder: within ~3 minutes the sweep writes amy a \"Reminder … starts in 2 hours\" for the meet (receipt reminded2At on the meet)",
+   "pass": false,
+   "detail": {
+    "create": 200,
+    "join": [
+     200,
+     "confirmed"
+    ],
+    "waitedS": 171,
+    "reminder": null
+   }
+  },
+  {
+   "name": "7 discover: the meet's card prints the distance from amy's saved home (\"1.0 km\" — 1 km north of the venue)",
+   "pass": false,
+   "detail": {
+    "dayIdx": 0,
+    "found": {
+     "text": "[probe mx] doubles mu782gbrKen Wong · Kowloon Park (probe)Social2/8",
+     "dist": null
+    }
+   }
+  }
+ ],
+ "info": [
+  {
+   "name": "setup ken follows Tom Ho",
+   "detail": 400
+  },
+  {
+   "name": "setup ken follows Mei Lam",
+   "detail": 400
+  },
+  {
+   "name": "setup amy follows ken",
+   "detail": 400
+  },
+  {
+   "name": "setup amy home",
+   "detail": 200
+  },
+  {
+   "name": "no input",
+   "detail": ".mc-listing .mc-field taro-input-core, .mc-listing .mc-field .mc-input"
+  },
+  {
+   "name": "meet A after promote",
+   "detail": {
+    "flags": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,152 @@
+{
+ "id": "ann-report",
+ "at": "2026-09-18T05:25:26.643Z",
+ "base": "https://uat.social.silkvo.com",
+ "verdict": "pass",
+ "pass": 10,
+ "total": 10,
+ "checks": [
+  {
+   "name": "0 tester2 engine token via the SSO seam (UAT)",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "userId": "ar7jww4yjhqz003s"
+   }
+  },
+  {
+   "name": "1 anon POST announcements {limit:3,isActive:true} → 200 array",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "n": 1,
+    "first": {
+     "id": "probeann00000001",
+     "createdAt": "2063-12-28T01:52:36.467Z",
+     "updatedAt": null,
+     "title": "Welcome to the GripBat sandbox",
+     "text": "Meets, clubs and the leaderboard are live here for testing. Tell the team what breaks.",
+     "imageUrl": null,
+     "icon": "info",
+     "display": "normal",
+     "forYou": false,
+     "needConfirmationToRead": false,
+     "silence": false
+    }
+   }
+  },
+  {
+   "name": "2 signed POST announcements → 200 array",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "n": 1,
+    "keys": [
+     "id",
+     "createdAt",
+     "updatedAt",
+     "title",
+     "text",
+     "imageUrl",
+     "icon",
+     "display",
+     "forYou",
+     "needConfirmationToRead",
+     "silence",
+     "isRead"
+    ],
+    "first": {
+     "id": "probeann00000001",
+     "createdAt": "2063-12-28T01:52:36.467Z",
+     "updatedAt": null,
+     "title": "Welcome to the GripBat sandbox",
+     "text": "Meets, clubs and the leaderboard are live here for testing. Tell the team what breaks.",
+     "imageUrl": null,
+     "icon": "info",
+     "display": "normal",
+     "forYou": false,
+     "needConfirmationToRead": false,
+     "silence": false,
+     "isRead": false
+    }
+   }
+  },
+  {
+   "name": "3 signed POST i/read-announcement {announcementId:probeann00000001} → 204",
+   "pass": true,
+   "detail": {
+    "status": 204,
+    "body": {
+     "raw": ""
+    }
+   }
+  },
+  {
+   "name": "4 anon POST i/read-announcement → 401 (credential required)",
+   "pass": true,
+   "detail": {
+    "status": 401,
+    "body": {
+     "error": {
+      "message": "Credential required.",
+      "code": "CREDENTIAL_REQUIRED",
+      "id": "1384574d-a912-4b81-8601-c7b1c4085df1",
+      "kind": "client"
+     }
+    }
+   }
+  },
+  {
+   "name": "5 users → a demo account to report",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "other": {
+     "id": "aqxxu4xssfmc000f",
+     "username": "demo_jason"
+    }
+   }
+  },
+  {
+   "name": "6 signed POST users/report-abuse {userId,comment} → 204",
+   "pass": true,
+   "detail": {
+    "status": 204,
+    "body": {
+     "raw": ""
+    }
+   }
+  },
+  {
+   "name": "7 anon POST users/report-abuse → 401",
+   "pass": true,
+   "detail": {
+    "status": 401,
+    "body": {
+     "error": {
+      "message": "Credential required.",
+      "code": "CREDENTIAL_REQUIRED",
+      "id": "1384574d-a912-4b81-8601-c7b1c4085df1",
+      "kind": "client"
+     }
+    }
+   }
+  },
+  {
+   "name": "8 signed POST blocking/create → 200 (or 400 ALREADY_BLOCKING)",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "isBlocking": true
+   }
+  },
+  {
+   "name": "9 signed POST blocking/delete → 200 (unblocked again)",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "isBlocking": false
+   }
+  }
+ ]
+}

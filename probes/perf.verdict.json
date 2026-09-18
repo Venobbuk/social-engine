@@ -1,0 +1,964 @@
+{
+ "id": "perf",
+ "at": "2026-09-17T18:17:43.352Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "box load average during run: 7.7 7.9 7.2",
+  "routes: 34, over budget (FCP>3000 or load>6000): 0"
+ ],
+ "rows": [
+  {
+   "state": "anon",
+   "name": "home",
+   "ttfb": 43,
+   "dcl": 195,
+   "load": 315,
+   "fcp": 324,
+   "bytes": 1049624,
+   "reqs": 63,
+   "idle": 1432,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     91,
+     200
+    ],
+    [
+     "/api/meets/list",
+     74,
+     200
+    ],
+    [
+     "/api/meets/list",
+     56,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "discover",
+   "ttfb": 13,
+   "dcl": 155,
+   "load": 243,
+   "fcp": 244,
+   "bytes": 568999,
+   "reqs": 43,
+   "idle": 1123,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     20,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     15,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     15,
+     304
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "meet",
+   "ttfb": 18,
+   "dcl": 237,
+   "load": 368,
+   "fcp": 368,
+   "bytes": 629912,
+   "reqs": 44,
+   "idle": 1419,
+   "slowApi": [
+    [
+     "/api/meets/show",
+     40,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     34,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     24,
+     304
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "community",
+   "ttfb": 7,
+   "dcl": 140,
+   "load": 246,
+   "fcp": 244,
+   "bytes": 889511,
+   "reqs": 51,
+   "idle": 1352,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     58,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     25,
+     304
+    ],
+    [
+     "/api/v1/public/homepage",
+     16,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "club",
+   "ttfb": 9,
+   "dcl": 129,
+   "load": 234,
+   "fcp": 232,
+   "bytes": 804001,
+   "reqs": 49,
+   "idle": 1337,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     79,
+     200
+    ],
+    [
+     "/api/clubs/settings/show",
+     30,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     24,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "inbox",
+   "ttfb": 12,
+   "dcl": 138,
+   "load": 221,
+   "fcp": 228,
+   "bytes": 566033,
+   "reqs": 42,
+   "idle": 1080,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     21,
+     200
+    ],
+    [
+     "/api/users/show",
+     21,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     16,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "feed",
+   "ttfb": 17,
+   "dcl": 131,
+   "load": 241,
+   "fcp": 260,
+   "bytes": 717241,
+   "reqs": 53,
+   "idle": 1305,
+   "slowApi": [
+    [
+     "/api/channels/timeline",
+     112,
+     200
+    ],
+    [
+     "/api/channels/timeline",
+     108,
+     200
+    ],
+    [
+     "/api/channels/timeline",
+     108,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "network",
+   "ttfb": 10,
+   "dcl": 133,
+   "load": 213,
+   "fcp": 216,
+   "bytes": 571138,
+   "reqs": 41,
+   "idle": 1090,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     20,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     16,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     12,
+     304
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "stats",
+   "ttfb": 12,
+   "dcl": 163,
+   "load": 248,
+   "fcp": 244,
+   "bytes": 564314,
+   "reqs": 42,
+   "idle": 1106,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     21,
+     200
+    ],
+    [
+     "/api/v1/public/tenant-brand",
+     20,
+     200
+    ],
+    [
+     "/api/meets/reviews/leaderboard",
+     18,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "player",
+   "ttfb": 12,
+   "dcl": 132,
+   "load": 202,
+   "fcp": 204,
+   "bytes": 626503,
+   "reqs": 50,
+   "idle": 1133,
+   "slowApi": [
+    [
+     "/api/users/show",
+     76,
+     200
+    ],
+    [
+     "/api/meets/list",
+     75,
+     200
+    ],
+    [
+     "/api/users/notes",
+     71,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "venue",
+   "ttfb": 8,
+   "dcl": 127,
+   "load": 249,
+   "fcp": 228,
+   "bytes": 722225,
+   "reqs": 44,
+   "idle": 1161,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     46,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     26,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     13,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "notifications",
+   "ttfb": 10,
+   "dcl": 114,
+   "load": 188,
+   "fcp": 196,
+   "bytes": 561339,
+   "reqs": 39,
+   "idle": 1025,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     12,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     9,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     9,
+     304
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "more",
+   "ttfb": 43,
+   "dcl": 182,
+   "load": 254,
+   "fcp": 256,
+   "bytes": 549653,
+   "reqs": 37,
+   "idle": 1107,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     12,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     7,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     7,
+     304
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "settings",
+   "ttfb": 14,
+   "dcl": 116,
+   "load": 178,
+   "fcp": 180,
+   "bytes": 564129,
+   "reqs": 39,
+   "idle": 1015,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     12,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     9,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     8,
+     304
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "signin",
+   "ttfb": 9,
+   "dcl": 110,
+   "load": 171,
+   "fcp": 180,
+   "bytes": 631536,
+   "reqs": 43,
+   "idle": 1017,
+   "slowApi": [
+    [
+     "/api/v1/public/stats",
+     18,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     13,
+     200
+    ],
+    [
+     "/api/v1/season/active",
+     11,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "meet-create",
+   "ttfb": 10,
+   "dcl": 135,
+   "load": 221,
+   "fcp": 220,
+   "bytes": 562691,
+   "reqs": 39,
+   "idle": 1071,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     18,
+     200
+    ],
+    [
+     "/api/v1/public/tenant-brand",
+     11,
+     200
+    ],
+    [
+     "/api/v1/auth/me",
+     11,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "anon",
+   "name": "casual",
+   "ttfb": 12,
+   "dcl": 132,
+   "load": 194,
+   "fcp": 200,
+   "bytes": 588552,
+   "reqs": 40,
+   "idle": 1035,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     10,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     8,
+     200
+    ],
+    [
+     "/api/v1/auth/me",
+     7,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "home",
+   "ttfb": 9,
+   "dcl": 110,
+   "load": 181,
+   "fcp": 180,
+   "bytes": 1053994,
+   "reqs": 94,
+   "idle": 2037,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     552,
+     200
+    ],
+    [
+     "/api/meets/list",
+     551,
+     200
+    ],
+    [
+     "/api/meets/list",
+     544,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "discover",
+   "ttfb": 9,
+   "dcl": 102,
+   "load": 198,
+   "fcp": 200,
+   "bytes": 572585,
+   "reqs": 48,
+   "idle": 1126,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     59,
+     200
+    ],
+    [
+     "/api/v1/public/tenant-brand",
+     50,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     50,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "meet",
+   "ttfb": 9,
+   "dcl": 100,
+   "load": 170,
+   "fcp": 168,
+   "bytes": 633175,
+   "reqs": 47,
+   "idle": 1074,
+   "slowApi": [
+    [
+     "/api/meets/show",
+     15,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     12,
+     200
+    ],
+    [
+     "/api/adapter/sso",
+     12,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "community",
+   "ttfb": 11,
+   "dcl": 141,
+   "load": 256,
+   "fcp": 260,
+   "bytes": 892700,
+   "reqs": 53,
+   "idle": 1333,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     150,
+     200
+    ],
+    [
+     "/api/channels/search",
+     24,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     18,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "club",
+   "ttfb": 14,
+   "dcl": 129,
+   "load": 246,
+   "fcp": 244,
+   "bytes": 807803,
+   "reqs": 52,
+   "idle": 1353,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     171,
+     200
+    ],
+    [
+     "/api/i",
+     70,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     55,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "inbox",
+   "ttfb": 8,
+   "dcl": 106,
+   "load": 190,
+   "fcp": 176,
+   "bytes": 575774,
+   "reqs": 50,
+   "idle": 1132,
+   "slowApi": [
+    [
+     "/api/chat/history",
+     52,
+     200
+    ],
+    [
+     "/api/chat/history",
+     50,
+     200
+    ],
+    [
+     "/api/meets/list",
+     43,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "feed",
+   "ttfb": 12,
+   "dcl": 113,
+   "load": 180,
+   "fcp": 180,
+   "bytes": 682963,
+   "reqs": 51,
+   "idle": 1141,
+   "slowApi": [
+    [
+     "/api/channels/timeline",
+     42,
+     200
+    ],
+    [
+     "/api/channels/timeline",
+     41,
+     200
+    ],
+    [
+     "/api/channels/timeline",
+     40,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "network",
+   "ttfb": 10,
+   "dcl": 113,
+   "load": 195,
+   "fcp": 192,
+   "bytes": 624907,
+   "reqs": 72,
+   "idle": 1310,
+   "slowApi": [
+    [
+     "/api/meets/show",
+     151,
+     200
+    ],
+    [
+     "/api/meets/show",
+     150,
+     200
+    ],
+    [
+     "/api/meets/show",
+     150,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "stats",
+   "ttfb": 15,
+   "dcl": 146,
+   "load": 241,
+   "fcp": 260,
+   "bytes": 580368,
+   "reqs": 57,
+   "idle": 1322,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     80,
+     200
+    ],
+    [
+     "/api/meets/list",
+     37,
+     200
+    ],
+    [
+     "/api/channels/followed",
+     33,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "player",
+   "ttfb": 17,
+   "dcl": 140,
+   "load": 240,
+   "fcp": 240,
+   "bytes": 653626,
+   "reqs": 64,
+   "idle": 1492,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     192,
+     200
+    ],
+    [
+     "/api/users/notes",
+     152,
+     200
+    ],
+    [
+     "/api/meets/list",
+     152,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "venue",
+   "ttfb": 8,
+   "dcl": 124,
+   "load": 187,
+   "fcp": 188,
+   "bytes": 724779,
+   "reqs": 48,
+   "idle": 1141,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     91,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     15,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     15,
+     304
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "notifications",
+   "ttfb": 8,
+   "dcl": 93,
+   "load": 150,
+   "fcp": 152,
+   "bytes": 581347,
+   "reqs": 48,
+   "idle": 1059,
+   "slowApi": [
+    [
+     "/api/meets/list",
+     33,
+     200
+    ],
+    [
+     "/api/i/notifications",
+     27,
+     200
+    ],
+    [
+     "/api/meets/list",
+     27,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "more",
+   "ttfb": 12,
+   "dcl": 96,
+   "load": 156,
+   "fcp": 160,
+   "bytes": 549663,
+   "reqs": 37,
+   "idle": 1002,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     13,
+     200
+    ],
+    [
+     "/api/v1/public/tenant-brand",
+     9,
+     200
+    ],
+    [
+     "/api/v1/public/feature/bug-widget",
+     9,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "settings",
+   "ttfb": 8,
+   "dcl": 118,
+   "load": 182,
+   "fcp": 180,
+   "bytes": 568372,
+   "reqs": 46,
+   "idle": 1055,
+   "slowApi": [
+    [
+     "/api/v1/dupr/connection",
+     19,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     16,
+     304
+    ],
+    [
+     "/api/v1/public/homepage",
+     14,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "signin",
+   "ttfb": 8,
+   "dcl": 94,
+   "load": 168,
+   "fcp": 180,
+   "bytes": 586121,
+   "reqs": 42,
+   "idle": 993,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     16,
+     200
+    ],
+    [
+     "/api/v1/public/stats",
+     15,
+     200
+    ],
+    [
+     "/api/v1/season/active",
+     13,
+     200
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "meet-create",
+   "ttfb": 8,
+   "dcl": 93,
+   "load": 178,
+   "fcp": 180,
+   "bytes": 565297,
+   "reqs": 43,
+   "idle": 1058,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     11,
+     200
+    ],
+    [
+     "/api/adapter/sso",
+     11,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     10,
+     304
+    ]
+   ]
+  },
+  {
+   "state": "signed",
+   "name": "casual",
+   "ttfb": 9,
+   "dcl": 100,
+   "load": 163,
+   "fcp": 160,
+   "bytes": 592389,
+   "reqs": 46,
+   "idle": 1053,
+   "slowApi": [
+    [
+     "/api/v1/public/homepage",
+     13,
+     200
+    ],
+    [
+     "/api/adapter/sso",
+     11,
+     200
+    ],
+    [
+     "/api/v1/public/homepage",
+     11,
+     304
+    ]
+   ]
+  }
+ ]
+}

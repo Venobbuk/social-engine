@@ -1,0 +1,25 @@
+{
+  "id": "club-v3",
+  "at": "2026-09-18T17:24:16.977Z",
+  "condition_fired": true,
+  "verdict": "fail",
+  "pass": 0,
+  "total": 1,
+  "reason": "the engine does not answer clubs/settings/show with refCode — CLUB-V3 not deployed yet",
+  "evidence": [
+    "0 setup: mei is the admin of the club and the club carries a code + link token (CLUB-V3 deployed)=FAIL {\"club\":\"UAT Paddle Club\",\"status\":200,\"code\":200,\"hasToken\":false}"
+  ],
+  "detail": "CLUB-V3 on UAT: pin / take a break / schedule + job / tags with expiry / venue / announcement / join by code + token / message admins / awards — engine API as mei · tom · amy, then the Home, club, members, join, schedule and club-admin pages in headless Chrome",
+  "checks": [
+    {
+      "name": "0 setup: mei is the admin of the club and the club carries a code + link token (CLUB-V3 deployed)",
+      "pass": false,
+      "detail": {
+        "club": "UAT Paddle Club",
+        "status": 200,
+        "code": 200,
+        "hasToken": false
+      }
+    }
+  ]
+}

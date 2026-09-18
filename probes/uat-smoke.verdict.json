@@ -1,0 +1,16 @@
+{
+ "id": "uat-smoke",
+ "at": "2026-09-17T21:09:54.695Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "tester": "uat.smoke.mu60vtfn@gripbat-test.silkvo.com",
+ "evidence": [
+  "PASS 1 a stranger lands on Home with no access code — 繁 Language Notifications Inbox THIS WEEK 11 meets near you this week Sign in PLA",
+  "PASS 3 sandbox prints the one-time code on the page (no inbox) — code 087272",
+  "PASS 4 signed in as the new tester — /app/pages/onboard/index · Welcome, Uat Four quick questions so GripBat shows you the r",
+  "PASS 5 hkpl account created in tenant boyau-uat (caged) — tenant_id=boyau-uat",
+  "PASS 6 engine user landed in se_sbx, none in production — se_sbx new users=1 · social new users=0",
+  "PASS 7 club created by the tester exists in se_sbx — rows=1 url=/app/pages/community/index?id=ar9l7m0f5xbf000u",
+  "PASS 8 the tester reaches the create-meet form (name, when, venue, seats) — Close Create a meet BASICS Name Visibility Anyone nearby can find it Public Priv"
+ ]
+}

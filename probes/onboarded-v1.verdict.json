@@ -1,0 +1,125 @@
+{
+  "id": "onboarded-v1",
+  "at": "2026-09-17T15:06:42.128Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 8,
+  "total": 8,
+  "evidence": [
+    "0 tester2 engine token via the SSO seam=ok {\"status\":200,\"userId\":\"ar7jww4yjhqz003s\"}",
+    "1 read (sport-only) answers with an onboarded boolean=ok {\"status\":200,\"body\":{\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprSingles\":null,\"duprDoubles\":null,\"gender\":\"male\",\"ageGroup\":\"adult\",\"onboarded\":false}}",
+    "2 selfLevel written before the stamp=ok {\"status\":200,\"body\":{\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprSingles\":null,\"duprDoubles\":null,\"gender\":\"male\",\"ageGroup\":\"adult\",\"onboarded\":false}}",
+    "3 POST meets/level {sport, onboarded:true} → onboarded:true=ok {\"status\":200,\"body\":{\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprSingles\":null,\"duprDoubles\":null,\"gender\":\"male\",\"ageGroup\":\"adult\",\"onboarded\":true}}",
+    "4 the stamp call did not wipe selfLevel=ok {\"selfLevel\":3.5,\"want\":3.5}",
+    "5 read (sport-only) → onboarded:true, selfLevel intact=ok {\"status\":200,\"body\":{\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprSingles\":null,\"duprDoubles\":null,\"gender\":\"male\",\"ageGroup\":\"adult\",\"onboarded\":true}}",
+    "6 db: onboardedAt non-null and unchanged by a second onboarded:true=ok {\"t1\":\"2026-09-17 15:06:41.748+00\",\"t2\":\"2026-09-17 15:06:41.748+00\"}",
+    "7 another sport (badminton) reads onboarded:false=ok {\"status\":200,\"body\":{\"sport\":\"badminton\",\"selfLevel\":null,\"duprSingles\":null,\"duprDoubles\":null,\"gender\":null,\"ageGroup\":null,\"onboarded\":false}}"
+  ],
+  "detail": "meets/level onboarded flag on the live engine as tester2 (write, read, no-wipe, idempotent stamp, per-sport)",
+  "checks": [
+    {
+      "name": "0 tester2 engine token via the SSO seam",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "userId": "ar7jww4yjhqz003s"
+      }
+    },
+    {
+      "name": "1 read (sport-only) answers with an onboarded boolean",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "sport": "pickleball",
+          "selfLevel": 3.5,
+          "duprSingles": null,
+          "duprDoubles": null,
+          "gender": "male",
+          "ageGroup": "adult",
+          "onboarded": false
+        }
+      }
+    },
+    {
+      "name": "2 selfLevel written before the stamp",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "sport": "pickleball",
+          "selfLevel": 3.5,
+          "duprSingles": null,
+          "duprDoubles": null,
+          "gender": "male",
+          "ageGroup": "adult",
+          "onboarded": false
+        }
+      }
+    },
+    {
+      "name": "3 POST meets/level {sport, onboarded:true} → onboarded:true",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "sport": "pickleball",
+          "selfLevel": 3.5,
+          "duprSingles": null,
+          "duprDoubles": null,
+          "gender": "male",
+          "ageGroup": "adult",
+          "onboarded": true
+        }
+      }
+    },
+    {
+      "name": "4 the stamp call did not wipe selfLevel",
+      "pass": true,
+      "detail": {
+        "selfLevel": 3.5,
+        "want": 3.5
+      }
+    },
+    {
+      "name": "5 read (sport-only) → onboarded:true, selfLevel intact",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "sport": "pickleball",
+          "selfLevel": 3.5,
+          "duprSingles": null,
+          "duprDoubles": null,
+          "gender": "male",
+          "ageGroup": "adult",
+          "onboarded": true
+        }
+      }
+    },
+    {
+      "name": "6 db: onboardedAt non-null and unchanged by a second onboarded:true",
+      "pass": true,
+      "detail": {
+        "t1": "2026-09-17 15:06:41.748+00",
+        "t2": "2026-09-17 15:06:41.748+00"
+      }
+    },
+    {
+      "name": "7 another sport (badminton) reads onboarded:false",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "sport": "badminton",
+          "selfLevel": null,
+          "duprSingles": null,
+          "duprDoubles": null,
+          "gender": null,
+          "ageGroup": null,
+          "onboarded": false
+        }
+      }
+    }
+  ]
+}

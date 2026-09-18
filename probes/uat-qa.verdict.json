@@ -1,0 +1,209 @@
+{
+  "id": "uat-qa",
+  "at": "2026-09-18T15:42:08.248Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 8,
+  "total": 8,
+  "evidence": [
+    "1 /qa.html renders (title, ≥7 role cards, search, clubs, GripBat operations only, pairs)=ok {\"title\":\"Try GripBat\",\"h1\":\"Try the new GripBat platform\",\"roles\":7,\"search\":true,\"clubs\":8,\"staff\":1,\"chips\":0,\"pairs\":3}",
+    "2 name saved under uat:tester and sent as tester_name in POST /api/v1/feedback=ok {\"stored\":\"Probe Tester\",\"tester_name\":\"Probe Tester\",\"page_context\":\"qa.html\",\"feedbackStatus\":200,\"fbMsg\":\"\"}",
+    "4 browse by club → Tuen Mun Paddle Club lists members with ≥1 Sign in button=ok {\"clubId\":\"ar7o90b5s64a0010\",\"rows\":19,\"withBtn\":19,\"owner\":\"Owner\",\"first\":\"Mandy 何 Owner\"}",
+    "3 search \"Jason\" → Sign in as Jason 張 (by-email) → /api/v1/auth/me is uat+demo_jason=ok {\"hits\":[{\"name\":\"Jason 張 Demo player\",\"meta\":\"uat+demo_jason@hkpl-test.silkvo.com\",\"btn\":true}],\"landed\":\"https://uat.social.silkvo.com/app/pages/home/index\",\"me\":{\"email\":\"uat+demo_jason@hkpl-test.silkvo.com\",\"fullname\":\"Jason 張\",\"role\":\"PLAYER\"}}",
+    "5 Seed a busy Saturday → three meet links (as the signed-in person)=ok {\"text\":\"✓ 3 meet(s) ready for Saturday, hosted by Jason 張: UAT Saturday Morning Doubles · UAT Saturday Afternoon Open Play · UAT Saturday Night Social\",\"links\":[\"/app/pages/meet/index?id=araoxx8jizsc0045\",\"/app/pages/meet/index?id=araoxxadizsc0048\",\"/app/pages/meet/index?id=araoxxb2izsc004b\"]}",
+    "6 /test-plan.html lists ≥40 scenarios and the search filters=ok {\"before\":66,\"after\":3,\"allMatch\":true,\"tabs\":10,\"n\":\"66\"}",
+    "7 /fixed.html lists 95 items with FIXED / PARTLY / OPEN counts=ok {\"rows\":95,\"counts\":[\"All 95\",\"Fixed 60\",\"Partly 10\",\"Open 23\",\"Noted 2\"]}",
+    "8 aliases: mine answer 200 (redirects 302 → /qa.html, app pages)=ok [{\"path\":\"/\",\"status\":302,\"location\":\"https://uat.social.silkvo.com/qa.html\",\"type\":\"text/html\"},{\"path\":\"/uat.html\",\"status\":302,\"location\":\"https://uat.social.silkvo.com/qa.html\",\"type\":\"text/html\"},{\"path\":\"/qa.html\",\"status\":200,\"location\":null,\"type\":\"text/html\"},{\"path\":\"/test-plan.html\",\"status\":200,\"location\":null,\"type\":\"text/html\"},{\"path\":\"/fixed.html\",\"status\":200,\"location\":null,\"type"
+  ],
+  "info": [
+    {
+      "name": "other agent's pages (demo / features / tutorial) — served by the same aliases once their files land",
+      "detail": [
+        {
+          "path": "/demo.html",
+          "status": 200,
+          "location": null,
+          "type": "text/html"
+        },
+        {
+          "path": "/features.html",
+          "status": 200,
+          "location": null,
+          "type": "text/html"
+        },
+        {
+          "path": "/tutorial.html",
+          "status": 200,
+          "location": null,
+          "type": "text/html"
+        }
+      ]
+    }
+  ],
+  "detail": "headless Chrome (real clicks) on https://uat.social.silkvo.com: qa.html render, tester name → feedback payload, search Jason → by-email → auth/me, browse by club, seed Saturday, test-plan search, fixed.html, aliases",
+  "checks": [
+    {
+      "name": "1 /qa.html renders (title, ≥7 role cards, search, clubs, GripBat operations only, pairs)",
+      "pass": true,
+      "detail": {
+        "title": "Try GripBat",
+        "h1": "Try the new GripBat platform",
+        "roles": 7,
+        "search": true,
+        "clubs": 8,
+        "staff": 1,
+        "chips": 0,
+        "pairs": 3
+      }
+    },
+    {
+      "name": "2 name saved under uat:tester and sent as tester_name in POST /api/v1/feedback",
+      "pass": true,
+      "detail": {
+        "stored": "Probe Tester",
+        "tester_name": "Probe Tester",
+        "page_context": "qa.html",
+        "feedbackStatus": 200,
+        "fbMsg": ""
+      }
+    },
+    {
+      "name": "4 browse by club → Tuen Mun Paddle Club lists members with ≥1 Sign in button",
+      "pass": true,
+      "detail": {
+        "clubId": "ar7o90b5s64a0010",
+        "rows": 19,
+        "withBtn": 19,
+        "owner": "Owner",
+        "first": "Mandy 何 Owner"
+      }
+    },
+    {
+      "name": "3 search \"Jason\" → Sign in as Jason 張 (by-email) → /api/v1/auth/me is uat+demo_jason",
+      "pass": true,
+      "detail": {
+        "hits": [
+          {
+            "name": "Jason 張 Demo player",
+            "meta": "uat+demo_jason@hkpl-test.silkvo.com",
+            "btn": true
+          }
+        ],
+        "landed": "https://uat.social.silkvo.com/app/pages/home/index",
+        "me": {
+          "email": "uat+demo_jason@hkpl-test.silkvo.com",
+          "fullname": "Jason 張",
+          "role": "PLAYER"
+        }
+      }
+    },
+    {
+      "name": "5 Seed a busy Saturday → three meet links (as the signed-in person)",
+      "pass": true,
+      "detail": {
+        "text": "✓ 3 meet(s) ready for Saturday, hosted by Jason 張: UAT Saturday Morning Doubles · UAT Saturday Afternoon Open Play · UAT Saturday Night Social",
+        "links": [
+          "/app/pages/meet/index?id=araoxx8jizsc0045",
+          "/app/pages/meet/index?id=araoxxadizsc0048",
+          "/app/pages/meet/index?id=araoxxb2izsc004b"
+        ]
+      }
+    },
+    {
+      "name": "6 /test-plan.html lists ≥40 scenarios and the search filters",
+      "pass": true,
+      "detail": {
+        "before": 66,
+        "after": 3,
+        "allMatch": true,
+        "tabs": 10,
+        "n": "66"
+      }
+    },
+    {
+      "name": "7 /fixed.html lists 95 items with FIXED / PARTLY / OPEN counts",
+      "pass": true,
+      "detail": {
+        "rows": 95,
+        "counts": [
+          "All 95",
+          "Fixed 60",
+          "Partly 10",
+          "Open 23",
+          "Noted 2"
+        ]
+      }
+    },
+    {
+      "name": "8 aliases: mine answer 200 (redirects 302 → /qa.html, app pages)",
+      "pass": true,
+      "detail": [
+        {
+          "path": "/",
+          "status": 302,
+          "location": "https://uat.social.silkvo.com/qa.html",
+          "type": "text/html"
+        },
+        {
+          "path": "/uat.html",
+          "status": 302,
+          "location": "https://uat.social.silkvo.com/qa.html",
+          "type": "text/html"
+        },
+        {
+          "path": "/qa.html",
+          "status": 200,
+          "location": null,
+          "type": "text/html"
+        },
+        {
+          "path": "/test-plan.html",
+          "status": 200,
+          "location": null,
+          "type": "text/html"
+        },
+        {
+          "path": "/fixed.html",
+          "status": 200,
+          "location": null,
+          "type": "text/html"
+        },
+        {
+          "path": "/uat/people.json",
+          "status": 200,
+          "location": null,
+          "type": "application/json"
+        },
+        {
+          "path": "/uat/test-plan.json",
+          "status": 200,
+          "location": null,
+          "type": "application/json"
+        },
+        {
+          "path": "/referee.html",
+          "status": 302,
+          "location": "https://uat.social.silkvo.com/app/pages/referee/index",
+          "type": "text/html"
+        },
+        {
+          "path": "/registrar.html",
+          "status": 302,
+          "location": "https://uat.social.silkvo.com/app/pages/registrar/index",
+          "type": "text/html"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    "/root/walk/_qa-club.png",
+    "/root/walk/_qa-desktop.png",
+    "/root/walk/_qa-feedback.png",
+    "/root/walk/_qa-fixed.png",
+    "/root/walk/_qa-home.png",
+    "/root/walk/_qa-jason-home.png",
+    "/root/walk/_qa-search.png",
+    "/root/walk/_qa-seed.png",
+    "/root/walk/_qa-testplan.png"
+  ]
+}

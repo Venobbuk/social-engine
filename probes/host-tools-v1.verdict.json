@@ -1,0 +1,377 @@
+{
+  "id": "host-tools-v1",
+  "at": "2026-09-18T16:54:39.998Z",
+  "base": "https://uat.social.silkvo.com",
+  "meet": {
+    "id": "arai4oggizsc000i",
+    "name": "UAT Thursday Open Play"
+  },
+  "condition_fired": true,
+  "verdict": "fail",
+  "pass": 3,
+  "total": 23,
+  "evidence": [
+    "0 setup: host-ken hosts the meet, tom + mei confirmed, submitMatches on=ok {\"id\":\"arai4oggizsc000i\",\"name\":\"UAT Thursday Open Play\",\"confirmed\":3,\"capacity\":12,\"tom\":\"confirmed\",\"mei\":\"confirmed\"}",
+    "1 meets/participants/bulk {tag:paid} on tom + mei → both rows carry paid, updated=2=FAIL {\"status\":404,\"err\":\"Not Found\"}",
+    "1b a non-host is refused (MEET_NOT_HOST)=FAIL {\"status\":404}",
+    "2 roles: tom isCoach, mei isReferee + isPaymentCollector (meets/participants/update)=ok {\"tom\":{\"isCoach\":true},\"mei\":{\"isReferee\":true,\"isPaymentCollector\":true}}",
+    "3 generate-teams preview: 2 teams, every confirmed player dealt once, nothing persisted=FAIL {\"status\":404,\"err\":\"Not Found\"}",
+    "4 generate-teams persist (same seed): the same deal is written — tom carries a teamKey, meet.blindTeamsMinutes=60=FAIL {\"status\":404,\"same\":true}",
+    "5 blind teams: a player sees no teamKey on anyone while the host sees them (meet starts in the future)=FAIL {\"tomSees\":[null,null,null],\"kenSees\":[null,null,null]}",
+    "6 blind off (blindTeamsMinutes:null) → the player sees the teams=FAIL {\"status\":404,\"blind\":null,\"tomSees\":[null,null,null]}",
+    "7 a custom match by hand: round 9, court 3, tom vs mei saved and listed=ok {\"status\":200,\"saved\":{\"round\":9,\"courtIndex\":2,\"t1\":[\"arariyc6izsc0064\"],\"t2\":[\"arariydaizsc0065\"]}}",
+    "8 meets/dupr-manager: tom + mei listed with a connected boolean; the custom match listed unscored=FAIL {\"status\":404,\"err\":\"Not Found\"}",
+    "8b a non-host is refused=FAIL {\"status\":404}",
+    "9 meets/matches/submit-dupr-all answers the counts; the unscored custom match is skipped=FAIL {\"status\":404,\"body\":{\"message\":\"Route POST:/api/meets/matches/submit-dupr-all not found\",\"error\":\"Not Found\",\"statusCode\":404}}",
+    "10 receipt: drive upload → meets/participants/receipt pins it → meets/show carries receiptUrl (fetch 200) + receiptAt + receiptById=ken=FAIL {\"upload\":200,\"fileId\":\"arariyxvizsc0067\",\"receipt\":404,\"img\":0,\"err\":\"Not Found\"}",
+    "10b another player cannot pin a receipt on tom=FAIL {\"status\":404}",
+    "11 meets/chat-mute: tom (member) → chatMuted true on meets/show and chat/rooms/show isMuted; ken (room owner) → 200 + chatMuted true=FAIL {\"tom\":404,\"roomMuted\":false,\"ken\":404,\"err\":\"Not Found\"}",
+    "12 Sort ▾ lists the seven Reclub options: Last confirmed · Alphabetical · Skill level · Courts · Attendance · DUPR singles · DUPR doubles=FAIL {\"items\":[\"Last confirmed ✓\",\"Name A–Z\",\"Level high→low\"],\"order0\":[\"Tom Ho\",\"Mei Lam\"]}",
+    "13 each option is applied (the label reads it) and Alphabetical equals the alphabetical order of the confirmed grid=FAIL {\"orders\":{\"Alphabetical\":{\"order\":[\"Tom Ho\",\"Mei Lam\"],\"label\":\"Sort: Last confirmed ▾\"},\"Skill level\":{\"order\":[\"Tom Ho\",\"Mei Lam\"],\"label\":\"Sort: Last confirmed ▾\"},\"Courts\":{\"order\":[\"Tom Ho\",\"Mei Lam\"],\"label\":\"Sort: Last confirmed ▾\"},\"Attendance\":{\"order\":[\"Tom Ho\",\"Mei Lam\"],\"label\":\"Sort: Last confirmed ▾\"},\"DUPR singles\":{\"order\":[\"Tom Ho\",\"Mei Lam\"],\"label\":\"Sort: Last confirmed ▾\"},\"DU",
+    "14 roster cells carry the role chips (Coach · Referee · Collector) and a team swatch per assigned player=FAIL {\"roles\":[],\"swatches\":0}",
+    "15 tapping tom's cell opens the participant sheet: Roles · Status · Assign a team · Assign a court · Payment · Method · Attendance=FAIL {\"sheetTitles\":[],\"tomName\":\"Tom Ho\"}",
+    "16 Payments manager: Receipt only · Unpaid · By status ▾ filters, and tom's row reads \"See receipt\"=FAIL {\"filters\":[],\"receipts\":[]}",
+    "17 Receipt only keeps only tom (the one receipt on the roster)=FAIL {\"rowsAfter\":[\"Ken WongUnpaidPaidUnpaidWaived\",\"Ken Wong\",\"Tom HoUnpaidPaidUnpaidWaived\",\"Tom Ho\",\"Mei LamUnpaidPaidUnpaidWaived\",\"Mei Lam\"]}",
+    "18 the DUPR Manager bar opens the sheet: a Connected / Not connected chip per confirmed player=FAIL {\"duprChips\":[]}",
+    "19 Details kebab carries \"Turn on chat notifications\" (ken muted) → tap → POST meets/chat-mute {mute:false} → chatMuted false=FAIL {\"kebab\":[\"Edit\",\"Duplicate\",\"Cancel meet\"],\"mutes\":[]}"
+  ],
+  "info": [
+    {
+      "name": "setup: meets/update submitMatches+autoApprove",
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "setup: tom meets/join",
+      "detail": {
+        "status": 200,
+        "myStatus": "confirmed"
+      }
+    },
+    {
+      "name": "setup: mei meets/join",
+      "detail": {
+        "status": 200,
+        "myStatus": "confirmed"
+      }
+    },
+    {
+      "name": "cleanup",
+      "detail": {
+        "tags": [
+          [],
+          [],
+          []
+        ],
+        "teams": [
+          null,
+          null,
+          null
+        ],
+        "receipts": 0
+      }
+    }
+  ],
+  "detail": "API (bulk tag, roles, generate teams + blind, custom match, DUPR manager, submit-dupr-all, receipt upload, chat-mute member + owner) and headless Chrome on https://uat.social.silkvo.com as host-ken (7 sorts, role chips, team swatches, participant sheet, Payments manager filters + See receipt, DUPR bar, kebab mute)",
+  "checks": [
+    {
+      "name": "0 setup: host-ken hosts the meet, tom + mei confirmed, submitMatches on",
+      "pass": true,
+      "detail": {
+        "id": "arai4oggizsc000i",
+        "name": "UAT Thursday Open Play",
+        "confirmed": 3,
+        "capacity": 12,
+        "tom": "confirmed",
+        "mei": "confirmed"
+      }
+    },
+    {
+      "name": "1 meets/participants/bulk {tag:paid} on tom + mei → both rows carry paid, updated=2",
+      "pass": false,
+      "detail": {
+        "status": 404,
+        "err": "Not Found"
+      }
+    },
+    {
+      "name": "1b a non-host is refused (MEET_NOT_HOST)",
+      "pass": false,
+      "detail": {
+        "status": 404
+      }
+    },
+    {
+      "name": "2 roles: tom isCoach, mei isReferee + isPaymentCollector (meets/participants/update)",
+      "pass": true,
+      "detail": {
+        "tom": {
+          "isCoach": true
+        },
+        "mei": {
+          "isReferee": true,
+          "isPaymentCollector": true
+        }
+      }
+    },
+    {
+      "name": "3 generate-teams preview: 2 teams, every confirmed player dealt once, nothing persisted",
+      "pass": false,
+      "detail": {
+        "status": 404,
+        "err": "Not Found"
+      }
+    },
+    {
+      "name": "4 generate-teams persist (same seed): the same deal is written — tom carries a teamKey, meet.blindTeamsMinutes=60",
+      "pass": false,
+      "detail": {
+        "status": 404,
+        "same": true
+      }
+    },
+    {
+      "name": "5 blind teams: a player sees no teamKey on anyone while the host sees them (meet starts in the future)",
+      "pass": false,
+      "detail": {
+        "tomSees": [
+          null,
+          null,
+          null
+        ],
+        "kenSees": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "name": "6 blind off (blindTeamsMinutes:null) → the player sees the teams",
+      "pass": false,
+      "detail": {
+        "status": 404,
+        "blind": null,
+        "tomSees": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "name": "7 a custom match by hand: round 9, court 3, tom vs mei saved and listed",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "saved": {
+          "round": 9,
+          "courtIndex": 2,
+          "t1": [
+            "arariyc6izsc0064"
+          ],
+          "t2": [
+            "arariydaizsc0065"
+          ]
+        }
+      }
+    },
+    {
+      "name": "8 meets/dupr-manager: tom + mei listed with a connected boolean; the custom match listed unscored",
+      "pass": false,
+      "detail": {
+        "status": 404,
+        "err": "Not Found"
+      }
+    },
+    {
+      "name": "8b a non-host is refused",
+      "pass": false,
+      "detail": {
+        "status": 404
+      }
+    },
+    {
+      "name": "9 meets/matches/submit-dupr-all answers the counts; the unscored custom match is skipped",
+      "pass": false,
+      "detail": {
+        "status": 404,
+        "body": {
+          "message": "Route POST:/api/meets/matches/submit-dupr-all not found",
+          "error": "Not Found",
+          "statusCode": 404
+        }
+      }
+    },
+    {
+      "name": "10 receipt: drive upload → meets/participants/receipt pins it → meets/show carries receiptUrl (fetch 200) + receiptAt + receiptById=ken",
+      "pass": false,
+      "detail": {
+        "upload": 200,
+        "fileId": "arariyxvizsc0067",
+        "receipt": 404,
+        "img": 0,
+        "err": "Not Found"
+      }
+    },
+    {
+      "name": "10b another player cannot pin a receipt on tom",
+      "pass": false,
+      "detail": {
+        "status": 404
+      }
+    },
+    {
+      "name": "11 meets/chat-mute: tom (member) → chatMuted true on meets/show and chat/rooms/show isMuted; ken (room owner) → 200 + chatMuted true",
+      "pass": false,
+      "detail": {
+        "tom": 404,
+        "roomMuted": false,
+        "ken": 404,
+        "err": "Not Found"
+      }
+    },
+    {
+      "name": "12 Sort ▾ lists the seven Reclub options: Last confirmed · Alphabetical · Skill level · Courts · Attendance · DUPR singles · DUPR doubles",
+      "pass": false,
+      "detail": {
+        "items": [
+          "Last confirmed ✓",
+          "Name A–Z",
+          "Level high→low"
+        ],
+        "order0": [
+          "Tom Ho",
+          "Mei Lam"
+        ]
+      }
+    },
+    {
+      "name": "13 each option is applied (the label reads it) and Alphabetical equals the alphabetical order of the confirmed grid",
+      "pass": false,
+      "detail": {
+        "orders": {
+          "Alphabetical": {
+            "order": [
+              "Tom Ho",
+              "Mei Lam"
+            ],
+            "label": "Sort: Last confirmed ▾"
+          },
+          "Skill level": {
+            "order": [
+              "Tom Ho",
+              "Mei Lam"
+            ],
+            "label": "Sort: Last confirmed ▾"
+          },
+          "Courts": {
+            "order": [
+              "Tom Ho",
+              "Mei Lam"
+            ],
+            "label": "Sort: Last confirmed ▾"
+          },
+          "Attendance": {
+            "order": [
+              "Tom Ho",
+              "Mei Lam"
+            ],
+            "label": "Sort: Last confirmed ▾"
+          },
+          "DUPR singles": {
+            "order": [
+              "Tom Ho",
+              "Mei Lam"
+            ],
+            "label": "Sort: Last confirmed ▾"
+          },
+          "DUPR doubles": {
+            "order": [
+              "Tom Ho",
+              "Mei Lam"
+            ],
+            "label": "Sort: Last confirmed ▾"
+          },
+          "Last confirmed": {
+            "order": [
+              "Tom Ho",
+              "Mei Lam"
+            ],
+            "label": "Sort: Last confirmed ▾"
+          }
+        },
+        "alpha": [
+          "Mei Lam",
+          "Tom Ho"
+        ]
+      }
+    },
+    {
+      "name": "14 roster cells carry the role chips (Coach · Referee · Collector) and a team swatch per assigned player",
+      "pass": false,
+      "detail": {
+        "roles": [],
+        "swatches": 0
+      }
+    },
+    {
+      "name": "15 tapping tom's cell opens the participant sheet: Roles · Status · Assign a team · Assign a court · Payment · Method · Attendance",
+      "pass": false,
+      "detail": {
+        "sheetTitles": [],
+        "tomName": "Tom Ho"
+      }
+    },
+    {
+      "name": "16 Payments manager: Receipt only · Unpaid · By status ▾ filters, and tom's row reads \"See receipt\"",
+      "pass": false,
+      "detail": {
+        "filters": [],
+        "receipts": []
+      }
+    },
+    {
+      "name": "17 Receipt only keeps only tom (the one receipt on the roster)",
+      "pass": false,
+      "detail": {
+        "rowsAfter": [
+          "Ken WongUnpaidPaidUnpaidWaived",
+          "Ken Wong",
+          "Tom HoUnpaidPaidUnpaidWaived",
+          "Tom Ho",
+          "Mei LamUnpaidPaidUnpaidWaived",
+          "Mei Lam"
+        ]
+      }
+    },
+    {
+      "name": "18 the DUPR Manager bar opens the sheet: a Connected / Not connected chip per confirmed player",
+      "pass": false,
+      "detail": {
+        "duprChips": []
+      }
+    },
+    {
+      "name": "19 Details kebab carries \"Turn on chat notifications\" (ken muted) → tap → POST meets/chat-mute {mute:false} → chatMuted false",
+      "pass": false,
+      "detail": {
+        "kebab": [
+          "Edit",
+          "Duplicate",
+          "Cancel meet"
+        ],
+        "mutes": []
+      }
+    }
+  ],
+  "screenshots": [
+    "/root/walk/_host-tools-v1-roster.png",
+    "/root/walk/_host-tools-v1-sortsheet.png",
+    "/root/walk/_host-tools-v1-psheet.png",
+    "/root/walk/_host-tools-v1-payments.png",
+    "/root/walk/_host-tools-v1-dupr.png",
+    "/root/walk/_host-tools-v1-kebab.png"
+  ]
+}

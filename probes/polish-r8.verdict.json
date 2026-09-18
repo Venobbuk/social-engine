@@ -1,0 +1,31 @@
+{
+ "id": "polish-r8",
+ "at": "2026-09-18T17:20:52.316Z",
+ "condition_fired": true,
+ "verdict": "fail",
+ "bundle": "deployed https://uat.social.silkvo.com",
+ "evidence": [
+  "PASS Home: launcher 40x40 at (16,761) shows no .pg-row in or around it at scroll 0%=0 visible (0 scrolled under the floor) of 0 · 50%=0 visible (0 scrolled under the floor) of 0 · 100%=0 visible (0 scrolled under the floor) of 0 (page does not scroll)",
+  "FAIL Home: the floor band is fixed, opaque paper, MISSING",
+  "FAIL Home: launcher docks on the tab bar cap — centre y 781 vs bar top 839, 40px",
+  "FAIL More: launcher 40x40 at (16,761) shows no .pg-row in or around it at scroll 0%=18 visible (1 scrolled under the floor) of 8 · 50%=18 visible (1 scrolled under the floor) of 8 · 100%=18 visible (1 scrolled under the floor) of 8 (page does not scroll)",
+  "FAIL More: the floor band is fixed, opaque paper, MISSING",
+  "FAIL More: launcher docks on the tab bar cap — centre y 781 vs bar top 839, 40px",
+  "FAIL Reports: launcher 40x40 at (16,761) shows no .pg-row in or around it at scroll 0%=27 visible (2 scrolled under the floor) of 8 · 50%=27 visible (2 scrolled under the floor) of 8 · 100%=27 visible (2 scrolled under the floor) of 8 (page does not scroll)",
+  "FAIL Reports: the floor band is fixed, opaque paper, MISSING",
+  "FAIL Reports: launcher docks on the tab bar cap — centre y 781 vs bar top 839, 40px",
+  "PASS Reports: list has a row to open",
+  "FAIL Reports #105: 5 status chips are button[aria-pressed] — [\"taro-text-core/null/null\",\"taro-text-core/null/null\",\"taro-text-core/null/null\",\"taro-text-core/null/null\",\"taro-text-core/null/null\"]",
+  "FAIL Reports #105: no element with id=\"undefined\" (1)",
+  "FAIL Reports #106: Save is the kit lg button (36px)",
+  "PASS Reports #111: Save → 200 PATCH /api/v1/admin/feedback/cmu74mg8v00vbdj156xxbl3hm",
+  "PASS Reports #111: a Save toast appeared — \"Saved\"",
+  "FAIL #127: /app/pages/discover/index → not-found page inside the app shell (nf false, shell false, tab bar false, path /app/pages/discover/index)",
+  "FAIL #127: the page says so and names the missing route — \"\"",
+  "PASS #116: first visit — Safety First shows for a player new to Ken (uat+clubadmin-tom on arai4oefizsc000f)",
+  "PASS #116: card reads Safety First — \"Safety Fir t\nYou haven't played with thi  ho t before. Meet in public place , and tell  om\"",
+  "PASS #116: \"Got it, continue\" button present",
+  "FAIL #116: remembered on the device — []",
+  "FAIL #116: second visit — Safety First NOT shown; CTA now \"Safety Fir t\nYou haven't played with thi  ho t before. Meet \""
+ ]
+}

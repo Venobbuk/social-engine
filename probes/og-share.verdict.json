@@ -1,0 +1,482 @@
+{
+ "probe": "og-share",
+ "at": "2026-09-18T08:15:32.976Z",
+ "host": "iZj6c7842lluyyg275lzd6Z",
+ "pass": 45,
+ "total": 45,
+ "verdict": "pass",
+ "engineRevision": "b539c14b34",
+ "checks": [
+  {
+   "name": "prod meet (1) crawler UA → 200 text/html, Cache-Control public max-age=300",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html; charset=utf-8",
+    "cc": "public, max-age=300",
+    "bytes": 1363
+   }
+  },
+  {
+   "name": "prod meet (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary_large_image, meta refresh",
+   "pass": true,
+   "detail": {
+    "title": "Tester Tuesday Doubles",
+    "description": "Tue 22 Sep · 21:00 · Jordan Valley Park · 7/8 going · 波友測試 2",
+    "image": "https://social.silkvo.com/app/static/boyau/img/spanish-armada-and-u-s-armed-forces-comp-3-card.jpg",
+    "url": "https://social.silkvo.com/app/pages/meet/index?id=ar7qrfpjs64a00mi",
+    "site": "GripBat 抓拍",
+    "card": "summary_large_image",
+    "refresh": true
+   }
+  },
+  {
+   "name": "prod meet (1) og:description present",
+   "pass": true,
+   "detail": {
+    "description": "Tue 22 Sep · 21:00 · Jordan Valley Park · 7/8 going · 波友測試 2"
+   }
+  },
+  {
+   "name": "prod meet (1) og:image is absolute on this host",
+   "pass": true,
+   "detail": {
+    "image": "https://social.silkvo.com/app/static/boyau/img/spanish-armada-and-u-s-armed-forces-comp-3-card.jpg"
+   }
+  },
+  {
+   "name": "prod meet (2) og:image URL → 200 image/*",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "image/jpeg",
+    "bytes": 22185
+   }
+  },
+  {
+   "name": "prod meet (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html",
+    "cc": "no-cache",
+    "sha": "8f250ebaef0b1f07",
+    "indexSha": "8f250ebaef0b1f07"
+   }
+  },
+  {
+   "name": "prod meet: og:title == meets/show name; description carries venue and n/cap going",
+   "pass": true,
+   "detail": {
+    "title": "Tester Tuesday Doubles",
+    "description": "Tue 22 Sep · 21:00 · Jordan Valley Park · 7/8 going · 波友測試 2",
+    "api": {
+     "name": "Tester Tuesday Doubles",
+     "venueName": "Jordan Valley Park",
+     "confirmed": 7,
+     "capacity": 8,
+     "startAt": "2026-09-22T13:00:00.000Z",
+     "timezone": "Asia/Hong_Kong"
+    }
+   }
+  },
+  {
+   "name": "prod club (1) crawler UA → 200 text/html, Cache-Control public max-age=300",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html; charset=utf-8",
+    "cc": "public, max-age=300",
+    "bytes": 1328
+   }
+  },
+  {
+   "name": "prod club (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary_large_image, meta refresh",
+   "pass": true,
+   "detail": {
+    "title": "Tuen Mun Paddle Club",
+    "description": "屯門黃金海岸波友。逢週三晚。 · 19 members",
+    "image": "https://social.silkvo.com/app/static/boyau/img/sports-court-harmony-of-the-seas-2025-card.jpg",
+    "url": "https://social.silkvo.com/app/pages/community/index?id=ar7o90b5s64a0010",
+    "site": "GripBat 抓拍",
+    "card": "summary_large_image",
+    "refresh": true
+   }
+  },
+  {
+   "name": "prod club (1) og:description present",
+   "pass": true,
+   "detail": {
+    "description": "屯門黃金海岸波友。逢週三晚。 · 19 members"
+   }
+  },
+  {
+   "name": "prod club (1) og:image is absolute on this host",
+   "pass": true,
+   "detail": {
+    "image": "https://social.silkvo.com/app/static/boyau/img/sports-court-harmony-of-the-seas-2025-card.jpg"
+   }
+  },
+  {
+   "name": "prod club (2) og:image URL → 200 image/*",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "image/jpeg",
+    "bytes": 64232
+   }
+  },
+  {
+   "name": "prod club (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html",
+    "cc": "no-cache",
+    "sha": "8f250ebaef0b1f07",
+    "indexSha": "8f250ebaef0b1f07"
+   }
+  },
+  {
+   "name": "prod club: og:title == channels/show name; description ends with \"usersCount members\"",
+   "pass": true,
+   "detail": {
+    "title": "Tuen Mun Paddle Club",
+    "description": "屯門黃金海岸波友。逢週三晚。 · 19 members",
+    "api": {
+     "name": "Tuen Mun Paddle Club",
+     "usersCount": 19,
+     "bannerUrl": null
+    }
+   }
+  },
+  {
+   "name": "prod player (1) crawler UA → 200 text/html, Cache-Control public max-age=300",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html; charset=utf-8",
+    "cc": "public, max-age=300",
+    "bytes": 1253
+   }
+  },
+  {
+   "name": "prod player (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary, meta refresh",
+   "pass": true,
+   "detail": {
+    "title": "Jason 張",
+    "description": "@demo_jason · GripBat player · DUPR 3.88 · Kowloon East · captain · demo account",
+    "image": "https://social.silkvo.com/share/avatar/aqxxu4xssfmc000f.svg",
+    "url": "https://social.silkvo.com/app/pages/player/index?id=aqxxu4xssfmc000f",
+    "site": "GripBat 抓拍",
+    "card": "summary",
+    "refresh": true
+   }
+  },
+  {
+   "name": "prod player (1) og:description present",
+   "pass": true,
+   "detail": {
+    "description": "@demo_jason · GripBat player · DUPR 3.88 · Kowloon East · captain · demo account"
+   }
+  },
+  {
+   "name": "prod player (1) og:image is absolute on this host",
+   "pass": true,
+   "detail": {
+    "image": "https://social.silkvo.com/share/avatar/aqxxu4xssfmc000f.svg"
+   }
+  },
+  {
+   "name": "prod player (2) og:image URL → 200 image/*",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "image/svg+xml; charset=utf-8",
+    "bytes": 278
+   }
+  },
+  {
+   "name": "prod player (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html",
+    "cc": "no-cache",
+    "sha": "8f250ebaef0b1f07",
+    "indexSha": "8f250ebaef0b1f07"
+   }
+  },
+  {
+   "name": "prod player: og:title == users/show name; description starts \"@username · GripBat player\"",
+   "pass": true,
+   "detail": {
+    "title": "Jason 張",
+    "description": "@demo_jason · GripBat player · DUPR 3.88 · Kowloon East · captain · demo account",
+    "api": {
+     "name": "Jason 張",
+     "username": "demo_jason"
+    }
+   }
+  },
+  {
+   "name": "prod meet (4) unknown id, crawler UA → 404",
+   "pass": true,
+   "detail": {
+    "status": 404,
+    "type": "text/plain; charset=utf-8"
+   }
+  },
+  {
+   "name": "prod club (4) unknown id, crawler UA → 404",
+   "pass": true,
+   "detail": {
+    "status": 404,
+    "type": "text/plain; charset=utf-8"
+   }
+  },
+  {
+   "name": "prod player (4) unknown id, crawler UA → 404",
+   "pass": true,
+   "detail": {
+    "status": 404,
+    "type": "text/plain; charset=utf-8"
+   }
+  },
+  {
+   "name": "prod meet (4) no ?id=, crawler UA → 404",
+   "pass": true,
+   "detail": {
+    "status": 404
+   }
+  },
+  {
+   "name": "prod direct /share/meet/:id (no nginx rewrite) → 200 text/html with og:title",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "title": "Tester Tuesday Doubles"
+   }
+  },
+  {
+   "name": "prod /share/venue/:id (kind not implemented) → 404",
+   "pass": true,
+   "detail": {
+    "status": 404
+   }
+  },
+  {
+   "name": "UAT (5) meets/list answers a public meet to preview",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "count": 5,
+    "id": "ar7o90czs64a001f",
+    "name": "週五夜雙打 Friday Night Doubles"
+   }
+  },
+  {
+   "name": "UAT meet (1) crawler UA → 200 text/html, Cache-Control public max-age=300",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html; charset=utf-8",
+    "cc": "public, max-age=300",
+    "bytes": 1379
+   }
+  },
+  {
+   "name": "UAT meet (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary_large_image, meta refresh",
+   "pass": true,
+   "detail": {
+    "title": "週五夜雙打 Friday Night Doubles",
+    "description": "Fri 18 Sep · 18:00 · Kowloon Park · 2/8 going · Yuki 蔡",
+    "image": "https://uat.social.silkvo.com/app/static/boyau/img/newport-doubles-shootout-card.jpg",
+    "url": "https://uat.social.silkvo.com/app/pages/meet/index?id=ar7o90czs64a001f",
+    "site": "GripBat 抓拍",
+    "card": "summary_large_image",
+    "refresh": true
+   }
+  },
+  {
+   "name": "UAT meet (1) og:description present",
+   "pass": true,
+   "detail": {
+    "description": "Fri 18 Sep · 18:00 · Kowloon Park · 2/8 going · Yuki 蔡"
+   }
+  },
+  {
+   "name": "UAT meet (1) og:image is absolute on this host",
+   "pass": true,
+   "detail": {
+    "image": "https://uat.social.silkvo.com/app/static/boyau/img/newport-doubles-shootout-card.jpg"
+   }
+  },
+  {
+   "name": "UAT meet (2) og:image URL → 200 image/*",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "image/jpeg",
+    "bytes": 51183
+   }
+  },
+  {
+   "name": "UAT meet (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html",
+    "cc": "no-cache",
+    "sha": "8f250ebaef0b1f07",
+    "indexSha": "8f250ebaef0b1f07"
+   }
+  },
+  {
+   "name": "UAT (5) og:title == the meet name; og:url on the UAT host",
+   "pass": true,
+   "detail": {
+    "title": "週五夜雙打 Friday Night Doubles",
+    "url": "https://uat.social.silkvo.com/app/pages/meet/index?id=ar7o90czs64a001f"
+   }
+  },
+  {
+   "name": "(6) tester2 UAT engine token via the SSO seam",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "userId": "ar7jww4yjhqz003s"
+   }
+  },
+  {
+   "name": "(6) meets/create visibility=private on UAT → 200 with id",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "id": "ara8zsmf05rx0002",
+    "visibility": "private"
+   }
+  },
+  {
+   "name": "UAT private meet (1) crawler UA → 200 text/html, Cache-Control public max-age=300",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html; charset=utf-8",
+    "cc": "public, max-age=300",
+    "bytes": 1168
+   }
+  },
+  {
+   "name": "UAT private meet (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary_large_image, meta refresh",
+   "pass": true,
+   "detail": {
+    "title": "[probe] og-share private 1789719332766",
+    "description": null,
+    "image": "https://uat.social.silkvo.com/app/static/boyau/img/jardim-kovalova-net-card.jpg",
+    "url": "https://uat.social.silkvo.com/app/pages/meet/index?id=ara8zsmf05rx0002",
+    "site": "GripBat 抓拍",
+    "card": "summary_large_image",
+    "refresh": true
+   }
+  },
+  {
+   "name": "UAT private meet (6) PRIVATE → no og:description (title only)",
+   "pass": true,
+   "detail": {
+    "title": "[probe] og-share private 1789719332766",
+    "description": null
+   }
+  },
+  {
+   "name": "UAT private meet (1) og:image is absolute on this host",
+   "pass": true,
+   "detail": {
+    "image": "https://uat.social.silkvo.com/app/static/boyau/img/jardim-kovalova-net-card.jpg"
+   }
+  },
+  {
+   "name": "UAT private meet (2) og:image URL → 200 image/*",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "image/jpeg",
+    "bytes": 42715
+   }
+  },
+  {
+   "name": "UAT private meet (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "type": "text/html",
+    "cc": "no-cache",
+    "sha": "8f250ebaef0b1f07",
+    "indexSha": "8f250ebaef0b1f07"
+   }
+  },
+  {
+   "name": "(6) private card: no venue / going / host in the page at all",
+   "pass": true,
+   "detail": {
+    "title": "[probe] og-share private 1789719332766"
+   }
+  },
+  {
+   "name": "(6) cleanup: meets/cancel the probe meet",
+   "pass": true,
+   "detail": {
+    "status": 200
+   }
+  }
+ ],
+ "id": "og-share",
+ "condition_fired": true,
+ "evidence": [
+  "PASS prod meet (1) crawler UA → 200 text/html, Cache-Control public max-age=300 — {\"status\":200,\"type\":\"text/html; charset=utf-8\",\"cc\":\"public, max-age=300\",\"bytes\":1363}",
+  "PASS prod meet (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary_large_image, meta refresh — {\"title\":\"Tester Tuesday Doubles\",\"description\":\"Tue 22 Sep · 21:00 · Jordan Valley Park · 7/8 going · 波友測試 2\",\"image\":\"",
+  "PASS prod meet (1) og:description present — {\"description\":\"Tue 22 Sep · 21:00 · Jordan Valley Park · 7/8 going · 波友測試 2\"}",
+  "PASS prod meet (1) og:image is absolute on this host — {\"image\":\"https://social.silkvo.com/app/static/boyau/img/spanish-armada-and-u-s-armed-forces-comp-3-card.jpg\"}",
+  "PASS prod meet (2) og:image URL → 200 image/* — {\"status\":200,\"type\":\"image/jpeg\",\"bytes\":22185}",
+  "PASS prod meet (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache — {\"status\":200,\"type\":\"text/html\",\"cc\":\"no-cache\",\"sha\":\"8f250ebaef0b1f07\",\"indexSha\":\"8f250ebaef0b1f07\"}",
+  "PASS prod meet: og:title == meets/show name; description carries venue and n/cap going — {\"title\":\"Tester Tuesday Doubles\",\"description\":\"Tue 22 Sep · 21:00 · Jordan Valley Park · 7/8 going · 波友測試 2\",\"api\":{\"n",
+  "PASS prod club (1) crawler UA → 200 text/html, Cache-Control public max-age=300 — {\"status\":200,\"type\":\"text/html; charset=utf-8\",\"cc\":\"public, max-age=300\",\"bytes\":1328}",
+  "PASS prod club (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary_large_image, meta refresh — {\"title\":\"Tuen Mun Paddle Club\",\"description\":\"屯門黃金海岸波友。逢週三晚。 · 19 members\",\"image\":\"https://social.silkvo.com/app/stati",
+  "PASS prod club (1) og:description present — {\"description\":\"屯門黃金海岸波友。逢週三晚。 · 19 members\"}",
+  "PASS prod club (1) og:image is absolute on this host — {\"image\":\"https://social.silkvo.com/app/static/boyau/img/sports-court-harmony-of-the-seas-2025-card.jpg\"}",
+  "PASS prod club (2) og:image URL → 200 image/* — {\"status\":200,\"type\":\"image/jpeg\",\"bytes\":64232}",
+  "PASS prod club (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache — {\"status\":200,\"type\":\"text/html\",\"cc\":\"no-cache\",\"sha\":\"8f250ebaef0b1f07\",\"indexSha\":\"8f250ebaef0b1f07\"}",
+  "PASS prod club: og:title == channels/show name; description ends with \"usersCount members\" — {\"title\":\"Tuen Mun Paddle Club\",\"description\":\"屯門黃金海岸波友。逢週三晚。 · 19 members\",\"api\":{\"name\":\"Tuen Mun Paddle Club\",\"usersC",
+  "PASS prod player (1) crawler UA → 200 text/html, Cache-Control public max-age=300 — {\"status\":200,\"type\":\"text/html; charset=utf-8\",\"cc\":\"public, max-age=300\",\"bytes\":1253}",
+  "PASS prod player (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary, meta refresh — {\"title\":\"Jason 張\",\"description\":\"@demo_jason · GripBat player · DUPR 3.88 · Kowloon East · captain · demo account\",\"ima",
+  "PASS prod player (1) og:description present — {\"description\":\"@demo_jason · GripBat player · DUPR 3.88 · Kowloon East · captain · demo account\"}",
+  "PASS prod player (1) og:image is absolute on this host — {\"image\":\"https://social.silkvo.com/share/avatar/aqxxu4xssfmc000f.svg\"}",
+  "PASS prod player (2) og:image URL → 200 image/* — {\"status\":200,\"type\":\"image/svg+xml; charset=utf-8\",\"bytes\":278}",
+  "PASS prod player (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache — {\"status\":200,\"type\":\"text/html\",\"cc\":\"no-cache\",\"sha\":\"8f250ebaef0b1f07\",\"indexSha\":\"8f250ebaef0b1f07\"}",
+  "PASS prod player: og:title == users/show name; description starts \"@username · GripBat player\" — {\"title\":\"Jason 張\",\"description\":\"@demo_jason · GripBat player · DUPR 3.88 · Kowloon East · captain · demo account\",\"api",
+  "PASS prod meet (4) unknown id, crawler UA → 404 — {\"status\":404,\"type\":\"text/plain; charset=utf-8\"}",
+  "PASS prod club (4) unknown id, crawler UA → 404 — {\"status\":404,\"type\":\"text/plain; charset=utf-8\"}",
+  "PASS prod player (4) unknown id, crawler UA → 404 — {\"status\":404,\"type\":\"text/plain; charset=utf-8\"}",
+  "PASS prod meet (4) no ?id=, crawler UA → 404 — {\"status\":404}",
+  "PASS prod direct /share/meet/:id (no nginx rewrite) → 200 text/html with og:title — {\"status\":200,\"title\":\"Tester Tuesday Doubles\"}",
+  "PASS prod /share/venue/:id (kind not implemented) → 404 — {\"status\":404}",
+  "PASS UAT (5) meets/list answers a public meet to preview — {\"status\":200,\"count\":5,\"id\":\"ar7o90czs64a001f\",\"name\":\"週五夜雙打 Friday Night Doubles\"}",
+  "PASS UAT meet (1) crawler UA → 200 text/html, Cache-Control public max-age=300 — {\"status\":200,\"type\":\"text/html; charset=utf-8\",\"cc\":\"public, max-age=300\",\"bytes\":1379}",
+  "PASS UAT meet (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary_large_image, meta refresh — {\"title\":\"週五夜雙打 Friday Night Doubles\",\"description\":\"Fri 18 Sep · 18:00 · Kowloon Park · 2/8 going · Yuki 蔡\",\"image\":\"ht",
+  "PASS UAT meet (1) og:description present — {\"description\":\"Fri 18 Sep · 18:00 · Kowloon Park · 2/8 going · Yuki 蔡\"}",
+  "PASS UAT meet (1) og:image is absolute on this host — {\"image\":\"https://uat.social.silkvo.com/app/static/boyau/img/newport-doubles-shootout-card.jpg\"}",
+  "PASS UAT meet (2) og:image URL → 200 image/* — {\"status\":200,\"type\":\"image/jpeg\",\"bytes\":51183}",
+  "PASS UAT meet (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache — {\"status\":200,\"type\":\"text/html\",\"cc\":\"no-cache\",\"sha\":\"8f250ebaef0b1f07\",\"indexSha\":\"8f250ebaef0b1f07\"}",
+  "PASS UAT (5) og:title == the meet name; og:url on the UAT host — {\"title\":\"週五夜雙打 Friday Night Doubles\",\"url\":\"https://uat.social.silkvo.com/app/pages/meet/index?id=ar7o90czs64a001f\"}",
+  "PASS (6) tester2 UAT engine token via the SSO seam — {\"status\":200,\"userId\":\"ar7jww4yjhqz003s\"}",
+  "PASS (6) meets/create visibility=private on UAT → 200 with id — {\"status\":200,\"id\":\"ara8zsmf05rx0002\",\"visibility\":\"private\"}",
+  "PASS UAT private meet (1) crawler UA → 200 text/html, Cache-Control public max-age=300 — {\"status\":200,\"type\":\"text/html; charset=utf-8\",\"cc\":\"public, max-age=300\",\"bytes\":1168}",
+  "PASS UAT private meet (1) og:title, og:url = the app URL, og:site_name \"GripBat 抓拍\", twitter:card summary_large_image, meta refresh — {\"title\":\"[probe] og-share private 1789719332766\",\"description\":null,\"image\":\"https://uat.social.silkvo.com/app/static/b",
+  "PASS UAT private meet (6) PRIVATE → no og:description (title only) — {\"title\":\"[probe] og-share private 1789719332766\",\"description\":null}",
+  "PASS UAT private meet (1) og:image is absolute on this host — {\"image\":\"https://uat.social.silkvo.com/app/static/boyau/img/jardim-kovalova-net-card.jpg\"}",
+  "PASS UAT private meet (2) og:image URL → 200 image/* — {\"status\":200,\"type\":\"image/jpeg\",\"bytes\":42715}",
+  "PASS UAT private meet (3) Chrome UA → the app index (sha256 equal to /app/index.html), text/html, no-cache — {\"status\":200,\"type\":\"text/html\",\"cc\":\"no-cache\",\"sha\":\"8f250ebaef0b1f07\",\"indexSha\":\"8f250ebaef0b1f07\"}",
+  "PASS (6) private card: no venue / going / host in the page at all — {\"title\":\"[probe] og-share private 1789719332766\"}",
+  "PASS (6) cleanup: meets/cancel the probe meet — {\"status\":200}"
+ ]
+}

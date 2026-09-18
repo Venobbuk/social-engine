@@ -1,0 +1,11 @@
+{
+ "id": "sw-unreg",
+ "at": "2026-09-17T17:30:34.308Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "engine root registered scopes: [\"https://social.silkvo.com/\"]",
+  "after /app/ load, scopes: []",
+  "controller present during that load: true"
+ ]
+}

@@ -1,0 +1,135 @@
+{
+  "id": "feed-people-report",
+  "at": "2026-09-18T05:25:52.640Z",
+  "base": "https://uat.social.silkvo.com/api",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 10,
+  "total": 10,
+  "evidence": [
+    "0 tester2 engine token via the SSO seam (UAT)=ok {\"status\":200,\"userId\":\"ar7jww4yjhqz003s\"}",
+    "1 POST notes/timeline {limit:12} as tester2 → 200 array=ok {\"status\":200,\"count\":12}",
+    "2 note shape: id, createdAt, text, user{id,username}, reactions, repliesCount (PostCard needs these)=ok {\"keys\":[\"id\",\"createdAt\",\"userId\",\"user\",\"text\",\"cw\",\"visibility\",\"localOnly\",\"reactionAcceptance\",\"renoteCount\",\"repliesCount\",\"reactionCount\",\"reactions\",\"reactionEmojis\",\"fileIds\",\"files\",\"replyId\",\"renoteId\",\"channelId\",\"channel\",\"clippedCount\",\"reply\"],\"sample\":{\"id\":\"ar8ucnc1vskd0035\",\"user\":\"hkpl_725cad12224f\",\"channel\":\"Kowloon Dinkers\",\"text\":\"Grader reply: 9am works\"}}",
+    "3 paging: notes/timeline {untilId: first.id} → 200 array without the first id=ok {\"status\":200,\"count\":12}",
+    "4 anonymous notes/timeline → 401 (so the door must short-circuit signed-out readers)=ok {\"status\":401,\"code\":\"CREDENTIAL_REQUIRED\"}",
+    "5 a reportable target exists on UAT (local, not tester2, not admin)=ok {\"status\":200,\"target\":{\"id\":\"aqxxu4xssfmc000f\",\"username\":\"demo_jason\"}}",
+    "6 POST users/report-abuse {userId, comment:\"Spam — note <id>\"} as tester2 → 204 empty=ok {\"status\":204,\"body\":null}",
+    "7 reporting yourself → 400 CANNOT_REPORT_YOURSELF=ok {\"status\":400,\"code\":\"CANNOT_REPORT_YOURSELF\"}",
+    "8 anonymous report → 401=ok {\"status\":401,\"code\":\"CREDENTIAL_REQUIRED\"}",
+    "9 empty comment → 400 (minLength 1)=ok {\"status\":400,\"code\":\"INVALID_PARAM\"}"
+  ],
+  "detail": "notes/timeline (signed-in, paging, anonymous 401) and users/report-abuse (204, self 400, anon 401, empty 400) on the UAT engine as tester2",
+  "checks": [
+    {
+      "name": "0 tester2 engine token via the SSO seam (UAT)",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "userId": "ar7jww4yjhqz003s"
+      }
+    },
+    {
+      "name": "1 POST notes/timeline {limit:12} as tester2 → 200 array",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "count": 12
+      }
+    },
+    {
+      "name": "2 note shape: id, createdAt, text, user{id,username}, reactions, repliesCount (PostCard needs these)",
+      "pass": true,
+      "detail": {
+        "keys": [
+          "id",
+          "createdAt",
+          "userId",
+          "user",
+          "text",
+          "cw",
+          "visibility",
+          "localOnly",
+          "reactionAcceptance",
+          "renoteCount",
+          "repliesCount",
+          "reactionCount",
+          "reactions",
+          "reactionEmojis",
+          "fileIds",
+          "files",
+          "replyId",
+          "renoteId",
+          "channelId",
+          "channel",
+          "clippedCount",
+          "reply"
+        ],
+        "sample": {
+          "id": "ar8ucnc1vskd0035",
+          "user": "hkpl_725cad12224f",
+          "channel": "Kowloon Dinkers",
+          "text": "Grader reply: 9am works"
+        }
+      }
+    },
+    {
+      "name": "3 paging: notes/timeline {untilId: first.id} → 200 array without the first id",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "count": 12
+      }
+    },
+    {
+      "name": "4 anonymous notes/timeline → 401 (so the door must short-circuit signed-out readers)",
+      "pass": true,
+      "detail": {
+        "status": 401,
+        "code": "CREDENTIAL_REQUIRED"
+      }
+    },
+    {
+      "name": "5 a reportable target exists on UAT (local, not tester2, not admin)",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "target": {
+          "id": "aqxxu4xssfmc000f",
+          "username": "demo_jason"
+        }
+      }
+    },
+    {
+      "name": "6 POST users/report-abuse {userId, comment:\"Spam — note <id>\"} as tester2 → 204 empty",
+      "pass": true,
+      "detail": {
+        "status": 204,
+        "body": null
+      }
+    },
+    {
+      "name": "7 reporting yourself → 400 CANNOT_REPORT_YOURSELF",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "code": "CANNOT_REPORT_YOURSELF"
+      }
+    },
+    {
+      "name": "8 anonymous report → 401",
+      "pass": true,
+      "detail": {
+        "status": 401,
+        "code": "CREDENTIAL_REQUIRED"
+      }
+    },
+    {
+      "name": "9 empty comment → 400 (minLength 1)",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "code": "INVALID_PARAM"
+      }
+    }
+  ]
+}

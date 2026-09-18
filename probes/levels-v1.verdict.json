@@ -1,0 +1,164 @@
+{
+  "id": "levels-v1",
+  "at": "2026-09-17T18:38:30.133Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 10,
+  "total": 10,
+  "evidence": [
+    "0 tester2 engine token via the SSO seam=ok {\"status\":200,\"userId\":\"ar7jww4yjhqz003s\"}",
+    "1 POST meets/level {sport:pickleball, selfLevel:3.5} as tester2=ok {\"status\":200,\"body\":{\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprSingles\":null,\"duprDoubles\":null,\"gender\":\"male\",\"ageGroup\":\"adult\",\"onboarded\":true}}",
+    "2 POST meets/levels {userIds:[tester2, other]} → 200 array=ok {\"status\":200,\"body\":[{\"userId\":\"ar7jww4yjhqz003s\",\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprDoubles\":null,\"duprSingles\":null,\"gender\":\"male\",\"ageGroup\":\"adult\"},{\"userId\":\"aqxxu4xssfmc000f\",\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprDoubles\":null,\"duprSingles\":null,\"gender\":\"female\",\"ageGroup\":\"adult\"}]}",
+    "3 array contains tester2 with selfLevel 3.5 and sport pickleball=ok {\"mine\":{\"userId\":\"ar7jww4yjhqz003s\",\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprDoubles\":null,\"duprSingles\":null,\"gender\":\"male\",\"ageGroup\":\"adult\"}}",
+    "4 row shape: exactly the public fields, nothing private=ok {\"keys\":[\"userId\",\"sport\",\"selfLevel\",\"duprDoubles\",\"duprSingles\",\"gender\",\"ageGroup\"]}",
+    "5 anonymous (no token) POST meets/levels → 200 with tester2 at 3.5=ok {\"status\":200,\"body\":[{\"userId\":\"ar7jww4yjhqz003s\",\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprDoubles\":null,\"duprSingles\":null,\"gender\":\"male\",\"ageGroup\":\"adult\"},{\"userId\":\"aqxxu4xssfmc000f\",\"sport\":\"pickleball\",\"selfLevel\":3.5,\"duprDoubles\":null,\"duprSingles\":null,\"gender\":\"female\",\"ageGroup\":\"adult\"}]}",
+    "6 empty userIds → 200 []=ok {\"status\":200,\"body\":[]}",
+    "7 sport scoping: badminton answers tester2 only if a badminton row exists (db count=0)=ok {\"status\":200,\"body\":[],\"badRows\":\"0\"}",
+    "8 answered rows == db rows for those ids in pickleball=ok {\"answered\":2,\"dbCount\":\"2\"}",
+    "9 101 ids → 400 (maxItems 100)=ok {\"status\":400,\"err\":\"INVALID_PARAM\"}"
+  ],
+  "detail": "meets/levels batch read on the live engine (signed-in + anonymous, tester2 at 3.5, empty [], sport scoping, db row count, maxItems)",
+  "checks": [
+    {
+      "name": "0 tester2 engine token via the SSO seam",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "userId": "ar7jww4yjhqz003s"
+      }
+    },
+    {
+      "name": "1 POST meets/level {sport:pickleball, selfLevel:3.5} as tester2",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": {
+          "sport": "pickleball",
+          "selfLevel": 3.5,
+          "duprSingles": null,
+          "duprDoubles": null,
+          "gender": "male",
+          "ageGroup": "adult",
+          "onboarded": true
+        }
+      }
+    },
+    {
+      "name": "2 POST meets/levels {userIds:[tester2, other]} → 200 array",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": [
+          {
+            "userId": "ar7jww4yjhqz003s",
+            "sport": "pickleball",
+            "selfLevel": 3.5,
+            "duprDoubles": null,
+            "duprSingles": null,
+            "gender": "male",
+            "ageGroup": "adult"
+          },
+          {
+            "userId": "aqxxu4xssfmc000f",
+            "sport": "pickleball",
+            "selfLevel": 3.5,
+            "duprDoubles": null,
+            "duprSingles": null,
+            "gender": "female",
+            "ageGroup": "adult"
+          }
+        ]
+      }
+    },
+    {
+      "name": "3 array contains tester2 with selfLevel 3.5 and sport pickleball",
+      "pass": true,
+      "detail": {
+        "mine": {
+          "userId": "ar7jww4yjhqz003s",
+          "sport": "pickleball",
+          "selfLevel": 3.5,
+          "duprDoubles": null,
+          "duprSingles": null,
+          "gender": "male",
+          "ageGroup": "adult"
+        }
+      }
+    },
+    {
+      "name": "4 row shape: exactly the public fields, nothing private",
+      "pass": true,
+      "detail": {
+        "keys": [
+          "userId",
+          "sport",
+          "selfLevel",
+          "duprDoubles",
+          "duprSingles",
+          "gender",
+          "ageGroup"
+        ]
+      }
+    },
+    {
+      "name": "5 anonymous (no token) POST meets/levels → 200 with tester2 at 3.5",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": [
+          {
+            "userId": "ar7jww4yjhqz003s",
+            "sport": "pickleball",
+            "selfLevel": 3.5,
+            "duprDoubles": null,
+            "duprSingles": null,
+            "gender": "male",
+            "ageGroup": "adult"
+          },
+          {
+            "userId": "aqxxu4xssfmc000f",
+            "sport": "pickleball",
+            "selfLevel": 3.5,
+            "duprDoubles": null,
+            "duprSingles": null,
+            "gender": "female",
+            "ageGroup": "adult"
+          }
+        ]
+      }
+    },
+    {
+      "name": "6 empty userIds → 200 []",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": []
+      }
+    },
+    {
+      "name": "7 sport scoping: badminton answers tester2 only if a badminton row exists (db count=0)",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": [],
+        "badRows": "0"
+      }
+    },
+    {
+      "name": "8 answered rows == db rows for those ids in pickleball",
+      "pass": true,
+      "detail": {
+        "answered": 2,
+        "dbCount": "2"
+      }
+    },
+    {
+      "name": "9 101 ids → 400 (maxItems 100)",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "err": "INVALID_PARAM"
+      }
+    }
+  ]
+}

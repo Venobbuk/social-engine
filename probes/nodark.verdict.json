@@ -1,0 +1,12 @@
+{
+ "id": "nodark",
+ "at": "2026-09-17T17:55:28.174Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "/app/pages/home/index dark OS + stored dark -> data-theme=light body bg rgba(0, 0, 0, 0) Appearance control present=false PASS",
+  "/app/pages/social-settings/index dark OS + stored dark -> data-theme=light body bg rgba(0, 0, 0, 0) Appearance control present=false PASS",
+  "/app/pages/more/index dark OS + stored dark -> data-theme=light body bg rgba(0, 0, 0, 0) Appearance control present=false PASS",
+  "Display sheet open=true Appearance present=false PASS"
+ ]
+}

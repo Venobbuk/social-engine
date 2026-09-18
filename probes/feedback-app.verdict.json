@@ -1,0 +1,21 @@
+{
+ "id": "feedback-app",
+ "at": "2026-09-18T15:11:36.820Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "PASS bug launcher (.sh-widgets-app .fb-fab) is on the Home page",
+  "PASS launcher sits bottom-left, clear of the search FAB — x 16 y 761",
+  "PASS panel opens (Report a problem)",
+  "PASS message field present",
+  "PASS Send report button present",
+  "PASS POST /api/v1/feedback → 200",
+  "PASS done line names GripBat, not the league office — \"Thanks. The GripBat team has your report.\"",
+  "PASS panel closes itself after the thanks line (grader r8 #100)",
+  "PASS admin list has the row (15 rows)",
+  "PASS row is in the GripBat UAT tenant — boyau-uat",
+  "PASS page_context carries the Home route — {\"ts\":\"2026-09-18T15:11:31.935Z\",\"ua\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/146.0.0.0 Safari/537.36\",\"url\":\"/ap",
+  "PASS tester name attached — Probe Launcher",
+  "PASS auto page capture attached — 1 image(s)"
+ ]
+}

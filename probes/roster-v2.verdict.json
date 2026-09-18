@@ -1,0 +1,237 @@
+{
+  "id": "roster-v2",
+  "at": "2026-09-18T15:10:23.333Z",
+  "base": "https://uat.social.silkvo.com",
+  "meet": {
+    "id": "arai4oggizsc000i",
+    "name": "UAT Thursday Open Play"
+  },
+  "condition_fired": true,
+  "verdict": "pass",
+  "pass": 10,
+  "total": 10,
+  "evidence": [
+    "0 setup: a live host-ken meet with allowPlusOne + autoApprove, tom and mei off it=ok {\"id\":\"arai4oggizsc000i\",\"name\":\"UAT Thursday Open Play\",\"allowPlusOne\":true,\"autoApprove\":true,\"confirmed\":1,\"capacity\":12,\"myStatus\":null}",
+    "1 the \"Bringing anyone?\" stepper renders above Join (meet allows +1, tom not on it)=ok {\"url\":\"https://uat.social.silkvo.com/app/pages/meet/index?id=arai4oggizsc000i&tab=participants&lang=en\",\"stepper\":true,\"cta\":[\"Bringing anyone?A +1 takes a seat of its own−Just me+Join\"]}",
+    "2 tap + → stepper reads \"+1\" and the Join label carries it=ok {\"val\":[\"+1\"],\"label\":[\"−\",\"+\",\"Join +1\"]}",
+    "3 POST meets/join carried plusOnes:1 and the engine counts two more confirmed seats=ok {\"joins\":[{\"meetId\":\"arai4oggizsc000i\",\"plusOnes\":1,\"i\":\"jPbKChbev70zGoRqKoevX1Vo1qWSzir2\"}],\"before\":1,\"after\":3,\"myStatus\":\"confirmed\",\"spotsLeft\":9}",
+    "4 the roster shows the \"+1\" tag on tom's cell and the counter reads the engine's number=ok {\"guestRow\":{\"id\":\"arant06hizsc003x\",\"displayName\":\"Tom Ho +1\",\"status\":\"confirmed\",\"tags\":[\"guest\"]},\"plustags\":[\"+1\"],\"counter\":\"CONFIRMED • 3/12\"}",
+    "5 Sort ▾ opens the kit sheet with Last confirmed ✓ · Name A–Z · Level high→low=ok {\"sortLabel0\":\"Sort: Last confirmed ▾\",\"items\":[\"Last confirmed ✓\",\"Name A–Z\",\"Level high→low\"],\"order0\":[\"Tom Ho\",\"Tom Ho +1\",\"Mei Lam\"]}",
+    "6 Name A–Z reorders the confirmed grid (differs from the engine order, equals the alphabetical order)=ok {\"order0\":[\"Tom Ho\",\"Tom Ho +1\",\"Mei Lam\"],\"order1\":[\"Mei Lam\",\"Tom Ho\",\"Tom Ho +1\"],\"alpha\":[\"Mei Lam\",\"Tom Ho\",\"Tom Ho +1\"],\"sortLabel1\":\"Sort: Name A–Z ▾\"}",
+    "7 Level high→low puts the highest level first (mei 4.0 ahead of tom 3.0 and the unrated +1)=ok {\"order2\":[\"Mei Lam\",\"Tom Ho\",\"Tom Ho +1\"],\"levels2\":[\"4.0\",\"3.0\"]}",
+    "8 level chips render on the roster (organizers + confirmed): ≥1 rated value, \"Unrated\" for players without a row=ok {\"chips\":[{\"t\":\"3.5\",\"none\":false},{\"t\":\"4.0\",\"none\":false},{\"t\":\"3.0\",\"none\":false}]}",
+    "9 Show ▾ → Level off: chips gone, gb.roster.level=\"0\", label reads Show: Tags=ok {\"hidden\":0,\"stored\":\"0\",\"showLabel\":\"Show: Tags ▾\"}"
+  ],
+  "info": [
+    {
+      "name": "setup: tom meets/leave",
+      "detail": {
+        "status": 400,
+        "code": "MEET_NOT_PARTICIPANT"
+      }
+    },
+    {
+      "name": "setup: mei meets/leave",
+      "detail": {
+        "status": 400,
+        "code": "MEET_NOT_PARTICIPANT"
+      }
+    },
+    {
+      "name": "safety interstitial acknowledged",
+      "detail": true
+    },
+    {
+      "name": "mei meets/join",
+      "detail": {
+        "status": 200,
+        "myStatus": "confirmed"
+      }
+    },
+    {
+      "name": "cleanup: tom meets/leave",
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "cleanup: mei meets/leave",
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "cleanup: confirmed back to",
+      "detail": {
+        "confirmed": 1,
+        "before": 1
+      }
+    }
+  ],
+  "detail": "headless Chrome on https://uat.social.silkvo.com as clubadmin-tom: +1 stepper → meets/join plusOnes:1 → confirmed +2 and the \"+1\" tag; Sort ▾ Name A–Z / Level high→low reorder the confirmed grid; level chips on the roster; Show ▾ Level toggle remembered",
+  "checks": [
+    {
+      "name": "0 setup: a live host-ken meet with allowPlusOne + autoApprove, tom and mei off it",
+      "pass": true,
+      "detail": {
+        "id": "arai4oggizsc000i",
+        "name": "UAT Thursday Open Play",
+        "allowPlusOne": true,
+        "autoApprove": true,
+        "confirmed": 1,
+        "capacity": 12,
+        "myStatus": null
+      }
+    },
+    {
+      "name": "1 the \"Bringing anyone?\" stepper renders above Join (meet allows +1, tom not on it)",
+      "pass": true,
+      "detail": {
+        "url": "https://uat.social.silkvo.com/app/pages/meet/index?id=arai4oggizsc000i&tab=participants&lang=en",
+        "stepper": true,
+        "cta": [
+          "Bringing anyone?A +1 takes a seat of its own−Just me+Join"
+        ]
+      }
+    },
+    {
+      "name": "2 tap + → stepper reads \"+1\" and the Join label carries it",
+      "pass": true,
+      "detail": {
+        "val": [
+          "+1"
+        ],
+        "label": [
+          "−",
+          "+",
+          "Join +1"
+        ]
+      }
+    },
+    {
+      "name": "3 POST meets/join carried plusOnes:1 and the engine counts two more confirmed seats",
+      "pass": true,
+      "detail": {
+        "joins": [
+          {
+            "meetId": "arai4oggizsc000i",
+            "plusOnes": 1,
+            "i": "jPbKChbev70zGoRqKoevX1Vo1qWSzir2"
+          }
+        ],
+        "before": 1,
+        "after": 3,
+        "myStatus": "confirmed",
+        "spotsLeft": 9
+      }
+    },
+    {
+      "name": "4 the roster shows the \"+1\" tag on tom's cell and the counter reads the engine's number",
+      "pass": true,
+      "detail": {
+        "guestRow": {
+          "id": "arant06hizsc003x",
+          "displayName": "Tom Ho +1",
+          "status": "confirmed",
+          "tags": [
+            "guest"
+          ]
+        },
+        "plustags": [
+          "+1"
+        ],
+        "counter": "CONFIRMED • 3/12"
+      }
+    },
+    {
+      "name": "5 Sort ▾ opens the kit sheet with Last confirmed ✓ · Name A–Z · Level high→low",
+      "pass": true,
+      "detail": {
+        "sortLabel0": "Sort: Last confirmed ▾",
+        "items": [
+          "Last confirmed ✓",
+          "Name A–Z",
+          "Level high→low"
+        ],
+        "order0": [
+          "Tom Ho",
+          "Tom Ho +1",
+          "Mei Lam"
+        ]
+      }
+    },
+    {
+      "name": "6 Name A–Z reorders the confirmed grid (differs from the engine order, equals the alphabetical order)",
+      "pass": true,
+      "detail": {
+        "order0": [
+          "Tom Ho",
+          "Tom Ho +1",
+          "Mei Lam"
+        ],
+        "order1": [
+          "Mei Lam",
+          "Tom Ho",
+          "Tom Ho +1"
+        ],
+        "alpha": [
+          "Mei Lam",
+          "Tom Ho",
+          "Tom Ho +1"
+        ],
+        "sortLabel1": "Sort: Name A–Z ▾"
+      }
+    },
+    {
+      "name": "7 Level high→low puts the highest level first (mei 4.0 ahead of tom 3.0 and the unrated +1)",
+      "pass": true,
+      "detail": {
+        "order2": [
+          "Mei Lam",
+          "Tom Ho",
+          "Tom Ho +1"
+        ],
+        "levels2": [
+          "4.0",
+          "3.0"
+        ]
+      }
+    },
+    {
+      "name": "8 level chips render on the roster (organizers + confirmed): ≥1 rated value, \"Unrated\" for players without a row",
+      "pass": true,
+      "detail": {
+        "chips": [
+          {
+            "t": "3.5",
+            "none": false
+          },
+          {
+            "t": "4.0",
+            "none": false
+          },
+          {
+            "t": "3.0",
+            "none": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "9 Show ▾ → Level off: chips gone, gb.roster.level=\"0\", label reads Show: Tags",
+      "pass": true,
+      "detail": {
+        "hidden": 0,
+        "stored": "0",
+        "showLabel": "Show: Tags ▾"
+      }
+    }
+  ],
+  "screenshots": [
+    "/root/walk/_roster-v2-joined.png",
+    "/root/walk/_roster-v2-show.png",
+    "/root/walk/_roster-v2-sorted.png",
+    "/root/walk/_roster-v2-sortsheet.png",
+    "/root/walk/_roster-v2-stepper.png"
+  ]
+}

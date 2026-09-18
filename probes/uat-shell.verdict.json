@@ -1,0 +1,20 @@
+{
+ "id": "uat-shell",
+ "at": "2026-09-18T15:52:57.248Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "page": "https://uat.social.silkvo.com/uat.html",
+ "evidence": [
+  "PASS 0 / lands on the role page (/qa.html; /uat.html is the old stub) with the role cards — /qa.html · cards player-amy,host-ken,clubowner-mei,clubadmin-tom,tester2,admin,own",
+  "PASS 0b task links resolved to the live meet / club ids — /app/pages/meet/index?id=arai4oefizsc000f /app/pages/meet/index?id=arai4oggizsc000i /app/pages/community/index?id=arai4ohlizsc000l",
+  "PASS 1 a ticked task survives a reload — aria-checked=true count 0→1",
+  "PASS 2 \"Sign in as host-ken\" lands on the app Home as Ken (hkpl session) — /app/pages/home/index · me={\"email\":\"uat+host-ken@hkpl-test.silkvo.com\",\"role\":\"PLAYER\"}",
+  "PASS 2b Home shows NEXT UP with UAT Tuesday Doubles — K Hi, Ken 繁 Language Notifications Inbox NEXT UP · Tue 07:30 pm UAT Tuesday Doubles Tuen Mun Sports Centre · 1/8 Confirmed See details PLAY ",
+  "PASS 2c the engine token is Ken's own engine user — {\"id\":\"arai4h1qizsc0003\",\"username\":\"hkpl_15949b81b857\",\"name\":\"Ken Wong\"} expected arai4h1qizsc0003",
+  "PASS 3 \"Sign in as clubowner-mei\" signs in as Mei (hkpl + engine) — /app/pages/home/index · me={\"email\":\"uat+clubowner-mei@hkpl-test.silkvo.com\",\"role\":\"PLAYER\"} · engine={\"id\":\"arai4im8izsc0006\",\"username\":\"hkpl_5885b6f3eeff\",\"name\":\"Mei Lam\"}",
+  "PASS 3b Community › My clubs shows \"UAT Paddle Club\" — Community Add My clubs UAT Paddle Club Public · Pickleball · 0 members Clubs near you Ladies Pickleball HK Public · Pickleball · 25 members ",
+  "PASS 4 \"Open /admin as admin\" lands on the admin console as TENANT_ADMIN — /admin.html · me={\"email\":\"uat+admin@hkpl-test.silkvo.com\",\"role\":\"TENANT_ADMIN\"} · ‹ Dashboard 🔑 Testing-sandbox access code today: 161604 (yesterday’s code also ",
+  "PASS 5 \"Sign in as player-amy\" signs in as Amy; first stop onboarding (new player) — first=/app/pages/onboard/index · me={\"email\":\"uat+player-amy@hkpl-test.silkvo.com\",\"role\":\"PLAYER\"} · engine={\"id\":\"arai4g7uizsc0001\",\"username\":\"hkpl_e5b42b31d944\",\"name\":\"Amy Chan\"}",
+  "PASS 5b Home signed in, no NEXT UP (THIS WEEK banner, Find a game) — A Hi, Amy 繁 Language Notifications Inbox THIS WEEK 19 meets near you this week Find a game PLAY NOW Find a meet Join a game near you Open pl"
+ ]
+}

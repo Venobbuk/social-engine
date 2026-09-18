@@ -1,0 +1,12 @@
+{
+ "id": "zh-times",
+ "at": "2026-09-18T08:11:22.239Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "PASS /app/pages/home/index — 上午/下午 cells=0 edge-hugging=[] 上一步=false",
+  "PASS /app/pages/meets/index — 上午/下午 cells=0 edge-hugging=[] 上一步=false",
+  "PASS /app/pages/meet/index?id=ar7qrfpjs64a00mi — 上午/下午 cells=0 edge-hugging=[] 上一步=false",
+  "PASS /app/pages/notifications/index — 上午/下午 cells=0 edge-hugging=[] 上一步=false"
+ ]
+}

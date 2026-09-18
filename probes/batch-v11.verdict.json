@@ -1,11 +1,11 @@
 {
   "id": "batch-v11",
-  "at": "2026-09-17T07:30:59.276Z",
+  "at": "2026-09-17T13:19:37.105Z",
   "condition_fired": true,
   "verdict": "pass",
   "pass": 5,
   "total": 5,
-  "evidence": "[\"1 \\\"You are confirmed\\\" names the meet and links meet:<id>=ok {\\\"header\\\":\\\"You are confirmed\\\",\\\"body\\\":\\\"You are confirmed to play [probe] link. Please be on time.\\\",\\\"link\\\":\\\"meet:ar8ryl2hctib0009\\\"}\",\"2 rotating 7 players × 6 rounds: seat counts spread ≤ 1=ok {\\\"matches\\\":6,\\\"counts\\\":[3,3,3,3,3,3,3,3],\\\"warnings\\\":[]}\",\"2b …and with the toggle off the sit-outs still rotate (spread ≤ 1)=ok {\\\"counts\\\":[3,3,3,3,3,3,3,3]}\",\"3 log-casual → a played private meet flagged casual with one scored match; absent from Discover and from the plain hosting list; present with casual:true=ok {\\\"status\\\":200,\\\"participants\\\":4,\\\"inDiscover\\\":false,\\\"inCasual\\\":true}\",\"4 ended meet: out of the day window by default, in with includePast=ok {\\\"inWindow\\\":false,\\\"withPast\\\":true}\"]",
+  "evidence": "[\"1 \\\"You are confirmed\\\" names the meet and links meet:<id>=ok {\\\"header\\\":\\\"You are confirmed\\\",\\\"body\\\":\\\"You are confirmed to play [probe] link. Please be on time.\\\",\\\"link\\\":\\\"meet:ar94ey5yoctj00qr\\\"}\",\"2 rotating 7 players × 6 rounds: seat counts spread ≤ 1=ok {\\\"matches\\\":6,\\\"counts\\\":[3,3,3,3,3,3,3,3],\\\"warnings\\\":[]}\",\"2b …and with the toggle off the sit-outs still rotate (spread ≤ 1)=ok {\\\"counts\\\":[3,3,3,3,3,3,3,3]}\",\"3 log-casual → a played private meet flagged casual with one scored match; absent from Discover and from the plain hosting list; present with casual:true=ok {\\\"status\\\":200,\\\"participants\\\":4,\\\"inDiscover\\\":false,\\\"inCasual\\\":true}\",\"4 ended meet: out of the day window by default, in with includePast=ok {\\\"inWindow\\\":false,\\\"withPast\\\":true}\"]",
   "detail": "notification link/name, fair seating, casual log, ended-meet exclusion on the live engine",
   "checks": [
     {
@@ -14,7 +14,7 @@
       "detail": {
         "header": "You are confirmed",
         "body": "You are confirmed to play [probe] link. Please be on time.",
-        "link": "meet:ar8ryl2hctib0009"
+        "link": "meet:ar94ey5yoctj00qr"
       }
     },
     {
