@@ -80,6 +80,9 @@ import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { VenueService } from '@/modules/venues/VenueService.js';
 import { ClubService } from '@/modules/clubs/ClubService.js';
+import { CompetitionService } from '@/modules/competitions/CompetitionService.js'; // TOURNAMENT-V1
+import { CompetitionEntityService } from '@/modules/competitions/CompetitionEntityService.js';
+import { ClubScheduleService } from '@/modules/clubs/ClubScheduleService.js'; // CLUB-V3
 import { ChatService } from './ChatService.js';
 import { RegistryApiService } from './RegistryApiService.js';
 import { ReversiService } from './ReversiService.js';
@@ -237,6 +240,9 @@ const $MeetLevelService: Provider = { provide: 'MeetLevelService', useExisting: 
 const $MeetMatchService: Provider = { provide: 'MeetMatchService', useExisting: MeetMatchService };
 const $VenueService: Provider = { provide: 'VenueService', useExisting: VenueService };
 const $ClubService: Provider = { provide: 'ClubService', useExisting: ClubService };
+const $CompetitionService: Provider = { provide: 'CompetitionService', useExisting: CompetitionService }; // TOURNAMENT-V1
+const $CompetitionEntityService: Provider = { provide: 'CompetitionEntityService', useExisting: CompetitionEntityService };
+const $ClubScheduleService: Provider = { provide: 'ClubScheduleService', useExisting: ClubScheduleService }; // CLUB-V3
 const $ChannelMutingService: Provider = { provide: 'ChannelMutingService', useExisting: ChannelMutingService };
 const $ChatService: Provider = { provide: 'ChatService', useExisting: ChatService };
 const $RegistryApiService: Provider = { provide: 'RegistryApiService', useExisting: RegistryApiService };
@@ -396,6 +402,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MeetMatchService,
 		VenueService,
 		ClubService,
+		CompetitionService, // TOURNAMENT-V1
+		CompetitionEntityService,
+		ClubScheduleService, // CLUB-V3
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -553,6 +562,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MeetMatchService,
 		$VenueService,
 		$ClubService,
+		$CompetitionService, // TOURNAMENT-V1
+		$CompetitionEntityService,
+		$ClubScheduleService, // CLUB-V3
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,
@@ -710,6 +722,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MeetMatchService,
 		VenueService,
 		ClubService,
+		CompetitionService, // TOURNAMENT-V1
+		CompetitionEntityService,
+		ClubScheduleService, // CLUB-V3
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -865,6 +880,9 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MeetMatchService,
 		$VenueService,
 		$ClubService,
+		$CompetitionService, // TOURNAMENT-V1
+		$CompetitionEntityService,
+		$ClubScheduleService, // CLUB-V3
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,

@@ -247,6 +247,15 @@ importers:
       blurhash:
         specifier: 2.0.5
         version: 2.0.5
+      brackets-manager:
+        specifier: 1.11.0
+        version: 1.11.0
+      brackets-memory-db:
+        specifier: 1.0.6
+        version: 1.0.6(brackets-model@1.7.0)
+      brackets-model:
+        specifier: 1.7.0
+        version: 1.7.0
       bullmq:
         specifier: 6.3.2
         version: 6.3.2(ioredis@5.11.1(supports-color@10.2.2))(pg@8.23.0)
@@ -4590,6 +4599,18 @@ packages:
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
+
+  brackets-manager@1.11.0:
+    resolution: {integrity: sha512-IhjktPosZTgqPo73NIuQbCOEuF5y6eJFmXeK5M5pBmjwl2TCWBqVJBlwhYonTLxILAOtjJ3dUjSyte97VI4cIQ==}
+    engines: {node: '>=14'}
+
+  brackets-memory-db@1.0.6:
+    resolution: {integrity: sha512-agCBS56rwbnZFwLhX3WGbFusAwvyuYz39MG7YrX+e+P3VK9VS/z3mjiZGM4XCYPL5Z6tGWcJ1BTnhYh7ww9t7w==}
+    peerDependencies:
+      brackets-model: ^1.7.0
+
+  brackets-model@1.7.0:
+    resolution: {integrity: sha512-Hj6WpXjWw/VmCha3LOSYC1ZjHPXD2UahwPVOEEboBmxFP8CfTdnm4kDUyG23RfTH+ktoNPrmcxNnHUN/T5IwLg==}
 
   broadcast-channel@7.4.0:
     resolution: {integrity: sha512-Oe0EdXTN+BjH0QatATL1tnK0Qs9aKMSML59nYKOJ8Jk6IMT9Y2O+bJGU6MEA9tD7onvj5HnrwQf8fCzXEBcbDQ==}
@@ -12173,9 +12194,9 @@ snapshots:
       obug: 2.1.1
       std-env: 4.1.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(happy-dom@20.12.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(msw@2.15.0(@types/node@26.4.0)(typescript@6.0.2))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.48.0)(tsx@4.23.13))
+      vitest: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(happy-dom@20.12.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(msw@2.15.0(@types/node@26.4.0)(@typescript/typescript6@6.0.2))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.48.0)(tsx@4.23.13))
     optionalDependencies:
-      '@vitest/browser': 4.1.11(bufferutil@4.1.0)(msw@2.15.0(@types/node@26.4.0)(typescript@6.0.2))(utf-8-validate@6.0.6)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.48.0)(tsx@4.23.13))(vitest@4.1.11)
+      '@vitest/browser': 4.1.11(bufferutil@4.1.0)(msw@2.15.0(@types/node@26.4.0)(@typescript/typescript6@6.0.2))(utf-8-validate@6.0.6)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.48.0)(tsx@4.23.13))(vitest@4.1.11)
 
   '@vitest/expect@2.0.5':
     dependencies:
@@ -12763,6 +12784,18 @@ snapshots:
   braces@3.0.3:
     dependencies:
       fill-range: 7.1.1
+
+  brackets-manager@1.11.0:
+    dependencies:
+      brackets-model: 1.7.0
+      uuid: 9.0.1
+
+  brackets-memory-db@1.0.6(brackets-model@1.7.0):
+    dependencies:
+      brackets-model: 1.7.0
+      rfdc: 1.4.1
+
+  brackets-model@1.7.0: {}
 
   broadcast-channel@7.4.0:
     dependencies:
@@ -13592,13 +13625,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.68.0(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0)(typescript@6.0.3))(eslint-import-resolver-node@0.3.10(supports-color@10.2.2))(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.68.0(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0)(typescript@6.0.3))(eslint-import-resolver-node@0.3.10(supports-color@5.5.0))(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0):
     dependencies:
       debug: 3.2.7(supports-color@5.5.0)
     optionalDependencies:
       '@typescript-eslint/parser': 8.68.0(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0)(typescript@6.0.3)
       eslint: 9.39.5(supports-color@5.5.0)
-      eslint-import-resolver-node: 0.3.10(supports-color@10.2.2)
+      eslint-import-resolver-node: 0.3.10(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -13671,7 +13704,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.5(supports-color@5.5.0)
       eslint-import-resolver-node: 0.3.10(supports-color@5.5.0)
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.68.0(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0)(typescript@6.0.3))(eslint-import-resolver-node@0.3.10(supports-color@10.2.2))(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.68.0(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0)(typescript@6.0.3))(eslint-import-resolver-node@0.3.10(supports-color@5.5.0))(eslint@9.39.5(supports-color@5.5.0))(supports-color@5.5.0)
       hasown: 2.0.4
       is-core-module: 2.16.2
       is-glob: 4.0.3

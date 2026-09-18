@@ -572,6 +572,8 @@ export class UserEntityService implements OnModuleInit {
 				}))),
 				memo: memo,
 				moderationNote: iAmModerator ? (profile!.moderationNote ?? '') : undefined,
+				// TOURNAMENT-V1: competition placements (1st–4th + custom awards) written by competitions/status finish — read by the profile page
+				placements: this.usersRepository.query('SELECT a."competitionId", c.name AS "competitionName", a.type, a.name, e.name AS "entryName", a."awardedAt" FROM competition_award a JOIN competition c ON c.id = a."competitionId" LEFT JOIN competition_entry e ON e.id = a."entryId" WHERE $1 = ANY(a."userIds") AND a.enabled = true ORDER BY a."awardedAt" DESC NULLS LAST LIMIT 50', [user.id]).then((rows: { competitionId: string; competitionName: string; type: string; name: string; entryName: string | null; awardedAt: Date | null }[]) => rows.map((r) => ({ competitionId: r.competitionId, competitionName: r.competitionName, type: r.type, name: r.name, entryName: r.entryName ?? '', awardedAt: r.awardedAt ? new Date(r.awardedAt).toISOString() : null }))).catch(() => []),
 			} : {}),
 
 			...(isDetailed && (isMe || iAmModerator) ? {

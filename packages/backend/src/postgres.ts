@@ -82,6 +82,12 @@ import { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import { MiVenue } from '@/modules/venues/models/Venue.js';
 import { MiUserLocation } from '@/modules/venues/models/UserLocation.js';
 import { MiClubSetting, MiClubJoinRequest } from '@/modules/clubs/models/ClubSetting.js';
+import { MiCompetition } from '@/modules/competitions/models/Competition.js'; // TOURNAMENT-V1
+import { MiCompetitionEntry } from '@/modules/competitions/models/CompetitionEntry.js';
+import { MiCompetitionMatch } from '@/modules/competitions/models/CompetitionMatch.js';
+import { MiCompetitionAward } from '@/modules/competitions/models/CompetitionAward.js';
+import { MiClubMemberState } from '@/modules/clubs/models/ClubSetting.js'; // CLUB-V3
+import { MiClubSchedule } from '@/modules/clubs/models/ClubSchedule.js'; // CLUB-V3
 import { MiRetentionAggregation } from '@/models/RetentionAggregation.js';
 import { MiRole } from '@/models/Role.js';
 import { MiRoleAssignment } from '@/models/RoleAssignment.js';
@@ -252,6 +258,10 @@ export const entities = [
 	MiClubJoinRequest,
 	MiChannelFollowing,
 	MiChannelFavorite,
+	MiCompetition, // TOURNAMENT-V1
+	MiCompetitionEntry,
+	MiCompetitionMatch,
+	MiCompetitionAward,
 	MiChannelMuting,
 	MiRegistryItem,
 	MiAd,
