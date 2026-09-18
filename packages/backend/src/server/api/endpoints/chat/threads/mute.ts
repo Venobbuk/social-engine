@@ -62,8 +62,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const room = await this.chatService.findRoomById(ps.roomId);
 				if (room == null || !(await this.chatService.isRoomMember(room, me.id))) throw new ApiError(meta.errors.noSuchThread);
 				await this.chatService.setNotificationMute(me.id, 'room', room.id, ps.mute);
-				// keep Misskey's per-membership mute (the meet kebab's meets/chat-mute writes that one) in step, so one switch reads true
-				await this.chatService.muteRoom(me.id, room.id, ps.mute).catch(() => undefined);
+				// turning notifications back ON also lifts Misskey's per-membership mute (the meet kebab's meets/chat-mute writes that
+				// one and chat/threads/show reports either), so one switch reads and clears the truth; turning OFF touches only this
+				// table, so the thread keeps its unread marker and only the notification is silenced
+				if (!ps.mute) await this.chatService.muteRoom(me.id, room.id, false).catch(() => undefined);
 				return { muted: ps.mute };
 			}
 			if (ps.userId) {

@@ -361,8 +361,15 @@ export class ChatService {
 	public async readAllChatMessages(
 		readerId: MiUser['id'],
 	): Promise<void> {
+		// CHAT-V2: the set lists every thread with a marker (user:<id> / room:<id>), so the per-thread markers that
+		// chat/history reads as isRead are cleared too — 'Mark all as read' in the inbox stays read after a reload
+		const threads = await this.redisClient.smembers(`newChatMessagesExists:${readerId}`);
 		const redisPipeline = this.redisClient.pipeline();
-		// TODO: newUserChatMessageExists とか newRoomChatMessageExists も消したい(けどキーの列挙が必要になって面倒)
+		for (const t of threads) {
+			const [kind, id] = t.split(':');
+			if (kind === 'user') redisPipeline.del(`newUserChatMessageExists:${readerId}:${id}`);
+			else if (kind === 'room') redisPipeline.del(`newRoomChatMessageExists:${readerId}:${id}`);
+		}
 		redisPipeline.del(`newChatMessagesExists:${readerId}`);
 		await redisPipeline.exec();
 	}
