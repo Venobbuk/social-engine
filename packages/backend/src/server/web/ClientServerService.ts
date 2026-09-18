@@ -768,7 +768,9 @@ export class ClientServerService {
 				const meet = await this.meetsRepository.findOneBy({ id });
 				if (meet == null) return shareNotFound(reply);
 				const m = await this.meetEntityService.pack(meet, null, { detailed: false });
-				const isPrivate = m.visibility !== 'public' || meet.accessToken != null;
+				// Every meet carries an accessToken from create; it gates only a private meet (meets/show), so the card's
+				// privacy is the visibility alone.
+				const isPrivate = m.visibility !== 'public';
 				const parts = isPrivate ? [] : [
 					formatMeetStart(m.startAt, m.timezone),
 					m.venueName,
