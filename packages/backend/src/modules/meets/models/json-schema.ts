@@ -98,6 +98,7 @@ export const packedMeetSchema = {
 		gender: { type: 'string', optional: false, nullable: false, enum: ['any', 'coed', 'female', 'male'] },
 		ageGroup: { type: 'string', optional: false, nullable: false, enum: ['any', 'junior', 'adult', 'senior'] },
 		submitMatches: { type: 'boolean', optional: false, nullable: false },
+		extras: { type: 'object', optional: true, nullable: true, description: 'MEET-EXTRAS-V1: externalUrl, contactInfo, promotedAt, promotedReach, scoringType, standingsMode, tiebreakers, forfeitScore, winPoints, lossPoints, drawPoints, tbWinPoints, tbLossPoints' },
 		seriesId: { type: 'string', optional: false, nullable: true },
 		confirmedCount: { type: 'number', optional: false, nullable: false },
 		waitlistedCount: { type: 'number', optional: false, nullable: false },

@@ -192,6 +192,52 @@ export class MiMeet {
 	@Column('varchar', { length: 32, nullable: true, comment: 'Series (recurring schedule) this meet was materialised from.' })
 	public seriesId: string | null;
 
+	// ---- MEET-EXTRAS-V1 (2026-09-19): listing link, promotion receipt, scoring rules, reminder receipts ----
+	@Column('varchar', { length: 512, nullable: true, comment: 'Listing: the external link (registration page, chat group…).' })
+	public externalUrl: string | null;
+
+	@Column('varchar', { length: 256, nullable: true, comment: 'Listing: how to reach the organiser.' })
+	public contactInfo: string | null;
+
+	@Column('timestamp with time zone', { nullable: true, comment: 'Promote meet: sent once, at this time.' })
+	public promotedAt: Date | null;
+
+	@Column('integer', { default: 0 })
+	public promotedReach: number;
+
+	@Column('varchar', { length: 8, default: 'GAME', comment: 'GAME | SET — what one score set is called and whether a deciding set is a tiebreaker.' })
+	public scoringType: string;
+
+	@Column('varchar', { length: 16, default: 'winLoss', comment: 'winLoss | winPct | setsWon | setsWinPct | totalScore (Reclub CompetitionPointCalculationType).' })
+	public standingsMode: string;
+
+	@Column('varchar', { length: 16, array: true, default: '{h2h_wins,score_diff,total_score}', comment: 'Tiebreaker order (Reclub CompetitionTiebreaker).' })
+	public tiebreakers: string[];
+
+	@Column('integer', { default: 11, comment: 'Score credited to the winner of a forfeited match.' })
+	public forfeitScore: number;
+
+	@Column('integer', { default: 1 })
+	public winPoints: number;
+
+	@Column('integer', { default: 0 })
+	public lossPoints: number;
+
+	@Column('integer', { default: 0 })
+	public drawPoints: number;
+
+	@Column('integer', { default: 1 })
+	public tbWinPoints: number;
+
+	@Column('integer', { default: 0 })
+	public tbLossPoints: number;
+
+	@Column('timestamp with time zone', { nullable: true })
+	public reminded24At: Date | null;
+
+	@Column('timestamp with time zone', { nullable: true })
+	public reminded2At: Date | null;
+
 	@Column('timestamp with time zone', { nullable: true })
 	public cancelledAt: Date | null;
 
