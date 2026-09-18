@@ -492,3 +492,15 @@ export * as 'chat/rooms/invitations/outbox' from './endpoints/chat/rooms/invitat
 export * as 'chat/history' from './endpoints/chat/history.js';
 export * as 'chat/read-all' from './endpoints/chat/read-all.js';
 export * as 'v2/admin/emoji/list' from './endpoints/v2/admin/emoji/list.js';
+// DISCOVER-V3: venue feedback + owner claim, coach profile, stats (DUPR rankings, pairings, h2h, street cred)
+export * as 'venues/feedback' from '@/modules/venues/endpoints/feedback-create.js';
+export * as 'venues/feedback/list' from '@/modules/venues/endpoints/feedback-list.js';
+export * as 'venues/claim' from '@/modules/venues/endpoints/claim.js';
+export * as 'coaches/show' from '@/modules/coaches/endpoints/show.js';
+export * as 'coaches/update' from '@/modules/coaches/endpoints/update.js';
+export * as 'coaches/list' from '@/modules/coaches/endpoints/list.js';
+export * as 'stats/dupr-rankings' from '@/modules/stats/endpoints/dupr-rankings.js';
+export * as 'stats/pairings' from '@/modules/stats/endpoints/pairings.js';
+export * as 'stats/h2h' from '@/modules/stats/endpoints/h2h.js';
+export * as 'stats/street-cred' from '@/modules/stats/endpoints/street-cred.js';
+export * as 'stats/kudos-by-activity' from '@/modules/stats/endpoints/kudos-by-activity.js';

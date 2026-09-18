@@ -6,6 +6,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { DI } from '@/di-symbols.js';
+import type { DataSource } from 'typeorm';
 import type { VenuesRepository, UserLocationsRepository, ChannelsRepository } from '@/models/_.js';
 import type { MiChannel } from '@/models/Channel.js';
 import type { MiVenue } from '@/modules/venues/models/Venue.js';
@@ -40,6 +41,9 @@ export class VenueService {
 
 		@Inject(DI.channelsRepository)
 		private channelsRepository: ChannelsRepository,
+
+		@Inject(DI.db)
+		private db: DataSource,
 
 		private idService: IdService,
 		private httpRequestService: HttpRequestService,
@@ -269,4 +273,47 @@ export class VenueService {
 	public async deleteLocation(user: MiUser, id: string): Promise<void> {
 		await this.userLocationsRepository.delete({ id, userId: user.id });
 	}
+
+	// ------------------------------------------------------------------------------- DISCOVER-V3: venue feedback + owner claim
+	/**
+	 * Reclub's venue feedback form (help:venue_subcategory_*) and the owner claim (Reclub: "Want a Verified Badge? Contact
+	 * our Support team" — a claim is a feedback row of category owner_claim that staff resolve with staffUpdate ownerUserId).
+	 * Raw SQL on the venue_feedback table (migration 1789060000000): no entity, so no shared registry file changes.
+	 */
+	@bindThis
+	public async createFeedback(user: MiUser, data: { venueId: string; category: VenueFeedbackCategory; body?: string | null; replyRequested?: boolean }): Promise<VenueFeedbackRow> {
+		const venue = await this.venuesRepository.findOneBy({ id: data.venueId });
+		if (!venue) throw this.err('no_such_venue', 'No such venue.');
+		if (data.category === 'owner_claim') {
+			// one open claim per (venue, user): a second tap returns the pending one
+			const open = await this.db.query('SELECT id FROM venue_feedback WHERE "venueId" = $1 AND "userId" = $2 AND category = $3 AND status = $4 LIMIT 1', [data.venueId, user.id, 'owner_claim', 'open']) as { id: string }[];
+			if (open.length) return (await this.listFeedback({ venueId: data.venueId, userId: user.id })).find(r => r.id === open[0].id)!;
+		}
+		const id = this.idService.gen();
+		await this.db.query('INSERT INTO venue_feedback (id, "venueId", "userId", category, body, "replyRequested", status, "createdAt") VALUES ($1, $2, $3, $4, $5, $6, $7, now())',
+			[id, data.venueId, user.id, data.category, data.body?.slice(0, 2048) ?? null, !!data.replyRequested, 'open']);
+		return (await this.listFeedback({ venueId: data.venueId, userId: user.id })).find(r => r.id === id)!;
+	}
+
+	/** My rows for a venue (the app shows "claim pending"), or every row for staff (userId null). */
+	@bindThis
+	public async listFeedback(opts: { venueId?: string | null; userId?: string | null; status?: string | null; limit?: number }): Promise<VenueFeedbackRow[]> {
+		const where: string[] = []; const args: unknown[] = [];
+		if (opts.venueId) { args.push(opts.venueId); where.push(`"venueId" = $${args.length}`); }
+		if (opts.userId) { args.push(opts.userId); where.push(`"userId" = $${args.length}`); }
+		if (opts.status) { args.push(opts.status); where.push(`status = $${args.length}`); }
+		args.push(Math.min(opts.limit ?? 50, 200));
+		const rows = await this.db.query(`SELECT id, "venueId", "userId", category, body, "replyRequested", status, "createdAt" FROM venue_feedback ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY "createdAt" DESC LIMIT $${args.length}`, args) as { id: string; venueId: string; userId: string; category: VenueFeedbackCategory; body: string | null; replyRequested: boolean; status: string; createdAt: Date }[];
+		return rows.map(r => ({ id: r.id, venueId: r.venueId, userId: r.userId, category: r.category, body: r.body, replyRequested: !!r.replyRequested, status: r.status, createdAt: new Date(r.createdAt).toISOString() }));
+	}
+
+	/** Staff: close a feedback row. */
+	@bindThis
+	public async resolveFeedback(id: string): Promise<void> {
+		await this.db.query('UPDATE venue_feedback SET status = $2 WHERE id = $1', [id, 'resolved']);
+	}
 }
+
+export const venueFeedbackCategories = ['wrong_details', 'permanently_closed', 'safety_concern', 'incorrect_images', 'suspicious_fraudulent', 'owner_claim', 'other'] as const;
+export type VenueFeedbackCategory = typeof venueFeedbackCategories[number];
+export interface VenueFeedbackRow { id: string; venueId: string; userId: string; category: VenueFeedbackCategory; body: string | null; replyRequested: boolean; status: string; createdAt: string }

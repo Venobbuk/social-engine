@@ -33,6 +33,13 @@ export const paramDef = {
 		lng: { type: 'number', nullable: true, minimum: -180, maximum: 180 },
 		radiusKm: { type: 'number', nullable: true, minimum: 0.1, maximum: 500 },
 		hideFull: { type: 'boolean', default: false },
+		// DISCOVER-V3: Reclub filter.tsx — times (mornings 4-11 / afternoons 11-17 / evenings 17-24, the meet's own
+		// timezone), friendsOnly (host or a confirmed player is someone I follow), hideEmpty (no confirmed player yet),
+		// verifiedOnly (the meet's venue row is Verified)
+		times: { type: 'array', items: { type: 'string', enum: ['mornings', 'afternoons', 'evenings'] }, nullable: true },
+		friendsOnly: { type: 'boolean', default: false },
+		hideEmpty: { type: 'boolean', default: false },
+		verifiedOnly: { type: 'boolean', default: false },
 		includePast: { type: 'boolean', default: false },
 		includeCancelled: { type: 'boolean', default: false },
 		// CASUAL-V1: casual games (flag 'casual') are never in Discover; true lists only them (scope mine/hosting)
@@ -103,6 +110,21 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				q.andWhere(`${distanceExpr} <= :radius`, { radius });
 			}
 
+			// DISCOVER-V3 filters
+			if (ps.times && ps.times.length > 0 && ps.times.length < 3) {
+				const bands: string[] = [];
+				const hour = 'EXTRACT(HOUR FROM (meet."startAt" AT TIME ZONE meet.timezone))';
+				if (ps.times.includes('mornings')) bands.push(`(${hour} >= 4 AND ${hour} < 11)`);
+				if (ps.times.includes('afternoons')) bands.push(`(${hour} >= 11 AND ${hour} < 17)`);
+				if (ps.times.includes('evenings')) bands.push(`(${hour} >= 17 OR ${hour} < 4)`);
+				q.andWhere(`(${bands.join(' OR ')})`);
+			}
+			if (ps.friendsOnly) {
+				if (me == null) return [];
+				q.andWhere('(EXISTS (SELECT 1 FROM following f WHERE f."followerId" = :fMe AND f."followeeId" = meet."hostId") OR EXISTS (SELECT 1 FROM meet_participant fp JOIN following f2 ON f2."followeeId" = fp."userId" WHERE fp."meetId" = meet.id AND fp.status IN (\'confirmed\', \'hold\') AND f2."followerId" = :fMe))', { fMe: me.id });
+			}
+			if (ps.hideEmpty) q.andWhere('EXISTS (SELECT 1 FROM meet_participant ep WHERE ep."meetId" = meet.id AND ep.status = \'confirmed\')');
+			if (ps.verifiedOnly) q.andWhere('meet."venueId" IS NOT NULL AND EXISTS (SELECT 1 FROM venue v WHERE v.id = meet."venueId" AND v.status = \'verified\')');
 			if (ps.hideFull) {
 				q.andWhere(new Brackets(qb => {
 					qb.where(`meet.capacity > (SELECT COUNT(*) FROM meet_participant p WHERE p."meetId" = meet.id AND p.status IN ('confirmed', 'hold'))`);
