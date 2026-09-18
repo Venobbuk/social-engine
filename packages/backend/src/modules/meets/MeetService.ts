@@ -491,6 +491,9 @@ export class MeetService {
 			await this.leaveConfirmed(em, locked, row, 'delete');
 			await this.promoteLocked(em, locked);
 		});
+		// CHAT-V2 fix: a player who leaves also leaves the meet room, so a later re-join posts "{name} has joined" again
+		// (the joined line is written only when the player is not yet a room member — probe chat-v2 E8).
+		if (meet.chatRoomId) await this.chatService.leaveRoom(user.id, meet.chatRoomId).catch(() => undefined);
 	}
 
 	// --------------------------------------------------------------------------------- host actions
