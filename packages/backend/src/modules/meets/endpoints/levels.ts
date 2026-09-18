@@ -24,6 +24,7 @@ export const meta = {
 				selfLevel: { type: 'number', optional: false, nullable: true },
 				duprDoubles: { type: 'number', optional: false, nullable: true },
 				duprSingles: { type: 'number', optional: false, nullable: true },
+				duprId: { type: 'string', optional: false, nullable: true },
 				gender: { type: 'string', optional: false, nullable: true },
 				ageGroup: { type: 'string', optional: false, nullable: true },
 			},
@@ -52,6 +53,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				selfLevel: level.selfLevel,
 				duprDoubles: level.duprDoubles,
 				duprSingles: level.duprSingles,
+				duprId: level.duprId, // DUPR-HKPL-V1: the app opens hkpl's DUPR profile with it
 				gender: level.gender,
 				ageGroup: level.ageGroup,
 			}));
