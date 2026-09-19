@@ -691,7 +691,7 @@ export class ChatService {
 	}
 
 	@bindThis
-	public async createRoomInvitation(inviterId: MiUser['id'], roomId: MiChatRoom['id'], inviteeId: MiUser['id']) {
+	public async createRoomInvitation(inviterId: MiUser['id'], roomId: MiChatRoom['id'], inviteeId: MiUser['id'], opts: { notify?: boolean } = {}) {
 		if (inviterId === inviteeId) {
 			throw new Error('yourself');
 		}
@@ -722,9 +722,14 @@ export class ChatService {
 
 		const created = await this.chatRoomInvitationsRepository.insertOne(invitation);
 
-		this.notificationService.createNotification(inviteeId, 'chatRoomInvitationReceived', {
-			invitationId: invitation.id,
-		}, inviterId);
+		// BACKEND-DELIVERY-V1: a module that invites and joins in one step (meet / club / competition rooms) passes
+		// notify:false. Its invitation is consumed at once, so the notification could never be listed (the packer drops a
+		// used invitation) yet it stayed in the unread count: a phantom badge the reader could never clear by reading.
+		if (opts.notify !== false) {
+			this.notificationService.createNotification(inviteeId, 'chatRoomInvitationReceived', {
+				invitationId: invitation.id,
+			}, inviterId);
+		}
 
 		return created;
 	}

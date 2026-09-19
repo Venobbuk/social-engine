@@ -239,7 +239,7 @@ export class ClubService {
 			await this.clubSettingsRepository.update({ channelId: channel.id }, { chatRoomId: room.id });
 		}
 		if (room.ownerId !== user.id && !(await this.chatService.isRoomMember(room, user.id))) {
-			await this.chatService.createRoomInvitation(room.ownerId, room.id, user.id);
+			await this.chatService.createRoomInvitation(room.ownerId, room.id, user.id, { notify: false });
 			await this.chatService.joinToRoom(user.id, room.id);
 		}
 		return { roomId: room.id };
@@ -422,7 +422,7 @@ export class ClubService {
 		}
 		for (const uid of [user.id, ...adminIds]) {
 			if (uid === room.ownerId || await this.chatService.isRoomMember(room, uid)) continue;
-			await this.chatService.createRoomInvitation(room.ownerId, room.id, uid);
+			await this.chatService.createRoomInvitation(room.ownerId, room.id, uid, { notify: false });
 			await this.chatService.joinToRoom(uid, room.id);
 		}
 		return { roomId: room.id };

@@ -9,6 +9,7 @@ import type { MeetsRepository, MeetParticipantsRepository, DriveFilesRepository 
 import { DI } from '@/di-symbols.js';
 import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { MeetService } from '@/modules/meets/MeetService.js';
 import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import { meetErrors, toApiError } from '../_shared.js';
@@ -51,6 +52,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private meetMatchService: MeetMatchService,
 		private meetEntityService: MeetEntityService,
 		private driveFileEntityService: DriveFileEntityService,
+		private meetService: MeetService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
@@ -64,6 +66,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					const file = await this.driveFilesRepository.findOneBy({ id: ps.fileId, userId: me.id });
 					if (file == null) throw new ApiError(meta.errors.noSuchFile);
 					await this.meetParticipantsRepository.update(p.id, { receiptFileId: file.id, receiptUrl: this.driveFileEntityService.getPublicUrl(file), receiptAt: new Date(), receiptById: me.id });
+					// BACKEND-DELIVERY-V1: a player's receipt reaches the host, who checks it (Reclub Payments Manager)
+					if (!host && meet.hostId !== me.id) this.meetService.notifyUser(meet.hostId, meet, 'Payment receipt', `${me.name ?? me.username} uploaded a payment receipt for ${meet.name}.`);
 				} else {
 					await this.meetParticipantsRepository.update(p.id, { receiptFileId: null, receiptUrl: null, receiptAt: null, receiptById: null });
 				}

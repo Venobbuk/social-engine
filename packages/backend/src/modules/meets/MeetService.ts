@@ -311,6 +311,13 @@ export class MeetService {
 			const host = await this.usersRepository.findOneBy({ id: meet.hostId });
 			void meetSystemLine(this.chatService, updated, systemKey, { name: host?.name ?? host?.username ?? null, userId: meet.hostId });
 		}
+		// BACKEND-DELIVERY-V1: a new time or place reaches every player holding a spot (Reclub
+		// notifications.meet_location_changed: "The meet location has changed. Tap to see changes.")
+		if (systemKey === 'time' || systemKey === 'venue') {
+			const rows = await this.meetParticipantsRepository.findBy({ meetId: meet.id, status: In(['confirmed', 'waitlisted', 'hold', 'invited', 'requested']) });
+			const body = systemKey === 'time' ? `The time of ${updated.name} has changed. Tap to see changes.` : `The location of ${updated.name} has changed. Tap to see changes.`;
+			for (const p of rows) if (p.userId && p.userId !== meet.hostId && !p.isHost) this.notify(p.userId, updated, 'Meet updated', body);
+		}
 		return updated;
 	}
 
@@ -449,6 +456,11 @@ export class MeetService {
 				if (autoConfirm) await this.confirmOrFallback(em, locked, guest, 'waitlisted');
 			}
 			if (!autoConfirm && meet.hostId !== user.id) this.notify(meet.hostId, meet, 'Request to join', `${user.name ?? user.username} has requested to join ${meet.name}.`);
+			// BACKEND-DELIVERY-V1: an auto-approved join reaches the host too (a seat taken, or a place on the waitlist)
+			if (autoConfirm && meet.hostId !== user.id) {
+				if (row.status === 'confirmed') this.notify(meet.hostId, meet, 'New player', `${user.name ?? user.username} joined ${meet.name}.`);
+				else if (row.status === 'waitlisted') this.notify(meet.hostId, meet, 'New player', `${user.name ?? user.username} joined the waitlist of ${meet.name}.`);
+			}
 			return row as MiMeetParticipant;
 		});
 	}
@@ -478,6 +490,7 @@ export class MeetService {
 	 */
 	@bindThis
 	public async leave(meet: MiMeet, user: MiUser): Promise<void> {
+		let leftFrom: string | null = null;
 		await this.withMeetLock(meet.id, async (em, locked) => {
 			const row = (await em.query(`SELECT * FROM "meet_participant" WHERE "meetId" = $1 AND "userId" = $2`, [meet.id, user.id]) as Row[])[0];
 			if (!row) throw this.err('not_participant', 'You are not on this meet.');
@@ -488,9 +501,14 @@ export class MeetService {
 			}
 			const guests = await em.query(`SELECT * FROM "meet_participant" WHERE "meetId" = $1 AND "sponsorId" = $2 AND "kind" = 'plusOne'`, [meet.id, user.id]) as Row[];
 			for (const g of guests) await this.leaveConfirmed(em, locked, g, 'delete');
+			leftFrom = row.status;
 			await this.leaveConfirmed(em, locked, row, 'delete');
 			await this.promoteLocked(em, locked);
 		});
+		// BACKEND-DELIVERY-V1: the host hears that a seat (or a waitlist place, or a request) was given up
+		if (meet.hostId !== user.id && (leftFrom === 'confirmed' || leftFrom === 'waitlisted' || leftFrom === 'requested')) {
+			this.notify(meet.hostId, meet, 'Player left', leftFrom === 'requested' ? `${user.name ?? user.username} withdrew their request to join ${meet.name}.` : `${user.name ?? user.username} left ${meet.name}.`);
+		}
 		// CHAT-V2 fix: a player who leaves also leaves the meet room, so a later re-join posts "{name} has joined" again
 		// (the joined line is written only when the player is not yet a room member — probe chat-v2 E8).
 		if (meet.chatRoomId) await this.chatService.leaveRoom(user.id, meet.chatRoomId).catch(() => undefined);
@@ -533,6 +551,8 @@ export class MeetService {
 			if (row.status === 'confirmed') await this.promoteLocked(em, locked);
 			if (status === 'invited' && row.userId) this.notify(row.userId, meet, "You've been invited", `You've been invited to ${meet.name}.`);
 			if (status === 'hold' && row.userId) this.notify(row.userId, meet, 'On hold', `You are on hold for ${meet.name}. Please message the host for more details.`);
+			// BACKEND-DELIVERY-V1: a declined request (or a declined spot) is told to the player, as an approval is
+			if (status === 'declined' && row.userId && row.status !== 'declined') this.notify(row.userId, meet, 'Request declined', `Your request to join ${meet.name} was declined.`);
 			return r as MiMeetParticipant;
 		});
 	}
@@ -703,7 +723,7 @@ export class MeetService {
 				const room = await this.chatService.findRoomById(meet.chatRoomId);
 				if (room && !(await this.chatService.isRoomMember(room, p.userId))) {
 					// an earlier stint on this meet leaves an invitation row: "already invited" must not skip the join (chat-v2 E8)
-					await this.chatService.createRoomInvitation(meet.hostId, room.id, p.userId).catch((e: any) => { if (!/already invited/.test(String(e && e.message))) throw e; });
+					await this.chatService.createRoomInvitation(meet.hostId, room.id, p.userId, { notify: false }).catch((e: any) => { if (!/already invited/.test(String(e && e.message))) throw e; });
 					await this.chatService.joinToRoom(p.userId, room.id);
 					// CHAT-V2: "{name} has joined the conversation." (Reclub gate line)
 					const joined = await this.usersRepository.findOneBy({ id: p.userId });
@@ -715,6 +735,12 @@ export class MeetService {
 			}
 			if (p.userId !== meet.hostId) this.notify(p.userId, meet, 'You are confirmed', `You are confirmed to play ${meet.name}. Please be on time.`);
 		}
+	}
+
+	/** BACKEND-DELIVERY-V1: the one meet notification door for callers outside this service (endpoints). */
+	@bindThis
+	public notifyUser(userId: MiUser['id'], meet: MiMeet, header: string, body: string): void {
+		this.notify(userId, meet, header, body);
 	}
 
 	private notify(userId: MiUser['id'], meet: MiMeet, header: string, body: string): void {

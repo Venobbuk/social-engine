@@ -55,6 +55,7 @@ export class ChannelEntityService {
 			favorites?: Set<MiChannel['id']>;
 			muting?: Set<MiChannel['id']>;
 			pinnedNotes?: Map<MiNote['id'], MiNote>;
+			memberCounts?: Map<MiChannel['id'], number>;
 		},
 	): Promise<Packed<'Channel'>> {
 		const channel = typeof src === 'object' ? src : await this.channelsRepository.findOneByOrFail({ id: src });
@@ -115,7 +116,10 @@ export class ChannelEntityService {
 			pinnedNoteIds: channel.pinnedNoteIds,
 			color: channel.color,
 			isArchived: channel.isArchived,
-			usersCount: channel.usersCount,
+			// BACKEND-DELIVERY-V1: a GripBat channel is a club and every screen prints usersCount as its MEMBER count; the
+			// stored counter is Misskey's "users who have posted" (NoteCreateService), which left new clubs at 0 members
+			// and drifted from the roster on 8 of 8 sandbox clubs. The packed value is the roster size: followers + owner.
+			usersCount: opts?.memberCounts?.get(channel.id) ?? (await this.memberCounts([channel])).get(channel.id) ?? channel.usersCount,
 			notesCount: channel.notesCount,
 			isSensitive: channel.isSensitive,
 			allowRenoteToExternal: channel.allowRenoteToExternal,
@@ -191,13 +195,28 @@ export class ChannelEntityService {
 			})
 			.then(it => new Map(it.map(it => [it.id, it])));
 
+		const memberCounts = await this.memberCounts(channels);
+
 		return Promise.all(channels.map(it => this.pack(it, me, detailed, {
+			memberCounts,
 			bannerFiles,
 			followings,
 			favorites,
 			muting,
 			pinnedNotes,
 		})));
+	}
+
+	/** BACKEND-DELIVERY-V1: members per channel = its followers, plus the owner when the owner does not follow it
+	 *  (ClubService.members' roster rule). One query for any number of channels. */
+	@bindThis
+	private async memberCounts(channels: MiChannel[]): Promise<Map<MiChannel['id'], number>> {
+		if (channels.length === 0) return new Map();
+		const rows = await this.channelFollowingsRepository.query(
+			`SELECT c."id", (SELECT count(*) FROM "channel_following" f WHERE f."followeeId" = c."id")::int
+			        + (CASE WHEN c."userId" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM "channel_following" f WHERE f."followeeId" = c."id" AND f."followerId" = c."userId") THEN 1 ELSE 0 END) AS "n"
+			   FROM "channel" c WHERE c."id" = ANY($1)`, [channels.map(c => c.id)]) as { id: string; n: number | string }[];
+		return new Map(rows.map(r => [r.id, Number(r.n)]));
 	}
 }
 
