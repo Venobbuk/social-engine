@@ -53,6 +53,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// SEC-ANON-FIELDS-V1: the gender filter is itself a gender oracle — an anonymous caller's filter is ignored
+			if (me == null) ps.gender = null;
 			const col = ps.sort === 'singles' ? 'duprSingles' : 'duprDoubles';
 			const q = this.meetPlayerLevelsRepository.createQueryBuilder('l').where('l.sport = :sport', { sport: ps.sport }).andWhere(`l."${col}" IS NOT NULL`);
 			if (ps.gender) q.andWhere('l.gender = :gender', { gender: ps.gender });
@@ -64,10 +66,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const v = mine ? mine[col] : null;
 				if (v != null && (!ps.gender || mine?.gender === ps.gender)) myRank = 1 + await q.clone().andWhere(`l."${col}" > :v`, { v }).getCount();
 			}
+			// SEC-ANON-FIELDS-V1 (2026-09-20): the ranking (name, singles, doubles) is a public leaderboard, but a
+			// player's gender is not — return it only to a signed-in caller.
+			const signedIn = me != null;
 			const out = [];
 			for (let i = 0; i < rows.length; i++) {
 				const r = rows[i];
-				out.push({ rank: ps.offset + i + 1, userId: r.userId, user: await this.userEntityService.pack(r.userId, me, { schema: 'UserLite' }).catch(() => null), singles: r.duprSingles, doubles: r.duprDoubles, gender: r.gender });
+				out.push({ rank: ps.offset + i + 1, userId: r.userId, user: await this.userEntityService.pack(r.userId, me, { schema: 'UserLite' }).catch(() => null), singles: r.duprSingles, doubles: r.duprDoubles, gender: signedIn ? r.gender : null });
 			}
 			return { country: (ps.country ?? 'HK').toUpperCase(), total, myRank, rows: out };
 		});

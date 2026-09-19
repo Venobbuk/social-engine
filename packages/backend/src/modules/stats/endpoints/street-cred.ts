@@ -53,6 +53,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// SEC-ANON-FIELDS-V1: the gender filter is itself a gender oracle — an anonymous caller's filter is ignored
+			if (me == null) ps.gender = null;
 			const [from, to] = timeframeWindow(ps.timeframe);
 			// the full ranking (limit 500) so a gender filter and the viewer's rank are computed on every row
 			let rows = await this.meetService.kudosLeaderboard(from, to, ps.dimension ?? null, 500);

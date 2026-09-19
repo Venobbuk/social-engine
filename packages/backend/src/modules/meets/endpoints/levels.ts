@@ -7,9 +7,12 @@ import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 
-// LEVELS-V1: public batch read of the stored player level for a list of users in one sport — the People list's
-// rating chips. One query; users with no row for the sport are absent from the answer. Nothing private is exposed
-// (no duprId, no source, no onboardedAt) — only what a meet card already shows about a player.
+// LEVELS-V1: batch read of the stored player level for a list of users in one sport — the People list's rating chips.
+// One query; users with no row for the sport are absent from the answer.
+//
+// SEC-ANON-FIELDS-V1 (2026-09-20): the rating chip (selfLevel / duprDoubles / duprSingles) is public by design, but a
+// player's gender, age group and DUPR id are NOT. They are returned only to a signed-in caller; an anonymous caller
+// gets the chip fields alone. (The app must send a session on any screen that needs duprId/gender/age — see report.)
 export const meta = {
 	tags: ['meets'],
 	requireCredential: false,
@@ -44,8 +47,9 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(private meetLevelService: MeetLevelService,) {
-		super(meta, paramDef, async (ps) => {
+		super(meta, paramDef, async (ps, me) => {
 			if (ps.userIds.length === 0) return [];
+			const signedIn = me != null; // SEC-ANON-FIELDS-V1: private fields only to a credentialed caller
 			const levels = await this.meetLevelService.getLevels(ps.userIds, ps.sport);
 			return levels.map((level) => ({
 				userId: level.userId,
@@ -53,9 +57,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				selfLevel: level.selfLevel,
 				duprDoubles: level.duprDoubles,
 				duprSingles: level.duprSingles,
-				duprId: level.duprId, // DUPR-HKPL-V1: the app opens hkpl's DUPR profile with it
-				gender: level.gender,
-				ageGroup: level.ageGroup,
+				duprId: signedIn ? level.duprId : null, // DUPR-HKPL-V1: the app opens hkpl's DUPR profile with it
+				gender: signedIn ? level.gender : null,
+				ageGroup: signedIn ? level.ageGroup : null,
 			}));
 		});
 	}

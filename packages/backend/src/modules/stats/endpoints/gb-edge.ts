@@ -38,6 +38,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			const e = await edgeOf(this.db, ps.userId, ps.sport) as Record<string, any>;
 			if (Array.isArray(e.partners)) {
+				// SEC-ANON-FIELDS-V1 (2026-09-20): a negative partner-chemistry score is private to the player. On
+				// anyone else's Edge (or an anonymous read) show only the positive-chemistry partners. The subject sees
+				// their own full list. (The app must send a session on the viewer's OWN Edge card — see report.)
+				const isSubject = me != null && me.id === ps.userId;
+				if (!isSubject) e.partners = e.partners.filter((p: { edge: number }) => p.edge >= 0);
 				for (const p of e.partners) p.user = await this.userEntityService.pack(p.partnerId, me, { schema: 'UserLite' }).catch(() => null);
 			}
 			return e;
