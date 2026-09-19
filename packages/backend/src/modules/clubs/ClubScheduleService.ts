@@ -162,6 +162,72 @@ export class ClubScheduleService {
 		return created;
 	}
 
+	/**
+	 * SCHEDULE-UPDATE-MEETS-V1 (W1 lane B1, triage A-upsert-schedule.13): Reclub's "Do you want to update existing future
+	 * meets with the new changes?" — Yes carries the changed settings onto every meet this schedule already created that
+	 * has not started and is still active (meet.seriesId = schedule.id). Each meet goes through MeetService.update, so its
+	 * rules hold (capacity never below the confirmed count, host seat) and its players hear about a new time / place.
+	 * A new start time moves each meet to that time on its own date; a new weekday applies to the meets created from now
+	 * on. A meet that refuses a field (capacity below its confirmed players) keeps that one field and is reported.
+	 */
+	@bindThis
+	public async applyToFutureMeets(s: MiClubSchedule, patch: SchedulePatch, now = new Date()): Promise<{ updated: string[]; skipped: { id: string; reason: string }[] }> {
+		const FIELDS = ['name', 'durationMinutes', 'capacity', 'venueId', 'venueName', 'venueAddress', 'lat', 'lng', 'hostPlays', 'visibility', 'autoApprove', 'allowPlusOne', 'feeType', 'feeAmount', 'feeCurrency', 'paymentInfo', 'gateType', 'levelBasis', 'minLevel', 'maxLevel', 'gender', 'ageGroup', 'submitMatches', 'notes', 'sendNotifications'] as const;
+		const base: Record<string, unknown> = {};
+		for (const k of FIELDS) if ((patch as Record<string, unknown>)[k] !== undefined) base[k] = (patch as Record<string, unknown>)[k];
+		const meets = await this.meetsRepository.find({ where: { seriesId: s.id, status: 'active', startAt: MoreThanOrEqual(now) }, order: { startAt: 'ASC' } });
+		const updated: string[] = []; const skipped: { id: string; reason: string }[] = [];
+		const off = (TZ_OFFSET_MIN[s.timezone] ?? 480) * 60_000;
+		for (const m of meets) {
+			const mp: Record<string, unknown> = { ...base };
+			if (patch.startTime) {
+				const [hh, mm] = patch.startTime.split(':').map(Number);
+				const local = new Date(new Date(m.startAt).getTime() + off);
+				const at = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate()) + (hh * 60 + mm) * 60_000 - off);
+				if (at.getTime() > now.getTime()) mp.startAt = at; else skipped.push({ id: m.id, reason: 'time_in_past' });
+			}
+			if (!Object.keys(mp).length) continue;
+			try {
+				await this.meetService.update(m, mp as Partial<MiMeet>);
+				updated.push(m.id);
+			} catch (e) {
+				if (mp.capacity === undefined) { skipped.push({ id: m.id, reason: e instanceof Error ? e.message : String(e) }); continue; }
+				delete mp.capacity;
+				try {
+					if (Object.keys(mp).length) await this.meetService.update(m, mp as Partial<MiMeet>);
+					updated.push(m.id); skipped.push({ id: m.id, reason: 'capacity_below_confirmed' });
+				} catch (e2) { skipped.push({ id: m.id, reason: e2 instanceof Error ? e2.message : String(e2) }); }
+			}
+		}
+		return { updated, skipped };
+	}
+
+	/**
+	 * MEET-CLUB-INVITE-V1 (W1 lane B1, triage A-meet-form.03): Reclub's meet form "Creating a meet for your club?" —
+	 * "Members of your club will automatically be invited and notified." A one-off meet posted in a club invites the
+	 * club's active members (all, or those holding one of tagIds; nobody on a break; never the host) — the very rule the
+	 * schedule applies in materialise(). The caller hosts the meet and is a member (or the owner) of its club. preview
+	 * answers how many would be invited, without inviting. Someone already on the meet is left as they are.
+	 */
+	@bindThis
+	public async inviteMembersToMeet(meetId: string, by: MiUser, tagIds: string[], preview: boolean): Promise<{ eligible: number; invited: number }> {
+		const meet = await this.meetsRepository.findOneBy({ id: meetId });
+		if (!meet) throw this.err('invalid', 'No such meet.');
+		if (!meet.channelId) throw this.err('invalid', 'This meet is not posted in a club.');
+		if (meet.status !== 'active') throw this.err('invalid', 'This meet is not active.');
+		await this.meetService.assertHost(meet, by);
+		const channel = await this.clubService.channel(meet.channelId);
+		if (channel.userId !== by.id && !(await this.clubService.isMember(channel.id, by.id))) throw this.err('not_member', 'Only members can do that.');
+		const onMeet = new Set((await this.meetsRepository.manager.query(`SELECT "userId" FROM "meet_participant" WHERE "meetId" = $1 AND "userId" IS NOT NULL`, [meet.id]) as { userId: string }[]).map((r) => r.userId));
+		const ids = (await this.clubService.activeMemberIds(channel, tagIds)).filter((u) => u !== meet.hostId && !onMeet.has(u));
+		if (preview) return { eligible: ids.length, invited: 0 };
+		let invited = 0;
+		for (const uid of ids) {
+			try { await this.meetService.hostAdd(meet, { userId: uid, status: 'invited' }); invited++; } catch { /* joined meanwhile */ }
+		}
+		return { eligible: ids.length, invited };
+	}
+
 	/** The sweep: every active schedule, once. */
 	@bindThis
 	public async sweep(now = new Date()): Promise<{ schedules: number; created: number }> {

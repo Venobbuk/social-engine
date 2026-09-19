@@ -224,6 +224,7 @@ export * as 'clubs/schedules/list' from '@/modules/clubs/endpoints/schedules-lis
 export * as 'clubs/schedules/show' from '@/modules/clubs/endpoints/schedules-show.js'; // CLUB-V3
 export * as 'clubs/schedules/create' from '@/modules/clubs/endpoints/schedules-create.js'; // CLUB-V3
 export * as 'clubs/schedules/update' from '@/modules/clubs/endpoints/schedules-update.js'; // CLUB-V3
+export * as 'clubs/meets/invite-members' from '@/modules/clubs/endpoints/meets-invite-members.js'; // MEET-CLUB-INVITE-V1 (W1 B1)
 export * as 'clubs/schedules/delete' from '@/modules/clubs/endpoints/schedules-delete.js'; // CLUB-V3
 export * as 'clubs/schedules/run' from '@/modules/clubs/endpoints/schedules-run.js'; // CLUB-V3
 export * as 'clubs/mine' from '@/modules/clubs/endpoints/mine.js'; // CLUB-V3
