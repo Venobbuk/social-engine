@@ -261,6 +261,16 @@ export * as 'competitions/standings' from '@/modules/competitions/endpoints/stan
 export * as 'competitions/awards' from '@/modules/competitions/endpoints/awards.js';
 export * as 'competitions/awards/upsert' from '@/modules/competitions/endpoints/awards/upsert.js';
 export * as 'competitions/chat' from '@/modules/competitions/endpoints/chat.js';
+export * as 'competitions/invitations' from '@/modules/competitions/endpoints/invitations.js'; // COMP-W1B4
+export * as 'competitions/invitations/respond' from '@/modules/competitions/endpoints/invitations/respond.js'; // COMP-W1B4
+export * as 'competitions/entries/partners' from '@/modules/competitions/endpoints/entries/partners.js'; // COMP-W1B4
+export * as 'competitions/entries/join' from '@/modules/competitions/endpoints/entries/join.js'; // COMP-W1B4
+export * as 'competitions/entries/requests/decide' from '@/modules/competitions/endpoints/entries/requests-decide.js'; // COMP-W1B4
+export * as 'competitions/free-agent' from '@/modules/competitions/endpoints/free-agent.js'; // COMP-W1B4
+export * as 'competitions/free-agents/assign' from '@/modules/competitions/endpoints/free-agents/assign.js'; // COMP-W1B4
+export * as 'competitions/staff/update' from '@/modules/competitions/endpoints/staff/update.js'; // COMP-W1B4
+export * as 'competitions/announcements/post' from '@/modules/competitions/endpoints/announcements/post.js'; // COMP-W1B4
+export * as 'competitions/announcements/delete' from '@/modules/competitions/endpoints/announcements/delete.js'; // COMP-W1B4
 export * as 'channels/timeline' from './endpoints/channels/timeline.js';
 export * as 'channels/unfavorite' from './endpoints/channels/unfavorite.js';
 export * as 'channels/unfollow' from './endpoints/channels/unfollow.js';

@@ -12,7 +12,9 @@ import { MiCompetition } from './Competition.js';
 // team of two; a team entry teamMinSize..teamMaxSize players. A reserved spot (Reclub CompetitionParticipantReferenceType
 // Reserved) is an entry with no users and a name. Status follows Reclub CompetitionTeamStatus: Pending:0 → 'pending',
 // Confirmed:1 → 'confirmed', Withdrawn:-1 → 'withdrawn', Forfeit:-2 → 'forfeit'.
-export const competitionEntryStatuses = ['pending', 'confirmed', 'withdrawn', 'forfeit'] as const;
+// COMP-W1B4: 'freeAgent' = Reclub "Join as free agent": one player + notes, no team yet — outside every active count,
+// never drawn, never an already_entered lock; the host assigns the player to a team (the row is then withdrawn).
+export const competitionEntryStatuses = ['pending', 'confirmed', 'withdrawn', 'forfeit', 'freeAgent'] as const;
 
 @Entity('competition_entry')
 export class MiCompetitionEntry {
@@ -36,6 +38,14 @@ export class MiCompetitionEntry {
 
 	@Column('varchar', { array: true, length: 32, default: '{}', comment: 'All members (captain first).' })
 	public userIds: string[];
+
+	// COMP-W1B4: partner consent — a partner named by the entrant waits here until they accept (never seated, never in the chat)
+	@Column('varchar', { array: true, length: 32, default: '{}', comment: 'Invited partners who have not accepted yet.' })
+	public invitedUserIds: string[];
+
+	// COMP-W1B4: join an existing team — players asking the captain for a place in this team
+	@Column('varchar', { array: true, length: 32, default: '{}', comment: 'Players who asked to join this team.' })
+	public requestedUserIds: string[];
 
 	@Column('integer', { nullable: true, comment: 'Seed (1 = top), null = unseeded.' })
 	public seed: number | null;

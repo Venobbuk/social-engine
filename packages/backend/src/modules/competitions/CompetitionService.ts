@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
-import type { CompetitionsRepository, CompetitionEntriesRepository, CompetitionMatchesRepository, CompetitionAwardsRepository, UsersRepository } from '@/models/_.js';
+import type { CompetitionsRepository, CompetitionEntriesRepository, CompetitionMatchesRepository, CompetitionAwardsRepository, UsersRepository, BlockingsRepository } from '@/models/_.js';
 import type { MiUser } from '@/models/User.js';
 import { IdService } from '@/core/IdService.js';
 import { ChatService } from '@/core/ChatService.js';
@@ -15,7 +15,7 @@ import { bindThis } from '@/decorators.js';
 import { secureRndstr, L_CHARS } from '@/misc/secure-rndstr.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { generate as generateRoundRobin, LIMITS as RR_LIMITS } from '@/modules/meets/MeetMatchGenerator.js';
-import type { MiCompetition, CompetitionFormat } from './models/Competition.js';
+import type { MiCompetition, CompetitionFormat, CompetitionAnnouncement } from './models/Competition.js';
 import type { MiCompetitionEntry } from './models/CompetitionEntry.js';
 import type { MiCompetitionMatch, CompetitionScoreSet } from './models/CompetitionMatch.js';
 import type { MiCompetitionAward } from './models/CompetitionAward.js';
@@ -27,7 +27,8 @@ import type { BracketDb, BracketMatchView } from './CompetitionBracket.js';
 export type CompetitionErrorId =
 	| 'not_found' | 'not_host' | 'private' | 'invalid_transition' | 'registration_closed' | 'full' | 'already_entered'
 	| 'not_entered' | 'started' | 'bad_team' | 'draw_exists' | 'not_enough_entries' | 'too_many_entries' | 'no_such_match'
-	| 'no_such_entry' | 'needs_winner' | 'bracket_locked' | 'stage_incomplete' | 'no_such_award' | 'forbidden';
+	| 'no_such_entry' | 'needs_winner' | 'bracket_locked' | 'stage_incomplete' | 'no_such_award' | 'forbidden'
+	| 'blocked' | 'no_such_invitation' | 'team_full' | 'no_such_announcement'; // COMP-W1B4
 
 export type StatusAction = 'publish' | 'lock' | 'reopen' | 'start' | 'finish' | 'reopenEnded' | 'reset';
 
@@ -62,6 +63,8 @@ export class CompetitionService {
 		private awardsRepository: CompetitionAwardsRepository,
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
+		@Inject(DI.blockingsRepository)
+		private blockingsRepository: BlockingsRepository,   // COMP-W1B4: partner consent is block-aware
 		private idService: IdService,
 		private chatService: ChatService,
 		private notificationService: NotificationService,
@@ -78,7 +81,16 @@ export class CompetitionService {
 	}
 
 	@bindThis
-	public isHost(c: MiCompetition, userId: string | null | undefined): boolean { return !!userId && c.hostId === userId; }
+	// COMP-W1B4: a co-admin (Reclub competition Admins) manages the competition exactly like its host, so every host gate
+	// below admits them; isOwner is the creator alone (staff changes cannot remove the owner).
+	public isHost(c: MiCompetition, userId: string | null | undefined): boolean { return !!userId && (c.hostId === userId || (c.adminIds ?? []).includes(userId)); }
+
+	@bindThis
+	public isOwner(c: MiCompetition, userId: string | null | undefined): boolean { return !!userId && c.hostId === userId; }
+
+	/** COMP-W1B4: a referee (Reclub competition Referees) may score and finalize any match. */
+	@bindThis
+	public isReferee(c: MiCompetition, userId: string | null | undefined): boolean { return !!userId && (c.refereeIds ?? []).includes(userId); }
 
 	@bindThis
 	public async myEntry(c: MiCompetition, userId: string | null | undefined): Promise<MiCompetitionEntry | null> {
@@ -98,6 +110,7 @@ export class CompetitionService {
 		if (me && this.isHost(c, me.id)) return;
 		if (accessToken && c.accessToken && accessToken === c.accessToken) return;
 		if (me && await this.myEntry(c, me.id)) return;
+		if (me && (this.isReferee(c, me.id) || await this.hasPendingRole(c, me.id))) return;   // COMP-W1B4
 		throw this.err('private', 'This competition is private, only invited people and participants can see.');
 	}
 
@@ -109,7 +122,8 @@ export class CompetitionService {
 	@bindThis
 	public async confirmedEntries(c: MiCompetition): Promise<MiCompetitionEntry[]> {
 		const all = await this.entries(c);
-		const confirmed = all.filter((e) => e.status === 'confirmed' || e.status === 'forfeit');
+		// COMP-W1B4: an incomplete team (an invited partner has not accepted) is not drawn
+		const confirmed = all.filter((e) => (e.status === 'confirmed' || e.status === 'forfeit') && this.isComplete(c, e));
 		// seeded first (1..n), then unseeded in sign-up order
 		return confirmed.sort((a, b) => (a.seed ?? 1e9) - (b.seed ?? 1e9) || a.createdAt.getTime() - b.createdAt.getTime());
 	}
@@ -131,7 +145,7 @@ export class CompetitionService {
 			qb.where('c.visibility = :v', { v: 'public' }).andWhere('c.status IN (:...st)', { st: q.includePast ? ['open', 'closed', 'inProgress', 'done'] : ['open', 'closed', 'inProgress'] });
 		} else if (q.scope === 'hosting') {
 			if (!me) return [];
-			qb.where('c."hostId" = :me', { me: me.id });
+			qb.where('(c."hostId" = :me OR :me = ANY(c."adminIds"))', { me: me.id });   // COMP-W1B4: co-admins
 			if (!q.includePast) qb.andWhere('c.status NOT IN (:...st)', { st: ['done', 'cancelled'] });
 		} else if (q.scope === 'mine') {
 			if (!me) return [];
@@ -180,6 +194,8 @@ export class CompetitionService {
 	@bindThis
 	public async setStatus(c: MiCompetition, host: MiUser, action: StatusAction): Promise<MiCompetition> {
 		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
+		// batch-1 review fix (operator): co-admins run the event, but only the host wipes its results
+		if (action === 'reset' && !this.isOwner(c, host.id)) throw this.err('not_host', 'Only the host can reset the results.');
 		const bad = () => this.err('invalid_transition', `Cannot ${action} a competition that is ${c.status}.`);
 		const now = new Date();
 		switch (action) {
@@ -201,6 +217,13 @@ export class CompetitionService {
 				if (confirmed.length < 2) throw this.err('not_enough_entries', 'At least 2 confirmed entries are needed to start.');
 				// pending entries are dropped at the start (Reclub: "Free Agents will be moved to Spectators when competition starts.")
 				await this.entriesRepository.update({ competitionId: c.id, status: 'pending' }, { status: 'withdrawn', statusChangedAt: now });
+				// COMP-W1B4: free agents without a team and incomplete teams (a partner never accepted) do not play
+				await this.entriesRepository.update({ competitionId: c.id, status: 'freeAgent' }, { status: 'withdrawn', statusChangedAt: now });
+				for (const e of await this.entries(c)) {
+					if (e.status !== 'confirmed' || this.isComplete(c, e)) continue;
+					await this.entriesRepository.update(e.id, { status: 'withdrawn', invitedUserIds: [], requestedUserIds: [], statusChangedAt: now });
+					for (const uid of e.userIds) this.notify(uid, c, 'Team incomplete', `${e.name} was withdrawn from ${c.name}: the team was not complete at the start.`);
+				}
 				if (!(await this.matchesRepository.existsBy({ competitionId: c.id }))) await this.draw(c, host, { stage: 'auto', reset: false, skipStatusCheck: true });
 				await this.competitionsRepository.update(c.id, { status: 'inProgress', lockRegistration: true, startedAt: now, updatedAt: now });
 				for (const e of confirmed) for (const uid of e.userIds) if (uid !== host.id) this.notify(uid, c, 'Competition started', `${c.name} has started. Check your matches.`);
@@ -229,7 +252,8 @@ export class CompetitionService {
 
 	@bindThis
 	public async cancel(c: MiCompetition, host: MiUser): Promise<MiCompetition> {
-		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
+		// batch-1 review fix (operator): only the host cancels (a co-admin cannot)
+		if (!this.isOwner(c, host.id)) throw this.err('not_host', 'Only the host can cancel the competition.');
 		if (c.status === 'cancelled' || c.status === 'done') throw this.err('invalid_transition', `Cannot cancel a competition that is ${c.status}.`);
 		await this.competitionsRepository.update(c.id, { status: 'cancelled', cancelledAt: new Date(), updatedAt: new Date() });
 		for (const e of await this.entries(c)) for (const uid of e.userIds) if (uid !== host.id) this.notify(uid, c, 'Competition cancelled', `${c.name} has been cancelled by the host.`);
@@ -374,7 +398,7 @@ export class CompetitionService {
 	@bindThis
 	public async chatRoom(c: MiCompetition, user: MiUser): Promise<{ roomId: string }> {
 		const entry = await this.myEntry(c, user.id);
-		if (!this.isHost(c, user.id) && !(entry && entry.status !== 'pending')) throw this.err('forbidden', 'Only participants can open the competition chat.');
+		if (!this.isHost(c, user.id) && !this.isReferee(c, user.id) && !(entry && entry.status !== 'pending')) throw this.err('forbidden', 'Only participants can open the competition chat.');
 		let room = c.chatRoomId ? await this.chatService.findRoomById(c.chatRoomId) : null;
 		if (!room) {
 			const owner = await this.usersRepository.findOneByOrFail({ id: c.hostId });
@@ -502,7 +526,7 @@ export class CompetitionService {
 	@bindThis
 	public async canScore(c: MiCompetition, m: MiCompetitionMatch, userId: string | null | undefined): Promise<boolean> {
 		if (!userId) return false;
-		if (this.isHost(c, userId)) return true;
+		if (this.isHost(c, userId) || this.isReferee(c, userId)) return true;   // COMP-W1B4: referees score any match
 		const e = await this.myEntry(c, userId);
 		return !!e && (m.entry1Id === e.id || m.entry2Id === e.id);
 	}
@@ -536,9 +560,15 @@ export class CompetitionService {
 			if (data.startAt !== undefined) upd.startAt = data.startAt;
 			if (data.notes !== undefined) upd.notes = data.notes;
 			if (m.bracketId == null) { if (data.entry1Id !== undefined && data.matchId) upd.entry1Id = data.entry1Id; if (data.entry2Id !== undefined && data.matchId) upd.entry2Id = data.entry2Id; if (data.round != null) upd.round = data.round; }
+			const moved = (data.startAt !== undefined && (data.startAt?.getTime() ?? null) !== (m.startAt?.getTime() ?? null)) || (data.courtIndex !== undefined && data.courtIndex !== m.courtIndex);
 			if (Object.keys(upd).length) { await this.matchesRepository.update(m.id, upd); m = (await this.matchesRepository.findOneBy({ id: m.id }))!; }
+			// COMP-W1B4: a scheduled / moved match reaches its players (the time and court are on the match page)
+			if (moved && data.matchId && (m.entry1Id || m.entry2Id)) {
+				const es = await this.entriesRepository.findBy({ id: In([m.entry1Id, m.entry2Id].filter((x): x is string => !!x)) });
+				for (const e of es) for (const uid of e.userIds) if (uid !== user.id) this.notify(uid, c, 'Match scheduled', `Your match in ${c.name} has a new time or court.`);
+			}
 		}
-		if (data.reopen && host) {
+		if (data.reopen && (host || this.isReferee(c, user.id))) {
 			if (m.status === 'completed' && m.bracketId != null && c.bracketData) {
 				let db: BracketDb;
 				try { db = await resetBracketMatch(c.bracketData, m.bracketId); } catch { throw this.err('bracket_locked', 'A later match already has a result — reopen that one first.'); }
@@ -552,7 +582,8 @@ export class CompetitionService {
 			if (!m.entry1Id || !m.entry2Id) throw this.err('needs_winner', 'Both sides must be known before a score.');
 			if (m.entry1Status === 'bye' || m.entry2Status === 'bye') throw this.err('needs_winner', 'A bye has no score.');
 			const wasCompleted = m.status === 'completed';
-			await this.applyResult(await this.get(c.id), m, { scores: data.scores ?? m.scores, forfeit: data.forfeit ?? null, finalize: host ? (data.finalize !== false) : false });
+			const official = host || this.isReferee(c, user.id);   // COMP-W1B4: a referee's result is final like the host's
+			await this.applyResult(await this.get(c.id), m, { scores: data.scores ?? m.scores, forfeit: data.forfeit ?? null, finalize: official ? (data.finalize !== false) : false });
 			const after = await this.matchesRepository.findOneBy({ id: m.id });
 			// BACKEND-DELIVERY-V1: a finalized result (or a corrected one) reaches every player of the match but its scorer
 			if (after && after.status === 'completed' && (!wasCompleted || JSON.stringify(after.scores) !== JSON.stringify(m.scores))) {
@@ -696,6 +727,268 @@ export class CompetitionService {
 	/** BACKEND-DELIVERY-V1: a draw generated by the host reaches every confirmed entrant (the start sends its own line). */
 	private notifyDraw(c: MiCompetition, host: MiUser, confirmed: MiCompetitionEntry[]): void {
 		for (const e of confirmed) for (const uid of e.userIds) if (uid !== host.id) this.notify(uid, c, 'Draw published', `The draw for ${c.name} is out. Check your matches.`);
+	}
+
+	// ================================================================================ COMP-W1B4 (2026-09-20)
+	// Teams with consent (T1 partner consent), join an existing team, free agents, staff, announcements.
+
+	/** A team is complete when it has its minimum of ACCEPTED players (a reserved spot — no users — counts as complete). */
+	@bindThis
+	public isComplete(c: MiCompetition, e: MiCompetitionEntry): boolean {
+		if (e.status === 'freeAgent') return false;
+		if (!e.captainId && e.userIds.length === 0) return true;
+		return e.userIds.length >= c.teamMinSize;
+	}
+
+	/** Places still open in a team: max size minus accepted players and open invitations. */
+	@bindThis
+	public openSlots(c: MiCompetition, e: MiCompetitionEntry): number {
+		if (e.status !== 'confirmed' && e.status !== 'pending') return 0;
+		if (!e.captainId) return 0;
+		return Math.max(0, c.teamMaxSize - e.userIds.length - (e.invitedUserIds ?? []).length);
+	}
+
+	/** Invited to, asking to join, or a free agent in this competition (sees a private competition, no seat yet). */
+	private async hasPendingRole(c: MiCompetition, userId: string): Promise<boolean> {
+		return await this.entriesRepository.createQueryBuilder('e')
+			.where('e."competitionId" = :cid', { cid: c.id })
+			.andWhere('(:uid = ANY(e."invitedUserIds") OR :uid = ANY(e."requestedUserIds") OR (e.status = \'freeAgent\' AND :uid = ANY(e."userIds")))', { uid: userId })
+			.andWhere('e.status IN (:...st)', { st: ['pending', 'confirmed', 'freeAgent'] })
+			.getExists();
+	}
+
+	/** Refuses a team in which any two players block each other, in either direction (competition:blocked). */
+	@bindThis
+	public async assertNoBlocks(userIds: string[]): Promise<void> {
+		const ids = Array.from(new Set(userIds.filter(Boolean)));
+		if (ids.length < 2) return;
+		const hit = await this.blockingsRepository.exists({ where: { blockerId: In(ids), blockeeId: In(ids) } });
+		if (hit) throw this.err('blocked', 'You cannot play in a team with this player.');
+	}
+
+	/** Each invitee hears who invited them, to which competition and team (the link opens the competition). */
+	@bindThis
+	public notifyInvites(c: MiCompetition, e: MiCompetitionEntry, inviter: MiUser, userIds?: string[]): void {
+		for (const uid of userIds ?? e.invitedUserIds ?? []) this.notify(uid, c, 'Team invitation', `${inviter.name ?? inviter.username} invited you to play ${c.name} in the team ${e.name}.`);
+	}
+
+	/** The accepted entry a user plays in (pending / confirmed / forfeit), excluding one entry. */
+	private async acceptedEntryOf(c: MiCompetition, userId: string, exceptEntryId?: string): Promise<MiCompetitionEntry | null> {
+		const e = await this.myEntry(c, userId);
+		return e && e.id !== exceptEntryId ? e : null;
+	}
+
+	private async entryOrFail(c: MiCompetition, entryId: string): Promise<MiCompetitionEntry> {
+		const e = await this.entriesRepository.findOneBy({ id: entryId, competitionId: c.id });
+		if (!e) throw this.err('no_such_entry', 'No such entry.');
+		return e;
+	}
+
+	/** Seats a player in a team: the free-agent row is closed, other asks of this player in the competition dropped. */
+	private async seat(c: MiCompetition, e: MiCompetitionEntry, userId: string): Promise<MiCompetitionEntry> {
+		const userIds = e.userIds.includes(userId) ? e.userIds : [...e.userIds, userId];
+		await this.entriesRepository.update(e.id, {
+			userIds, captainId: e.captainId ?? userId,
+			invitedUserIds: (e.invitedUserIds ?? []).filter((x) => x !== userId),
+			requestedUserIds: (e.requestedUserIds ?? []).filter((x) => x !== userId),
+		});
+		await this.entriesRepository.update({ competitionId: c.id, status: 'freeAgent', captainId: userId }, { status: 'withdrawn', statusChangedAt: new Date() });
+		const others = await this.entriesRepository.createQueryBuilder('x').where('x."competitionId" = :cid', { cid: c.id }).andWhere('x.id <> :eid', { eid: e.id })
+			.andWhere(':uid = ANY(x."requestedUserIds")', { uid: userId }).getMany();
+		for (const o of others) await this.entriesRepository.update(o.id, { requestedUserIds: o.requestedUserIds.filter((x) => x !== userId) });
+		await this.closeAsksElsewhere(c, userId, e.id); // batch-1 review fix: no phantom invitation on another team
+		if (e.status === 'confirmed') await this.joinChat(c, [userId]);
+		return (await this.entriesRepository.findOneBy({ id: e.id }))!;
+	}
+
+	/** Batch-1 review fix: a player who now plays in one team is taken out of every OTHER live team's open invitations
+	 *  (its captain is told — the place is open again) and join requests (silently). */
+	private async closeAsksElsewhere(c: MiCompetition, userId: string, exceptEntryId: string): Promise<void> {
+		const others = await this.entriesRepository.createQueryBuilder('x').where('x."competitionId" = :cid', { cid: c.id }).andWhere('x.id <> :eid', { eid: exceptEntryId })
+			.andWhere('x.status IN (:...st)', { st: ['pending', 'confirmed'] })
+			.andWhere('(:uid = ANY(x."invitedUserIds") OR :uid = ANY(x."requestedUserIds"))', { uid: userId }).getMany();
+		if (!others.length) return;
+		const u = await this.usersRepository.findOneBy({ id: userId });
+		const who = u ? (u.name ?? u.username) : 'A player';
+		for (const o of others) {
+			const wasInvited = (o.invitedUserIds ?? []).includes(userId);
+			await this.entriesRepository.update(o.id, { invitedUserIds: (o.invitedUserIds ?? []).filter((x) => x !== userId), requestedUserIds: (o.requestedUserIds ?? []).filter((x) => x !== userId) });
+			if (wasInvited && o.captainId && o.captainId !== userId) this.notify(o.captainId, c, 'Team invitation closed', `${who} joined another team in ${c.name}; the place in ${o.name} is open again.`);
+		}
+	}
+
+	/** My open invitations across competitions still taking entries (newest first). */
+	@bindThis
+	public async invitationsOf(userId: string): Promise<{ c: MiCompetition; e: MiCompetitionEntry }[]> {
+		const es = await this.entriesRepository.createQueryBuilder('e')
+			.where(':uid = ANY(e."invitedUserIds")', { uid: userId })
+			.andWhere('e.status IN (:...st)', { st: ['pending', 'confirmed'] })
+			.orderBy('e."createdAt"', 'DESC').take(50).getMany();
+		const cs = es.length ? await this.competitionsRepository.findBy({ id: In(es.map((e) => e.competitionId)) }) : [];
+		const byId = new Map(cs.map((c) => [c.id, c]));
+		return es.map((e) => ({ c: byId.get(e.competitionId)!, e })).filter((x) => x.c && ['open', 'closed'].includes(x.c.status));
+	}
+
+	/** The entry inviting this user in a competition (or null). */
+	@bindThis
+	public async invitationIn(c: MiCompetition, userId: string | null | undefined): Promise<MiCompetitionEntry | null> {
+		if (!userId) return null;
+		return await this.entriesRepository.createQueryBuilder('e').where('e."competitionId" = :cid', { cid: c.id })
+			.andWhere(':uid = ANY(e."invitedUserIds")', { uid: userId }).andWhere('e.status IN (:...st)', { st: ['pending', 'confirmed'] }).getOne();
+	}
+
+	/** Accept (seated, joins the chat, the captain hears it) or decline (the place opens again) a team invitation. */
+	@bindThis
+	public async respondInvitation(c: MiCompetition, me: MiUser, entryId: string, accept: boolean): Promise<MiCompetitionEntry> {
+		const e = await this.entriesRepository.findOneBy({ id: entryId, competitionId: c.id });
+		if (!e || !(e.invitedUserIds ?? []).includes(me.id) || !['pending', 'confirmed'].includes(e.status)) throw this.err('no_such_invitation', 'No such invitation.');
+		if (!accept) {
+			await this.entriesRepository.update(e.id, { invitedUserIds: e.invitedUserIds.filter((x) => x !== me.id) });
+			if (e.captainId) this.notify(e.captainId, c, 'Invitation declined', `${me.name ?? me.username} declined to play ${c.name} in ${e.name}.`);
+			return (await this.entriesRepository.findOneBy({ id: e.id }))!;
+		}
+		if (c.status !== 'open' && c.status !== 'closed') throw this.err('started', 'The competition has started.');
+		if (await this.acceptedEntryOf(c, me.id, e.id)) throw this.err('already_entered', 'You already play in another team of this competition.');
+		await this.assertNoBlocks([...e.userIds, me.id]);
+		const seated = await this.seat(c, e, me.id);
+		if (e.captainId) this.notify(e.captainId, c, 'Invitation accepted', `${me.name ?? me.username} accepted to play ${c.name} in ${e.name}.`);
+		return seated;
+	}
+
+	/** The captain (or a manager) invites more partners after a decline, or cancels an open invitation. */
+	@bindThis
+	public async setPartners(c: MiCompetition, actor: MiUser, entryId: string, data: { invite?: string[] | null; cancel?: string[] | null }): Promise<MiCompetitionEntry> {
+		const e = await this.entryOrFail(c, entryId);
+		if (e.captainId !== actor.id && !this.isHost(c, actor.id)) throw this.err('forbidden', 'Only the captain can invite partners.');
+		if (c.status !== 'open' && c.status !== 'closed') throw this.err('started', 'The competition has started.');
+		let invited = (e.invitedUserIds ?? []).filter((x) => !(data.cancel ?? []).includes(x));
+		const add = Array.from(new Set((data.invite ?? []).filter((x) => !e.userIds.includes(x) && !invited.includes(x))));
+		if (add.length) {
+			if (e.userIds.length + invited.length + add.length > c.teamMaxSize) throw this.err('team_full', 'This team has no place left.');
+			if ((await this.usersRepository.countBy({ id: In(add) })) !== add.length) throw this.err('bad_team', 'A player does not exist.');
+			await this.assertNoBlocks([...e.userIds, ...add]);
+			for (const uid of add) if (await this.acceptedEntryOf(c, uid, e.id)) throw this.err('already_entered', 'A player already plays in another team of this competition.');
+			invited = [...invited, ...add];
+		}
+		await this.entriesRepository.update(e.id, { invitedUserIds: invited });
+		const after = (await this.entriesRepository.findOneBy({ id: e.id }))!;
+		if (add.length) this.notifyInvites(c, after, actor, add);
+		return after;
+	}
+
+	/** Join an existing team (Reclub "Join" on a team that needs players): ask, or take the ask back. */
+	@bindThis
+	public async requestJoin(c: MiCompetition, me: MiUser, entryId: string, cancel: boolean, accessToken?: string | null): Promise<MiCompetitionEntry> {
+		const e = await this.entryOrFail(c, entryId);
+		if (cancel) {
+			await this.entriesRepository.update(e.id, { requestedUserIds: (e.requestedUserIds ?? []).filter((x) => x !== me.id) });
+			return (await this.entriesRepository.findOneBy({ id: e.id }))!;
+		}
+		await this.assertVisible(c, me, accessToken);
+		if (!this.registrationOpen(c)) throw this.err('registration_closed', 'Registration is closed.');
+		if (e.status === 'freeAgent' || this.openSlots(c, e) <= 0) throw this.err('team_full', 'This team has no place left.');
+		if (e.userIds.includes(me.id)) throw this.err('already_entered', 'You are in this team.');
+		if (await this.acceptedEntryOf(c, me.id)) throw this.err('already_entered', 'You already play in a team of this competition.');
+		await this.assertNoBlocks([...e.userIds, me.id]);
+		if (!(e.requestedUserIds ?? []).includes(me.id)) await this.entriesRepository.update(e.id, { requestedUserIds: [...(e.requestedUserIds ?? []), me.id] });
+		if (e.captainId) this.notify(e.captainId, c, 'Join request', `${me.name ?? me.username} asked to join ${e.name} in ${c.name}.`);
+		return (await this.entriesRepository.findOneBy({ id: e.id }))!;
+	}
+
+	/** The captain (or a manager) accepts or declines a player who asked to join the team. */
+	@bindThis
+	public async decideJoin(c: MiCompetition, actor: MiUser, entryId: string, userId: string, accept: boolean): Promise<MiCompetitionEntry> {
+		const e = await this.entryOrFail(c, entryId);
+		if (e.captainId !== actor.id && !this.isHost(c, actor.id)) throw this.err('forbidden', 'Only the captain can answer a join request.');
+		if (!(e.requestedUserIds ?? []).includes(userId)) throw this.err('no_such_invitation', 'No such request.');
+		if (!accept) {
+			await this.entriesRepository.update(e.id, { requestedUserIds: e.requestedUserIds.filter((x) => x !== userId) });
+			this.notify(userId, c, 'Join request declined', `${e.name} did not take your request in ${c.name}.`);
+			return (await this.entriesRepository.findOneBy({ id: e.id }))!;
+		}
+		if (c.status !== 'open' && c.status !== 'closed') throw this.err('started', 'The competition has started.');
+		if (this.openSlots(c, e) <= 0) throw this.err('team_full', 'This team has no place left.');
+		if (await this.acceptedEntryOf(c, userId, e.id)) throw this.err('already_entered', 'This player already plays in another team.');
+		await this.assertNoBlocks([...e.userIds, userId]);
+		const seated = await this.seat(c, e, userId);
+		this.notify(userId, c, 'Join request accepted', `You are in ${e.name} for ${c.name}.`);
+		return seated;
+	}
+
+	/** Join as a free agent (Reclub): one row per player with notes; leave takes it back. */
+	@bindThis
+	public async freeAgent(c: MiCompetition, me: MiUser, data: { notes?: string | null; leave?: boolean | null; accessToken?: string | null }): Promise<MiCompetitionEntry | null> {
+		const mine = await this.entriesRepository.findOneBy({ competitionId: c.id, status: 'freeAgent', captainId: me.id });
+		if (data.leave) {
+			if (mine) await this.entriesRepository.update(mine.id, { status: 'withdrawn', statusChangedAt: new Date() });
+			return null;
+		}
+		await this.assertVisible(c, me, data.accessToken);
+		if (c.participantType === 'singles') throw this.err('bad_team', 'A singles competition has no teams — join it directly.');
+		if (!this.registrationOpen(c)) throw this.err('registration_closed', 'Registration is closed.');
+		if (await this.acceptedEntryOf(c, me.id)) throw this.err('already_entered', 'You already play in a team of this competition.');
+		const notes = (data.notes ?? '').trim().slice(0, 512) || null;
+		if (mine) { await this.entriesRepository.update(mine.id, { notes }); return (await this.entriesRepository.findOneBy({ id: mine.id }))!; }
+		const e = await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name: me.name ?? me.username, captainId: me.id, userIds: [me.id], invitedUserIds: [], requestedUserIds: [], seed: null, pool: null, status: 'freeAgent', isPaid: false, notes, createdById: me.id, createdAt: new Date(), statusChangedAt: new Date() });
+		this.notify(c.hostId, c, 'New free agent', `${e.name} is looking for a team in ${c.name}.`);
+		return e;
+	}
+
+	/** A manager places a free agent in a team with an open place (Reclub "Assign team"). */
+	@bindThis
+	public async assignFreeAgent(c: MiCompetition, actor: MiUser, freeAgentEntryId: string, entryId: string): Promise<MiCompetitionEntry> {
+		if (!this.isHost(c, actor.id)) throw this.err('not_host', 'Only the host can do this.');
+		const fa = await this.entryOrFail(c, freeAgentEntryId);
+		if (fa.status !== 'freeAgent' || !fa.captainId) throw this.err('no_such_entry', 'No such free agent.');
+		const e = await this.entryOrFail(c, entryId);
+		if (e.status === 'freeAgent' || this.openSlots(c, e) <= 0) throw this.err('team_full', 'This team has no place left.');
+		await this.assertNoBlocks([...e.userIds, fa.captainId]);
+		const seated = await this.seat(c, e, fa.captainId);
+		this.notify(fa.captainId, c, 'You have a team', `The host placed you in ${e.name} for ${c.name}.`);
+		if (e.captainId && e.captainId !== actor.id) this.notify(e.captainId, c, 'New teammate', `The host added ${fa.name} to ${e.name} in ${c.name}.`);
+		return seated;
+	}
+
+	/** Staff (Reclub Admins + Referees): the owner or a co-admin adds / removes a co-admin or a referee. */
+	@bindThis
+	public async setStaff(c: MiCompetition, actor: MiUser, userId: string, role: 'admin' | 'referee' | null): Promise<MiCompetition> {
+		if (!this.isHost(c, actor.id)) throw this.err('not_host', 'Only the host can do this.');
+		if (userId === c.hostId) throw this.err('forbidden', 'The host is always an admin.');
+		// batch-1 review fix (operator): co-admins may add / remove referees; only the host adds or removes co-admins
+		if ((role === 'admin' || (c.adminIds ?? []).includes(userId)) && !this.isOwner(c, actor.id)) throw this.err('not_host', 'Only the host can add or remove co-admins.');
+		if (role && !(await this.usersRepository.existsBy({ id: userId }))) throw this.err('no_such_entry', 'No such user.');
+		if (role) await this.assertNoBlocks([c.hostId, userId]);
+		const admins = (c.adminIds ?? []).filter((x) => x !== userId);
+		const refs = (c.refereeIds ?? []).filter((x) => x !== userId);
+		if (role === 'admin') admins.push(userId);
+		if (role === 'referee') refs.push(userId);
+		await this.competitionsRepository.update(c.id, { adminIds: admins, refereeIds: refs, updatedAt: new Date() });
+		if (role) this.notify(userId, c, role === 'admin' ? 'You are a co-admin' : 'You are a referee', role === 'admin' ? `${actor.name ?? actor.username} made you a co-admin of ${c.name}.` : `${actor.name ?? actor.username} made you a referee of ${c.name}.`);
+		return await this.get(c.id);
+	}
+
+	/** Announcements (Reclub "Need to announce something? / Post announcement"): every player and staff member hears it. */
+	@bindThis
+	public async postAnnouncement(c: MiCompetition, actor: MiUser, text: string): Promise<MiCompetition> {
+		if (!this.isHost(c, actor.id)) throw this.err('not_host', 'Only the host can do this.');
+		const t = text.trim();
+		if (!t) throw this.err('no_such_announcement', 'An announcement needs text.');
+		const a: CompetitionAnnouncement = { id: this.idService.gen(), userId: actor.id, text: t.slice(0, 2000), createdAt: new Date().toISOString() };
+		await this.competitionsRepository.update(c.id, { announcements: [a, ...(c.announcements ?? [])].slice(0, 50), updatedAt: new Date() });
+		const to = new Set<string>([c.hostId, ...(c.adminIds ?? []), ...(c.refereeIds ?? [])]);
+		for (const e of await this.entries(c)) if (['pending', 'confirmed', 'forfeit', 'freeAgent'].includes(e.status)) for (const uid of e.userIds) to.add(uid);
+		to.delete(actor.id);
+		for (const uid of to) this.notify(uid, c, 'Announcement', `${c.name}: ${a.text.length > 140 ? a.text.slice(0, 139) + '…' : a.text}`);
+		return await this.get(c.id);
+	}
+
+	@bindThis
+	public async deleteAnnouncement(c: MiCompetition, actor: MiUser, announcementId: string): Promise<MiCompetition> {
+		if (!this.isHost(c, actor.id)) throw this.err('not_host', 'Only the host can do this.');
+		const list = c.announcements ?? [];
+		if (!list.some((a) => a.id === announcementId)) throw this.err('no_such_announcement', 'No such announcement.');
+		await this.competitionsRepository.update(c.id, { announcements: list.filter((a) => a.id !== announcementId), updatedAt: new Date() });
+		return await this.get(c.id);
 	}
 
 	private notify(userId: string, c: MiCompetition, header: string, body: string): void {

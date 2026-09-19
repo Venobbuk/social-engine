@@ -41,19 +41,28 @@ export class CompetitionEntityService {
 	}
 
 	@bindThis
-	public async packEntry(e: MiCompetitionEntry, me?: { id: MiUser['id'] } | null): Promise<Record<string, unknown>> {
+	public async packEntry(e: MiCompetitionEntry, me?: { id: MiUser['id'] } | null, comp?: MiCompetition | null): Promise<Record<string, unknown>> {
+		// COMP-W1B4: consent + open places — invited partners (not seated yet), players asking to join, completeness
+		const c = comp ?? await this.competitionService.get(e.competitionId).catch(() => null);
+		const invited = e.invitedUserIds ?? [], requested = e.requestedUserIds ?? [];
 		return {
 			id: e.id, competitionId: e.competitionId, name: e.name, captainId: e.captainId, userIds: e.userIds,
 			users: await this.usersLite(e.userIds, me),
+			invitedUserIds: invited, invitedUsers: await this.usersLite(invited, me),
+			requestedUserIds: requested, requestedUsers: await this.usersLite(requested, me),
+			complete: c ? this.competitionService.isComplete(c, e) : true, openSlots: c ? this.competitionService.openSlots(c, e) : 0,
+			freeAgent: e.status === 'freeAgent',
 			seed: e.seed, pool: e.pool, status: e.status, isPaid: e.isPaid, notes: e.notes,
-			isMine: !!me && e.userIds.includes(me.id),
+			isMine: !!me && e.userIds.includes(me.id), isCaptain: !!me && e.captainId === me.id,
+			isInvited: !!me && invited.includes(me.id), hasRequested: !!me && requested.includes(me.id),
 			createdAt: e.createdAt.toISOString(), statusChangedAt: e.statusChangedAt.toISOString(),
 		};
 	}
 
 	@bindThis
-	public async packEntries(es: MiCompetitionEntry[], me?: { id: MiUser['id'] } | null): Promise<Record<string, unknown>[]> {
-		return await Promise.all(es.map((e) => this.packEntry(e, me)));
+	public async packEntries(es: MiCompetitionEntry[], me?: { id: MiUser['id'] } | null, comp?: MiCompetition | null): Promise<Record<string, unknown>[]> {
+		const c = comp ?? (es[0] ? await this.competitionService.get(es[0].competitionId).catch(() => null) : null);
+		return await Promise.all(es.map((e) => this.packEntry(e, me, c)));
 	}
 
 	@bindThis
@@ -85,13 +94,20 @@ export class CompetitionEntityService {
 		const counts = await this.entriesRepository.createQueryBuilder('e').select('e.status', 'status').addSelect('COUNT(*)', 'n').where('e."competitionId" = :cid', { cid: c.id }).groupBy('e.status').getRawMany<{ status: string; n: string }>();
 		const n = (s: string) => Number(counts.find((r) => r.status === s)?.n ?? 0);
 		const myEntry = me ? await this.competitionService.myEntry(c, me.id) : null;
+		// COMP-W1B4: staff, announcements, my invitation / free-agent row
+		const isReferee = this.competitionService.isReferee(c, me?.id);
+		const myInvitation = me ? await this.competitionService.invitationIn(c, me.id) : null;
+		const myFreeAgent = me ? await this.entriesRepository.findOneBy({ competitionId: c.id, status: 'freeAgent', captainId: me.id }) : null;
+		const announcements = c.announcements ?? [];
+		const authors = await this.usersLite(Array.from(new Set(announcements.map((a) => a.userId))), me);
+		const authorOf = new Map(authors.map((u) => [u.id as string, u]));
 		const hasDraw = await this.matchesRepository.existsBy({ competitionId: c.id });
 		const now = Date.now();
 		const registrationOpen = c.status === 'open' && !c.lockRegistration && !(c.registrationOpenAt && c.registrationOpenAt.getTime() > now) && !(c.registrationCloseAt && c.registrationCloseAt.getTime() < now);
 		const base: Record<string, unknown> = {
 			id: c.id, referenceCode: c.referenceCode, hostId: c.hostId,
 			host: await this.userEntityService.pack(c.hostId, me, { schema: 'UserLite' }).catch(() => null),
-			channelId: c.channelId, chatRoomId: (isHost || myEntry) ? c.chatRoomId : null,
+			channelId: c.channelId, chatRoomId: (isHost || isReferee || myEntry) ? c.chatRoomId : null,
 			sport: c.sport, name: c.name, notes: c.notes, format: c.format, participantType: c.participantType,
 			teamMinSize: c.teamMinSize, teamMaxSize: c.teamMaxSize, maxEntries: c.maxEntries,
 			registrationOpenAt: c.registrationOpenAt?.toISOString() ?? null, registrationCloseAt: c.registrationCloseAt?.toISOString() ?? null,
@@ -107,7 +123,14 @@ export class CompetitionEntityService {
 			tiebreakerWinPoint: c.tiebreakerWinPoint, tiebreakerLossPoint: c.tiebreakerLossPoint, tiebreakers: c.tiebreakers,
 			revealDraw: c.revealDraw, showSeeds: c.showSeeds, manualSeeding: c.manualSeeding, autoApprove: c.autoApprove,
 			entriesCount: n('confirmed') + n('forfeit'), pendingCount: n('pending'), spotsLeft: Math.max(0, c.maxEntries - n('confirmed') - n('pending') - n('forfeit')),
-			isHost, myEntry: myEntry ? await this.packEntry(myEntry, me) : null, hasDraw, registrationOpen,
+			isHost, myEntry: myEntry ? await this.packEntry(myEntry, me, c) : null, hasDraw, registrationOpen,
+			isOwner: this.competitionService.isOwner(c, me?.id), isReferee,
+			adminIds: c.adminIds ?? [], refereeIds: c.refereeIds ?? [],
+			staff: { admins: await this.usersLite(c.adminIds ?? [], me), referees: await this.usersLite(c.refereeIds ?? [], me) },
+			announcements: announcements.map((a) => ({ id: a.id, userId: a.userId, user: authorOf.get(a.userId) ?? null, text: a.text, createdAt: a.createdAt })),
+			myInvitation: myInvitation ? await this.packEntry(myInvitation, me, c) : null,
+			myFreeAgent: myFreeAgent ? await this.packEntry(myFreeAgent, me, c) : null,
+			freeAgentsCount: n('freeAgent'),
 			drawVisible: isHost || c.revealDraw || c.status === 'inProgress' || c.status === 'done',
 			isPast: c.status === 'done' || c.status === 'cancelled',
 			startedAt: c.startedAt?.toISOString() ?? null, endedAt: c.endedAt?.toISOString() ?? null, cancelledAt: c.cancelledAt?.toISOString() ?? null,

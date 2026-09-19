@@ -28,3 +28,18 @@ pattern: minted at create, entrants joined when confirmed).
 
 Migration: `migration/1789010000000-tournament-v1.js` (additive, idempotent). Probe: `probes/tournament-v1.probe.cjs`
 on kaka (UAT).
+
+COMP-W1B4 (2026-09-20, wave 1 lane B4; Reclub triage family "competitions"): migration
+`1789094000000-competitions-w1b4.js` (additive). **Teams with consent** — `competition_entry.invitedUserIds`: a partner
+named by the entrant waits there until `competitions/invitations/respond` (accept → seated + chat; decline → the place
+opens); `competitions/invitations` lists my open ones; `competitions/entries/partners` lets the captain re-invite /
+cancel. Block-aware through `CompetitionService.assertNoBlocks` (either direction). The guard inside `enter()` /
+`assertTeam()` (partners go to invitedUserIds, blocks refused) is lane A's patch — contract `kaka:/root/gen/w1-engine-api.md`.
+An incomplete team (fewer accepted players than teamMinSize) is never drawn and is withdrawn at the start.
+**Join an existing team** — `requestedUserIds` + `competitions/entries/join` / `competitions/entries/requests/decide`.
+**Free agents** — an entry with status `freeAgent` (one player + notes; outside every count, never drawn, never an
+already_entered lock): `competitions/free-agent`, host `competitions/free-agents/assign`; free agents leave at the start.
+**Staff** — `competition.adminIds` (co-admins pass every host gate: `isHost` admits them, `isOwner` is the creator) and
+`refereeIds` (score + finalize any match, open the chat): `competitions/staff/update`. **Announcements** —
+`competition.announcements` jsonb + `competitions/announcements/post|delete` (every player + staff notified). A match
+whose time / court the host changes (`competitions/matches/upsert` startAt / courtIndex) notifies its players.

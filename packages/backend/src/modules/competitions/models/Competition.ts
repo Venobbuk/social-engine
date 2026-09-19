@@ -31,6 +31,8 @@ export const competitionAgeGroups = ['any', 'junior', 'adult', 'senior'] as cons
 
 export type CompetitionFormat = typeof competitionFormats[number];
 export type CompetitionStatus = typeof competitionStatuses[number];
+/** COMP-W1B4: one announcement of the host / a co-admin (Reclub competition announcements). */
+export interface CompetitionAnnouncement { id: string; userId: string; text: string; createdAt: string }
 
 @Entity('competition')
 export class MiCompetition {
@@ -211,6 +213,16 @@ export class MiCompetition {
 
 	@Column('boolean', { default: true, comment: 'Reclub autoApprove for players: an entry is confirmed without host approval.' })
 	public autoApprove: boolean;
+
+	// COMP-W1B4: staff (Reclub Admins + Referees grids) and the host's announcements
+	@Column('varchar', { array: true, length: 32, default: '{}', comment: 'Co-admins: manage the competition like the host.' })
+	public adminIds: string[];
+
+	@Column('varchar', { array: true, length: 32, default: '{}', comment: 'Referees: may score and finalize any match.' })
+	public refereeIds: string[];
+
+	@Column('jsonb', { default: [], comment: 'Announcements [{id, userId, text, createdAt}], newest first.' })
+	public announcements: CompetitionAnnouncement[];
 
 	@Column('jsonb', { nullable: true, comment: 'brackets-manager export (participant/stage/group/round/match) for the knockout stage(s).' })
 	public bracketData: BracketDb | null;

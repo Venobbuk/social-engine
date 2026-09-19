@@ -31,6 +31,11 @@ export const competitionErrors = {
 	noSuchAward: { message: 'No such award.', code: 'NO_SUCH_AWARD', id: '7c0a0000-0000-4000-8000-000000000013' },
 	forbidden: { message: 'Not allowed.', code: 'COMPETITION_FORBIDDEN', id: '7c0a0000-0000-4000-8000-000000000014' },
 	invalidDate: { message: 'Invalid date.', code: 'COMPETITION_INVALID_DATE', id: '7c0a0000-0000-4000-8000-000000000015' },
+	// COMP-W1B4
+	blocked: { message: 'You cannot play in a team with this player.', code: 'COMPETITION_BLOCKED', id: '7c0a0000-0000-4000-8000-000000000016' },
+	noSuchInvitation: { message: 'No such invitation.', code: 'NO_SUCH_INVITATION', id: '7c0a0000-0000-4000-8000-000000000017' },
+	teamFull: { message: 'This team has no place left.', code: 'COMPETITION_TEAM_FULL', id: '7c0a0000-0000-4000-8000-000000000018' },
+	noSuchAnnouncement: { message: 'No such announcement.', code: 'NO_SUCH_ANNOUNCEMENT', id: '7c0a0000-0000-4000-8000-000000000019' },
 } as const;
 
 const map: Record<CompetitionErrorId, keyof typeof competitionErrors> = {
@@ -38,6 +43,7 @@ const map: Record<CompetitionErrorId, keyof typeof competitionErrors> = {
 	full: 'full', already_entered: 'alreadyEntered', not_entered: 'notEntered', started: 'started', bad_team: 'badTeam', draw_exists: 'drawExists',
 	not_enough_entries: 'notEnoughEntries', too_many_entries: 'tooManyEntries', no_such_match: 'noSuchMatch', no_such_entry: 'noSuchEntry',
 	needs_winner: 'needsWinner', bracket_locked: 'bracketLocked', stage_incomplete: 'stageIncomplete', no_such_award: 'noSuchAward', forbidden: 'forbidden',
+	blocked: 'blocked', no_such_invitation: 'noSuchInvitation', team_full: 'teamFull', no_such_announcement: 'noSuchAnnouncement', // COMP-W1B4
 };
 
 export function toApiError(e: unknown): never {
