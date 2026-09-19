@@ -401,6 +401,13 @@ export class ChatService {
 	@bindThis
 	public async deleteMessage(message: MiChatMessage) {
 		await this.chatMessagesRepository.delete(message.id);
+		// CHAT-REPLY-V1: replies keep a snapshot of the text they quote — blank it, so removed words do not live on in a quote
+		// (batch-1 review fix: scoped to the message's own thread, so the scan uses the room / user-pair indexes)
+		if (message.toRoomId) {
+			await this.chatMessagesRepository.query(`UPDATE "chat_message" SET "attachment" = "attachment" || '{"text": null, "deleted": true}'::jsonb WHERE "toRoomId" = $2 AND "attachment"->>'kind' = 'reply' AND "attachment"->>'replyId' = $1`, [message.id, message.toRoomId]);
+		} else if (message.toUserId) {
+			await this.chatMessagesRepository.query(`UPDATE "chat_message" SET "attachment" = "attachment" || '{"text": null, "deleted": true}'::jsonb WHERE (("fromUserId" = $2 AND "toUserId" = $3) OR ("fromUserId" = $3 AND "toUserId" = $2)) AND "attachment"->>'kind' = 'reply' AND "attachment"->>'replyId' = $1`, [message.id, message.fromUserId, message.toUserId]);
+		}
 
 		if (message.toUserId) {
 			const [fromUser, toUser] = await Promise.all([

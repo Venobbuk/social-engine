@@ -10,7 +10,8 @@ import { GetterService } from '@/server/api/GetterService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '@/server/api/error.js';
 import { ChatService } from '@/core/ChatService.js';
-import type { DriveFilesRepository, MeetsRepository, MiUser } from '@/models/_.js';
+import type { DriveFilesRepository, MeetsRepository, MiUser, UsersRepository } from '@/models/_.js';
+import { replyAttachment } from '@/core/ChatReply.js';
 
 export const meta = {
 	tags: ['chat'],
@@ -51,6 +52,12 @@ export const meta = {
 			id: '4372b8e2-185d-4146-8749-2f68864a3e5f',
 		},
 
+		// CHAT-REPLY-V1
+		noSuchReply: {
+			message: 'The message you reply to is not in this chat.',
+			code: 'NO_SUCH_REPLY',
+			id: 'c2a1d5e0-5c1b-4f7e-9a3c-7e1b2c3d4e97',
+		},
 		noSuchMeet: {
 			message: 'No such meet.',
 			code: 'NO_SUCH_MEET',
@@ -78,6 +85,8 @@ export const paramDef = {
 		fileId: { type: 'string', format: 'misskey:id' },
 		/** CHAT-V2: share a meet — the message carries a card snapshot of it (attachment.kind = 'meet') */
 		meetId: { type: 'string', format: 'misskey:id' },
+		/** CHAT-REPLY-V1: reply to a message of this thread — the message carries its quote (attachment.kind = 'reply'); not with meetId */
+		replyId: { type: 'string', format: 'misskey:id' },
 		toUserId: { type: 'string', format: 'misskey:id' },
 	},
 	required: ['toUserId'],
@@ -91,6 +100,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 		@Inject(DI.meetsRepository)
 		private meetsRepository: MeetsRepository,
+
+		@Inject(DI.usersRepository)
+		private usersRepository: UsersRepository,
 
 		private getterService: GetterService,
 		private chatService: ChatService,
@@ -116,6 +128,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
 				if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
 				attachment = { kind: 'meet', meetId: meet.id, name: meet.name, startAt: meet.startAt.toISOString(), durationMinutes: meet.durationMinutes, venueName: meet.venueName, status: meet.status };
+			}
+
+			// CHAT-REPLY-V1: the quote of a message in this same thread (a reply cannot also carry a meet card)
+			if (ps.replyId != null) {
+				if (attachment != null) throw new ApiError(meta.errors.noSuchReply);
+				attachment = await replyAttachment(this.chatService, this.usersRepository, ps.replyId, { meId: me.id, otherId: ps.toUserId });
+				if (attachment == null) throw new ApiError(meta.errors.noSuchReply);
+				if (ps.text == null && file == null) throw new ApiError(meta.errors.contentRequired);
 			}
 
 			// テキストが無いかつ添付ファイルも無かったらエラー

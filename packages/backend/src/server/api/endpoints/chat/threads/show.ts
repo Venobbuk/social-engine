@@ -11,6 +11,8 @@ import { ChatEntityService } from '@/core/entities/ChatEntityService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import type { UsersRepository } from '@/models/_.js';
+import type { DataSource } from 'typeorm';
+import { runsRoom, roomManagement } from '@/core/ChatModeration.js';
 
 /* CHAT-V2 — one thread's settings sheet in one read (Reclub chats/settings/[channelId]): muted?, read-only?, the members
  * (a room: owner first, then the memberships), whether I own it and may leave it. `roomId` for a meet / club / group
@@ -33,6 +35,13 @@ export const meta = {
 			readOnly: { type: 'boolean', optional: false, nullable: false },
 			isOwner: { type: 'boolean', optional: false, nullable: false },
 			canLeave: { type: 'boolean', optional: false, nullable: false },
+			// CHAT-MOD-V1: I may delete anyone's message here (room owner, club owner / admins, meet host / co-hosts, competition host)
+			canModerate: { type: 'boolean', optional: false, nullable: false },
+			// CHAT-MOD-V1: the module that keeps this room's membership (meet / club / competition); null = a plain group,
+			// whose owner may remove members (chat/rooms/members/remove)
+			managed: { type: 'string', optional: false, nullable: true, enum: ['meet', 'club', 'competition'] },
+			// INBOX-ARCHIVE-V1: I archived this thread (chat/threads/archive) — the inbox lists it under Archived
+			archived: { type: 'boolean', optional: false, nullable: false },
 			room: { type: 'object', optional: false, nullable: true, ref: 'ChatRoom' },
 			members: { type: 'array', optional: false, nullable: false, items: { type: 'object', optional: false, nullable: false, ref: 'UserLite' } },
 		},
@@ -60,6 +69,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
+		@Inject(DI.db)
+		private db: DataSource,
 
 		private chatService: ChatService,
 		private chatEntityService: ChatEntityService,
@@ -86,6 +97,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					readOnly: room.readOnlyAt != null && room.readOnlyAt.getTime() <= Date.now(),
 					isOwner: room.ownerId === me.id,
 					canLeave: room.ownerId !== me.id,
+					canModerate: await runsRoom(this.db, room.id, me.id),
+					managed: await roomManagement(this.db, room.id),
+					archived: mutes.some(m => m.scope === 'archiveRoom' && m.targetId === room.id),
 					room: packedRoom,
 					members,
 				};
@@ -102,6 +116,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					readOnly: false,
 					isOwner: false,
 					canLeave: false,
+					canModerate: false,
+					managed: null,
+					archived: mutes.some(m => m.scope === 'archiveUser' && m.targetId === other.id),
 					room: null,
 					members: await this.userEntityService.packMany([me.id, other.id], me),
 				};
