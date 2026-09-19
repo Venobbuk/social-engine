@@ -177,6 +177,7 @@ export class ClubService {
 		const s = await this.settings(channel.id);
 		if (s.visibility !== 'private') return;
 		if (await this.isMember(channel.id, user.id) || await this.isAdmin(channel, user.id)) return;
+		if (await this.myInvitation(channel.id, user.id)) return;   // CLUB-TIERS-V1 × CLUB-INVITE-V1: "unless invited by admin"
 		throw this.err('private_club', 'This club is private — only its members can follow it.');
 	}
 
@@ -488,7 +489,8 @@ export class ClubService {
 			await this.db.query(`UPDATE "club_invitation" SET "status" = 'declined', "decidedAt" = now() WHERE "id" = $1 AND "status" = 'pending'`, [inv.id]);
 			return { status: 'declined' };
 		}
-		if (channel.userId !== user.id && !(await this.isMember(channel.id, user.id))) await this.channelFollowingService.follow(user, channel);
+		// CLUB-TIERS-V1: the invitation seats through the one member door (member + follower, via 'invite')
+		if (channel.userId !== user.id && !(await this.isMember(channel.id, user.id))) await this.addMember(channel, user, 'invite', inv.invitedById);
 		await this.db.query(`UPDATE "club_invitation" SET "status" = 'accepted', "decidedAt" = now() WHERE "id" = $1 AND "status" = 'pending'`, [inv.id]);
 		await this.clubJoinRequestsRepository.delete({ channelId: channel.id, userId: user.id, status: 'pending' });
 		this.notify(inv.invitedById, 'Invitation accepted', `${user.name ?? user.username} accepted your invitation to ${channel.name}.`, channel.id);
@@ -522,7 +524,8 @@ export class ClubService {
 			WHERE c."isArchived" = false AND (c."userId" = $1 OR $1 = ANY(s."adminIds")) ORDER BY c."id" DESC LIMIT 50`, [viewer.id]) as { id: string; name: string; userId: string | null }[];
 		if (!clubs.length) return [];
 		const ids = clubs.map(c => c.id);
-		const follows = new Set((await this.db.query(`SELECT "followeeId" FROM "channel_following" WHERE "followerId" = $1 AND "followeeId" = ANY($2)`, [userId, ids]) as { followeeId: string }[]).map(r => r.followeeId));
+		// CLUB-TIERS-V1: 'member' is club_member (a follower is not a member — the admin can invite them)
+		const follows = new Set((await this.db.query(`SELECT "channelId" AS "followeeId" FROM "club_member" WHERE "userId" = $1 AND "channelId" = ANY($2)`, [userId, ids]) as { followeeId: string }[]).map(r => r.followeeId));
 		const invs = await this.db.query(`SELECT DISTINCT ON ("channelId") "channelId", "status" FROM "club_invitation" WHERE "userId" = $1 AND "channelId" = ANY($2) ORDER BY "channelId", "createdAt" DESC`, [userId, ids]) as { channelId: string; status: string }[];
 		const latestInv = new Map(invs.map(r => [r.channelId, r.status]));
 		const requested = new Set((await this.clubJoinRequestsRepository.find({ where: { userId, channelId: In(ids), status: 'pending' }, select: { channelId: true } })).map(r => r.channelId));
