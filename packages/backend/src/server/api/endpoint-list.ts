@@ -234,6 +234,10 @@ export * as 'clubs/tags/list' from '@/modules/clubs/endpoints/tags-list.js'; // 
 export * as 'clubs/tags/upsert' from '@/modules/clubs/endpoints/tags-upsert.js'; // CLUB-V3
 export * as 'clubs/tags/delete' from '@/modules/clubs/endpoints/tags-delete.js'; // CLUB-V3
 export * as 'clubs/tags/member' from '@/modules/clubs/endpoints/tags-member.js'; // CLUB-V3
+export * as 'clubs/leave' from '@/modules/clubs/endpoints/leave.js'; // CLUB-TIERS-V1
+export * as 'clubs/requests/cancel' from '@/modules/clubs/endpoints/requests-cancel.js'; // CLUB-TIERS-V1
+export * as 'clubs/followers' from '@/modules/clubs/endpoints/followers.js'; // CLUB-TIERS-V1
+export * as 'clubs/followers/remove' from '@/modules/clubs/endpoints/followers-remove.js'; // CLUB-TIERS-V1
 export * as 'adapter/clubs/sync' from '@/modules/venues/endpoints/clubs-sync.js';
 export * as 'channels/favorite' from './endpoints/channels/favorite.js';
 export * as 'channels/featured' from './endpoints/channels/featured.js';

@@ -157,6 +157,8 @@ export class ClubScheduleService {
 				if (uid === host.id) continue;
 				try { await this.meetService.hostAdd(meet, { userId: uid, status: 'invited' }); } catch { /* already on it */ }
 			}
+			// CLUB-TIERS-V1: the members were invited above; a public occurrence is also announced to the followers
+			void this.clubService.notifyNewMeet(meet, { skipMembers: true }).catch(() => undefined);
 		}
 		await this.clubSchedulesRepository.update(s.id, { lastRunAt: now });
 		return created;

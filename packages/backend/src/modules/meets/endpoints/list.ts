@@ -9,6 +9,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import type { MeetsRepository, MeetParticipantsRepository } from '@/models/_.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import { DI } from '@/di-symbols.js';
+import { memberExistsSql, adminExistsSql } from '@/modules/clubs/club-tiers.js';   // CLUB-TIERS-V1
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
 import { parseIsoDate } from './_shared.js';
 
@@ -87,8 +88,12 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 				case 'channel': {
 					if (!ps.channelId) return [];
-					q.andWhere('meet.channelId = :channelId', { channelId: ps.channelId });
-					q.andWhere('meet.visibility IN (:...vis)', { vis: ['public', 'club'] });
+					// CLUB-TIERS-V1: the club's meets = its own (meet.channelId) and those it was attached to (meet_group, Reclub MeetGroup)
+					q.andWhere('(meet.channelId = :channelId OR EXISTS (SELECT 1 FROM meet_group mg WHERE mg."meetId" = meet.id AND mg."channelId" = :channelId AND mg."cancelledAt" IS NULL))', { channelId: ps.channelId });
+					// CLUB-TIERS-V1: the club's public meets for everyone (a follower, a visitor); its members-only meets (private)
+					// for a member / admin — membership is club_member, never the follow ('club' visibility no longer exists)
+					if (me != null) q.andWhere(`(meet.visibility = 'public' OR (meet.visibility = 'private' AND (${memberExistsSql(':channelId', ':clubViewer')} OR ${adminExistsSql(':channelId', ':clubViewer')})))`, { clubViewer: me.id });
+					else q.andWhere('meet.visibility = :pubOnly', { pubOnly: 'public' });
 					break;
 				}
 				default: {

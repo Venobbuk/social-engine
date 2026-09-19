@@ -31,6 +31,7 @@
 		"test-and-coverage": "pnpm build:unit && cross-env NODE_ENV=test pnpm compile-config && vitest --coverage --config vitest.config.unit.ts",
 		"test-and-coverage:e2e": "pnpm build:e2e && cross-env NODE_ENV=test pnpm compile-config && vitest --coverage --config vitest.config.e2e.ts",
 		"check-migrations": "node scripts/check_migrations_clean.js",
+		"check-error-ids": "node scripts/check_error_ids.js",
 		"generate-api-json": "pnpm compile-config && node ./scripts/generate_api_json.js"
 	},
 	"optionalDependencies": {

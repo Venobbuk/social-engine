@@ -10,6 +10,7 @@ import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import { DI } from '@/di-symbols.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { ClubService } from '@/modules/clubs/ClubService.js';
 import { ApiError } from '@/server/api/error.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { meetErrors, meetParamProps, parseIsoDate, pickMeetFields, toApiError } from './_shared.js';
@@ -20,7 +21,7 @@ export const meta = {
 	prohibitMoved: true,
 	kind: 'write:meets',
 	res: { type: 'object', optional: false, nullable: false, ref: 'Meet' },
-	errors: { invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014' }, ...meetErrors },
+	errors: { invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014' }, notClubMember: { message: 'Only the club admins — or its members, when the club allows it — can put meets in this club.', code: 'CLUB_NOT_MEMBER', id: 'c1b00000-0000-4000-8000-000000000011' }, ...meetErrors },   // CLUB-TIERS-V1: notClubMember
 } as const;
 
 export const paramDef = {
@@ -39,6 +40,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private meetsRepository: MeetsRepository,
 		private meetService: MeetService,
 		private meetEntityService: MeetEntityService,
+		private clubService: ClubService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
@@ -52,6 +54,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (start && (meet.flags ?? []).includes('casual')) throw new IdentifiableError('meet:invalid_transition', 'The date of a logged casual game cannot be changed.');
 				const fields = pickMeetFields(ps as Record<string, unknown>) as Partial<MiMeet>;
 				delete (fields as Record<string, unknown>).startAt;
+				// CLUB-TIERS-V1: moving a meet into a club needs the same right as creating one there
+				if (fields.channelId && fields.channelId !== meet.channelId && !(await this.clubService.canCreateMeet(await this.clubService.channel(fields.channelId), me.id))) throw new ApiError(meta.errors.notClubMember);
 				const updated = await this.meetService.update(meet, { ...fields, ...(start ? { startAt: start } : {}) });
 				return await this.meetEntityService.pack(updated, me, { detailed: true });
 			} catch (e) {

@@ -44,6 +44,7 @@ import { ApRendererService } from '@/core/activitypub/ApRendererService.js';
 import { ApDeliverManagerService } from '@/core/activitypub/ApDeliverManagerService.js';
 import { RemoteUserResolveService } from '@/core/RemoteUserResolveService.js';
 import { bindThis } from '@/decorators.js';
+import { mayPostInClub } from '@/modules/clubs/club-tiers.js';   // CLUB-TIERS-V1
 import { DB_MAX_NOTE_TEXT_LENGTH } from '@/const.js';
 import { RoleService } from '@/core/RoleService.js';
 import { SearchService } from '@/core/SearchService.js';
@@ -460,6 +461,12 @@ export class NoteCreateService implements OnApplicationShutdown {
 		// (クライアントサイドでやっても良い処理だと思うけどとりあえずサーバーサイドで)
 		if (data.reply && (data.channel == null) && data.reply.channelId) {
 			data.channel = await this.channelsRepository.findOneBy({ id: data.reply.channelId });
+		}
+
+		// CLUB-TIERS-V1: every channel is a GripBat club — only its members (and admins) post, comment or renote in it;
+		// a follower reads (Reclub: followers have no forum rights). Local accounts only (federation is off).
+		if (data.channel != null && user.host == null && !(await mayPostInClub(this.channelsRepository, data.channel.id, user.id))) {
+			throw new IdentifiableError('c1b00000-0000-4000-8000-000000000011', 'Only members can post in this club.');   // clubErrors.notMember / CLUB_NOT_MEMBER - review-batch2 #4
 		}
 
 		if (data.createdAt == null) data.createdAt = new Date();

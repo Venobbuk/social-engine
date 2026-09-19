@@ -20,7 +20,7 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: {},
+	properties: { tier: { type: 'string', enum: ['member', 'all'], default: 'member' } },   // CLUB-TIERS-V1
 	required: [],
 } as const;
 
@@ -30,7 +30,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				// the clubs I am in (owned or joined), pinned first, each with my state — the Home pinned row and the kebab read this
-				const rows = await this.clubService.mine(me);
+				const rows = await this.clubService.mine(me, ps.tier === 'all' ? 'all' : 'member');   // CLUB-TIERS-V1: 'all' adds the clubs I follow (role follower)
 				const out = [];
 				for (const r of rows) out.push({ ...(await this.channelEntityService.pack(r.channel, me, false)), pinned: r.pinned, paused: r.paused, role: r.role });
 				return out;

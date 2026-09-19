@@ -81,6 +81,19 @@ export const packedChannelSchema = {
 			type: 'boolean',
 			optional: true, nullable: false,
 		},
+		// CLUB-TIERS-V1: the member tier (GripBat) next to the native follow; both counts
+		isMember: {
+			type: 'boolean',
+			optional: true, nullable: false,
+		},
+		membersCount: {
+			type: 'number',
+			nullable: false, optional: false,
+		},
+		followersCount: {
+			type: 'number',
+			nullable: false, optional: false,
+		},
 		isFavorited: {
 			type: 'boolean',
 			optional: true, nullable: false,

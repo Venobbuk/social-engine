@@ -18,6 +18,7 @@ import { NotificationService } from '@/core/NotificationService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { meetSystemLine, meetUpdateSystemKey, sweepEndedMeetChats } from '@/modules/meets/MeetChatSystem.js';
 import { bindThis } from '@/decorators.js';
+import { memberExistsSql, adminExistsSql } from '@/modules/clubs/club-tiers.js';   // CLUB-TIERS-V1
 import type { Packed } from '@/misc/json-schema.js';
 import type { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { secureRndstr, L_CHARS } from '@/misc/secure-rndstr.js';
@@ -420,7 +421,9 @@ export class MeetService {
 		return await this.blockingsRepository.exists({ where: { blockerId: userId, blockeeId: In(hosts) } });
 	}
 
-	/** Private meets: the access token, an invitation, or club membership (any attached club's channel) admits. */
+	/** Private meets: the access token, an invitation, or club membership (the meet's own club, or any attached club's
+	 *  channel) admits. CLUB-TIERS-V1: membership is club_member (+ owner / admins), not the follow — a follower of the
+	 *  club does not see its members-only meets. */
 	public async mayViewPrivate(meet: MiMeet, userId: MiUser['id'] | null, accessToken?: string | null): Promise<boolean> {
 		if (meet.visibility !== 'private') return true;
 		if (accessToken && meet.accessToken === accessToken) return true;
@@ -428,8 +431,9 @@ export class MeetService {
 		if (userId === meet.hostId) return true;
 		if (await this.meetParticipantsRepository.existsBy({ meetId: meet.id, userId })) return true;
 		const groups = await this.meetGroupsRepository.find({ where: { meetId: meet.id }, select: { channelId: true } });
-		if (!groups.length) return false;
-		const rows = await this.db.query(`SELECT 1 FROM "channel_following" WHERE "followeeId" = ANY($1) AND "followerId" = $2 LIMIT 1`, [groups.map(g => g.channelId), userId]) as unknown[];
+		const clubIds = Array.from(new Set([...(meet.channelId ? [meet.channelId] : []), ...groups.map(g => g.channelId)]));
+		if (!clubIds.length) return false;
+		const rows = await this.db.query(`SELECT 1 FROM unnest($1::varchar[]) AS c(id) WHERE ${memberExistsSql('c.id', '$2')} OR ${adminExistsSql('c.id', '$2')} LIMIT 1`, [clubIds, userId]) as unknown[];
 		return rows.length > 0;
 	}
 

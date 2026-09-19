@@ -19,11 +19,17 @@ import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { isGripbatStaff, gripbatStaffIds } from '@/modules/staff.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { bindThis } from '@/decorators.js';
+import { clubCounts } from '@/modules/clubs/club-tiers.js';
 
 // CLUB-ADMIN-V1: Reclub's club management (spec_clubs_discover_home §clubs/[groupId]/settings, groups/manage-*,
 // group-user, tags, insights, claim-club-ownership) on a Misskey channel. The channel's userId is the owner;
-// adminIds are the committee; membership is channel_following. Everything a member can see stays public; what
-// only an admin can do is gated here in one place (assertAdmin).
+// adminIds are the committee. Everything a member can see stays public; what only an admin can do is gated here in
+// one place (assertAdmin).
+// CLUB-TIERS-V1 (2026-09-20): Reclub's two relationships. FOLLOW = Misskey's native channel_following (channels/follow)
+// — a follower sees the club's public content and hears about new public meets. MEMBER = club_member (GripBat's
+// extension, see club-tiers.ts) — joined through the gate; members-only meets, chat, tags, forum posting. Every
+// membership read in the engine goes through isMember / club-tiers.ts; a member is also a follower.
+// INT-BATCH2: this supersedes CLUB-GATE-V1 (INTERIM, batch 1) — membership is no longer channel_following.
 /** CLUB-CLAIM-VERIFY-V1.1 (W1): after a declined claim the same person may claim the same club again only after this. */
 export const CLAIM_COOLDOWN_DAYS = 7;
 
@@ -119,9 +125,187 @@ export class ClubService {
 		if (!(await this.isAdmin(channel, userId))) throw this.err('not_admin', 'Only the club owner or an admin can do that.');
 	}
 
+	/** CLUB-TIERS-V1: a member = a club_member row, or the club's owner. (Was: any follower.) */
 	@bindThis
 	public async isMember(channelId: string, userId: string): Promise<boolean> {
+		const r = await this.db.query(`SELECT 1 FROM "club_member" WHERE "channelId" = $1 AND "userId" = $2
+			UNION ALL SELECT 1 FROM "channel" WHERE "id" = $1 AND "userId" = $2 LIMIT 1`, [channelId, userId]) as unknown[];
+		return r.length > 0;
+	}
+
+	/** CLUB-TIERS-V1: the follow — Misskey's own channel_following, read as is. */
+	@bindThis
+	public async isFollowing(channelId: string, userId: string): Promise<boolean> {
 		return await this.channelFollowingsRepository.exists({ where: { followeeId: channelId, followerId: userId } });
+	}
+
+	// ------------------------------------------------------------------------------------- CLUB-TIERS-V1: the two tiers
+	/** Seat a member (the ONE door every gate goes through: open, approval, invite, the ?at= link, a claim). Idempotent.
+	 *  Joining also follows (a member is a follower), closes the person's pending join request, and records whether they
+	 *  followed before (the insights' follower → member conversion). Their notification mutes are untouched. */
+	@bindThis
+	public async addMember(channel: MiChannel, user: MiUser, via: 'open' | 'approval' | 'invite' | 'link' | 'owner' | 'claim', invitedById: string | null = null): Promise<void> {
+		const wasFollower = await this.isFollowing(channel.id, user.id);
+		await this.db.query(`INSERT INTO "club_member" ("id", "channelId", "userId", "via", "fromFollower", "invitedById") VALUES ($1, $2, $3, $4, $5, $6)
+			ON CONFLICT ("channelId", "userId") DO NOTHING`, [this.idService.gen(), channel.id, user.id, via, wasFollower, invitedById]);
+		if (!wasFollower) await this.channelFollowingService.follow(user as MiLocalUser, channel).catch((e: unknown) => { if (!(e instanceof IdentifiableError)) throw e; /* already following */ });
+		if (via !== 'approval') await this.clubJoinRequestsRepository.delete({ channelId: channel.id, userId: user.id, status: 'pending' });
+	}
+
+	/** Un-seat a member: the row, their admin role and tags, their seat in the club chat; `unfollow` also drops the follow
+	 *  (always for a private club — nobody follows a private club from outside). The owner is never removed here. */
+	@bindThis
+	public async removeMember(channel: MiChannel, userId: string, opts: { unfollow: boolean }): Promise<void> {
+		if (channel.userId === userId) throw this.err('owner_cannot_leave', 'The owner cannot leave the club.');
+		const s = await this.settings(channel.id);
+		await this.db.query(`DELETE FROM "club_member" WHERE "channelId" = $1 AND "userId" = $2`, [channel.id, userId]);
+		const tags = s.tags.map(t => { const m = { ...t.members }; delete m[userId]; return { ...t, members: m }; });
+		await this.clubSettingsRepository.update(channel.id, { adminIds: s.adminIds.filter(x => x !== userId), tags, memberTags: this.deriveMemberTags(tags), updatedAt: new Date() });
+		if (s.chatRoomId) await this.chatService.leaveRoom(userId, s.chatRoomId).catch(() => undefined);
+		if (opts.unfollow || s.visibility === 'private') {
+			await this.clubMemberStatesRepository.delete({ channelId: channel.id, userId });
+			const u = await this.usersRepository.findOneBy({ id: userId });
+			if (u) await this.channelFollowingService.unfollow(u as MiLocalUser, channel);
+		}
+	}
+
+	/** channels/follow (native) for a club: any public club, whatever its gate — the follow gives no member rights. A
+	 *  private club cannot be followed from outside (Reclub groups:privateTip "No one can see, request to join, or follow
+	 *  a private club, unless invited by admin"). The endpoint then runs the native follow unchanged. */
+	@bindThis
+	public async assertMayFollow(channel: MiChannel, user: MiUser): Promise<void> {
+		const s = await this.settings(channel.id);
+		if (s.visibility !== 'private') return;
+		if (await this.isMember(channel.id, user.id) || await this.isAdmin(channel, user.id)) return;
+		throw this.err('private_club', 'This club is private — only its members can follow it.');
+	}
+
+	/** channels/unfollow (native) for a club: a member who unfollows leaves (a member is always a follower); anyone else
+	 *  just stops following. Returns true when the membership was ended here (the native unfollow already ran). */
+	@bindThis
+	public async unfollowMeansLeave(channel: MiChannel, user: MiUser): Promise<boolean> {
+		if (channel.userId === user.id) return false;
+		const member = (await this.db.query(`SELECT 1 FROM "club_member" WHERE "channelId" = $1 AND "userId" = $2`, [channel.id, user.id]) as unknown[]).length > 0;
+		if (!member) return false;
+		await this.removeMember(channel, user.id, { unfollow: true });
+		return true;
+	}
+
+	/** Leave the club (Reclub groups:title_leave_group). keepFollowing: stay a follower of a public club. */
+	@bindThis
+	public async leave(channel: MiChannel, user: MiUser, keepFollowing = false): Promise<{ member: false; following: boolean }> {
+		if (channel.userId === user.id) throw this.err('owner_cannot_leave', 'The owner cannot leave the club.');
+		if (!(await this.isMember(channel.id, user.id))) throw this.err('not_member', 'You are not a member of this club.');
+		await this.removeMember(channel, user.id, { unfollow: !keepFollowing });
+		return { member: false, following: await this.isFollowing(channel.id, user.id) };
+	}
+
+	/** Reclub common:cancel_request — the player withdraws a pending join request (the follow stays). */
+	@bindThis
+	public async cancelRequest(channel: MiChannel, user: MiUser): Promise<{ status: 'cancelled' }> {
+		const r = await this.clubJoinRequestsRepository.findOneBy({ channelId: channel.id, userId: user.id, status: 'pending' });
+		if (!r) throw this.err('no_such_request', 'No pending request to this club.');
+		await this.clubJoinRequestsRepository.delete(r.id);
+		return { status: 'cancelled' };
+	}
+
+	/** Reclub ClubFollower list (5769): the follower tier only (members are in the member list). Admins only. */
+	@bindThis
+	public async followers(channel: MiChannel, viewer: MiUser, opts: { limit?: number; offset?: number } = {}) {
+		await this.assertAdmin(channel, viewer.id);
+		// review-batch2 #9: the WHOLE follower list used to be read and sliced in JS, one pack() per row. Paged in SQL,
+		// counted in SQL, packed in ONE call - a club with many followers no longer costs a query per follower.
+		const limit = Math.max(1, Math.min(200, opts.limit ?? 100));
+		const offset = Math.max(0, opts.offset ?? 0);
+		const where = `f."followeeId" = $1 AND f."followerId" IS DISTINCT FROM $2
+			AND NOT EXISTS (SELECT 1 FROM "club_member" m WHERE m."channelId" = f."followeeId" AND m."userId" = f."followerId")`;
+		const total = Number((await this.db.query(`SELECT count(*)::int AS n FROM "channel_following" f WHERE ${where}`, [channel.id, channel.userId]) as { n: number }[])[0]?.n ?? 0);
+		const rows = await this.db.query(`SELECT f."id", f."followerId" AS "userId" FROM "channel_following" f
+			WHERE ${where} ORDER BY f."id" DESC LIMIT $3 OFFSET $4`, [channel.id, channel.userId, limit, offset]) as { id: string; userId: string }[];
+		const packed = new Map<string, unknown>();
+		if (rows.length) for (const u of await this.userEntityService.packMany(rows.map(r => r.userId), viewer, { schema: 'UserLite' })) packed.set(u.id, u);
+		return { total, followers: rows.map(r => ({ userId: r.userId, followedAt: this.idService.parse(r.id).date.toISOString(), user: packed.get(r.userId) ?? null })) };
+	}
+
+	/** Reclub groups:remove_from_club on a follower: the admins end someone's follow of their club. */
+	@bindThis
+	public async removeFollower(channel: MiChannel, by: MiUser, userId: string): Promise<void> {
+		await this.assertAdmin(channel, by.id);
+		if (await this.isMember(channel.id, userId)) throw this.err('is_member', 'This player is a member — remove them from the member list.');
+		const u = await this.usersRepository.findOneBy({ id: userId });
+		if (u) await this.channelFollowingService.unfollow(u as MiLocalUser, channel);
+	}
+
+	/** Members and followers of one club (club-tiers.ts, the same numbers every surface prints). */
+	@bindThis
+	public async counts(channelId: string): Promise<{ members: number; followers: number }> {
+		return (await clubCounts(this.db, [channelId])).get(channelId) ?? { members: 0, followers: 0 };
+	}
+
+	/** Reclub meets:no_club_note — "you must be an admin of the club or the club allows members to create meets". */
+	@bindThis
+	public async canCreateMeet(channel: MiChannel, userId: string): Promise<boolean> {
+		if (await this.isAdmin(channel, userId)) return true;
+		const s = await this.settings(channel.id);
+		return s.createMeetPermission === 'members' && await this.isMember(channel.id, userId);
+	}
+
+	/** Reclub club forum: admins post (announcements), members post when the forum is on; followers read. */
+	@bindThis
+	public async canPost(channel: MiChannel, userId: string): Promise<boolean> {
+		if (await this.isAdmin(channel, userId)) return true;
+		const s = await this.settings(channel.id);
+		return s.enableForum !== false && await this.isMember(channel.id, userId);
+	}
+
+	/** "Tell me about new meets" for one club (notification_mute scope 'clubMeets'); the person's row, whatever the tier. */
+	@bindThis
+	public async setMeetsMuted(channel: MiChannel, user: MiUser, muted: boolean): Promise<void> {
+		if (!(await this.isFollowing(channel.id, user.id)) && !(await this.isMember(channel.id, user.id))) throw this.err('not_following', 'Follow the club first.');
+		if (muted) await this.db.query(`INSERT INTO "notification_mute" ("id", "userId", "scope", "targetId") VALUES ($1, $2, 'clubMeets', $3) ON CONFLICT DO NOTHING`, [this.idService.gen(), user.id, channel.id]);
+		else await this.db.query(`DELETE FROM "notification_mute" WHERE "userId" = $1 AND "scope" = 'clubMeets' AND "targetId" = $2`, [user.id, channel.id]);
+	}
+
+	@bindThis
+	public async meetsMuted(channelId: string, userId: string): Promise<boolean> {
+		return (await this.db.query(`SELECT 1 FROM "notification_mute" WHERE "userId" = $1 AND "scope" = 'clubMeets' AND "targetId" = $2 LIMIT 1`, [userId, channelId]) as unknown[]).length > 0;
+	}
+
+	/** Of these users, the ones who turned club notifications off — every club (settings toggle, scope 'club') or this
+	 *  club's meets (scope 'clubMeets'). CHAT-V2's mute table; nothing new. */
+	private async mutedForClub(channelId: string, userIds: string[]): Promise<Set<string>> {
+		if (!userIds.length) return new Set();
+		const rows = await this.db.query(`SELECT DISTINCT "userId" FROM "notification_mute" WHERE "userId" = ANY($1)
+			AND (("scope" = 'club' AND "targetId" = '') OR ("scope" = 'clubMeets' AND "targetId" = $2))`, [userIds, channelId]) as { userId: string }[];
+		return new Set(rows.map(r => r.userId));
+	}
+
+	/** A new club meet is announced (Reclub "Members of your club will automatically be invited and notified", and the
+	 *  follow's point: hearing about the club's public meets). Public meet → active members + followers; members-only
+	 *  meet → active members. Never the creator; honours the meet's "Send notifications" switch, members on a break,
+	 *  and the person's club mutes. `skipMembers`: the members were already invited (a schedule's auto-invite). */
+	@bindThis
+	public async notifyNewMeet(meet: { id: string; name: string; channelId: string | null; visibility: string; hostId: string; startAt: Date; timezone?: string | null; sendNotifications?: boolean }, opts: { skipMembers?: boolean } = {}): Promise<number> {
+		if (!meet.channelId || meet.sendNotifications === false) return 0;
+		const channel = await this.channelsRepository.findOneBy({ id: meet.channelId });
+		if (!channel || channel.isArchived) return 0;
+		const to = new Set<string>(opts.skipMembers ? [] : await this.activeMemberIds(channel));
+		if (meet.visibility === 'public') {
+			const f = await this.db.query(`SELECT f."followerId" AS "userId" FROM "channel_following" f WHERE f."followeeId" = $1
+				AND NOT EXISTS (SELECT 1 FROM "club_member" m WHERE m."channelId" = f."followeeId" AND m."userId" = f."followerId")`, [channel.id]) as { userId: string }[];
+			for (const r of f) to.add(r.userId);
+		}
+		to.delete(meet.hostId);
+		const muted = await this.mutedForClub(channel.id, Array.from(to));
+		let when = '';
+		try { when = new Date(meet.startAt).toLocaleString('en-GB', { timeZone: meet.timezone || 'Asia/Hong_Kong', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch { /* bad tz */ }
+		let n = 0;
+		for (const uid of to) {
+			if (muted.has(uid)) continue;
+			this.notificationService.createNotification(uid, 'app', { customHeader: `New meet · ${channel.name}`, customBody: when ? `${meet.name} · ${when}` : meet.name, customIcon: null, appAccessTokenId: null, customLink: 'meet:' + meet.id });
+			n++;
+		}
+		return n;
 	}
 
 	/** Owner / admins may change these; the channel's own name/description/banner go through channels/update. */
@@ -135,14 +319,15 @@ export class ClubService {
 	}
 
 	// ------------------------------------------------------------------------------------- members
-	/** Members = channel followers, with role (owner / admin / member), tags, joinedAt. Members and admins may look
-	 *  (Reclub's group member list is visible to members); the tags column is the admins' — a member sees []. */
+	/** Members (club_member, CLUB-TIERS-V1 — followers are not members), with role (owner / admin / member), tags,
+	 *  joinedAt. Members and admins may look (Reclub's group member list is visible to members); the tags column is the
+	 *  admins' — a member sees []. */
 	@bindThis
 	public async members(channel: MiChannel, viewer: MiUser, opts: { limit?: number; offset?: number; query?: string } = {}) {
 		const admin = await this.isAdmin(channel, viewer.id);
 		if (!admin && !(await this.isMember(channel.id, viewer.id))) throw this.err('not_member', 'Only members can see the member list.');
 		const s = await this.settings(channel.id);
-		const rows = await this.channelFollowingsRepository.find({ where: { followeeId: channel.id }, order: { id: 'ASC' } });
+		const rows = (await this.db.query(`SELECT "id", "userId" AS "followerId" FROM "club_member" WHERE "channelId" = $1 ORDER BY "id" ASC`, [channel.id])) as { id: string; followerId: string }[];
 		const ids = rows.map(r => r.followerId);
 		if (channel.userId && !ids.includes(channel.userId)) ids.unshift(channel.userId);
 		const users = ids.length ? await this.usersRepository.find({ where: { id: In(ids) } }) : [];
@@ -181,21 +366,18 @@ export class ClubService {
 			for (const t of tags) { const on = names.some(n => n.toLowerCase() === t.name.toLowerCase()); if (on) { if (!(userId in t.members)) t.members[userId] = null; } else delete t.members[userId]; }
 			upd.tags = tags; upd.memberTags = this.deriveMemberTags(tags);
 		}
-		if (patch.remove) {
-			upd.adminIds = (upd.adminIds ?? s.adminIds).filter(x => x !== userId);
-			const tags = (upd.tags ?? s.tags).map(t => { const m = { ...t.members }; delete m[userId]; return { ...t, members: m }; }); upd.tags = tags; upd.memberTags = this.deriveMemberTags(tags);
-			await this.clubMemberStatesRepository.delete({ channelId: channel.id, userId });
-			const u = await this.usersRepository.findOneBy({ id: userId });
-			if (u) await this.channelFollowingService.unfollow(u as MiLocalUser, channel);
-		}
+		// CLUB-TIERS-V1: removal is the one removeMember door (row, role, tags, chat seat, follow)
+		if (patch.remove) { await this.removeMember(channel, userId, { unfollow: true }); return; }
 		await this.clubSettingsRepository.update(channel.id, upd);
 		this.privateClubsCache = null; // CLUB-PRIVATE-V1: the admins may have changed
 	}
 
 	// ------------------------------------------------------------------------------------- joining
 	/** Reclub GroupGateType: open → member now; approval → a request the admins decide; invite → refused.
-	 *  CLUB-GATE-V1 (W1): the ONE membership door — clubs/join AND the stock channels/follow both land here (decide() seats an
-	 *  approved request); nothing else may insert channel_following. */
+	 *  CLUB-GATE-V1 (W1) → CLUB-TIERS-V1 (INT-BATCH2): the ONE membership door is clubs/join; the stock channels/follow no
+	 *  longer lands here (it is a follow again, ungated) and nothing else may insert club_member. decide() seats an approved
+	 *  request. Seating goes through addMember (member + follower); a request to a public club also follows it, so the player
+	 *  sees the club's public meets while the admins decide (and stays a follower if declined). */
 	@bindThis
 	public async join(channel: MiChannel, user: MiLocalUser, message: string | null, accessToken: string | null = null): Promise<{ status: 'member' | 'requested' }> {
 		const s = await this.settings(channel.id);
@@ -206,9 +388,10 @@ export class ClubService {
 		// accepting that invitation — seated in any gate, the invitation closed, the inviter told (respondInvitation)
 		if ((await this.myInvitation(channel.id, user.id)) === 'pending') { await this.respondInvitation(channel, user, true); return { status: 'member' }; }
 		// CLUB-V3: the invite link's ?at= token is the admins' invitation — it seats the person in any gate
-		if (accessToken && s.accessToken && accessToken === s.accessToken) { await this.channelFollowingService.follow(user, channel); await this.clubJoinRequestsRepository.delete({ channelId: channel.id, userId: user.id }); return { status: 'member' }; }
-		if (s.gateType === 'open') { await this.channelFollowingService.follow(user, channel); return { status: 'member' }; }
+		if (accessToken && s.accessToken && accessToken === s.accessToken) { await this.addMember(channel, user, 'link'); return { status: 'member' }; }
+		if (s.gateType === 'open') { await this.addMember(channel, user, 'open'); return { status: 'member' }; }
 		if (s.gateType === 'invite') throw this.err('invite_only', 'This club is invite-only.');
+		if (s.visibility === 'public' && !(await this.isFollowing(channel.id, user.id))) await this.channelFollowingService.follow(user, channel).catch((e: unknown) => { if (!(e instanceof IdentifiableError)) throw e; });
 		const existing = await this.clubJoinRequestsRepository.findOneBy({ channelId: channel.id, userId: user.id });
 		if (existing) { if (existing.status === 'pending') return { status: 'requested' }; await this.clubJoinRequestsRepository.update(existing.id, { status: 'pending', message, decidedById: null, decidedAt: null, createdAt: new Date() }); }
 		else await this.clubJoinRequestsRepository.insertOne({ id: this.idService.gen(), channelId: channel.id, userId: user.id, status: 'pending', message, decidedById: null, decidedAt: null, createdAt: new Date() });
@@ -231,7 +414,7 @@ export class ClubService {
 		const r = await this.clubJoinRequestsRepository.findOneBy({ id: requestId, channelId: channel.id });
 		if (!r) throw this.err('no_such_request', 'No such request.');
 		await this.clubJoinRequestsRepository.update(r.id, { status: approve ? 'approved' : 'declined', decidedById: by.id, decidedAt: new Date() });
-		if (approve) { const u = await this.usersRepository.findOneBy({ id: r.userId }); if (u) await this.channelFollowingService.follow(u as MiLocalUser, channel); }
+		if (approve) { const u = await this.usersRepository.findOneBy({ id: r.userId }); if (u) await this.addMember(channel, u, 'approval'); }   // CLUB-TIERS-V1
 		this.notify(r.userId, approve ? 'Welcome to the club' : 'Join request declined', approve ? `You are now a member of ${channel.name}.` : `${channel.name} declined your request to join.`, channel.id);
 	}
 
@@ -257,17 +440,22 @@ export class ClubService {
 			default: return [new Date(2000, 0, 1), new Date(2100, 0, 1)];
 		} })();
 		const [from, to] = range;
-		// members = followers ∪ the owner (channels/create does not follow the owner; Reclub counts them)
-		const followerCount = await this.channelFollowingsRepository.countBy({ followeeId: channel.id });
-		const ownerFollows = channel.userId ? await this.channelFollowingsRepository.exists({ where: { followeeId: channel.id, followerId: channel.userId } }) : true;
-		const totalMembers = followerCount + (ownerFollows ? 0 : 1);
+		// CLUB-TIERS-V1: members (club_member + the owner) and followers (the follower tier only) are separate numbers
+		// (Reclub groups:total_members / groups:total_followers); conversion = followers who joined in the timeframe
+		const { members: totalMembers, followers: totalFollowers } = await this.counts(channel.id);
+		const joined = (await this.db.query(`SELECT "id", "fromFollower" FROM "club_member" WHERE "channelId" = $1 AND "via" NOT IN ('owner', 'migration')`, [channel.id]) as { id: string; fromFollower: boolean }[])
+			.filter(r => { const t = this.idService.parse(r.id).date; return t >= from && t < to; });
+		const followed = (await this.db.query(`SELECT "id" FROM "channel_following" WHERE "followeeId" = $1`, [channel.id]) as { id: string }[])
+			.filter(r => { const t = this.idService.parse(r.id).date; return t >= from && t < to; }).length;
+		const fromFollowers = joined.filter(r => r.fromFollower).length;
+		const conversion = { newFollowers: followed, newMembers: joined.length, newMembersFromFollowers: fromFollowers, followerToMemberPct: fromFollowers + totalFollowers > 0 ? Math.round(100 * fromFollowers / (fromFollowers + totalFollowers)) : 0 };
 		const acts = await this.db.query(`SELECT m."id", m."capacity", m."confirmed", m."startAt" FROM "meet" m WHERE m."channelId" = $1 AND m."status" <> 'cancelled' AND m."startAt" >= $2 AND m."startAt" < $3`, [channel.id, from, to]) as { id: string; capacity: number; confirmed: number; startAt: Date }[];
 		const totalActivities = acts.length;
 		const fillRate = acts.length ? Math.round(100 * acts.reduce((n, a) => n + Math.min(1, (a.confirmed ?? 0) / Math.max(1, a.capacity ?? 1)), 0) / acts.length) : 0;
 		const active = acts.length ? await this.db.query(`SELECT p."userId", count(*)::int AS n FROM "meet_participant" p WHERE p."meetId" = ANY($1) AND p."status" = 'confirmed' AND p."userId" IS NOT NULL GROUP BY p."userId" ORDER BY n DESC`, [acts.map(a => a.id)]) as { userId: string; n: number }[] : [];
 		const rewarded = acts.length ? await this.db.query(`SELECT r."targetUserId" AS "userId", count(*)::int AS n FROM "meet_review" r WHERE r."meetId" = ANY($1) AND r."type" = 'endorsement' AND r."archivedAt" IS NULL GROUP BY r."targetUserId" ORDER BY n DESC LIMIT 5`, [acts.map(a => a.id)]) as { userId: string; n: number }[] : [];
 		const pack = async (rows: { userId: string; n: number }[]) => { const out = []; for (const r of rows.slice(0, 5)) out.push({ user: await this.userEntityService.pack(r.userId, viewer, { schema: 'UserLite' }).catch(() => null), count: r.n }); return out; };
-		return { timeframe, totalMembers, totalFollowers: totalMembers, totalActivities, activeMembers: active.length, fillRate, mostActive: await pack(active), mostRewarded: await pack(rewarded) };
+		return { timeframe, totalMembers, totalFollowers, conversion, totalActivities, activeMembers: active.length, fillRate, mostActive: await pack(active), mostRewarded: await pack(rewarded) };
 	}
 
 	// ---- invitations (CLUB-INVITE-V1)
@@ -564,6 +752,9 @@ export class ClubService {
 	/** Take a break (Reclub PUT /users/<id> {is_active}). Members only.
 	 *  NUKE-CLUB-PIN-V1: "Pin to home screen" left here — it is the native channels/favorite. */
 	@bindThis
+	// INT-BATCH2 × NUKE-CLUB-PIN-V1: CLUB-TIERS-V1 loosened this guard so a FOLLOWER could pin the club to Home.
+	// NUKE-CLUB-PIN-V1 then moved pinning off this row entirely onto the native channel favourite, which any signed-in
+	// person may set — so the follower case is served natively and this door is a member's "Take a break" only.
 	public async updateMyState(channel: MiChannel, user: MiUser, patch: { paused?: boolean | null }): Promise<MiClubMemberState> {
 		if (!(await this.isMember(channel.id, user.id)) && !(await this.isAdmin(channel, user.id))) throw this.err('not_member', 'Join the club first.');
 		let st = await this.myState(channel.id, user.id);
@@ -574,33 +765,38 @@ export class ClubService {
 		return await this.clubMemberStatesRepository.findOneByOrFail({ id: st.id });
 	}
 
-	/** The clubs I am in, each with my state — the Home pinned row reads this. */
+	/** The clubs I am in, each with my state — the Home pinned row reads this. CLUB-TIERS-V1: memberships (club_member)
+	 *  by default; tier 'all' adds the clubs I only follow, with role 'follower'. */
 	@bindThis
-	public async mine(user: MiUser): Promise<{ channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' }[]> {
-		const follows = await this.channelFollowingsRepository.find({ where: { followerId: user.id }, order: { id: 'DESC' } });
+	public async mine(user: MiUser, tier: 'member' | 'all' = 'member'): Promise<{ channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' | 'follower' }[]> {
+		const joined = await this.db.query(`SELECT "channelId" FROM "club_member" WHERE "userId" = $1 ORDER BY "id" DESC`, [user.id]) as { channelId: string }[];
+		const follows = tier === 'all' ? await this.channelFollowingsRepository.find({ where: { followerId: user.id }, order: { id: 'DESC' } }) : [];
 		const owned = await this.channelsRepository.find({ where: { userId: user.id, isArchived: false } });
-		const ids = Array.from(new Set([...owned.map(c => c.id), ...follows.map(f => f.followeeId)]));
+		const memberIds = new Set([...owned.map(c => c.id), ...joined.map(r => r.channelId)]);
+		const ids = Array.from(new Set([...owned.map(c => c.id), ...joined.map(r => r.channelId), ...follows.map(f => f.followeeId)]));
 		if (!ids.length) return [];
 		const channels = await this.channelsRepository.find({ where: { id: In(ids), isArchived: false } });
 		const states = await this.clubMemberStatesRepository.find({ where: { userId: user.id, channelId: In(ids) } });
 		const pinned = await this.pinnedChannelIds(user.id, ids); // NUKE-CLUB-PIN-V1: native channel_favorite
 		const settings = await this.clubSettingsRepository.find({ where: { channelId: In(ids) } });
 		const byId = new Map(channels.map(c => [c.id, c]));
-		const out: { channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' }[] = [];
+		const out: { channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' | 'follower' }[] = [];
 		for (const id of ids) {
 			const c = byId.get(id); if (!c) continue;
 			const st = states.find(x => x.channelId === id); const s = settings.find(x => x.channelId === id);
-			out.push({ channel: c, pinned: pinned.has(id), paused: !!(st && st.pausedAt), role: c.userId === user.id ? 'owner' : s && s.adminIds.includes(user.id) ? 'admin' : 'member' });
+			// INT-BATCH2: pinned from the native channel favourite (NUKE-CLUB-PIN-V1), role from the tiers (CLUB-TIERS-V1)
+			out.push({ channel: c, pinned: pinned.has(id), paused: !!(st && st.pausedAt), role: c.userId === user.id ? 'owner' : s && s.adminIds.includes(user.id) ? 'admin' : memberIds.has(id) ? 'member' : 'follower' });
 		}
 		return out.sort((a, b) => Number(b.pinned) - Number(a.pinned));
 	}
 
-	/** Member ids to notify / auto-invite: followers ∪ owner, minus those on a break, filtered to the tags when given. */
+	/** Member ids to notify / auto-invite: members (club_member, CLUB-TIERS-V1 — not followers) ∪ owner, minus those
+	 *  on a break, filtered to the tags when given. */
 	@bindThis
 	public async activeMemberIds(channel: MiChannel, tagIds: string[] = []): Promise<string[]> {
 		const s = await this.settings(channel.id);
-		const rows = await this.channelFollowingsRepository.find({ where: { followeeId: channel.id }, select: { followerId: true } });
-		const ids = new Set(rows.map(r => r.followerId)); if (channel.userId) ids.add(channel.userId);
+		const rows = await this.db.query(`SELECT "userId" FROM "club_member" WHERE "channelId" = $1`, [channel.id]) as { userId: string }[];
+		const ids = new Set(rows.map(r => r.userId)); if (channel.userId) ids.add(channel.userId);
 		const paused = (await this.clubMemberStatesRepository.find({ where: { channelId: channel.id }, select: { userId: true, pausedAt: true } })).filter(x => x.pausedAt).map(x => x.userId);
 		for (const p of paused) ids.delete(p);
 		if (tagIds.length) {
@@ -625,7 +821,10 @@ export class ClubService {
 		await this.channelsRepository.update(channel.id, { pinnedNoteIds: ids.slice(0, 10) });
 		if (on) {
 			const text = (note.text ?? '').replace(/\s+/g, ' ').trim().slice(0, 80);
-			for (const uid of await this.activeMemberIds(channel)) if (uid !== by.id) this.notify(uid, `Announcement · ${channel.name}`, text || 'A new announcement was posted.', channel.id);
+			// CLUB-TIERS-V1: the settings page's "Club notifications" switch (notification_mute scope 'club') is honoured
+			const ids = (await this.activeMemberIds(channel)).filter(uid => uid !== by.id);
+			const off = ids.length ? new Set((await this.db.query(`SELECT "userId" FROM "notification_mute" WHERE "userId" = ANY($1) AND "scope" = 'club' AND "targetId" = ''`, [ids]) as { userId: string }[]).map(r => r.userId)) : new Set<string>();
+			for (const uid of ids) if (!off.has(uid)) this.notify(uid, `Announcement · ${channel.name}`, text || 'A new announcement was posted.', channel.id);
 		}
 		return { pinnedNoteIds: ids.slice(0, 10) };
 	}

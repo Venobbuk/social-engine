@@ -5,9 +5,10 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { MeetsRepository, MeetParticipantsRepository } from '@/models/_.js';
+import type { MeetsRepository } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { MeetService } from '@/modules/meets/MeetService.js';
 import { ApiError } from '@/server/api/error.js';
 import { meetErrors } from './_shared.js';
 
@@ -34,19 +35,17 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		@Inject(DI.meetsRepository)
 		private meetsRepository: MeetsRepository,
-		@Inject(DI.meetParticipantsRepository)
-		private meetParticipantsRepository: MeetParticipantsRepository,
 		private meetEntityService: MeetEntityService,
+		private meetService: MeetService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const meet = ps.meetId
 				? await this.meetsRepository.findOneBy({ id: ps.meetId })
 				: await this.meetsRepository.findOneBy({ referenceCode: ps.referenceCode ?? '' });
 			if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
-			if (meet.visibility === 'private' && meet.accessToken) {
-				const isOnMeet = me != null && (meet.hostId === me.id || await this.meetParticipantsRepository.existsBy({ meetId: meet.id, userId: me.id }));
-				if (ps.accessToken !== meet.accessToken && !isOnMeet) throw new ApiError(meta.errors.accessDenied);
-			}
+			// CLUB-TIERS-V1: the ONE private-meet rule (MeetService.mayViewPrivate: link token, host, on the roster, or a member
+			// of the meet's club) — this door had its own copy without the club, so a members-only meet refused its members
+			if (meet.visibility === 'private' && !(await this.meetService.mayViewPrivate(meet, me?.id ?? null, ps.accessToken))) throw new ApiError(meta.errors.accessDenied);
 			return await this.meetEntityService.pack(meet, me, { detailed: true });
 		});
 	}

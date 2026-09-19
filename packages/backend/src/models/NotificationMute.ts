@@ -12,13 +12,15 @@ import { MiUser } from './User.js';
  *   scope 'room'     targetId = chat room id      — a meet / club / group thread
  *   scope 'user'     targetId = the other user id — a 1-on-1 thread
  *   scope 'club' | 'chat' | 'promoted' | 'updates'   targetId = ''  — the settings page toggles
+ *   scope 'clubMeets' targetId = the club (channel id) — CLUB-TIERS-V1: "tell me about new meets" of one club, for a
+ *                    follower and a member alike (the row belongs to the person, so joining keeps it)
  *  A row present = muted. No row = notifications on (the default).
  *  INBOX-ARCHIVE-V1 (2026-09-20) — the same per-account, per-thread flag shape carries the inbox ARCHIVE (Reclub
  *  PUT /channels/{id}/users/{me}/archival): a row present = I archived that thread. It is not a mute — nothing that
  *  reads notification mutes looks at these two scopes (they match only 'room' / 'user' / the toggles by name).
  *   scope 'archiveRoom'  targetId = chat room id
  *   scope 'archiveUser'  targetId = the other user id */
-export const notificationMuteScopes = ['room', 'user', 'club', 'chat', 'promoted', 'updates', 'archiveRoom', 'archiveUser'] as const;
+export const notificationMuteScopes = ['room', 'user', 'club', 'chat', 'promoted', 'updates', 'archiveRoom', 'archiveUser', 'clubMeets'] as const;
 export type NotificationMuteScope = typeof notificationMuteScopes[number];
 
 @Entity('notification_mute')

@@ -92,6 +92,15 @@ export const meta = {
 			id: '04da457d-b083-4055-9082-955525eda5a5',
 		},
 
+		// CLUB-TIERS-V1: a follower (or a visitor) cannot post in a club; members and admins can
+		// review-batch2 #4: this carried ...081, which is clubErrors.ownerCannotLeave, so one id answered two codes AND
+		// CLUB_NOT_MEMBER had two ids. It is the SAME error as clubErrors.notMember (modules/clubs/endpoints/_shared.ts).
+		clubNotMember: {
+			message: 'Only members can post in this club.',
+			code: 'CLUB_NOT_MEMBER',
+			id: 'c1b00000-0000-4000-8000-000000000011',
+		},
+
 		noSuchChannel: {
 			message: 'No such channel.',
 			code: 'NO_SUCH_CHANNEL',
@@ -303,6 +312,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 						throw new ApiError(meta.errors.cannotCreateAlreadyExpiredPoll);
 					} else if (err.id === 'bfa3905b-25f5-4894-b430-da331a490e4b') {
 						throw new ApiError(meta.errors.noSuchChannel);
+					} else if (err.id === 'c1b00000-0000-4000-8000-000000000011') {
+						throw new ApiError(meta.errors.clubNotMember);   // CLUB-TIERS-V1
 					}
 				}
 				throw err;

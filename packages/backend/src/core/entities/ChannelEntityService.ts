@@ -20,6 +20,7 @@ import type { MiUser } from '@/models/User.js';
 import type { MiChannel } from '@/models/Channel.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
+import { clubCounts } from '@/modules/clubs/club-tiers.js';
 import { DriveFileEntityService } from './DriveFileEntityService.js';
 import { NoteEntityService } from './NoteEntityService.js';
 
@@ -55,7 +56,8 @@ export class ChannelEntityService {
 			favorites?: Set<MiChannel['id']>;
 			muting?: Set<MiChannel['id']>;
 			pinnedNotes?: Map<MiNote['id'], MiNote>;
-			memberCounts?: Map<MiChannel['id'], number>;
+			memberCounts?: Map<MiChannel['id'], { members: number; followers: number }>;
+			memberships?: Set<MiChannel['id']>;
 		},
 	): Promise<Packed<'Channel'>> {
 		const channel = typeof src === 'object' ? src : await this.channelsRepository.findOneByOrFail({ id: src });
@@ -67,6 +69,7 @@ export class ChannelEntityService {
 		}
 
 		let isFollowing = false;
+		let isMember = false;   // CLUB-TIERS-V1
 		let isFavorited = false;
 		let isMuting = false;
 		if (me) {
@@ -76,6 +79,8 @@ export class ChannelEntityService {
 					followeeId: channel.id,
 				},
 			});
+
+			isMember = opts?.memberships?.has(channel.id) ?? (await this.membershipsOf(me.id, [channel])).has(channel.id);
 
 			isFavorited = opts?.favorites?.has(channel.id) ?? await this.channelFavoritesRepository.exists({
 				where: {
@@ -91,6 +96,8 @@ export class ChannelEntityService {
 				},
 			});
 		}
+
+		const tierCounts = (opts?.memberCounts ?? await this.memberCounts([channel])).get(channel.id);
 
 		const pinnedNotes = Array.of<MiNote>();
 		if (channel.pinnedNoteIds.length > 0) {
@@ -118,14 +125,19 @@ export class ChannelEntityService {
 			isArchived: channel.isArchived,
 			// BACKEND-DELIVERY-V1: a GripBat channel is a club and every screen prints usersCount as its MEMBER count; the
 			// stored counter is Misskey's "users who have posted" (NoteCreateService), which left new clubs at 0 members
-			// and drifted from the roster on 8 of 8 sandbox clubs. The packed value is the roster size: followers + owner.
-			usersCount: opts?.memberCounts?.get(channel.id) ?? (await this.memberCounts([channel])).get(channel.id) ?? channel.usersCount,
+			// and drifted from the roster on 8 of 8 sandbox clubs. The packed value is the roster size.
+			// CLUB-TIERS-V1: the roster is club_member (+ the owner), no longer the followers; followersCount is the follower
+			// tier only (members are not counted twice) — Reclub's 'Members · Followers'.
+			usersCount: tierCounts ? tierCounts.members : channel.usersCount,
+			membersCount: tierCounts ? tierCounts.members : 0,
+			followersCount: tierCounts ? tierCounts.followers : 0,
 			notesCount: channel.notesCount,
 			isSensitive: channel.isSensitive,
 			allowRenoteToExternal: channel.allowRenoteToExternal,
 
 			...(me ? {
 				isFollowing,
+				isMember,
 				isFavorited,
 				isMuting,
 				hasUnreadNote: false, // 後方互換性のため
@@ -196,9 +208,11 @@ export class ChannelEntityService {
 			.then(it => new Map(it.map(it => [it.id, it])));
 
 		const memberCounts = await this.memberCounts(channels);
+		const memberships = me ? await this.membershipsOf(me.id, channels) : new Set<MiChannel['id']>();
 
 		return Promise.all(channels.map(it => this.pack(it, me, detailed, {
 			memberCounts,
+			memberships,
 			bannerFiles,
 			followings,
 			favorites,
@@ -207,16 +221,22 @@ export class ChannelEntityService {
 		})));
 	}
 
-	/** BACKEND-DELIVERY-V1: members per channel = its followers, plus the owner when the owner does not follow it
-	 *  (ClubService.members' roster rule). One query for any number of channels. */
+	/** BACKEND-DELIVERY-V1 → CLUB-TIERS-V1: members (club_member + the owner) and followers (the follower tier only) per
+	 *  channel — club-tiers.ts, the rule ClubService counts with. One query for any number of channels. */
 	@bindThis
-	private async memberCounts(channels: MiChannel[]): Promise<Map<MiChannel['id'], number>> {
-		if (channels.length === 0) return new Map();
+	private async memberCounts(channels: MiChannel[]): Promise<Map<MiChannel['id'], { members: number; followers: number }>> {
+		return await clubCounts(this.channelFollowingsRepository, channels.map(c => c.id));
+	}
+
+	/** CLUB-TIERS-V1: which of these clubs the viewer is a member of (club_member rows or ownership). */
+	@bindThis
+	private async membershipsOf(userId: MiUser['id'], channels: MiChannel[]): Promise<Set<MiChannel['id']>> {
+		if (channels.length === 0) return new Set();
 		const rows = await this.channelFollowingsRepository.query(
-			`SELECT c."id", (SELECT count(*) FROM "channel_following" f WHERE f."followeeId" = c."id")::int
-			        + (CASE WHEN c."userId" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM "channel_following" f WHERE f."followeeId" = c."id" AND f."followerId" = c."userId") THEN 1 ELSE 0 END) AS "n"
-			   FROM "channel" c WHERE c."id" = ANY($1)`, [channels.map(c => c.id)]) as { id: string; n: number | string }[];
-		return new Map(rows.map(r => [r.id, Number(r.n)]));
+			`SELECT "channelId" AS "id" FROM "club_member" WHERE "userId" = $1 AND "channelId" = ANY($2)`, [userId, channels.map(c => c.id)]) as { id: string }[];
+		const out = new Set(rows.map(r => r.id));
+		for (const c of channels) if (c.userId === userId) out.add(c.id);
+		return out;
 	}
 }
 
