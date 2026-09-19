@@ -1,0 +1,42 @@
+# social-engine — UAT web instance (2026-09-18). Same image as production, same db/redis containers, but the
+# `se_sbx` database and redis db 1, served at https://uat.social.silkvo.com/ on 127.0.0.1:3961.
+# Use TOGETHER with compose.prod.yml, always:
+#   docker compose -f compose.prod.yml -f compose.uat.yml up -d web web-uat
+# (a `up -d web` with compose.prod.yml alone warns about an orphan; it does not remove web-uat.)
+# Testers' social data (clubs, meets, chats) lives in se_sbx; hkpl's caged tenant `boyau-uat` is the identity side
+# (SANDBOX_TENANT_IDS) — no email, push or DUPR submission can leave the sandbox.
+name: social-engine
+
+services:
+  web-uat:
+    image: ghcr.io/venobbuk/social-engine:${SOCIAL_IMAGE_TAG:-master}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "127.0.0.1:3961:3000"
+    volumes:
+      - ./.config-uat:/misskey/.config:ro
+    environment:
+      NODE_ENV: production
+      ADAPTER_SSO_STAFF_TENANTS: boyau-uat   # CLUB-CLAIM-VERIFY-V1: UAT tenant admins are GripBat staff on the UAT engine ONLY (never on web)
+      # SEC-SSO-AUD-V1 step (a): the engine REQUIRES an audience. Today's hkpl mint stamps 'social.silkvo.com' for every
+      # host (one key, SOCIAL_URL unset), so UAT accepts that until the key split (/root/gen/sso-split.sh) flips this
+      # to "uat.social.silkvo.com" together with the UAT key and the per-tenant mint.
+      ADAPTER_SSO_AUDIENCE: "social.silkvo.com"
+    env_file:
+      - /root/social-engine.env
+      - /root/social-engine.hkpl.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: "1.0"
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "3" }

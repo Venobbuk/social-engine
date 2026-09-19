@@ -93,11 +93,19 @@ export const paramDef = {
 const ISSUERS: Record<string, string> = {
 	hkpl: process.env.ADAPTER_SSO_PUBKEY_HKPL ?? '/misskey/.config/hkpl-sso-rs256.pub',
 };
-const AUDIENCE = process.env.ADAPTER_SSO_AUDIENCE ?? 'social.silkvo.com';
+// SEC-SSO-AUD-V1 (2026-09-20): the token's audience MUST equal the audience configured for THIS engine instance, and
+// there is no default — an unset ADAPTER_SSO_AUDIENCE fails closed. Step (a), safe with TODAY's single key and today's
+// mint (which stamps 'social.silkvo.com' for every host): BOTH compose files set it explicitly — web 'social.silkvo.com',
+// web-uat ALSO 'social.silkvo.com' for now. Step (b), the key split (/root/gen/sso-split.sh), gives UAT its own key and
+// the mint a per-tenant audience, then flips web-uat to 'uat.social.silkvo.com'. ADAPTER_SSO_TENANT is an optional
+// second binding and is deliberately NOT set in step (a) (an hkpl row of tenant 'uat' signs in to prod today).
+const AUDIENCE = process.env.ADAPTER_SSO_AUDIENCE ?? null;
+const EXPECTED_TENANT = process.env.ADAPTER_SSO_TENANT ?? null; // optional second binding; unset = not enforced
 // STAFF-ROLE-V1: the one engine role the host's admins hold (fixed id so every worker converges on one row). Default
 // tenant list is production's ("boyau") only; the UAT container sets ADAPTER_SSO_STAFF_TENANTS=boyau-uat.
 const STAFF_TENANTS = (process.env.ADAPTER_SSO_STAFF_TENANTS ?? 'boyau').split(',').map(x => x.trim()).filter(Boolean);
 const MAX_TTL_SEC = 300;
+const CLOCK_SKEW_SEC = 60; // tolerate a minute of clock drift between the mint and this box
 
 // First-party USER scope for the SSO credential. Every non-admin permission in misskey-js consts plus the
 // meet module's own. Admin scopes are deliberately absent: an SSO token must never be able to moderate.
@@ -119,7 +127,9 @@ function b64urlToBuf(s: string): Buffer {
 
 type Claims = { iss: string; aud: string; sub: string; exp: number; iat?: number; jti?: string; row?: string; tenant?: string; name?: string | null; avatar?: string | null; role?: string | null; dupr_id?: string | null; dupr_rating?: number | null; home_club_id?: number | null; lang?: string };
 
-function verifyJwt(token: string): Claims {
+// SEC-ACCOUNT-DELETE-REAUTH-V1: exported so adapter/account/delete can demand a FRESH hkpl-signed proof (same
+// verification: signature, audience, mandatory iat, ≤ 5-min TTL, mandatory jti) before it destroys an account.
+export function verifyJwt(token: string): Claims {
 	const parts = token.split('.');
 	if (parts.length !== 3) throw new Error('shape');
 	const header = JSON.parse(b64urlToBuf(parts[0]).toString('utf8'));
@@ -133,15 +143,24 @@ function verifyJwt(token: string): Claims {
 	verifier.update(`${parts[0]}.${parts[1]}`);
 	if (!verifier.verify(createPublicKey(pem), b64urlToBuf(parts[2]))) throw new Error('sig');
 	const now = Math.floor(Date.now() / 1000);
+	// SEC-SSO-AUD-V1: fail closed if this engine has no audience configured, and require the token to name THIS engine.
+	if (!AUDIENCE) throw new ApiError(meta.errors.unconfigured);
 	if (payload.aud !== AUDIENCE) throw new Error('aud');
+	if (EXPECTED_TENANT != null && payload.tenant !== EXPECTED_TENANT) throw new Error('tenant');
 	if (typeof payload.exp !== 'number' || payload.exp < now) throw new Error('exp');
-	if (typeof payload.iat === 'number' && payload.exp - payload.iat > MAX_TTL_SEC) throw new Error('ttl');
+	// SEC-SSO-HYGIENE-V1 (2026-09-20): iat is MANDATORY. Without it the 5-minute lifetime cap cannot be enforced, so a
+	// captured token with a far-future exp would live indefinitely. Require it, reject a future-dated iat (small skew),
+	// and cap the lifetime at MAX_TTL_SEC. hkpl's mint has always sent iat (jsonwebtoken expiresIn ⇒ iat + exp).
+	if (typeof payload.iat !== 'number') throw new Error('iat');
+	if (payload.iat > now + CLOCK_SKEW_SEC) throw new Error('iat_future');
+	if (payload.exp - payload.iat > MAX_TTL_SEC) throw new Error('ttl');
 	if (typeof payload.sub !== 'string' || payload.sub.length < 4) throw new Error('sub');
 	return payload;
 }
 
 // deterministic local username: <issuer>_<12 hex of sha256(external id)> — ≤ 20 chars, [a-z0-9_]
-function usernameFor(iss: string, sub: string): string {
+// SEC-ACCOUNT-DELETE-REAUTH-V1: exported so adapter/account/delete can prove a re-auth proof maps to the same account.
+export function usernameFor(iss: string, sub: string): string {
 	return `${iss}_${createHash('sha256').update(`${iss}:${sub}`).digest('hex').slice(0, 12)}`.toLowerCase();
 }
 
@@ -178,27 +197,34 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			try {
 				claims = verifyJwt(ps.jwt);
 			} catch (e) {
+				// SEC-SSO-HYGIENE-V1: log WHY a token was refused (aud / tenant / iat / ttl / exp / sig …) with its
+				// iss/aud/tenant — never the token itself — so a misconfigured fail-closed deploy is diagnosable.
+				let hint = '';
+				try { const p = JSON.parse(b64urlToBuf(ps.jwt.split('.')[1] ?? '').toString('utf8')); hint = ` iss=${String(p.iss)} aud=${String(p.aud)} tenant=${String(p.tenant)}`; } catch { hint = ' (payload unreadable)'; }
+				this.logger.warn(`SSO token refused: ${e instanceof ApiError ? e.code : (e instanceof Error ? e.message : String(e))}${hint} (engine audience=${String(AUDIENCE)})`);
 				if (e instanceof ApiError) throw e;
 				throw new ApiError(meta.errors.invalidToken);
 			}
 
-			// S3 — single redemption. A JWT without a jti is a pre-V2 mint. DEPLOY ORDER: the mint must ship
-			// before this becomes strict, or every live SSO breaks. ADAPTER_SSO_JTI_OPTIONAL=1 is the transition
-			// window: a missing jti is logged and admitted WITHOUT replay protection; a present jti is always
-			// checked. Unset the flag once hkpl's IDENTITY-PERSON-V1 mint is live. Default: required.
-			if (typeof claims.jti !== 'string' || claims.jti.length < 8) {
-				if (process.env.ADAPTER_SSO_JTI_OPTIONAL !== '1') throw new ApiError(meta.errors.invalidToken);
-				this.logger.warn(`admitting a jti-less SSO token from ${claims.iss} (transition flag set; no replay protection)`);
-			} else {
-				const ttl = Math.max(1, Math.min(MAX_TTL_SEC, (claims.exp - Math.floor(Date.now() / 1000)) + 5));
-				const first = await this.redisClient.set(`sso:jti:${claims.iss}:${claims.jti}`, '1', 'EX', ttl, 'NX');
-				if (first !== 'OK') throw new ApiError(meta.errors.replayed);
-			}
+			// S3 — single redemption. SEC-SSO-HYGIENE-V1 (2026-09-20): the jti (replay id) is now MANDATORY and the
+			// replay check ALWAYS runs. The old ADAPTER_SSO_JTI_OPTIONAL transition window (which admitted jti-less
+			// tokens with NO replay protection) is removed — hkpl's IDENTITY-PERSON-V1 mint sends a jti, so a token
+			// without one is rejected outright. The token is redeemable exactly once within its own TTL.
+			if (typeof claims.jti !== 'string' || claims.jti.length < 8) throw new ApiError(meta.errors.invalidToken);
+			const ttl = Math.max(1, Math.min(MAX_TTL_SEC, (claims.exp - Math.floor(Date.now() / 1000)) + 5));
+			const first = await this.redisClient.set(`sso:jti:${claims.iss}:${claims.jti}`, '1', 'EX', ttl, 'NX');
+			if (first !== 'OK') throw new ApiError(meta.errors.replayed);
 
 			const username = usernameFor(claims.iss, claims.sub);
 			const displayName = (claims.name ?? '').toString().slice(0, 50) || null;
 			const lang = typeof claims.lang === 'string' && claims.lang.length <= 12 ? claims.lang : null;
 
+			// SEC-SSO-HYGIENE-V1: link by the hkpl IDENTITY, not a mutable name. `username` is a pure, one-way function
+			// of (iss, sub) where sub is hkpl's immutable PERSON id (IDENTITY-LINKS-V1), so this lookup already binds
+			// the account to the identity — a display-name change never re-points it, and there is no username-rename
+			// path for these password-unknown accounts. (Defense-in-depth follow-up: a dedicated (iss,sub)→userId link
+			// table, so a tombstoned/renamed row can never be mismatched. Left out here to avoid colliding with the
+			// engine-batch1 entity-list edits; see report.)
 			const existing = await this.usersRepository.findOneBy({ usernameLower: username, host: null as never });
 			if (existing) {
 				if (displayName && existing.name !== displayName) {

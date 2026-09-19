@@ -18,9 +18,12 @@ services:
       - ./.config:/misskey/.config:ro
     environment:
       NODE_ENV: production
-      # SSO-SEAM-V2 transition (2026-09-16): admit jti-less JWTs from hkpl until its IDENTITY-PERSON-V1 mint is
-      # deployed. REMOVE this line once it is — with it set, replay protection is not enforced for old mints.
-      ADAPTER_SSO_JTI_OPTIONAL: "1"
+      # SEC-SSO-HYGIENE-V1 (2026-09-20): the SSO-SEAM-V2 transition flag ADAPTER_SSO_JTI_OPTIONAL is removed. hkpl's
+      # IDENTITY-PERSON-V1 mint now sends a jti, and the engine requires it (adapter/sso), so replay protection is
+      # always on. Do NOT reintroduce the flag — a jti-less token is rejected outright.
+      # SEC-SSO-AUD-V1 (2026-09-20): the engine REQUIRES ADAPTER_SSO_AUDIENCE (no default; unset = SSO refused).
+      # Production's audience never changes. (web-uat sets its own in compose.uat.yml.)
+      ADAPTER_SSO_AUDIENCE: "social.silkvo.com"
     env_file:
       - /root/social-engine.env          # OSS_SOCIAL_* — created by the operator, never by the agent
       - /root/social-engine.hkpl.env     # ADAPTER_HKPL_URL / _S2S_SECRET / _ALLOW_LOCAL — MEET-MATCH-V1 (SOCIAL-DUPR-V1 door)
