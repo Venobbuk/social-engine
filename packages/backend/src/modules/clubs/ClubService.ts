@@ -190,11 +190,15 @@ export class ClubService {
 	}
 
 	// ------------------------------------------------------------------------------------- joining
-	/** Reclub GroupGateType: open → member now; approval → a request the admins decide; invite → refused. */
+	/** Reclub GroupGateType: open → member now; approval → a request the admins decide; invite → refused.
+	 *  CLUB-GATE-V1 (W1): the ONE membership door — clubs/join AND the stock channels/follow both land here (decide() seats an
+	 *  approved request); nothing else may insert channel_following. */
 	@bindThis
 	public async join(channel: MiChannel, user: MiLocalUser, message: string | null, accessToken: string | null = null): Promise<{ status: 'member' | 'requested' }> {
 		const s = await this.settings(channel.id);
 		if (await this.isMember(channel.id, user.id)) return { status: 'member' };
+		// CLUB-GATE-V1: the club's owner and admins are never gated (the stock follow door let them in; keep it so)
+		if (channel.userId === user.id || s.adminIds.includes(user.id)) { await this.channelFollowingService.follow(user, channel); return { status: 'member' }; }
 		// CLUB-V3: the invite link's ?at= token is the admins' invitation — it seats the person in any gate
 		if (accessToken && s.accessToken && accessToken === s.accessToken) { await this.channelFollowingService.follow(user, channel); await this.clubJoinRequestsRepository.delete({ channelId: channel.id, userId: user.id }); return { status: 'member' }; }
 		if (s.gateType === 'open') { await this.channelFollowingService.follow(user, channel); return { status: 'member' }; }
