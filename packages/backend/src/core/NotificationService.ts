@@ -22,6 +22,7 @@ import type { Config } from '@/config.js';
 import { UserListService } from '@/core/UserListService.js';
 import { FilterUnionByProperty, groupedNotificationTypes, obsoleteNotificationTypes } from '@/types.js';
 import { trackPromise } from '@/misc/promise-tracker.js';
+import { sendHkplDevicePush } from '@/misc/hkpl-device-push.js';
 // import { escapeHtml } from '@/misc/escape-html.js';
 
 @Injectable()
@@ -194,6 +195,10 @@ export class NotificationService implements OnApplicationShutdown {
 
 			this.globalEventService.publishMainStream(notifieeId, 'unreadNotification', packed);
 			this.pushNotificationService.pushNotification(notifieeId, 'notification', packed);
+			// GB-PUSH-V1 (2026-09-19): the same moment reaches the member's phone through hkpl's dispatcher (gated by
+			// GRIPBAT_DEVICE_PUSH=on, SSO members only, fails soft; see misc/hkpl-device-push.ts).
+			// batch 1: with the switch off not even the user lookup runs (inert until the hkpl side ships)
+			if (process.env.GRIPBAT_DEVICE_PUSH === 'on') void this.cacheService.findUserById(notifieeId).then((u) => sendHkplDevicePush({ host: this.config.host, username: u.host == null ? u.username : null, lang: profile.lang, notification: packed as never }), () => { /* unknown user: nothing to push */ });
 
 			if (type === 'follow') this.emailNotificationFollow(notifieeId, await this.usersRepository.findOneByOrFail({ id: notifierId! }));
 			if (type === 'receiveFollowRequest') this.emailNotificationReceiveFollowRequest(notifieeId, await this.usersRepository.findOneByOrFail({ id: notifierId! }));
