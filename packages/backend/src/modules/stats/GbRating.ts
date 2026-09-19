@@ -22,7 +22,7 @@ export const expectedOf = (a: number, b: number): number => 1 / (1 + Math.pow(10
 const clamp = (x: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, x));
 
 type Side = { userIds: string[] };
-type Raw = { source: 'meet' | 'competition'; id: string; playedAt: Date; sport: string; sides: [Side, Side]; games: [number, number][] };
+type Raw = { source: 'meet' | 'competition' | 'openplay'; id: string; playedAt: Date; sport: string; sides: [Side, Side]; games: [number, number][] };
 
 async function pendingMatches(db: DataSource, limit: number): Promise<Raw[]> {
 	const meet = await db.query(
@@ -49,6 +49,7 @@ async function pendingMatches(db: DataSource, limit: number): Promise<Raw[]> {
 	for (const r of comp) {
 		out.push({ source: 'competition', id: r.id, playedAt: new Date(r.playedAt), sport: r.sport || 'pickleball', sides: [{ userIds: r.u1 ?? [] }, { userIds: r.u2 ?? [] }], games: (r.scores ?? []).filter((g) => g.type !== 'extra').map((g) => [Number(g.t1), Number(g.t2)] as [number, number]) });
 	}
+	out.push(...await pendingOpenPlay(db, limit).catch(() => [] as Raw[]));   // GB-OPENPLAY-V1
 	out.sort((a, b) => a.playedAt.getTime() - b.playedAt.getTime());
 	return out;
 }
@@ -199,4 +200,45 @@ export async function pairsOf(db: DataSource, pairs: [string, string][], sport =
 		out.push({ a, b, matches: x ? x.n : 0, wins: x ? x.w : 0, expected: x ? Math.round(x.e * 100) / 100 : 0 });
 	}
 	return out;
+}
+
+// ---- GB-OPENPLAY-V1: open-play games (hkpl open play, the app's "Open play") count toward the GripBat rating --------
+// Every 5 minutes the sweep pulls PLAYED games for this engine's host from hkpl (GET /api/v1/social/openplay/played,
+// x-social-secret) into gb_openplay_game; pendingMatches() then rates them as source 'openplay'. Open play stores DUPR
+// ids as player refs; a ref maps to a GripBat user through meet_player_level.duprId. A game with a guest is skipped.
+let openPlayAt = 0;
+export async function importOpenPlay(db: DataSource, host: string): Promise<number> {
+	if (Date.now() - openPlayAt < 5 * 60e3) return 0;
+	openPlayAt = Date.now();
+	const base = (process.env.ADAPTER_HKPL_URL ?? '').replace(/\/+$/, ''), secret = process.env.ADAPTER_HKPL_S2S_SECRET ?? '';
+	if (!base || !secret || !host) return 0;
+	const since = (await db.query('SELECT max("playedAt") AS s FROM gb_openplay_game'))[0]?.s;
+	const url = `${base}/api/v1/social/openplay/played?host=${encodeURIComponent(host)}&limit=200` + (since ? '&since=' + encodeURIComponent(new Date(since).toISOString()) : '');
+	const r = await fetch(url, { headers: { 'x-social-secret': secret } });
+	if (!r.ok) throw new Error('openplay feed ' + r.status);
+	const j = await r.json() as { games?: { id: string; played_at: string; format: string; refs: (string | null)[]; score_a: number; score_b: number }[] };
+	let n = 0;
+	for (const g of j.games ?? []) {
+		await db.query('INSERT INTO gb_openplay_game (id, "playedAt", format, refs, "scoreA", "scoreB") VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING',
+			[g.id, new Date(g.played_at), g.format || 'doubles', (g.refs ?? []).map((x) => (x ?? '').trim()), g.score_a, g.score_b]);
+		n++;
+	}
+	return n;
+}
+
+async function pendingOpenPlay(db: DataSource, limit: number): Promise<Raw[]> {
+	const rows = await db.query(
+		`SELECT g.id, g."playedAt", g.format, g.refs, g."scoreA", g."scoreB" FROM gb_openplay_game g
+		 WHERE NOT EXISTS (SELECT 1 FROM gb_rating_log l WHERE l.source = 'openplay' AND l."matchId" = g.id)
+		 ORDER BY g."playedAt" ASC LIMIT $1`, [limit]) as { id: string; playedAt: Date; format: string; refs: string[]; scoreA: number; scoreB: number }[];
+	const refs = [...new Set(rows.flatMap((r) => r.refs.filter(Boolean).map((x) => x.toUpperCase())))];
+	const map = new Map<string, string>();
+	if (refs.length) for (const x of await db.query('SELECT "userId", upper("duprId") AS d FROM meet_player_level WHERE upper("duprId") = ANY($1)', [refs]) as { userId: string; d: string }[]) map.set(x.d, x.userId);
+	return rows.map((r) => {
+		const u = r.refs.map((x) => (x ? map.get(x.toUpperCase()) ?? '' : ''));
+		const doubles = r.format !== 'singles';
+		return { source: 'openplay' as const, id: r.id, playedAt: new Date(r.playedAt), sport: 'pickleball',
+			sides: [{ userIds: doubles ? [u[0], u[1]] : [u[0]] }, { userIds: doubles ? [u[2], u[3]] : [u[1]] }] as [Side, Side],
+			games: [[Number(r.scoreA), Number(r.scoreB)]] as [number, number][] };
+	});
 }
