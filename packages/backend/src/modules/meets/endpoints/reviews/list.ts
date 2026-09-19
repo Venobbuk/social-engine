@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
-import type { MeetsRepository, MeetReviewsRepository } from '@/models/_.js';
+import type { MeetsRepository, MeetReviewsRepository, BlockingsRepository } from '@/models/_.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ApiError } from '@/server/api/error.js';
@@ -20,6 +20,8 @@ import type { MiMeetReview } from '@/modules/meets/models/MeetReview.js';
 //   WARNING_PUBLIC_THRESHOLD distinct people have warned, then public). Archived rows are the person's own business:
 //   only the person sees them, and only with archived=true (Reclub's archived toggle).
 // given: the reviews the signed-in viewer WROTE (Reclub "By you"), every type, newest first — nobody else's.
+// The other person (`user`) and the meet are given only to the author and to the person reviewed (not for a warning);
+// anyone else sees the review without who wrote it or where (null) — the meet would name the author's circle.
 // Each row carries its id, type, the endorsement's kudo dimensions, the meet it came from, and what the viewer may do
 // with it (canDelete = I wrote it; canArchive = it is about me and not a warning — a warning is a safety signal the
 // person cannot hide). `dims` totals the visible endorsements per dimension with the distinct givers
@@ -52,6 +54,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		@Inject(DI.meetsRepository) private meetsRepository: MeetsRepository,
 		@Inject(DI.meetReviewsRepository) private meetReviewsRepository: MeetReviewsRepository,
+		@Inject(DI.blockingsRepository) private blockingsRepository: BlockingsRepository,
 		private meetService: MeetService,
 		private userEntityService: UserEntityService,
 	) {
@@ -61,11 +64,23 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const userId = given ? me!.id : (ps.userId ?? (me ? me.id : null));
 			if (!userId) throw new ApiError(meta.errors.noUser);
 			const self = !!me && me.id === userId;
+			// blocked either way: nothing to list (the player page shows the blocked panel instead)
+			if (!given && me && !self && await this.blockingsRepository.exists({ where: [{ blockerId: userId, blockeeId: me.id }, { blockerId: me.id, blockeeId: userId }] })) {
+				return { userId, direction: ps.direction, total: 0, counts: { endorsement: 0, feedback: 0, warning: 0 }, dims: {}, warningCount: 0, warningsPublic: false, warningThreshold: WARNING_PUBLIC_THRESHOLD, rows: [] };
+			}
 
 			let rows: MiMeetReview[];
 			let warningCount = 0; let warningsPublic = false;
+			const counts = { endorsement: 0, feedback: 0, warning: 0 };
+			let givenTotal: number | null = null;   // review-batch2 #9: the 'given' side pages in SQL, so its total is a COUNT
 			if (given) {
-				rows = await this.meetReviewsRepository.find({ where: { authorId: userId }, order: { createdAt: 'DESC' } });
+				// review-batch2 #9: every review this person ever wrote used to be loaded and sliced in JS. One page in SQL; the
+				// tab counts stay what they were - one grouped query over all of them, not over the page.
+				const qb = this.meetReviewsRepository.createQueryBuilder('r').where('r.authorId = :u', { u: userId });
+				for (const c of await qb.clone().select('r.type', 'type').addSelect('count(*)', 'n').groupBy('r.type').getRawMany() as { type: 'endorsement' | 'feedback' | 'warning'; n: string }[]) counts[c.type] = Number(c.n);
+				if (ps.type) qb.andWhere('r.type = :t', { t: ps.type });
+				givenTotal = await qb.getCount();
+				rows = await qb.orderBy('r.createdAt', 'DESC').skip(ps.offset).take(ps.limit).getMany();
 			} else {
 				const v = await this.meetService.reviewsVisibleTo(userId, me ? me.id : null);
 				rows = v.reviews.filter(r => ps.archived ? self && r.archivedAt != null : r.archivedAt == null);
@@ -84,11 +99,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 				for (const k of Object.keys(dims)) dims[k].people = givers[k].size;
 			}
-			const counts = { endorsement: 0, feedback: 0, warning: 0 };
-			for (const r of rows) counts[r.type]++;
-			if (ps.type) rows = rows.filter(r => r.type === ps.type);
-			const total = rows.length;
-			const page = rows.slice(ps.offset, ps.offset + ps.limit);
+			if (!given) for (const r of rows) counts[r.type]++;
+			if (ps.type && !given) rows = rows.filter(r => r.type === ps.type);
+			const total = givenTotal ?? rows.length;
+			const page = given ? rows : rows.slice(ps.offset, ps.offset + ps.limit);
 
 			const meetIds = Array.from(new Set(page.map(r => r.meetId).filter((x): x is string => !!x)));
 			const meets = meetIds.length ? await this.meetsRepository.find({ where: { id: In(meetIds) }, select: { id: true, name: true, startAt: true } }) : [];
@@ -97,14 +111,25 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const targetWarn = new Map<string, number>();
 			if (given) {
 				const tids = Array.from(new Set(page.filter(r => r.type === 'warning').map(r => r.targetUserId)));
-				for (const t of tids) {
-					const ws = await this.meetReviewsRepository.find({ where: { targetUserId: t, type: 'warning' }, select: { authorId: true, archivedAt: true } });
-					targetWarn.set(t, new Set(ws.filter(w => !w.archivedAt).map(w => w.authorId)).size);
+				if (tids.length) {
+					// review-batch2 #9: ONE grouped query (was one query per warned player on the page)
+					for (const w of await this.meetReviewsRepository.createQueryBuilder('r')
+						.select('r.targetUserId', 'target').addSelect('count(DISTINCT r.authorId)', 'n')
+						.where('r.targetUserId IN (:...tids)', { tids }).andWhere('r.type = :w', { w: 'warning' }).andWhere('r.archivedAt IS NULL')
+						.groupBy('r.targetUserId').getRawMany() as { target: string; n: string }[]) targetWarn.set(w.target, Number(w.n));
 				}
 			}
+			// review-batch2 #9: the page's users in ONE packMany (was one pack() per row)
+			const isKnown = (r: MiMeetReview) => given || (!!me && r.authorId === me.id) || (self && r.type !== 'warning');
+			const needIds = Array.from(new Set(page.filter(isKnown).map(r => given ? r.targetUserId : r.authorId)));
+			const packedUsers = new Map<string, unknown>();
+			if (needIds.length) for (const u of await this.userEntityService.packMany(needIds, me, { schema: 'UserLite' })) packedUsers.set(u.id, u);
 			const out = [];
 			for (const r of page) {
 				const other = given ? r.targetUserId : r.authorId;
+				// may this viewer know who wrote it, and where: the author always; the person reviewed, except for a warning (a warned
+				// player never learns who warned them — the author's safety)
+				const known = isKnown(r);
 				const m = r.meetId ? meetById.get(r.meetId) : undefined;
 				const isPublic = r.type === 'endorsement' ? true : r.type === 'feedback' ? false : given ? (targetWarn.get(r.targetUserId) ?? 0) >= WARNING_PUBLIC_THRESHOLD : warningsPublic;
 				out.push({
@@ -113,15 +138,18 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					body: r.body,
 					dims: r.type === 'endorsement' && r.body ? r.body.split(',').map(x => x.trim()).filter(Boolean) : [],
 					createdAt: r.createdAt.toISOString(),
-					archived: r.archivedAt != null,
+					archived: !given && r.archivedAt != null, // the author is not told that the person archived it
 					public: isPublic,
-					user: await this.userEntityService.pack(other, me, { schema: 'UserLite' }).catch(() => null),
-					meet: m ? { id: m.id, name: m.name, startAt: new Date(m.startAt).toISOString() } : null,
+					// who wrote a review is shown to the person reviewed and to its author only (triage A-user-kudos-summary.03:
+					// Reclub shows the givers to Supporters; GripBat's free equivalent is "to the player themself")
+					user: known ? packedUsers.get(other) ?? null : null,
+					meet: known && m ? { id: m.id, name: m.name, startAt: new Date(m.startAt).toISOString() } : null,
 					canDelete: !!me && r.authorId === me.id,
 					canArchive: !!me && r.targetUserId === me.id && r.type !== 'warning',
 				});
 			}
-			return { userId, direction: ps.direction, total, counts, dims, warningCount, warningsPublic, warningThreshold: WARNING_PUBLIC_THRESHOLD, rows: out };
+			// the count of warnings is known before the threshold only to the person themself
+			return { userId, direction: ps.direction, total, counts, dims, warningCount: warningsPublic || self ? warningCount : 0, warningsPublic, warningThreshold: WARNING_PUBLIC_THRESHOLD, rows: out };
 		});
 	}
 }

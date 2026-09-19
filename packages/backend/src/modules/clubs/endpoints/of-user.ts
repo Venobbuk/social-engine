@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
-import type { ChannelsRepository, ChannelFollowingsRepository, ClubSettingsRepository } from '@/models/_.js';
+import type { ChannelsRepository, ChannelFollowingsRepository, ClubSettingsRepository, BlockingsRepository } from '@/models/_.js';
 import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 
 // PLAYER-CLUBS-V1 (W2-F, Reclub E-player.15 "Clubs the player belongs to → club page"): the clubs a person owns or has
@@ -36,9 +36,12 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.channelsRepository) private channelsRepository: ChannelsRepository,
 		@Inject(DI.channelFollowingsRepository) private channelFollowingsRepository: ChannelFollowingsRepository,
 		@Inject(DI.clubSettingsRepository) private clubSettingsRepository: ClubSettingsRepository,
+		@Inject(DI.blockingsRepository) private blockingsRepository: BlockingsRepository,
 		private channelEntityService: ChannelEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// blocked either way: nothing to list
+			if (me && me.id !== ps.userId && await this.blockingsRepository.exists({ where: [{ blockerId: ps.userId, blockeeId: me.id }, { blockerId: me.id, blockeeId: ps.userId }] })) return [];
 			const follows = await this.channelFollowingsRepository.find({ where: { followerId: ps.userId }, order: { id: 'DESC' }, select: { followeeId: true } });
 			const owned = await this.channelsRepository.find({ where: { userId: ps.userId, isArchived: false }, order: { id: 'DESC' } });
 			const ids = Array.from(new Set([...owned.map(c => c.id), ...follows.map(f => f.followeeId)]));

@@ -13,7 +13,7 @@ import { ApiError } from '@/server/api/error.js';
 // or restores a review about them. An archived row leaves their list and the public view (MeetService.reviewsVisibleTo
 // already shows archived rows to the person only) and stops counting in the kudos boards. A warning cannot be
 // archived: it is the community's safety signal, and hiding it would let a player reset the public threshold.
-// A new review from the same author on the same type un-archives it (MeetService.review sets archivedAt null).
+// The author editing the review keeps it archived (MeetService.review leaves archivedAt alone).
 export const meta = {
 	tags: ['meets'],
 	requireCredential: true,
@@ -21,7 +21,9 @@ export const meta = {
 	kind: 'write:meets',
 	res: { type: 'object', optional: false, nullable: false },
 	errors: {
-		noSuchReview: { message: 'No such review.', code: 'NO_SUCH_REVIEW', id: 'b7a1c2d3-0f00-4a00-8000-0000000000c1' },
+		// review-batch2 (found by scripts/check_error_ids.js, the guard added for #4): the SAME error as reviews/delete's
+		// noSuchReview - one code, one id. It used ...c1, so NO_SUCH_REVIEW answered two ids.
+		noSuchReview: { message: 'No such review.', code: 'NO_SUCH_REVIEW', id: 'b7a1c2d3-0f00-4a00-8000-0000000000b1' },
 		notTarget: { message: 'Only the person reviewed can archive a review.', code: 'REVIEW_NOT_TARGET', id: 'b7a1c2d3-0f00-4a00-8000-0000000000c2' },
 		warning: { message: 'A warning cannot be archived.', code: 'REVIEW_WARNING_NOT_ARCHIVABLE', id: 'b7a1c2d3-0f00-4a00-8000-0000000000c3' },
 	},

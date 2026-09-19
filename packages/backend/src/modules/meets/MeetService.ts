@@ -721,7 +721,7 @@ export class MeetService {
 		if (author.id === targetUserId) throw this.err('invalid_transition', 'You cannot review yourself.');
 		const existing = await this.meetReviewsRepository.findOneBy({ authorId: author.id, targetUserId, type });
 		if (existing) {
-			await this.meetReviewsRepository.update(existing.id, { body, meetId, archivedAt: null });
+			await this.meetReviewsRepository.update(existing.id, { body, meetId }); // W2-F: keeps archivedAt — the reviewed player's archive stands
 			return await this.meetReviewsRepository.findOneByOrFail({ id: existing.id });
 		}
 		return await this.meetReviewsRepository.insertOne({ id: this.idService.gen(), authorId: author.id, targetUserId, type, body, meetId, createdAt: new Date() });
@@ -759,7 +759,8 @@ export class MeetService {
 	/** SAFETY-V1: the packed view of a person's reviews for a viewer (see reviewsVisibleTo) + no-shows + kudos tally. */
 	@bindThis
 	public async packReviews(targetUserId: MiUser['id'], viewerId: MiUser['id'] | null, users: UserEntityService): Promise<Packed<'PlayerReviews'>> {
-		const { reviews, warningCount, warningsPublic } = await this.reviewsVisibleTo(targetUserId, viewerId);
+		const { reviews: visible, warningCount, warningsPublic } = await this.reviewsVisibleTo(targetUserId, viewerId);
+		const reviews = visible.filter(r => !r.archivedAt); // W2-F: an archived review leaves the tallies, the person's own view too
 		const packRow = async (r: MiMeetReview) => ({ author: await users.pack(r.authorId, null, { schema: 'UserLite' as const }).catch(() => null), body: r.body, createdAt: r.createdAt.toISOString() });
 		const by = async (t: MiMeetReview['type']) => Promise.all(reviews.filter(r => r.type === t).map(packRow));
 		const kudos: Record<string, number> = {};
