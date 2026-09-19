@@ -16,6 +16,7 @@ import { NotificationService } from '@/core/NotificationService.js';
 import { ChatService } from '@/core/ChatService.js';
 import { ChannelFollowingService } from '@/core/ChannelFollowingService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { isGripbatStaff, gripbatStaffIds } from '@/modules/staff.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { bindThis } from '@/decorators.js';
 
@@ -23,6 +24,9 @@ import { bindThis } from '@/decorators.js';
 // group-user, tags, insights, claim-club-ownership) on a Misskey channel. The channel's userId is the owner;
 // adminIds are the committee; membership is channel_following. Everything a member can see stays public; what
 // only an admin can do is gated here in one place (assertAdmin).
+/** CLUB-CLAIM-VERIFY-V1.1 (W1): after a declined claim the same person may claim the same club again only after this. */
+export const CLAIM_COOLDOWN_DAYS = 7;
+
 export type ClubTimeframe = 'CURRENT_MONTH' | 'LAST_MONTH' | 'LAST_3_MONTHS' | 'YTD' | 'LAST_YEAR' | 'ALL_TIME';
 
 @Injectable()
@@ -216,12 +220,81 @@ export class ClubService {
 	}
 
 	// ------------------------------------------------------------------------------------- ownership
-	/** Reclub claim-club-ownership: a mirrored / orphaned club (no owner) is claimed by a member; the staff can reassign. */
+	/** Reclub claim-club-ownership: a mirrored / orphaned club (no owner) is claimed by a member and verified by staff.
+	 *  CLUB-CLAIM-VERIFY-V1 (2026-09-19): the claim is a REQUEST (club_claim, status 'pending'); only GripBat staff's
+	 *  claimsDecide sets the owner. Before this, any member became owner instantly (17 ownerless clubs on live).
+	 *  V1.1 (W1 review-w0): staff are told a claim arrived (in-app notification to every holder of the GripBat staff role
+	 *  that adapter/sso gives the tenant's admins — a plain role, not a Misskey moderator); a person whose claim was declined waits CLAIM_COOLDOWN_DAYS. */
 	@bindThis
-	public async claim(channel: MiChannel, user: MiUser): Promise<void> {
+	public async claim(channel: MiChannel, user: MiUser): Promise<{ status: 'pending' }> {
 		if (channel.userId) throw this.err('has_owner', 'This club already has an owner.');
 		if (!(await this.isMember(channel.id, user.id))) throw this.err('not_member', 'Join the club first.');
-		await this.channelsRepository.update(channel.id, { userId: user.id });
+		const recent = await this.db.query(`SELECT "decidedAt" FROM "club_claim" WHERE "channelId" = $1 AND "userId" = $2 AND "status" = 'rejected' AND "decidedAt" > now() - make_interval(days => $3) ORDER BY "decidedAt" DESC LIMIT 1`, [channel.id, user.id, CLAIM_COOLDOWN_DAYS]) as { decidedAt: Date }[];
+		if (recent.length) throw this.err('claim_cooldown', `Your last claim on this club was declined. You can claim it again after ${new Date(new Date(recent[0].decidedAt).getTime() + CLAIM_COOLDOWN_DAYS * 86_400_000).toISOString().slice(0, 10)}.`);
+		const inserted = await this.db.query(`INSERT INTO "club_claim" ("id", "channelId", "userId") VALUES ($1, $2, $3)
+			ON CONFLICT ("channelId", "userId") WHERE "status" = 'pending' DO NOTHING RETURNING "id"`, [this.idService.gen(), channel.id, user.id]) as { id: string }[];
+		if (inserted.length) {
+			// staff hear about a NEW claim once (a repeated tap on a pending claim inserts nothing and notifies nobody)
+			for (const staffId of await gripbatStaffIds(this.db)) { // STAFF-ROLE-V1: holders of the GripBat staff role only
+				if (staffId !== user.id) this.notify(staffId, 'Club ownership claim', `${user.name ?? user.username} asked to become the owner of ${channel.name}.`, channel.id);
+			}
+		}
+		return { status: 'pending' };
+	}
+
+	/** CLUB-CLAIM-VERIFY-V1: my latest claim on a club (the club page shows "request sent" instead of the button). */
+	@bindThis
+	public async myClaim(channelId: string, userId: string): Promise<{ status: string; createdAt: Date } | null> {
+		const r = await this.db.query(`SELECT "status", "createdAt" FROM "club_claim" WHERE "channelId" = $1 AND "userId" = $2 ORDER BY "createdAt" DESC LIMIT 1`, [channelId, userId]) as { status: string; createdAt: Date }[];
+		return r[0] ?? null;
+	}
+
+	/** CLUB-CLAIM-VERIFY-V1: staff queue — pending claims, oldest first, with the club and the claimant. */
+	@bindThis
+	public async claimsList(viewer: MiUser, limit = 50) {
+		if (!(await isGripbatStaff(this.db, viewer.id))) throw this.err('not_staff', 'Only GripBat staff can do this.'); // STAFF-ROLE-V1
+		const rows = await this.db.query(`SELECT k."id", k."channelId", k."userId", k."createdAt", c."name" AS "clubName", c."userId" AS "ownerId"
+			FROM "club_claim" k JOIN "channel" c ON c."id" = k."channelId" WHERE k."status" = 'pending' ORDER BY k."createdAt" ASC LIMIT $1`, [limit]) as { id: string; channelId: string; userId: string; createdAt: Date; clubName: string; ownerId: string | null }[];
+		const out = [];
+		for (const r of rows) out.push({ id: r.id, channelId: r.channelId, clubName: r.clubName, hasOwner: !!r.ownerId, createdAt: r.createdAt, user: await this.userEntityService.pack(r.userId, viewer, { schema: 'UserLite' }).catch(() => null) });
+		return out;
+	}
+
+	/** CLUB-CLAIM-VERIFY-V1: staff decision. Approve sets the owner (only while the club is still ownerless) and closes
+	 *  the club's other pending claims; reject closes just this one.
+	 *  V1.1 (W1 review-w0): locks in ONE order — the channel row first, then its claims by id — so two staff deciding two
+	 *  claims on one club cannot deadlock; approval re-checks the claimant is still a member with a live account; the
+	 *  claimant (and anyone whose claim was closed by the approval) is told the outcome after commit. */
+	@bindThis
+	public async claimsDecide(claimId: string, approve: boolean, staff: MiUser): Promise<{ status: string }> {
+		if (!(await isGripbatStaff(this.db, staff.id))) throw this.err('not_staff', 'Only GripBat staff can do this.'); // STAFF-ROLE-V1
+		const head = (await this.db.query(`SELECT "channelId" FROM "club_claim" WHERE "id" = $1`, [claimId]))[0] as { channelId: string } | undefined;
+		if (!head) throw this.err('no_such_claim', 'No such claim.');
+		const out = await this.db.transaction(async (m) => {
+			const c = (await m.query(`SELECT "userId", "name" FROM "channel" WHERE "id" = $1 FOR UPDATE`, [head.channelId]))[0] as { userId: string | null; name: string } | undefined;
+			if (!c) throw this.err('no_such_club', 'No such club.');
+			const claims = await m.query(`SELECT "id", "userId", "status" FROM "club_claim" WHERE "channelId" = $1 AND ("status" = 'pending' OR "id" = $2) ORDER BY "id" FOR UPDATE`, [head.channelId, claimId]) as { id: string; userId: string; status: string }[];
+			const k = claims.find(x => x.id === claimId);
+			if (!k) throw this.err('no_such_claim', 'No such claim.');
+			if (k.status !== 'pending') throw this.err('claim_decided', 'This claim was already decided.');
+			if (!approve) {
+				await m.query(`UPDATE "club_claim" SET "status" = 'rejected', "decidedAt" = now(), "decidedById" = $2 WHERE "id" = $1`, [k.id, staff.id]);
+				return { status: 'rejected', club: c.name, told: [{ userId: k.userId, approved: false }] };
+			}
+			if (c.userId) throw this.err('has_owner', 'This club already has an owner.');
+			const account = (await m.query(`SELECT 1 FROM "user" u WHERE u."id" = $1 AND u."isSuspended" = false AND u."isDeleted" = false`, [k.userId]) as unknown[]).length > 0;
+			const live = account && await this.isMember(head.channelId, k.userId); // isMember: the one member definition
+			if (!live) throw this.err('not_member', 'The claimant is no longer a member of this club (or their account is suspended). Reject this claim.');
+			await m.query(`UPDATE "channel" SET "userId" = $2 WHERE "id" = $1`, [head.channelId, k.userId]);
+			await m.query(`UPDATE "club_claim" SET "status" = 'approved', "decidedAt" = now(), "decidedById" = $2 WHERE "id" = $1`, [k.id, staff.id]);
+			const others = claims.filter(x => x.id !== k.id && x.status === 'pending');
+			if (others.length) await m.query(`UPDATE "club_claim" SET "status" = 'rejected', "decidedAt" = now(), "decidedById" = $2 WHERE "id" = ANY($1)`, [others.map(x => x.id), staff.id]);
+			return { status: 'approved', club: c.name, told: [{ userId: k.userId, approved: true }, ...others.map(x => ({ userId: x.userId, approved: false }))] };
+		});
+		for (const t of out.told) {
+			this.notify(t.userId, t.approved ? 'Club ownership approved' : 'Club ownership claim declined', t.approved ? `You are now the owner of ${out.club}.` : `Your claim to own ${out.club} was declined.`, head.channelId);
+		}
+		return { status: out.status };
 	}
 
 	/** CLUB-CHAT-V1: the club's chat room for a member — minted on first open (owned by the club owner, else the

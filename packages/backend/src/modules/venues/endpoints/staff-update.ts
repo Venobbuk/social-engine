@@ -3,19 +3,23 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import type { DataSource } from 'typeorm';
+import { DI } from '@/di-symbols.js';
+import { ApiError } from '@/server/api/error.js';
+import { isGripbatStaff, notStaffError } from '@/modules/staff.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { VenueService } from '@/modules/venues/VenueService.js';
 import { venueErrors, packVenue, toVenueApiError } from './_shared.js';
 
-// Reclub staff: verify / close a venue, assign its owner (module 7379 venue-owner). Moderators only.
+// Reclub staff: verify / close a venue, assign its owner (module 7379 venue-owner). STAFF-ROLE-V1 (batch-1 review fix):
+// holders of the GripBat staff role only (modules/staff.ts), not Misskey moderators.
 export const meta = {
 	tags: ['venues'],
 	requireCredential: true,
-	requireModerator: true,
 	kind: 'write:meets',
 	res: { type: 'object', optional: false, nullable: false, ref: 'Venue' },
-	errors: { noSuchVenue: venueErrors.noSuchVenue },
+	errors: { noSuchVenue: venueErrors.noSuchVenue, notStaff: notStaffError },
 } as const;
 
 export const paramDef = {
@@ -31,8 +35,12 @@ export const paramDef = {
 
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
-	constructor(private venueService: VenueService) {
-		super(meta, paramDef, async (ps) => {
+	constructor(
+		@Inject(DI.db) private db: DataSource,
+		private venueService: VenueService,
+	) {
+		super(meta, paramDef, async (ps, me) => {
+			if (!(await isGripbatStaff(this.db, me.id))) throw new ApiError(meta.errors.notStaff);
 			try {
 				const patch: Parameters<VenueService['staffUpdate']>[1] = {};
 				if (ps.status != null) patch.status = ps.status;

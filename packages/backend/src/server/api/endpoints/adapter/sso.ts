@@ -24,13 +24,29 @@
  *       `ratingSynced: false`; the gate-side distinction lands with the meet module rewrite.
  *   Also: `sub` is now the PERSON id (hkpl lib/identity), so a shadow account or a second-league row no
  *   longer creates a second social identity (S9/G4). The mint sends `row` for audit; it is never keyed on.
+ *
+ * STAFF-ROLE-V1 (W1, 2026-09-20, review-w0 HIGH): the engine's staff doors (requireModerator: clubs/claims/list|decide,
+ *   venues/staff-update) had NOBODY behind them — 0 moderator roles on live and sandbox, only the root account passed.
+ *   The people who run GripBat are the host's admins, and the host says so in the JWT (`role`, `tenant`). Each sign-in
+ *   now syncs ONE engine role, "GripBat staff" (manual, not public, fixed id STAFF_ROLE_ID): an hkpl SUPER_ADMIN, or a
+ *   TENANT_ADMIN of a GripBat tenant (ADAPTER_SSO_STAFF_TENANTS; default "boyau" — the UAT container sets "boyau-uat"
+ *   for itself; a production engine must never list the UAT tenant), holds it; a sign-in through a GripBat tenant with
+ *   any other role drops it (demotion follows the host). A sign-in through another tenant (the league) says nothing
+ *   and changes nothing.
+ *   Batch-1 review fix: the role is PLAIN — isModerator false, no Misskey moderator or admin power (no DM read, no
+ *   instance-wide note delete, no channel edit). It opens only the doors that check it by id (modules/staff.ts):
+ *   clubs/claims/list|decide and venues/staff-update.
  */
 import { createPublicKey, createVerify, randomBytes, createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { UsersRepository, AccessTokensRepository } from '@/models/_.js';
+import type { UsersRepository, AccessTokensRepository, RolesRepository, RoleAssignmentsRepository, MiRole } from '@/models/_.js';
+import { RoleService } from '@/core/RoleService.js';
+import { GlobalEventService } from '@/core/GlobalEventService.js';
+import { isDuplicateKeyValueError } from '@/misc/is-duplicate-key-value-error.js';
+import { STAFF_ROLE_ID } from '@/modules/staff.js';
 import { SignupService } from '@/core/SignupService.js';
 import { IdService } from '@/core/IdService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
@@ -60,6 +76,7 @@ export const meta = {
 			created: { type: 'boolean', optional: false, nullable: false },
 			lang: { type: 'string', optional: false, nullable: true },
 			ratingSynced: { type: 'boolean', optional: false, nullable: false },
+			staff: { type: 'boolean', optional: false, nullable: true }, // STAFF-ROLE-V1: true/false when this sign-in decided it, null when it said nothing
 		},
 	},
 } as const;
@@ -77,6 +94,9 @@ const ISSUERS: Record<string, string> = {
 	hkpl: process.env.ADAPTER_SSO_PUBKEY_HKPL ?? '/misskey/.config/hkpl-sso-rs256.pub',
 };
 const AUDIENCE = process.env.ADAPTER_SSO_AUDIENCE ?? 'social.silkvo.com';
+// STAFF-ROLE-V1: the one engine role the host's admins hold (fixed id so every worker converges on one row). Default
+// tenant list is production's ("boyau") only; the UAT container sets ADAPTER_SSO_STAFF_TENANTS=boyau-uat.
+const STAFF_TENANTS = (process.env.ADAPTER_SSO_STAFF_TENANTS ?? 'boyau').split(',').map(x => x.trim()).filter(Boolean);
 const MAX_TTL_SEC = 300;
 
 // First-party USER scope for the SSO credential. Every non-admin permission in misskey-js consts plus the
@@ -139,6 +159,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.accessTokensRepository)
 		private accessTokensRepository: AccessTokensRepository,
 
+		@Inject(DI.rolesRepository)
+		private rolesRepository: RolesRepository,
+
+		@Inject(DI.roleAssignmentsRepository)
+		private roleAssignmentsRepository: RoleAssignmentsRepository,
+
+		private roleService: RoleService,
+		private globalEventService: GlobalEventService,
+
 		private signupService: SignupService,
 		private idService: IdService,
 		private meetLevelService: MeetLevelService,
@@ -176,8 +205,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					await this.usersRepository.update(existing.id, { name: displayName });
 				}
 				const ratingSynced = await this.syncLevel(existing.id, claims);
+				const staff = await this.syncStaffRole(existing.id, claims);
 				const token = await this.issueCredential(existing.id, claims);
-				return { token, userId: existing.id, username: existing.username, created: false, lang, ratingSynced };
+				return { token, userId: existing.id, username: existing.username, created: false, lang, ratingSynced, staff };
 			}
 
 			// first sign-in from this host: create the account with a password nobody knows (host-only entry).
@@ -192,8 +222,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// in i/update. Existing accounts were moved to 'everyone' by SQL on 2026-09-17.
 			await this.usersRepository.update(account.id, { chatScope: 'everyone', ...(displayName ? { name: displayName } : {}) });
 			const ratingSynced = await this.syncLevel(account.id, claims);
+			const staff = await this.syncStaffRole(account.id, claims);
 			const token = await this.issueCredential(account.id, claims);
-			return { token, userId: account.id, username: account.username, created: true, lang, ratingSynced };
+			return { token, userId: account.id, username: account.username, created: true, lang, ratingSynced, staff };
 		});
 
 		this.logger = this.loggerService.getLogger('adapter:sso');
@@ -216,6 +247,49 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			permission: SSO_PERMISSIONS,
 		});
 		return accessToken;
+	}
+
+	// STAFF-ROLE-V1 — see the header. Returns true / false when this sign-in decided staff, null when it said nothing (or the
+	// sync failed: logged; sign-in proceeds and the previous assignment stands).
+	private async syncStaffRole(userId: string, claims: Claims): Promise<boolean | null> {
+		const superAdmin = claims.role === 'SUPER_ADMIN';
+		if (!superAdmin && !(claims.tenant && STAFF_TENANTS.includes(claims.tenant))) return null;
+		const staff = superAdmin || claims.role === 'TENANT_ADMIN';
+		try {
+			await this.ensureStaffRole();
+			const has = await this.roleAssignmentsRepository.existsBy({ roleId: STAFF_ROLE_ID, userId });
+			if (staff && !has) await this.roleService.assign(userId, STAFF_ROLE_ID);
+			if (!staff && has) await this.roleService.unassign(userId, STAFF_ROLE_ID);
+			return staff;
+		} catch (e) {
+			this.logger.warn(`staff role sync failed for user ${userId} from ${claims.iss}: ${e instanceof Error ? e.message : String(e)}`);
+			return null;
+		}
+	}
+
+	private async ensureStaffRole(): Promise<void> {
+		const existing = await this.rolesRepository.findOneBy({ id: STAFF_ROLE_ID });
+		if (existing) {
+			// batch-1 review fix: a row made by an earlier build as a moderator role is demoted to a plain role
+			if (existing.isModerator || existing.isAdministrator) {
+				await this.rolesRepository.update(STAFF_ROLE_ID, { isModerator: false, isAdministrator: false, updatedAt: new Date() });
+				this.globalEventService.publishInternalEvent('roleUpdated', await this.rolesRepository.findOneByOrFail({ id: STAFF_ROLE_ID }));
+			}
+			return;
+		}
+		const now = new Date();
+		try {
+			const created = await this.rolesRepository.insertOne({
+				id: STAFF_ROLE_ID, updatedAt: now, lastUsedAt: now, name: 'GripBat staff',
+				description: 'The host\'s admins (hkpl SUPER_ADMIN, or TENANT_ADMIN of a GripBat tenant), synced at every SSO sign-in (STAFF-ROLE-V1). A plain role: it opens only the club-claim queue and venue verification (modules/staff.ts), no moderator power.',
+				color: null, iconUrl: null, target: 'manual', condFormula: {} as MiRole['condFormula'], isPublic: false, asBadge: false,
+				isModerator: false, isAdministrator: false, isExplorable: false, preserveAssignmentOnMoveAccount: false, canEditMembersByModerator: false,
+				displayOrder: 0, policies: {},
+			});
+			this.globalEventService.publishInternalEvent('roleCreated', created);
+		} catch (e) {
+			if (!isDuplicateKeyValueError(e)) throw e; // another worker created it first
+		}
 	}
 
 	// Host-provided rating feeds the meet gates (DUPR doubles is the value hkpl carries; singles unknown).

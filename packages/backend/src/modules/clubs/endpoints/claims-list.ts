@@ -9,18 +9,20 @@ import { ClubService } from '@/modules/clubs/ClubService.js';
 import { clubErrors, toApiError } from './_shared.js';
 
 // CLUB-ADMIN-V1 — see modules/clubs/ClubService.ts
+// STAFF-ROLE-V1: holders of the GripBat staff role only (ClubService checks it; NOT_GRIPBAT_STAFF 403) — not Misskey moderators.
+// CLUB-CLAIM-VERIFY-V1: staff queue of pending ownership claims.
 export const meta = {
 	tags: ['clubs'],
 	requireCredential: true,
-	kind: 'write:channels',
-	res: { type: 'object', optional: false, nullable: false },
+	kind: 'read:channels',
+	res: { type: 'array', optional: false, nullable: false, items: { type: 'object', optional: false, nullable: false } },
 	errors: clubErrors,
 } as const;
 
 export const paramDef = {
 	type: 'object',
-	properties: { channelId: { type: 'string', format: 'misskey:id' } },
-	required: ['channelId'],
+	properties: { limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 } },
+	required: [],
 } as const;
 
 @Injectable()
@@ -28,9 +30,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(private clubService: ClubService) {
 		super(meta, paramDef, async (ps, me) => {
 			try {
-				const c = await this.clubService.channel(ps.channelId);
-			// CLUB-CLAIM-VERIFY-V1: a request staff verify, not an instant takeover
-			return { ok: true, ...(await this.clubService.claim(c, me)) };
+				return await this.clubService.claimsList(me, ps.limit);
 			} catch (e) {
 				return toApiError(e);
 			}
