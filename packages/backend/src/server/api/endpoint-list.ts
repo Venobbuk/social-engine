@@ -218,6 +218,7 @@ export * as 'clubs/invitations/list' from '@/modules/clubs/endpoints/invitations
 export * as 'clubs/invitations/cancel' from '@/modules/clubs/endpoints/invitations-cancel.js'; // CLUB-INVITE-V1
 export * as 'clubs/invitations/for-user' from '@/modules/clubs/endpoints/invitations-for-user.js'; // CLUB-INVITE-V1
 export * as 'clubs/posts/announce' from '@/modules/clubs/endpoints/posts-announce.js'; // CLUB-V3
+export * as 'clubs/posts/edit' from '@/modules/clubs/endpoints/posts-edit.js'; // CLUB-POST-EDIT-V1
 export * as 'clubs/admins/chat' from '@/modules/clubs/endpoints/admins-chat.js'; // CLUB-V3
 export * as 'clubs/schedules/list' from '@/modules/clubs/endpoints/schedules-list.js'; // CLUB-V3
 export * as 'clubs/schedules/show' from '@/modules/clubs/endpoints/schedules-show.js'; // CLUB-V3
