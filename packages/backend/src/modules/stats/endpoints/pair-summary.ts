@@ -39,7 +39,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const s = await pairSummary(this.db, ps.a, ps.b, ps.sport, ps.limit);
+			const s = await pairSummary(this.db, ps.a, ps.b, ps.sport, ps.limit, me?.id ?? null);   // private meets stay private
 			const ids = [...new Set([ps.a, ps.b, ...s.opponents.flatMap((o) => o.opponentIds)])];
 			const users = new Map<string, unknown>();
 			for (const u of await this.userEntityService.packMany(ids, me, { schema: 'UserLite' })) users.set(u.id, u);

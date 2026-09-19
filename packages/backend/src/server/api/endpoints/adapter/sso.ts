@@ -327,12 +327,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	// Host-provided rating feeds the meet gates (DUPR doubles is the value hkpl carries; singles unknown).
 	// S7 — returns whether the sync succeeded; a failure is logged, not swallowed. Login still proceeds.
 	private async syncLevel(userId: string, claims: Claims): Promise<boolean> {
-		// DUPR-UNLINK-SYNC-V1 (W2-S 2026-09-20): the host says this player has no DUPR link any more (hkpl's disconnect =
-		// PATCH /me/profile {dupr_id: null}) - forget the DUPR id THIS host gave us, so GripBat stops calling them connected.
-		// Only a row the same host wrote (source = iss) that still holds an id is touched; the rating stays, as it does on hkpl.
-		if (Object.prototype.hasOwnProperty.call(claims, 'dupr_id') && claims.dupr_id == null) {
-			await this.meetLevelService.clearHostDuprId(userId, 'pickleball', claims.iss).catch((e: unknown) => this.logger.warn(`dupr unlink sync failed for user ${userId}: ${e instanceof Error ? e.message : String(e)}`));
-		}
 		if (claims.dupr_rating == null && claims.dupr_id == null) return true; // nothing to sync is not a failure
 		try {
 			await this.meetLevelService.upsertLevel(userId, 'pickleball', {

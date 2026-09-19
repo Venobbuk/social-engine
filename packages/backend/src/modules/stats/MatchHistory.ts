@@ -15,6 +15,9 @@ import { winnerOf } from './_shared.js';
 // (ORDER BY … LIMIT … OFFSET) and only the page's rows are read back and enriched; nothing loads a whole history.
 // PRIVACY: a viewer who is not the player sees only matches of PUBLIC meets / competitions, or of ones the viewer
 // hosted or played in (the same rule meets/show applies to a private meet's roster).
+// ONE rule, applied by EVERY function here: historyPage / activitiesPage / matchSummary (meetVisible / compVisible)
+// and pairSummary / rankingsPage (logVisible). A new aggregate in this file without it publishes private meets to
+// anonymous callers - review-batch2 #6.
 
 export type Source = 'meet' | 'competition' | 'openplay';
 export type PlayerRef = { userId: string | null; name: string | null };
@@ -25,6 +28,19 @@ export interface HistoryRow {
 	games: [number, number][];   // from the player's side: [theirs-side-of-player, opponents]
 	won: boolean | null; forfeit: boolean; ratingDelta: number | null;
 }
+
+// VISIBILITY (one rule, reused): viewer $V may see a meet when it is public, they host it, or they are on its roster;
+// a competition when it is public, they host it, or they are in any of its entries. '' = anonymous.
+const meetVisible = (m: string, v: string) => `(${m}.visibility = 'public' OR ${m}."hostId" = ${v} OR EXISTS (SELECT 1 FROM meet_participant vp WHERE vp."meetId" = ${m}.id AND vp."userId" = ${v}))`;
+const compVisible = (c: string, v: string) => `(${c}.visibility = 'public' OR ${c}."hostId" = ${v} OR EXISTS (SELECT 1 FROM competition_entry ve WHERE ve."competitionId" = ${c}.id AND ${v} = ANY(ve."userIds")))`;
+/** A gb_rating_log row `l` the viewer may see (open play is public open play on hkpl) - and that still COUNTS.
+ *  The EXISTS requires the match row to be there and the meet / competition not to be cancelled: the same rule as
+ *  FRESH-EYES-V1's edgeOf() guard (modules/stats/GbRating.ts, master d7abe5128d, "a rating row cannot outlive the
+ *  match that justified it") and as historyPage / activitiesPage below (`status <> 'cancelled'`). The two compose:
+ *  a row counts only while the match that justified it is alive AND the viewer may see where it was played. */
+const logVisible = (l: string, v: string) => `(${l}.source = 'openplay'
+	OR (${l}.source = 'meet' AND EXISTS (SELECT 1 FROM meet_match vmm JOIN meet vm ON vm.id = vmm."meetId" WHERE vmm.id = ${l}."matchId" AND vm.status <> 'cancelled' AND ${meetVisible('vm', v)}))
+	OR (${l}.source = 'competition' AND EXISTS (SELECT 1 FROM competition_match vcm JOIN competition vc ON vc.id = vcm."competitionId" WHERE vcm.id = ${l}."matchId" AND vc.status <> 'cancelled' AND ${compVisible('vc', v)})))`;
 
 const MAX_OFFSET = 5000;
 const pageArgs = (limit: number, offset: number): [number, number] => [Math.max(1, Math.min(100, limit | 0)), Math.max(0, Math.min(MAX_OFFSET, offset | 0))];
@@ -44,27 +60,27 @@ WITH h AS (
 	SELECT 'meet'::text AS source, mm.id AS "matchId", m.id AS "contextId", m.name AS "contextName", m."venueName" AS "venueName",
 	       m."startAt" AS "playedAt", mm.round, mm."courtIndex", (CASE WHEN p.id = ANY(mm."team1Ids") THEN 1 ELSE 2 END)::int AS side,
 	       mm.scores AS games, mm."forfeitTeam" AS "forfeitTeam", mm."team1Ids" AS t1, mm."team2Ids" AS t2,
-	       NULL::varchar[] AS u1, NULL::varchar[] AS u2, NULL::varchar AS "logPartner", NULL::varchar[] AS "logOpp", NULL::text AS result
+	       NULL::varchar[] AS u1, NULL::varchar[] AS u2, NULL::varchar AS "logPartner", NULL::varchar[] AS "logOpp", NULL::text AS result, NULL::text AS f1, NULL::text AS f2
 	FROM meet_participant p
 	JOIN meet_match mm ON mm."meetId" = p."meetId" AND (p.id = ANY(mm."team1Ids") OR p.id = ANY(mm."team2Ids"))
 	JOIN meet m ON m.id = mm."meetId"
 	WHERE p."userId" = $1 AND m.sport = $2 AND m.status <> 'cancelled' AND jsonb_array_length(mm.scores) > 0
-	  AND ($3 = $1 OR m.visibility = 'public' OR m."hostId" = $3 OR EXISTS (SELECT 1 FROM meet_participant vp WHERE vp."meetId" = m.id AND vp."userId" = $3))
+	  AND ($3 = $1 OR ${meetVisible('m', '$3')})
 	  AND ($6::varchar IS NULL OR m.id = $6)
 	UNION ALL
 	SELECT 'competition', cm.id, c.id, c.name, c."venueName", COALESCE(cm."startAt", cm."updatedAt"), cm.round, cm."courtIndex",
 	       (CASE WHEN cm."entry1Id" = e.id THEN 1 ELSE 2 END)::int, cm.scores, NULL::int, NULL::varchar[], NULL::varchar[],
-	       e1."userIds", e2."userIds", NULL::varchar, NULL::varchar[], cm.result::text
+	       e1."userIds", e2."userIds", NULL::varchar, NULL::varchar[], cm.result::text, cm."entry1Status"::text, cm."entry2Status"::text
 	FROM competition_entry e
 	JOIN competition_match cm ON cm."competitionId" = e."competitionId" AND (cm."entry1Id" = e.id OR cm."entry2Id" = e.id)
 	JOIN competition c ON c.id = cm."competitionId"
 	LEFT JOIN competition_entry e1 ON e1.id = cm."entry1Id" LEFT JOIN competition_entry e2 ON e2.id = cm."entry2Id"
 	WHERE $1 = ANY(e."userIds") AND c.sport = $2 AND cm.status = 'completed' AND jsonb_array_length(cm.scores) > 0
-	  AND ($3 = $1 OR c.visibility = 'public' OR c."hostId" = $3)
+	  AND ($3 = $1 OR ${compVisible('c', '$3')})
 	  AND ($6::varchar IS NULL OR c.id = $6)
 	UNION ALL
 	SELECT 'openplay', l."matchId", NULL, NULL, NULL, l."playedAt", NULL, NULL, 1, l.games, NULL, NULL, NULL, NULL, NULL,
-	       l."partnerId", l."opponentIds", NULL
+	       l."partnerId", l."opponentIds", NULL, NULL, NULL
 	FROM gb_rating_log l WHERE l.source = 'openplay' AND l."userId" = $1 AND l.sport = $2 AND NOT l.skipped AND $6::varchar IS NULL
 )
 SELECT h.* FROM h
@@ -73,7 +89,7 @@ WHERE ($7::varchar IS NULL AND $8::varchar[] IS NULL) OR EXISTS (
 	  AND ($7::varchar IS NULL OR f."partnerId" = $7) AND ($8::varchar[] IS NULL OR f."opponentIds" @> $8))
 ORDER BY h."playedAt" DESC, h."matchId" DESC LIMIT $4 OFFSET $5`;
 
-type RawHist = { source: Source; matchId: string; contextId: string | null; contextName: string | null; venueName: string | null; playedAt: Date; round: number | null; courtIndex: number | null; side: number; games: unknown; forfeitTeam: number | null; t1: string[] | null; t2: string[] | null; u1: string[] | null; u2: string[] | null; logPartner: string | null; logOpp: string[] | null; result: string | null };
+type RawHist = { source: Source; matchId: string; contextId: string | null; contextName: string | null; venueName: string | null; playedAt: Date; round: number | null; courtIndex: number | null; side: number; games: unknown; forfeitTeam: number | null; t1: string[] | null; t2: string[] | null; u1: string[] | null; u2: string[] | null; logPartner: string | null; logOpp: string[] | null; result: string | null; f1: string | null; f2: string | null };
 
 /** One page of a player's scored matches. Filters: one meet / competition, a partner, an opponent line-up. */
 export async function historyPage(db: DataSource, o: { userId: string; viewerId: string | null; sport: string; limit: number; offset: number; contextId?: string | null; partnerId?: string | null; opponentIds?: string[] | null }): Promise<HistoryRow[]> {
@@ -105,8 +121,12 @@ export async function historyPage(db: DataSource, o: { userId: string; viewerId:
 			[mine, theirs] = side === 1 ? [t1, t2] : [t2, t1];
 			const g = compGames(r.games);
 			games = side === 1 ? g : g.map(([a, b]) => [b, a] as [number, number]);
+			// the same rule as matchSummary: a result wins, else a one-sided forfeit, else the games
+			const ff1 = r.f1 === 'forfeit', ff2 = r.f2 === 'forfeit';
 			if (r.result === 'entry1' || r.result === 'entry2') won = (r.result === 'entry1') === (side === 1);
+			else if (ff1 !== ff2) won = (ff1 ? 2 : 1) === side;
 			else { const w = winnerOf(g); won = w == null ? null : w === side; }
+			forfeit = ff1 || ff2;
 		} else {
 			mine = r.logPartner ? [ref(r.logPartner)] : [];
 			theirs = (r.logOpp ?? []).map(ref);
@@ -146,10 +166,9 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 	if (source === 'meet') {
 		const r = (await db.query(
 			`SELECT mm.id, mm.round, mm."courtIndex", mm."team1Ids", mm."team2Ids", mm.scores, mm."forfeitTeam", mm."duprStatus", mm."duprSubmittedById", mm."duprSubmittedAt", mm."duprRef", mm."duprError",
-			        m.id AS "meetId", m.name, m."startAt", m."venueName", m.visibility
+			        m.id AS "meetId", m.name, m."startAt", m."venueName", m.visibility, m."hostId"
 			 FROM meet_match mm JOIN meet m ON m.id = mm."meetId"
-			 WHERE mm.id = $1 AND m.status <> 'cancelled'
-			   AND (m.visibility = 'public' OR m."hostId" = $2 OR EXISTS (SELECT 1 FROM meet_participant vp WHERE vp."meetId" = m.id AND vp."userId" = $2))`, [matchId, viewer]))[0];
+			 WHERE mm.id = $1 AND m.status <> 'cancelled' AND ${meetVisible('m', '$2')}`, [matchId, viewer]))[0];
 		if (!r) return null;
 		const ids = [...(r.team1Ids ?? []), ...(r.team2Ids ?? [])];
 		const pmap = new Map<string, PlayerRef>();
@@ -163,7 +182,7 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 			source, matchId, context: { kind: 'meet', id: r.meetId, name: r.name, startAt: new Date(r.startAt).toISOString(), venueName: r.venueName, visibility: r.visibility },
 			playedAt: new Date(r.startAt).toISOString(), round: r.round, courtIndex: r.courtIndex, stage: null, pool: null,
 			teams: [team(1, r.team1Ids), team(2, r.team2Ids)], games,
-			dupr: { status: r.duprStatus ?? null, submittedById: r.duprSubmittedById ?? null, submittedAt: r.duprSubmittedAt ? new Date(r.duprSubmittedAt).toISOString() : null, ref: r.duprRef ?? null, error: r.duprError ?? null },
+			dupr: { status: r.duprStatus ?? null, submittedById: r.duprSubmittedById ?? null, submittedAt: r.duprSubmittedAt ? new Date(r.duprSubmittedAt).toISOString() : null, ref: r.duprRef ?? null, error: viewer && viewer === r.hostId ? r.duprError ?? null : null },   // the error text is for the host
 		};
 	}
 	if (source === 'competition') {
@@ -172,7 +191,7 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 			        c.id AS "compId", c.name, c."startAt", c."venueName", c.visibility, e1."userIds" AS u1, e2."userIds" AS u2, e1.name AS n1, e2.name AS n2
 			 FROM competition_match cm JOIN competition c ON c.id = cm."competitionId"
 			 LEFT JOIN competition_entry e1 ON e1.id = cm."entry1Id" LEFT JOIN competition_entry e2 ON e2.id = cm."entry2Id"
-			 WHERE cm.id = $1 AND (c.visibility = 'public' OR c."hostId" = $2 OR $2 = ANY(COALESCE(e1."userIds", '{}')) OR $2 = ANY(COALESCE(e2."userIds", '{}')))`, [matchId, viewer]))[0];
+			 WHERE cm.id = $1 AND ${compVisible('c', '$2')}`, [matchId, viewer]))[0];
 		if (!r) return null;
 		await loadLogs();
 		const games = compGames(r.scores);
@@ -211,7 +230,7 @@ export async function activitiesPage(db: DataSource, o: { userId: string; viewer
 			SELECT 'meet'::text AS kind, m.id, m.name, m."startAt", m."venueName", (m."hostId" = $1 OR COALESCE(bool_or(p."isHost"), false)) AS hosted, m.confirmed::int AS players
 			FROM meet m LEFT JOIN meet_participant p ON p."meetId" = m.id AND p."userId" = $1 AND p.status = 'confirmed'
 			WHERE m.sport = $2 AND m.status <> 'cancelled' AND m."startAt" < now() AND (p.id IS NOT NULL OR m."hostId" = $1)
-			  AND ($3 = $1 OR m.visibility = 'public' OR m."hostId" = $3 OR EXISTS (SELECT 1 FROM meet_participant vp WHERE vp."meetId" = m.id AND vp."userId" = $3))
+			  AND ($3 = $1 OR ${meetVisible('m', '$3')})
 			GROUP BY m.id
 			UNION ALL
 			SELECT 'competition', c.id, c.name, c."startAt", c."venueName", c."hostId" = $1,
@@ -219,27 +238,48 @@ export async function activitiesPage(db: DataSource, o: { userId: string; viewer
 			FROM competition c
 			WHERE c.sport = $2 AND c.status <> 'cancelled' AND c."startAt" < now()
 			  AND (c."hostId" = $1 OR EXISTS (SELECT 1 FROM competition_entry ce WHERE ce."competitionId" = c.id AND $1 = ANY(ce."userIds")))
-			  AND ($3 = $1 OR c.visibility = 'public' OR c."hostId" = $3)
+			  AND ($3 = $1 OR ${compVisible('c', '$3')})
 		)
 		SELECT * FROM a WHERE ($4 = 'all' OR kind = $4) ORDER BY "startAt" DESC, id DESC LIMIT $5 OFFSET $6`,
 		[o.userId, o.sport, o.viewerId ?? '', o.kind, limit, offset]) as { kind: 'meet' | 'competition'; id: string; name: string; startAt: Date; venueName: string | null; hosted: boolean; players: number }[];
 	if (!rows.length) return [];
-	// the player's record in each activity of THIS page (bounded by the page's activities)
+	// the player's record in each activity of THIS page — one GROUP BY in SQL over the page's ids (same winner rules as
+	// historyPage: meet forfeit → the other side; competition result → one-sided forfeit → games)
 	const rec = new Map<string, { matches: number; wins: number; losses: number }>();
-	for (const a of rows) {
-		const h = await historyPage(db, { userId: o.userId, viewerId: o.viewerId, sport: o.sport, limit: 100, offset: 0, contextId: a.id });
-		rec.set(a.id, { matches: h.length, wins: h.filter((x) => x.won === true).length, losses: h.filter((x) => x.won === false).length });
-	}
+	const gw = (arr: string, a: string, b: string, extra = '') => `(SELECT CASE WHEN sum(CASE WHEN ${a} > ${b} THEN 1 ELSE 0 END) > sum(CASE WHEN ${b} > ${a} THEN 1 ELSE 0 END) THEN 1 WHEN sum(CASE WHEN ${a} > ${b} THEN 1 ELSE 0 END) < sum(CASE WHEN ${b} > ${a} THEN 1 ELSE 0 END) THEN 2 ELSE 0 END FROM jsonb_array_elements(${arr}) g ${extra})`;
+	for (const x of await db.query(
+		`WITH x AS (
+			SELECT mm."meetId" AS ctx, (CASE WHEN p.id = ANY(mm."team1Ids") THEN 1 ELSE 2 END) AS side,
+			       (CASE WHEN mm."forfeitTeam" IN (1, 2) THEN 3 - mm."forfeitTeam" ELSE ${gw('mm.scores', '(g->>0)::int', '(g->>1)::int')} END) AS w
+			FROM meet_participant p JOIN meet_match mm ON mm."meetId" = p."meetId" AND (p.id = ANY(mm."team1Ids") OR p.id = ANY(mm."team2Ids"))
+			WHERE p."userId" = $1 AND p."meetId" = ANY($2) AND jsonb_array_length(mm.scores) > 0
+			UNION ALL
+			SELECT cm."competitionId", (CASE WHEN cm."entry1Id" = e.id THEN 1 ELSE 2 END),
+			       (CASE WHEN cm.result = 'entry1' THEN 1 WHEN cm.result = 'entry2' THEN 2
+			             WHEN cm."entry1Status" = 'forfeit' AND cm."entry2Status" <> 'forfeit' THEN 2 WHEN cm."entry2Status" = 'forfeit' AND cm."entry1Status" <> 'forfeit' THEN 1
+			             ELSE ${gw('cm.scores', "(g->>'t1')::int", "(g->>'t2')::int", "WHERE COALESCE(g->>'type', '') <> 'extra'")} END)
+			FROM competition_entry e JOIN competition_match cm ON cm."competitionId" = e."competitionId" AND (cm."entry1Id" = e.id OR cm."entry2Id" = e.id)
+			WHERE $1 = ANY(e."userIds") AND e."competitionId" = ANY($2) AND cm.status = 'completed' AND jsonb_array_length(cm.scores) > 0
+		)
+		SELECT ctx, count(*)::int AS n, sum(CASE WHEN w = side THEN 1 ELSE 0 END)::int AS w, sum(CASE WHEN w <> 0 AND w <> side THEN 1 ELSE 0 END)::int AS l FROM x GROUP BY ctx`,
+		[o.userId, rows.map((a) => a.id)]) as { ctx: string; n: number; w: number; l: number }[]) rec.set(x.ctx, { matches: Number(x.n), wins: Number(x.w), losses: Number(x.l) });
 	return rows.map((a) => ({ kind: a.kind, id: a.id, name: a.name, startAt: new Date(a.startAt).toISOString(), venueName: a.venueName, hosted: !!a.hosted, players: Number(a.players) || 0, ...(rec.get(a.id) ?? { matches: 0, wins: 0, losses: 0 }) }));
 }
 
 // ---- rankings (Reclub Statistics › Rankings, on the GripBat rating) ------------------------------------------------
+// The GripBat rating is ONE number across singles and doubles (GB-RATING-V1 has one stream per sport); the type decides
+// who is listed (a rated match of that type) and which wins / matches / opponents are counted. The app says so.
 export interface RankRow { rank: number; userId: string; rating: number; matches: number; wins: number; opponents: number; provisional: boolean }
 
+// $1 sport, $2 doubles?, $3 gender or NULL, $4 viewer ('' = anonymous). review-batch2 #6: the counts are the
+// VIEWER's view of a player's record - exactly as stats/pair-summary reads it - so a match played in a PRIVATE meet
+// is counted only for someone who may see that meet, and a player whose only rated matches of this type are private
+// is not in that viewer's table at all.
 const RANK_CTE = `
 WITH base AS (
 	SELECT l."userId", l.won, l."opponentIds" FROM gb_rating_log l
 	WHERE l.sport = $1 AND NOT l.skipped AND (l."partnerId" IS NOT NULL) = $2
+	  AND ${logVisible('l', '$4')}
 ),
 agg AS (SELECT "userId", count(*)::int AS matches, sum(CASE WHEN won THEN 1 ELSE 0 END)::int AS wins FROM base GROUP BY "userId"),
 opp AS (SELECT b."userId", count(DISTINCT o)::int AS opponents FROM base b CROSS JOIN LATERAL unnest(b."opponentIds") o GROUP BY b."userId"),
@@ -255,28 +295,28 @@ ranked AS (
 /** One page of the GripBat ranking table for singles or doubles + the viewer's own row. Aggregated in SQL. */
 export async function rankingsPage(db: DataSource, o: { sport: string; type: 'singles' | 'doubles'; gender: string | null; limit: number; offset: number; viewerId: string | null }): Promise<{ total: number; mine: RankRow | null; rows: RankRow[] }> {
 	const [limit, offset] = pageArgs(o.limit, o.offset);
-	const args = [o.sport, o.type === 'doubles', o.gender];
+	const args = [o.sport, o.type === 'doubles', o.gender, o.viewerId ?? ''];
 	const pack = (x: any): RankRow => ({ rank: Number(x.rank), userId: x.userId, rating: Math.round(Number(x.rating) * 1000) / 1000, matches: Number(x.matches), wins: Number(x.wins), opponents: Number(x.opponents), provisional: Number(x.total) < 10 });
-	const rows = (await db.query(RANK_CTE + ' SELECT * FROM ranked ORDER BY rank, "userId" LIMIT $4 OFFSET $5', [...args, limit, offset]) as any[]).map(pack);
+	const rows = (await db.query(RANK_CTE + ' SELECT * FROM ranked ORDER BY rank, "userId" LIMIT $5 OFFSET $6', [...args, limit, offset]) as any[]).map(pack);
 	const total = Number(((await db.query(RANK_CTE + ' SELECT count(*)::int AS n FROM ranked', args)) as any[])[0]?.n ?? 0);
-	const mine = o.viewerId ? ((await db.query(RANK_CTE + ' SELECT * FROM ranked WHERE "userId" = $4', [...args, o.viewerId])) as any[]).map(pack)[0] ?? null : null;
+	const mine = o.viewerId ? ((await db.query(RANK_CTE + ' SELECT * FROM ranked WHERE "userId" = $5', [...args, o.viewerId])) as any[]).map(pack)[0] ?? null : null;
 	return { total, mine, rows };
 }
 
 // ---- pair record + the opponents it has faced (Reclub Stats team summary) ----------------------------------------
 export interface PairOpp { opponentIds: string[]; matches: number; wins: number; pointsFor: number; pointsAgainst: number; lastAt: string }
 
-export async function pairSummary(db: DataSource, a: string, b: string, sport: string, limit: number): Promise<{ matches: number; wins: number; pointsFor: number; pointsAgainst: number; opponents: PairOpp[] }> {
+export async function pairSummary(db: DataSource, a: string, b: string, sport: string, limit: number, viewerId: string | null): Promise<{ matches: number; wins: number; pointsFor: number; pointsAgainst: number; opponents: PairOpp[] }> {
 	const [lim] = pageArgs(limit, 0);
 	const pts = `(SELECT COALESCE(sum((g->>0)::int), 0) FROM jsonb_array_elements(l.games) g)`, ptsA = `(SELECT COALESCE(sum((g->>1)::int), 0) FROM jsonb_array_elements(l.games) g)`;
 	const tot = (await db.query(
 		`SELECT count(*)::int AS n, COALESCE(sum(CASE WHEN won THEN 1 ELSE 0 END), 0)::int AS w, COALESCE(sum(${pts}), 0)::int AS pf, COALESCE(sum(${ptsA}), 0)::int AS pa
-		 FROM gb_rating_log l WHERE l."userId" = $1 AND l."partnerId" = $2 AND l.sport = $3 AND NOT l.skipped`, [a, b, sport]))[0] ?? {};
+		 FROM gb_rating_log l WHERE l."userId" = $1 AND l."partnerId" = $2 AND l.sport = $3 AND NOT l.skipped AND ${logVisible('l', '$4')}`, [a, b, sport, viewerId ?? '']))[0] ?? {};
 	const opp = await db.query(
 		`SELECT (SELECT array_agg(x ORDER BY x) FROM unnest(l."opponentIds") x) AS opp, count(*)::int AS n, sum(CASE WHEN won THEN 1 ELSE 0 END)::int AS w,
 		        sum(${pts})::int AS pf, sum(${ptsA})::int AS pa, max(l."playedAt") AS last
-		 FROM gb_rating_log l WHERE l."userId" = $1 AND l."partnerId" = $2 AND l.sport = $3 AND NOT l.skipped
-		 GROUP BY 1 ORDER BY n DESC, last DESC LIMIT $4`, [a, b, sport, lim]) as { opp: string[]; n: number; w: number; pf: number; pa: number; last: Date }[];
+		 FROM gb_rating_log l WHERE l."userId" = $1 AND l."partnerId" = $2 AND l.sport = $3 AND NOT l.skipped AND ${logVisible('l', '$5')}
+		 GROUP BY 1 ORDER BY n DESC, last DESC LIMIT $4`, [a, b, sport, lim, viewerId ?? '']) as { opp: string[]; n: number; w: number; pf: number; pa: number; last: Date }[];
 	return {
 		matches: Number(tot.n ?? 0), wins: Number(tot.w ?? 0), pointsFor: Number(tot.pf ?? 0), pointsAgainst: Number(tot.pa ?? 0),
 		opponents: opp.map((x) => ({ opponentIds: x.opp ?? [], matches: Number(x.n), wins: Number(x.w), pointsFor: Number(x.pf), pointsAgainst: Number(x.pa), lastAt: new Date(x.last).toISOString() })),

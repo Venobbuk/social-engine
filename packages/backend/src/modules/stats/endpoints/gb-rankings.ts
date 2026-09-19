@@ -40,6 +40,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// SEC-ANON-FIELDS-V1 (master 891697dc1f) - the SAME rule as stats/dupr-rankings and stats/street-cred:
+			// gender is a private profile field, so a gender FILTER on a door that answers without a credential is itself
+			// a gender oracle (ask twice, diff the rows). An anonymous caller's filter is ignored.
+			if (me == null) ps.gender = null;
 			const r = await rankingsPage(this.db, { sport: ps.sport, type: ps.type as 'doubles' | 'singles', gender: ps.gender ?? null, limit: ps.limit, offset: ps.offset, viewerId: me?.id ?? null });
 			const ids = [...new Set([...r.rows.map((x) => x.userId), ...(r.mine ? [r.mine.userId] : [])])];
 			const users = new Map<string, unknown>();

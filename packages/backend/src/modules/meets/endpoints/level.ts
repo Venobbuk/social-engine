@@ -46,6 +46,9 @@ export const paramDef = {
 		// GB-CONSENT-V1: the member accepts this version of the GripBat terms + privacy policy. The server stamps the time and
 		// APPENDS a row (history kept); accepting the version that is already the latest keeps its first stamp.
 		acceptTerms: { type: 'string', minLength: 1, maxLength: 32 },
+		// DUPR-UNLINK-V1 (W2-S): true = the player unlinked DUPR on the host (hkpl PATCH /me/profile {dupr_id: null}); forget the
+		// DUPR id here too so GripBat stops calling them connected. Only ever the caller's own row; the rating value stays (as on hkpl).
+		unlinkDupr: { type: 'boolean' },
 	},
 	required: [],
 } as const;
@@ -62,6 +65,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (ps.selfLevel !== undefined) patch.selfLevel = ps.selfLevel;
 			if (ps.gender !== undefined) patch.gender = ps.gender;
 			if (ps.ageGroup !== undefined) patch.ageGroup = ps.ageGroup;
+			if (ps.unlinkDupr === true) patch.duprId = null;
 			if (ps.onboarded === true) {
 				const current = await this.meetLevelService.getLevel(me.id, ps.sport);
 				if (current?.onboardedAt == null) patch.onboardedAt = new Date();
