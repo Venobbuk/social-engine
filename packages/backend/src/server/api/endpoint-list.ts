@@ -158,6 +158,9 @@ export * as 'meets/matches/log-casual' from '@/modules/meets/endpoints/matches/l
 export * as 'meets/reviews/upsert' from '@/modules/meets/endpoints/reviews/upsert.js';
 export * as 'meets/reviews/show' from '@/modules/meets/endpoints/reviews/show.js';
 export * as 'meets/reviews/leaderboard' from '@/modules/meets/endpoints/reviews/leaderboard.js';
+export * as 'meets/reviews/list' from '@/modules/meets/endpoints/reviews/list.js'; // REVIEWS-LIST-V1 (W2-F)
+export * as 'meets/reviews/delete' from '@/modules/meets/endpoints/reviews/delete.js'; // REVIEWS-LIST-V1 (W2-F)
+export * as 'meets/reviews/archive' from '@/modules/meets/endpoints/reviews/archive.js'; // REVIEWS-LIST-V1 (W2-F)
 // MEET-EXTRAS-V1
 export * as 'meets/promote' from '@/modules/meets/endpoints/promote.js';
 export * as 'meets/summary' from '@/modules/meets/endpoints/summary.js';
@@ -228,6 +231,7 @@ export * as 'clubs/meets/invite-members' from '@/modules/clubs/endpoints/meets-i
 export * as 'clubs/schedules/delete' from '@/modules/clubs/endpoints/schedules-delete.js'; // CLUB-V3
 export * as 'clubs/schedules/run' from '@/modules/clubs/endpoints/schedules-run.js'; // CLUB-V3
 export * as 'clubs/mine' from '@/modules/clubs/endpoints/mine.js'; // CLUB-V3
+export * as 'clubs/of-user' from '@/modules/clubs/endpoints/of-user.js'; // PLAYER-CLUBS-V1 (W2-F)
 export * as 'clubs/me/update' from '@/modules/clubs/endpoints/me-update.js'; // CLUB-V3
 export * as 'clubs/by-code' from '@/modules/clubs/endpoints/by-code.js'; // CLUB-V3
 export * as 'clubs/tags/list' from '@/modules/clubs/endpoints/tags-list.js'; // CLUB-V3
