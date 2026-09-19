@@ -196,6 +196,11 @@ export * as 'stats/gb-ratings' from '@/modules/stats/endpoints/gb-ratings.js'; /
 export * as 'stats/gb-rising' from '@/modules/stats/endpoints/gb-rising.js'; // GB-RATING-V1
 export * as 'stats/gb-pairs' from '@/modules/stats/endpoints/gb-pairs.js'; // GB-RATING-V1
 export * as 'stats/kudos-by-activity' from '@/modules/stats/endpoints/kudos-by-activity.js';
+export * as 'stats/matches' from '@/modules/stats/endpoints/matches.js'; // STATS-HISTORY-V1
+export * as 'stats/match-summary' from '@/modules/stats/endpoints/match-summary.js'; // STATS-HISTORY-V1
+export * as 'stats/activities' from '@/modules/stats/endpoints/activities.js'; // STATS-HISTORY-V1
+export * as 'stats/gb-rankings' from '@/modules/stats/endpoints/gb-rankings.js'; // STATS-HISTORY-V1
+export * as 'stats/pair-summary' from '@/modules/stats/endpoints/pair-summary.js'; // STATS-HISTORY-V1
 export * as 'adapter/venues/sync' from '@/modules/venues/endpoints/sync.js';
 export * as 'clubs/settings/show' from '@/modules/clubs/endpoints/settings-show.js';
 export * as 'clubs/settings/update' from '@/modules/clubs/endpoints/settings-update.js';

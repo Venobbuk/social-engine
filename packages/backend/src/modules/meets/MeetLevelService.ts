@@ -98,4 +98,10 @@ export class MeetLevelService {
 			updatedAt: new Date(),
 		});
 	}
+
+	// DUPR-UNLINK-SYNC-V1 (W2-S): the host unlinked this player's DUPR - drop the id that host gave us (row source = host).
+	public async clearHostDuprId(userId: MiUser['id'], sport: string, source: string): Promise<void> {
+		await this.meetPlayerLevelsRepository.createQueryBuilder().update().set({ duprId: null, updatedAt: new Date() })
+			.where('"userId" = :userId AND sport = :sport AND source = :source AND "duprId" IS NOT NULL', { userId, sport, source }).execute();
+	}
 }
