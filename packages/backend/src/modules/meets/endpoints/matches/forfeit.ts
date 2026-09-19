@@ -10,6 +10,7 @@ import type { MeetsRepository, MeetMatchesRepository } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { ApiError } from '@/server/api/error.js';
 import { scoringOf } from '@/modules/meets/MeetExtras.js';
 import { meetErrors, toApiError } from '../_shared.js';
@@ -50,6 +51,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private meetMatchesRepository: MeetMatchesRepository,
 		private meetService: MeetService,
 		private meetEntityService: MeetEntityService,
+		private meetMatchService: MeetMatchService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
@@ -58,6 +60,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const match = await this.meetMatchesRepository.findOneBy({ id: ps.matchId, meetId: meet.id });
 			if (match == null) throw new ApiError(meta.errors.noSuchMatch);
 			if (match.duprStatus === 'submitted') throw new ApiError(meta.errors.duprLocked);
+			// SEC-CASUAL-CONSENT-V1: a forfeit rewrites the score — refused once another player confirmed a casual game
+			try { await this.meetMatchService.assertCasualUnlocked(meet, match); } catch (e) { return toApiError(e); }
 			const rules = scoringOf(meet as unknown as Record<string, unknown>);
 			const scores: [number, number][] = ps.team === 1 ? [[0, rules.forfeitScore]] : ps.team === 2 ? [[rules.forfeitScore, 0]] : [];
 			await this.db.query(`UPDATE "meet_match" SET "forfeitTeam" = $2, "scores" = $3::jsonb, "updatedAt" = now() WHERE "id" = $1`, [match.id, ps.team === 0 ? null : ps.team, JSON.stringify(scores)]);

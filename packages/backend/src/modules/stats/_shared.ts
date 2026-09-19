@@ -40,6 +40,13 @@ export async function scoredMatchesOf(db: DataSource, userId: string, sport: str
 		 FROM meet_match mm JOIN meet m ON m.id = mm."meetId"
 		 WHERE m.status <> 'cancelled' AND m.sport = $2 AND jsonb_array_length(mm.scores) > 0
 		   AND EXISTS (SELECT 1 FROM meet_participant p WHERE p."userId" = $1 AND p."meetId" = mm."meetId" AND (p.id = ANY(mm."team1Ids") OR p.id = ANY(mm."team2Ids")))
+		   -- SEC-CASUAL-CONSENT-V1: a casual game shows in a player's stats / H2H only when every account player on the
+		   -- match is confirmed (a pending or declined player keeps it hidden until they confirm).
+		   AND (NOT ('casual' = ANY(m.flags)) OR (m."startAt" < now() AND NOT EXISTS (
+		         SELECT 1 FROM meet_participant pu
+		          WHERE pu."meetId" = mm."meetId"
+		            AND (pu.id = ANY(mm."team1Ids") OR pu.id = ANY(mm."team2Ids"))
+		            AND pu."userId" IS NOT NULL AND pu.status <> 'confirmed')))
 		 ORDER BY m."startAt" DESC LIMIT $3`, [userId, sport, limit]) as { id: string; meetId: string; round: number | null; courtIndex: number | null; team1Ids: string[]; team2Ids: string[]; scores: [number, number][]; meetName: string; startAt: Date }[];
 	return rows.map(r => ({ id: r.id, meetId: r.meetId, meetName: r.meetName, startAt: new Date(r.startAt), round: r.round, courtIndex: r.courtIndex, team1Ids: r.team1Ids ?? [], team2Ids: r.team2Ids ?? [], scores: r.scores ?? [], winnerTeam: winnerOf(r.scores ?? []) }));
 }

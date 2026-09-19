@@ -472,6 +472,23 @@ export class MeetService {
 		return await this.withMeetLock(meet.id, async (em, locked) => {
 			const row = (await em.query(`SELECT * FROM "meet_participant" WHERE "meetId" = $1 AND "userId" = $2`, [meet.id, user.id]) as Row[])[0];
 			if (!row) throw this.err('not_participant', 'You are not on this meet.');
+			// SEC-CASUAL-CONSENT-V1: a logged casual game is already played — its consent is its own path, not a seat
+			// claim (claimSeat requires startAt > now, and the game is dated in the past). The invitee's answer is final
+			// and idempotent: accept → confirmed (a repeat accept is a no-op), decline → declined (the game never counts).
+			if ((locked.flags ?? []).includes('casual')) {
+				if (answer === 'accept') {
+					if (row.status === 'confirmed') return row as MiMeetParticipant;
+					if (row.status !== 'invited') throw this.err('invalid_transition', `Cannot confirm a casual game from status ${row.status}.`);
+					await em.query(`UPDATE "meet" SET "confirmed" = LEAST("confirmed" + 1, "capacity"), "updatedAt" = now() WHERE "id" = $1`, [meet.id]);
+					return await this.setRowStatus(em, row, 'confirmed') as MiMeetParticipant;
+				}
+				if (answer === 'decline') {
+					if (row.status === 'declined') return row as MiMeetParticipant;
+					if (row.status !== 'invited') throw this.err('invalid_transition', `Cannot decline a casual game from status ${row.status}.`);
+					return await this.setRowStatus(em, row, 'declined') as MiMeetParticipant;
+				}
+				throw this.err('invalid_transition', 'A casual game can only be confirmed or declined.');
+			}
 			if (!['invited', 'maybe', 'requested', 'waitlisted', 'hold'].includes(row.status)) throw this.err('invalid_transition', `Cannot answer from status ${row.status}.`);
 			if (answer === 'decline') return await this.leaveConfirmed(em, locked, row, 'declined') as MiMeetParticipant;
 			if (answer === 'maybe') {
@@ -531,6 +548,11 @@ export class MeetService {
 		return await this.withMeetLock(meet.id, async (em, locked) => {
 			const row = await this.getRow(em, participantId);
 			if (!row || row.meetId !== meet.id) throw this.err('not_participant', 'No such participant on this meet.');
+			// SEC-CASUAL-CONSENT-V1: on a casual game only the player answers for themself — the host may remove or decline
+			// another player, never confirm / re-invite / waitlist / hold them (that would manufacture consent).
+			if ((locked.flags ?? []).includes('casual') && row.userId && row.userId !== meet.hostId && status !== 'remove' && status !== 'declined') {
+				throw this.err('invalid_transition', 'Only the player can confirm a casual game.');
+			}
 			if (status === 'remove') {
 				if (row.isHost) throw this.err('invalid_transition', 'Remove the host role first.');
 				const guests = row.userId ? await em.query(`SELECT * FROM "meet_participant" WHERE "meetId" = $1 AND "sponsorId" = $2`, [meet.id, row.userId]) as Row[] : [];
@@ -573,6 +595,10 @@ export class MeetService {
 	@bindThis
 	public async hostAdd(meet: MiMeet, data: { userId?: string | null; displayName?: string | null; declaredLevel?: number | null; extGender?: string | null; extAge?: string | null; status: 'confirmed' | 'invited' | 'waitlisted' | 'hold' }): Promise<MiMeetParticipant> {
 		return await this.withMeetLock(meet.id, async (em, locked) => {
+			// SEC-CASUAL-CONSENT-V1: another account can join a casual game only as PENDING ('invited'); never straight in
+			if ((locked.flags ?? []).includes('casual') && data.userId && data.userId !== meet.hostId && data.status !== 'invited') {
+				throw this.err('invalid_transition', 'Another player can only be invited to a casual game; they confirm it themselves.');
+			}
 			if (data.userId) {
 				const existing = (await em.query(`SELECT * FROM "meet_participant" WHERE "meetId" = $1 AND "userId" = $2`, [meet.id, data.userId]) as Row[])[0];
 				if (existing) throw this.err('already_participant', 'That person already has a status on this meet.');
@@ -631,6 +657,7 @@ export class MeetService {
 		for (const [meetId, ids] of byMeet) {
 			const meet = await this.meetsRepository.findOneBy({ id: meetId, status: 'active', startAt: MoreThan(now) });
 			if (!meet) continue;
+			if ((meet.flags ?? []).includes('casual')) continue; // SEC-CASUAL-CONSENT-V1: a casual invite is never auto-confirmed
 			await this.withMeetLock(meetId, async (em, locked) => {
 				for (const id of ids) {
 					const row = await this.getRow(em, id);

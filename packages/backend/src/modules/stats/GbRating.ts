@@ -30,6 +30,13 @@ async function pendingMatches(db: DataSource, limit: number): Promise<Raw[]> {
 		 FROM meet_match mm JOIN meet m ON m.id = mm."meetId"
 		 WHERE m.status <> 'cancelled' AND jsonb_array_length(mm.scores) > 0 AND m."startAt" < now()
 		   AND NOT EXISTS (SELECT 1 FROM gb_rating_log l WHERE l.source = 'meet' AND l."matchId" = mm.id)
+		   -- SEC-CASUAL-CONSENT-V1: a casual game counts only when every account player on the match is confirmed;
+		   -- a pending ('invited') or declined player keeps the game out of the rating until they confirm.
+		   AND (NOT ('casual' = ANY(m.flags)) OR NOT EXISTS (
+		         SELECT 1 FROM meet_participant pu
+		          WHERE pu."meetId" = mm."meetId"
+		            AND (pu.id = ANY(mm."team1Ids") OR pu.id = ANY(mm."team2Ids"))
+		            AND pu."userId" IS NOT NULL AND pu.status <> 'confirmed'))
 		 ORDER BY m."startAt" ASC LIMIT $1`, [limit]) as { id: string; playedAt: Date; sport: string; team1Ids: string[]; team2Ids: string[]; scores: [number, number][] }[];
 	const pids = [...new Set(meet.flatMap((r) => [...(r.team1Ids ?? []), ...(r.team2Ids ?? [])]))];
 	const pmap = new Map<string, string | null>();

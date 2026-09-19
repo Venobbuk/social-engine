@@ -6,6 +6,7 @@
 import { Injectable } from '@nestjs/common';
 import type Logger from '@/logger.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
+import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { bindThis } from '@/decorators.js';
 import { QueueLoggerService } from '@/queue/QueueLoggerService.js';
 import { Inject } from '@nestjs/common';
@@ -23,6 +24,7 @@ export class MeetSweepProcessorService {
 
 	constructor(
 		private meetService: MeetService,
+		private meetMatchService: MeetMatchService,
 		private queueLoggerService: QueueLoggerService,
 		@Inject(DI.db)
 		private db: DataSource,
@@ -40,6 +42,9 @@ export class MeetSweepProcessorService {
 		// GB-RATING-V1: rate newly scored GripBat matches (meets, casual, competitions) — idempotent, 200 a minute
 		await importOpenPlay(this.db, new URL(this.config.url).host).then((n) => { if (n) this.logger.info('open play imported: ' + n); }).catch((e) => this.logger.warn('open play import: ' + (e as Error).message));   // GB-OPENPLAY-V1
 		await processRatings(this.db, 200).then((r) => { if (r.rated || r.skipped) this.logger.info('gb ratings: ' + r.rated + ' rated, ' + r.skipped + ' skipped'); }).catch((e) => this.logger.warn('gb ratings: ' + (e as Error).message));
+		// SEC-CASUAL-CONSENT-V1: send the deferred DUPR submissions of casual games that are now fully confirmed (safety
+		// net; meets/respond submits at the moment of the last confirmation). Idempotent — only unsent matches are touched.
+		await this.meetMatchService.submitDeferredCasual().then((n) => { if (n) this.logger.info('casual dupr submitted after consent: ' + n); }).catch((e) => this.logger.warn('casual deferred dupr: ' + (e as Error).message));
 		const rem = await remindUpcoming(this.db, (userId, header, body, link) => this.notificationService.createNotification(userId, 'app', { customHeader: header, customBody: body, customIcon: null, appAccessTokenId: null, customLink: link }), new Date()).catch((e) => { this.logger.warn('meet reminders: ' + (e as Error).message); return null; });
 		if (rem && rem.sent) this.logger.info(`meet reminders: ${rem.meets24} meets at 24 h, ${rem.meets2} at 2 h, ${rem.sent} notifications`);
 		if (r.purgedMaybes || r.autoConfirmedInvites || r.waitlistedInvites) {

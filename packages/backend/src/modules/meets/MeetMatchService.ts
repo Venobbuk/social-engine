@@ -4,8 +4,9 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
+import type { DataSource } from 'typeorm';
 import { DI } from '@/di-symbols.js';
-import type { MeetMatchesRepository, MeetParticipantsRepository, UsersRepository } from '@/models/_.js';
+import type { MeetMatchesRepository, MeetParticipantsRepository, MeetsRepository, UsersRepository } from '@/models/_.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import type { MiMeetMatch } from '@/modules/meets/models/MeetMatch.js';
 import type { MiMeetParticipant } from '@/modules/meets/models/MeetParticipant.js';
@@ -28,6 +29,7 @@ const HKPL_URL = (process.env.ADAPTER_HKPL_URL ?? '').replace(/\/+$/, '');
 const HKPL_SECRET = process.env.ADAPTER_HKPL_S2S_SECRET ?? '';
 // hkpl-app runs on the same box (host.docker.internal:3939): the SSRF guard must admit that private address.
 const HKPL_ALLOW_LOCAL = process.env.ADAPTER_HKPL_ALLOW_LOCAL === '1';
+const CASUAL_UNCONFIRMED = 'Every player must confirm this casual game before it can be sent to DUPR.'; // SEC-CASUAL-CONSENT-V1
 
 /**
  * MEET-MATCH-V1: Reclub's Matches pane (spec_meets.md §4.1, §4.6) and its DUPR hand-off.
@@ -46,8 +48,14 @@ export class MeetMatchService {
 		@Inject(DI.meetParticipantsRepository)
 		private meetParticipantsRepository: MeetParticipantsRepository,
 
+		@Inject(DI.meetsRepository)
+		private meetsRepository: MeetsRepository,
+
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
+
+		@Inject(DI.db)
+		private db: DataSource,
 
 		private idService: IdService,
 		private httpRequestService: HttpRequestService,
@@ -127,6 +135,9 @@ export class MeetMatchService {
 			if (!host) throw this.err('not_host', 'Only a host can do that.');
 		}
 		if (data.scores !== undefined && match && !(await this.canUpdateScore(meet, match, user))) throw this.err('not_host', 'Only a host or a player of this match can score it.');
+		// SEC-CASUAL-CONSENT-V1: once another player has confirmed a casual game, its result is what they agreed to —
+		// no score or team edits (withdrawing the record by delete/cancel stays possible; it never fakes a result).
+		if (match && (structural || data.scores !== undefined)) await this.assertCasualUnlocked(meet, match);
 
 		const team1Ids = data.team1Ids ?? match?.team1Ids ?? [];
 		const team2Ids = data.team2Ids ?? match?.team2Ids ?? [];
@@ -162,7 +173,7 @@ export class MeetMatchService {
 			match = await this.meetMatchesRepository.findOneByOrFail({ id: match.id });
 		}
 
-		if (meet.submitMatches && match.scores.length > 0 && data.scores !== undefined) {
+		if (meet.submitMatches && match.scores.length > 0 && data.scores !== undefined && (await this.casualPending(meet, match)).length === 0) {
 			match = await this.submitDupr(meet, match, user);
 		}
 		return match;
@@ -274,6 +285,10 @@ export class MeetMatchService {
 	 */
 	@bindThis
 	public async submitDupr(meet: MiMeet, match: MiMeetMatch, by: MiUser): Promise<MiMeetMatch> {
+		// SEC-CASUAL-CONSENT-V1: the ONE door to DUPR refuses a casual game while any account player on the match has
+		// not confirmed (invited / declined / anything else) — every caller (submit-dupr, submit-dupr-all, upsert,
+		// the deferred submit, the sweep, list() retries) goes through here.
+		if ((await this.casualPending(meet, match)).length > 0) throw this.err('invalid_transition', CASUAL_UNCONFIRMED);
 		const e = await this.eligibility(meet, match);
 		const mark = async (patch: Partial<MiMeetMatch>) => {
 			await this.meetMatchesRepository.update(match.id, { ...patch, updatedAt: new Date() });
@@ -319,6 +334,92 @@ export class MeetMatchService {
 			// let list() retry it; the badge reads 'Submitting' until hkpl answers
 			return await mark({ duprStatus: 'queued', duprRef: null, duprSubmittedById: by.id, duprSubmittedAt: new Date(), duprError: `hkpl unreachable: ${(err as Error).message}`.slice(0, 512) });
 		}
+	}
+
+	/**
+	 * SEC-CASUAL-CONSENT-V1: submit the still-unsent matches of casual games that asked for DUPR (meet.submitMatches)
+	 * and are now fully confirmed — no account player on the match is still pending or declined. Idempotent: only
+	 * matches with duprStatus IS NULL are touched, and submitDupr never throws (it records the outcome on the row).
+	 * Called with a meetId from meets/respond the moment the last player confirms, and with no argument from the
+	 * minute sweep as a safety net. Returns how many matches were submitted.
+	 */
+	/** SEC-CASUAL-CONSENT-V1: participant ids of ACCOUNT players on a casual match who have not confirmed ([] if not casual). */
+	@bindThis
+	public async casualPending(meet: MiMeet, match: MiMeetMatch): Promise<string[]> {
+		if (!(meet.flags ?? []).includes('casual')) return [];
+		const ids = [...match.team1Ids, ...match.team2Ids];
+		if (!ids.length) return [];
+		const rows = await this.meetParticipantsRepository.createQueryBuilder('p').where('p.meetId = :meetId', { meetId: meet.id }).andWhere('p.id IN (:...ids)', { ids }).getMany();
+		return rows.filter(r => r.userId != null && r.status !== 'confirmed').map(r => r.id);
+	}
+
+	/**
+	 * SEC-CASUAL-CONSENT-V1 (round-3 review): a casual match's result is frozen once it has COUNTED — it is rated
+	 * (a gb_rating_log row for this match id) or it has gone to DUPR (duprStatus queued / submitted). Before that a
+	 * correction is an ordinary edit.
+	 *   Why not "any other player confirmed": gb_rating_log is append-only per match id and delete / cancel never
+	 *   un-rate, so locking at confirmation forced a cancel-and-re-log — which rates the SAME game a second time under
+	 *   a new match id and inflates everyone's match count. Keying on rated/sent keeps one game = one rating.
+	 *   Consent is unaffected: an unconfirmed player still keeps the game out of rating, stats and DUPR, so an edit
+	 *   before rating is an edit of something that has counted for nobody.
+	 *   Accepted behaviour: the host CAN release this lock for a not-yet-rated game by declining or removing the
+	 *   confirmed player (that un-counts the game by consent), and may then edit. DUPR stays blocked while anyone is
+	 *   unconfirmed, and an already-rated or already-sent match cannot be edited at all. Withdrawing the record
+	 *   (matches/delete, meets/cancel) stays open — it never fabricates a result.
+	 */
+	@bindThis
+	public async casualLockReason(meet: MiMeet, match: MiMeetMatch): Promise<'rated' | 'dupr' | null> {
+		if (!(meet.flags ?? []).includes('casual')) return null;
+		if (match.duprStatus === 'submitted' || match.duprStatus === 'queued') return 'dupr';
+		// NOT skipped: a "skipped" row means the rating declined to count the game (a guest, a drawn score), so nothing
+		// counted and a correction stays an ordinary edit (the sweep will not re-read it either way).
+		const rated = await this.db.query('SELECT 1 FROM gb_rating_log WHERE source = $1 AND "matchId" = $2 AND NOT skipped LIMIT 1', ['meet', match.id]) as unknown[];
+		return rated.length > 0 ? 'rated' : null;
+	}
+
+	@bindThis
+	public async assertCasualUnlocked(meet: MiMeet, match: MiMeetMatch): Promise<void> {
+		const why = await this.casualLockReason(meet, match);
+		if (why === 'rated') throw this.err('invalid_transition', 'This casual game has already counted towards the GripBat rating and can no longer be edited. Delete it if it should not stand.');
+		if (why === 'dupr') throw this.err('invalid_transition', 'This casual game has been sent to DUPR and can no longer be edited.');
+	}
+
+	@bindThis
+	public async submitDeferredCasual(meetId?: string): Promise<number> {
+		const rows = await this.db.query(
+			`SELECT mm.id, mm."meetId"
+			   FROM meet_match mm JOIN meet m ON m.id = mm."meetId"
+			  WHERE 'casual' = ANY(m.flags) AND m."submitMatches" = true AND m.status = 'active' AND m."startAt" < now()
+			    AND jsonb_array_length(mm.scores) > 0 AND mm."duprStatus" IS NULL
+			    ${meetId ? 'AND mm."meetId" = $1' : ''}
+			    AND NOT EXISTS (
+			          SELECT 1 FROM meet_participant pu
+			           WHERE pu."meetId" = mm."meetId"
+			             AND (pu.id = ANY(mm."team1Ids") OR pu.id = ANY(mm."team2Ids"))
+			             AND pu."userId" IS NOT NULL AND pu.status <> 'confirmed')
+			  LIMIT 50`, meetId ? [meetId] : []) as { id: string; meetId: string }[];
+		let sent = 0;
+		for (const r of rows) {
+			const meet = await this.meetsRepository.findOneBy({ id: r.meetId });
+			const host = meet ? await this.usersRepository.findOneBy({ id: meet.hostId }) : null;
+			if (!meet || !host) continue;
+			// claim the row BEFORE the HTTP call so respond(accept) and the sweep cannot both submit it: only the caller
+			// whose UPDATE flips NULL → 'queued' goes on (a claimed row without a ref is retried by list(), FAIL-SOFT-V1)
+			const claimed = await this.db.query(
+				`UPDATE meet_match SET "duprStatus" = 'queued', "duprRef" = NULL, "updatedAt" = now() WHERE id = $1 AND "duprStatus" IS NULL RETURNING id`, [r.id]) as unknown;
+			const won = Array.isArray(claimed) && (Array.isArray(claimed[0]) ? claimed[0].length > 0 : claimed.length > 0);
+			if (!won) continue;
+			const match = await this.meetMatchesRepository.findOneBy({ id: r.id });
+			if (!match) continue;
+			try {
+				await this.submitDupr(meet, match, host);
+				sent++;
+			} catch {
+				// consent changed after the select (e.g. the host declined a player): release the claim, never leave it 'queued'
+				await this.db.query(`UPDATE meet_match SET "duprStatus" = NULL, "updatedAt" = now() WHERE id = $1 AND "duprStatus" = 'queued' AND "duprRef" IS NULL`, [r.id]);
+			}
+		}
+		return sent;
 	}
 
 	/** Ask hkpl whether a queued match has been drained to DUPR. */

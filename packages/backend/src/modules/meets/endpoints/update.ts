@@ -11,6 +11,7 @@ import { DI } from '@/di-symbols.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
 import { ApiError } from '@/server/api/error.js';
+import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { meetErrors, meetParamProps, parseIsoDate, pickMeetFields, toApiError } from './_shared.js';
 
 export const meta = {
@@ -46,6 +47,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				await this.meetService.assertHost(meet, me);
 				const start = ps.startAt !== undefined ? parseIsoDate(ps.startAt) : undefined;
 				if (ps.startAt !== undefined && start == null) throw new ApiError(meta.errors.invalidDate);
+				// SEC-CASUAL-CONSENT-V1: a logged casual game keeps the date it was played — moving it (into the future,
+				// where seat claims and the invite sweep live) would reopen the consent bypass.
+				if (start && (meet.flags ?? []).includes('casual')) throw new IdentifiableError('meet:invalid_transition', 'The date of a logged casual game cannot be changed.');
 				const fields = pickMeetFields(ps as Record<string, unknown>) as Partial<MiMeet>;
 				delete (fields as Record<string, unknown>).startAt;
 				const updated = await this.meetService.update(meet, { ...fields, ...(start ? { startAt: start } : {}) });

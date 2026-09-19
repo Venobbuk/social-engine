@@ -9,6 +9,7 @@ import type { MeetsRepository } from '@/models/_.js';
 import { DI } from '@/di-symbols.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetEntityService } from '@/modules/meets/MeetEntityService.js';
+import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { ApiError } from '@/server/api/error.js';
 import { meetErrors, toApiError } from './_shared.js';
 
@@ -37,12 +38,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private meetsRepository: MeetsRepository,
 		private meetService: MeetService,
 		private meetEntityService: MeetEntityService,
+		private meetMatchService: MeetMatchService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
 			if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
 			try {
 				await this.meetService.respond(meet, me, ps.answer);
+				// SEC-CASUAL-CONSENT-V1: accepting may complete a casual game's consent — send its deferred DUPR
+				// submission the moment the last account player confirms (idempotent; the sweep is the safety net).
+				if (ps.answer === 'accept') await this.meetMatchService.submitDeferredCasual(meet.id).catch(() => 0);
 				return await this.meetEntityService.pack(meet.id, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);
