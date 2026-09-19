@@ -86,7 +86,8 @@ export class ClubService {
 		if (accessToken && p.accessToken && accessToken === p.accessToken) return true;
 		if (!userId) return false;
 		if (p.ownerId === userId || p.adminIds.includes(userId)) return true;
-		return await this.isMember(channelId, userId); // the ONE member definition (the club-tiers lane owns it)
+		if (await this.isMember(channelId, userId)) return true; // the ONE member definition (the club-tiers lane owns it)
+		return (await this.myInvitation(channelId, userId)) === 'pending'; // CLUB-INVITE-V1: an invited player reads the club to decide
 	}
 
 	@bindThis
@@ -199,6 +200,9 @@ export class ClubService {
 		if (await this.isMember(channel.id, user.id)) return { status: 'member' };
 		// CLUB-GATE-V1: the club's owner and admins are never gated (the stock follow door let them in; keep it so)
 		if (channel.userId === user.id || s.adminIds.includes(user.id)) { await this.channelFollowingService.follow(user, channel); return { status: 'member' }; }
+		// INT-BATCH1 (CLUB-GATE x CLUB-INVITE): a player an admin invited (clubs/invitations/create) who taps Join / follows is
+		// accepting that invitation — seated in any gate, the invitation closed, the inviter told (respondInvitation)
+		if ((await this.myInvitation(channel.id, user.id)) === 'pending') { await this.respondInvitation(channel, user, true); return { status: 'member' }; }
 		// CLUB-V3: the invite link's ?at= token is the admins' invitation — it seats the person in any gate
 		if (accessToken && s.accessToken && accessToken === s.accessToken) { await this.channelFollowingService.follow(user, channel); await this.clubJoinRequestsRepository.delete({ channelId: channel.id, userId: user.id }); return { status: 'member' }; }
 		if (s.gateType === 'open') { await this.channelFollowingService.follow(user, channel); return { status: 'member' }; }

@@ -288,18 +288,31 @@ export class CompetitionService {
 		}
 	}
 
-	/** Self sign-up (Reclub join-competition). */
+	/** Self sign-up (Reclub join-competition).
+	 *  COMP-CONSENT (batch 1: lane A's T1 D-comp-join.03 guard on lane B4's data model): naming partners no longer seats
+	 *  them. Only the entrant is in the team (userIds); the partners wait in invitedUserIds until each accepts through
+	 *  competitions/invitations/respond (seated + chat) or declines (the place opens; the captain re-invites through
+	 *  competitions/entries/partners). The whole proposed team must fit the size rule, exist, not be entered elsewhere, and
+	 *  have no block between any two of them (either direction, COMPETITION_BLOCKED). An invited partner holds nobody's
+	 *  place anywhere else (myEntry reads userIds only), so a stale invite never locks anyone out; a team that is still
+	 *  incomplete at the start is withdrawn (COMP-W1B4 statusAction start). */
 	@bindThis
 	public async enter(c: MiCompetition, user: MiUser, data: { name?: string | null; partnerIds?: string[] | null; accessToken?: string | null }): Promise<MiCompetitionEntry> {
 		await this.assertVisible(c, user, data.accessToken);
 		if (!this.registrationOpen(c)) throw this.err('registration_closed', 'Registration is closed.');
 		if ((await this.activeCount(c)) >= c.maxEntries) throw this.err('full', 'No spot left.');
-		const userIds = [user.id, ...(data.partnerIds ?? []).filter((x) => x !== user.id)];
-		await this.assertTeam(c, userIds);
+		const partners = Array.from(new Set((data.partnerIds ?? []).filter((x) => x !== user.id)));
+		const team = [user.id, ...partners];
+		await this.assertTeam(c, team);
+		await this.assertNoBlocks(team);
 		const name = (data.name ?? '').trim() || (user.name ?? user.username);
 		const status = c.autoApprove ? 'confirmed' : 'pending';
-		const entry = await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name, captainId: user.id, userIds, seed: null, pool: null, status, isPaid: false, notes: null, createdById: user.id, createdAt: new Date(), statusChangedAt: new Date() });
-		if (status === 'confirmed') await this.joinChat(c, userIds);
+		// a free agent who enters a team of their own is no longer looking for one
+		await this.entriesRepository.update({ competitionId: c.id, status: 'freeAgent', captainId: user.id }, { status: 'withdrawn', statusChangedAt: new Date() });
+		const entry = await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name, captainId: user.id, userIds: [user.id], invitedUserIds: partners, requestedUserIds: [], seed: null, pool: null, status, isPaid: false, notes: null, createdById: user.id, createdAt: new Date(), statusChangedAt: new Date() });
+		if (status === 'confirmed') await this.joinChat(c, [user.id]);
+		await this.closeAsksElsewhere(c, user.id, entry.id); // batch-1 review fix: the entrant no longer holds a place on another team
+		if (partners.length) this.notifyInvites(c, entry, user);
 		// BACKEND-DELIVERY-V1: two whole sentences (not a verb spliced into one) so the app can put each in the reader's language
 		this.notify(c.hostId, c, status === 'confirmed' ? 'New entry' : 'Entry request', status === 'confirmed' ? `${name} entered ${c.name}.` : `${name} requested to enter ${c.name}.`);
 		return entry;
@@ -311,8 +324,12 @@ export class CompetitionService {
 		const e = await this.myEntry(c, user.id);
 		if (!e) throw this.err('not_entered', 'You are not entered.');
 		if (c.status === 'inProgress' || c.status === 'done') throw this.err('started', 'The competition has started — ask the host to forfeit your entry.');
-		await this.entriesRepository.update(e.id, { status: 'withdrawn', statusChangedAt: new Date() });
+		await this.entriesRepository.update(e.id, { status: 'withdrawn', invitedUserIds: [], requestedUserIds: [], statusChangedAt: new Date() });
 		this.notify(c.hostId, c, 'Entry withdrawn', `${e.name} withdrew from ${c.name}.`);
+		// COMP-CONSENT (batch 1): partners still invited to this team hear that the invitation is gone
+		for (const uid of e.invitedUserIds ?? []) this.notify(uid, c, 'Team invitation withdrawn', `${e.name} withdrew from ${c.name}; your invitation is closed.`);
+		// batch-1 review fix: players who asked to join the team hear it too
+		for (const uid of e.requestedUserIds ?? []) this.notify(uid, c, 'Join request closed', `${e.name} withdrew from ${c.name}; your request to join is closed.`);
 		return (await this.entriesRepository.findOneBy({ id: e.id }))!;
 	}
 

@@ -10,6 +10,7 @@ import { DI } from '@/di-symbols.js';
 import { ApiError } from '@/server/api/error.js';
 import { ChatService } from '@/core/ChatService.js';
 import { ChatEntityService } from '@/core/entities/ChatEntityService.js';
+import { UserBlockingService } from '@/core/UserBlockingService.js';
 
 export const meta = {
 	tags: ['chat'],
@@ -37,6 +38,13 @@ export const meta = {
 			code: 'NO_SUCH_ROOM',
 			id: '916f9507-49ba-4e90-b57f-1fd4deaa47a5',
 		},
+
+		// INT-BATCH1 (GripBat): a group chat is made with this native door, one invitation per player — never across a block
+		blocked: {
+			message: 'You cannot invite this user.',
+			code: 'BLOCKED',
+			id: 'c2a1d5e0-5c1b-4f7e-9a3c-7e1b2c3d4e98',
+		},
 	},
 } as const;
 
@@ -54,6 +62,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		private chatService: ChatService,
 		private chatEntityService: ChatEntityService,
+		private userBlockingService: UserBlockingService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			await this.chatService.checkChatAvailability(me.id, 'write');
@@ -61,6 +70,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const room = await this.chatService.findMyRoomById(me.id, ps.roomId);
 			if (room == null) {
 				throw new ApiError(meta.errors.noSuchRoom);
+			}
+			if (await this.userBlockingService.checkBlocked(ps.userId, me.id) || await this.userBlockingService.checkBlocked(me.id, ps.userId)) {
+				throw new ApiError(meta.errors.blocked);
 			}
 			const invitation = await this.chatService.createRoomInvitation(me.id, room.id, ps.userId);
 			return await this.chatEntityService.packRoomInvitation(invitation, me);

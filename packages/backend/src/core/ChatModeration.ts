@@ -11,7 +11,7 @@ import type { MiUser } from '@/models/User.js';
  * offer Delete on someone else's message, and whether a room's membership is its own.
  *  - runsRoom: THE rule for CHAT-MODERATE-V1 — chat/messages/delete (the door) and chat/threads/show canModerate (the
  *    menu) both call it, so they cannot disagree: the room owner; in a club chat the club's owner and admins; in a meet
- *    chat the host and co-hosts; in a competition chat its host.
+ *    chat the host and co-hosts; in a competition chat its host and co-admins (COMP-W1B4 adminIds).
  *  - roomManagement: a room another module mints and keeps in step is MANAGED — a meet's chat (meet.chatRoomId), a
  *    club's chat (club_setting.chatRoomId), a competition's chat. Its membership follows the meet roster / the club /
  *    the entries, so members are removed THERE, never from the chat alone. A plain group (chat/rooms/create or
@@ -22,7 +22,7 @@ export async function runsRoom(db: DataSource, roomId: MiChatRoom['id'], userId:
 	const rows = await db.query(`SELECT 1 FROM "chat_room" r WHERE r."id" = $1 AND r."ownerId" = $2
 		UNION ALL SELECT 1 FROM "club_setting" s JOIN "channel" c ON c."id" = s."channelId" WHERE s."chatRoomId" = $1 AND (c."userId" = $2 OR $2 = ANY(s."adminIds"))
 		UNION ALL SELECT 1 FROM "meet" m WHERE m."chatRoomId" = $1 AND (m."hostId" = $2 OR EXISTS (SELECT 1 FROM "meet_participant" p WHERE p."meetId" = m."id" AND p."userId" = $2 AND p."isHost"))
-		UNION ALL SELECT 1 FROM "competition" k WHERE k."chatRoomId" = $1 AND k."hostId" = $2
+		UNION ALL SELECT 1 FROM "competition" k WHERE k."chatRoomId" = $1 AND (k."hostId" = $2 OR $2 = ANY(k."adminIds"))
 		LIMIT 1`, [roomId, userId]) as unknown[];
 	return rows.length > 0;
 }

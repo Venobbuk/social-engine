@@ -14,7 +14,7 @@ import { runsRoom } from '@/core/ChatModeration.js';
 
 // CHAT-MODERATE-V1 (W1, T1 E-chat-msg-menu.04): the author deletes their own message (as before); the people who RUN a room
 // delete anyone's message in it — the room owner, the club's owner and admins in the club chat, the meet host and co-hosts
-// in the meet chat, the competition host in its chat. Before, only the author could (findMyMessageById), so an admin's
+// in the meet chat, the competition host and co-admins in its chat. Before, only the author could (findMyMessageById), so an admin's
 // only tool against an abusive message was switching the whole chat off. Anyone else still gets NO_SUCH_MESSAGE.
 // The rule lives in ONE place, core/ChatModeration.runsRoom, which chat/threads/show canModerate reads too.
 export const meta = {
