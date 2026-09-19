@@ -20,6 +20,7 @@ fs.mkdirSync('/root/walk', { recursive: true });
 (async () => {
   const browser = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome', headless: 'new', args: ['--no-sandbox', '--disable-gpu'] });
   const ctx = await browser.createBrowserContext(); const page = await ctx.newPage(); await page.setViewport({ width: 412, height: 915, deviceScaleFactor: 2 });
+  await page.setExtraHTTPHeaders({ 'X-HKPL-Probe': '1' }); // PROBE-TAG-V1: the feedback this probe files is stored as status 'probe', never in the committee inbox
   const feedbackPosts = [];
   page.on('request', (r) => { if (r.url().endsWith('/api/v1/feedback') && r.method() === 'POST') { try { feedbackPosts.push(JSON.parse(r.postData() || '{}')); } catch (e) { feedbackPosts.push({ raw: r.postData() }); } } });
   let feedbackStatus = null;

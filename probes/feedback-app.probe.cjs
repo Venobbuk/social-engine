@@ -14,6 +14,7 @@ const stamp = 'probe: in-app launcher round trip ' + new Date().toISOString();
   const sess = await getSession(1);
   const browser = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome', headless: 'new', args: ['--no-sandbox', '--disable-gpu'] });
   const page = await browser.newPage();
+  await page.setExtraHTTPHeaders({ 'X-HKPL-Probe': '1' }); // PROBE-TAG-V1: the row is stored as status 'probe', kept out of the committee inbox
   await page.setViewport({ width: 412, height: 915, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await page.setCookie({ name: sess.name, value: sess.value, domain: new URL(BASE).hostname, path: '/' });
   await page.evaluateOnNewDocument(() => { try { localStorage.setItem('uat:tester', 'Probe Launcher'); localStorage.setItem('hkpl_lang', 'en'); } catch (e) {} });
@@ -48,7 +49,7 @@ const stamp = 'probe: in-app launcher round trip ' + new Date().toISOString();
   // admin side: tester1 (TENANT_ADMIN) through the QA door
   const door = await fetch(BASE + '/api/v1/auth/qa/by-email/boyau.tester1@silkvo.com?p=hkpl-uat-2026', { redirect: 'manual' });
   const sid = (door.headers.get('set-cookie') || '').split(';')[0];
-  const list = await (await fetch(BASE + '/api/v1/admin/feedback?limit=20', { headers: { cookie: sid } })).json();
+  const list = await (await fetch(BASE + '/api/v1/admin/feedback?status=probe&limit=20', { headers: { cookie: sid } })).json();
   const row = (list.data || []).find((r) => r.message === stamp);
   ev(!!row, `admin list has the row (${(list.data || []).length} rows)`);
   if (row) {
