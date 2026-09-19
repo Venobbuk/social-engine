@@ -8,6 +8,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { UsersRepository } from '@/models/_.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { NoteDeleteService } from '@/core/NoteDeleteService.js';
+import { ClubService } from '@/modules/clubs/ClubService.js';
 import { DI } from '@/di-symbols.js';
 import { GetterService } from '@/server/api/GetterService.js';
 import { RoleService } from '@/core/RoleService.js';
@@ -58,6 +59,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private getterService: GetterService,
 		private roleService: RoleService,
 		private noteDeleteService: NoteDeleteService,
+		private clubService: ClubService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const note = await this.getterService.getNote(ps.noteId).catch(err => {
@@ -65,12 +67,19 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw err;
 			});
 
-			if (!await this.roleService.isModerator(me) && (note.userId !== me.id)) {
+			// CLUB-POST-MOD-V1 (W1, T1 B-content-detail.04/.06): besides the author and moderators, the owner and admins of the club
+			// a post / comment lives in may take it down (a comment carries its post's club). Nobody else, and never outside that club.
+			if (!await this.roleService.isModerator(me) && (note.userId !== me.id) && !(note.channelId && await this.runsClub(note.channelId, me.id))) {
 				throw new ApiError(meta.errors.accessDenied);
 			}
 
 			// この操作を行うのが投稿者とは限らない(例えばモデレーター)ため
 			await this.noteDeleteService.delete(await this.usersRepository.findOneByOrFail({ id: note.userId }), note, false, me);
 		});
+	}
+
+	/** CLUB-POST-MOD-V1: is this user the owner or an admin of the club (channel)? */
+	private async runsClub(channelId: string, userId: string): Promise<boolean> {
+		try { return await this.clubService.isAdmin(await this.clubService.channel(channelId), userId); } catch { return false; }
 	}
 }
