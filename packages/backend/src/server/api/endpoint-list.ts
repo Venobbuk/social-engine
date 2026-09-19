@@ -196,6 +196,8 @@ export * as 'stats/street-cred' from '@/modules/stats/endpoints/street-cred.js';
 export * as 'stats/gb-edge' from '@/modules/stats/endpoints/gb-edge.js'; // GB-RATING-V1
 export * as 'stats/gb-fair' from '@/modules/stats/endpoints/gb-fair.js'; // GB-RATING-V1
 export * as 'stats/gb-ratings' from '@/modules/stats/endpoints/gb-ratings.js'; // GB-RATING-V1
+export * as 'stats/gb-rising' from '@/modules/stats/endpoints/gb-rising.js'; // GB-RATING-V1
+export * as 'stats/gb-pairs' from '@/modules/stats/endpoints/gb-pairs.js'; // GB-RATING-V1
 export * as 'stats/kudos-by-activity' from '@/modules/stats/endpoints/kudos-by-activity.js';
 export * as 'adapter/venues/sync' from '@/modules/venues/endpoints/sync.js';
 export * as 'clubs/settings/show' from '@/modules/clubs/endpoints/settings-show.js';

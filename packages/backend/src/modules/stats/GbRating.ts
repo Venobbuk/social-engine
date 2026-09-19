@@ -175,3 +175,28 @@ export async function ratingsOf(db: DataSource, userIds: string[], sport = 'pick
 	const rows = await db.query('SELECT "userId", rating, matches FROM gb_player_rating WHERE "userId" = ANY($1) AND sport = $2', [userIds, sport]) as { userId: string; rating: string; matches: number }[];
 	return rows.map((x) => ({ userId: x.userId, rating: Number(x.rating), matches: Number(x.matches), provisional: Number(x.matches) < 10 }));
 }
+
+/** Rising players: the biggest 30-day GripBat rating gains (≥ 5 rated matches in the window) — the "upset radar". */
+export async function risingOf(db: DataSource, sport = 'pickleball', limit = 20): Promise<{ userId: string; rating: number; gain: number; matches: number; upsets: number }[]> {
+	const rows = await db.query(
+		`WITH w AS (
+		   SELECT "userId", count(*)::int AS n,
+		          (array_agg(pre ORDER BY "playedAt" ASC))[1] AS first_pre,
+		          (array_agg(post ORDER BY "playedAt" DESC))[1] AS last_post,
+		          sum(CASE WHEN won AND "oppRating" - "teamRating" >= 0.25 THEN 1 ELSE 0 END)::int AS upsets
+		   FROM gb_rating_log WHERE sport = $1 AND NOT skipped AND "playedAt" > now() - interval '30 days'
+		   GROUP BY "userId")
+		 SELECT "userId", last_post AS rating, (last_post - first_pre) AS gain, n AS matches, upsets FROM w
+		 WHERE n >= 5 AND last_post > first_pre ORDER BY gain DESC LIMIT $2`, [sport, limit]) as { userId: string; rating: string; gain: string; matches: number; upsets: number }[];
+	return rows.map((r) => ({ userId: r.userId, rating: Number(r.rating), gain: Number(r.gain), matches: Number(r.matches), upsets: Number(r.upsets) }));
+}
+
+/** A pair's record together (GripBat matches): matches, wins, expected wins — the scouting line under a team. */
+export async function pairsOf(db: DataSource, pairs: [string, string][], sport = 'pickleball'): Promise<{ a: string; b: string; matches: number; wins: number; expected: number }[]> {
+	const out = [];
+	for (const [a, b] of pairs.slice(0, 40)) {
+		const x = (await db.query(`SELECT count(*)::int n, coalesce(sum(CASE WHEN won THEN 1 ELSE 0 END),0)::int w, coalesce(sum(expected),0)::float e FROM gb_rating_log WHERE "userId" = $1 AND "partnerId" = $2 AND sport = $3 AND NOT skipped`, [a, b, sport]))[0];
+		out.push({ a, b, matches: x ? x.n : 0, wins: x ? x.w : 0, expected: x ? Math.round(x.e * 100) / 100 : 0 });
+	}
+	return out;
+}
