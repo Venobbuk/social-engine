@@ -260,6 +260,92 @@ export class ClubService {
 		return { timeframe, totalMembers, totalFollowers: totalMembers, totalActivities, activeMembers: active.length, fillRate, mostActive: await pack(active), mostRewarded: await pack(rewarded) };
 	}
 
+	// ---- invitations (CLUB-INVITE-V1)
+	/** Reclub "Invite to a club": an admin invites one player; the player sees "You have been invited to this club"
+	 *  with Accept / Decline. Rows live in club_invitation (raw SQL, no entity); one pending row per club+player.
+	 *  A pending join request by the same player is kept — accepting the invitation closes it. */
+	@bindThis
+	public async invite(channel: MiChannel, by: MiUser, userId: string): Promise<{ status: 'invited' }> {
+		await this.assertAdmin(channel, by.id);
+		const target = await this.usersRepository.findOneBy({ id: userId });
+		if (!target || target.host != null) throw this.err('no_such_user', 'No such user.');
+		if (channel.userId === userId || await this.isMember(channel.id, userId)) throw this.err('already_member', 'This player is already a member of the club.');
+		const blocked = await this.db.query(`SELECT 1 FROM "blocking" WHERE ("blockerId" = $1 AND "blockeeId" = $2) OR ("blockerId" = $2 AND "blockeeId" = $1) LIMIT 1`, [by.id, userId]) as unknown[];
+		if (blocked.length) throw this.err('blocked', 'You cannot invite this player.');
+		// already invited → no second row, no second notification
+		if (await this.myInvitation(channel.id, userId)) return { status: 'invited' };
+		await this.db.query(`INSERT INTO "club_invitation" ("id", "channelId", "userId", "invitedById") VALUES ($1, $2, $3, $4)
+			ON CONFLICT ("channelId", "userId") WHERE "status" = 'pending' DO NOTHING`, [this.idService.gen(), channel.id, userId, by.id]);
+		this.notify(userId, 'Club invitation', `${by.name ?? by.username} invited you to join ${channel.name}.`, channel.id);
+		return { status: 'invited' };
+	}
+
+	/** The invitee's answer. Accept seats the player in ANY gate (like the ?at= link token in join()) and closes their
+	 *  pending join request; decline just records it. */
+	@bindThis
+	public async respondInvitation(channel: MiChannel, user: MiLocalUser, accept: boolean): Promise<{ status: 'member' | 'declined' }> {
+		const inv = (await this.db.query(`SELECT "id", "invitedById" FROM "club_invitation" WHERE "channelId" = $1 AND "userId" = $2 AND "status" = 'pending' LIMIT 1`, [channel.id, user.id]) as { id: string; invitedById: string }[])[0];
+		if (!inv) throw this.err('no_such_invitation', 'No pending invitation to this club.');
+		if (!accept) {
+			await this.db.query(`UPDATE "club_invitation" SET "status" = 'declined', "decidedAt" = now() WHERE "id" = $1 AND "status" = 'pending'`, [inv.id]);
+			return { status: 'declined' };
+		}
+		if (channel.userId !== user.id && !(await this.isMember(channel.id, user.id))) await this.channelFollowingService.follow(user, channel);
+		await this.db.query(`UPDATE "club_invitation" SET "status" = 'accepted', "decidedAt" = now() WHERE "id" = $1 AND "status" = 'pending'`, [inv.id]);
+		await this.clubJoinRequestsRepository.delete({ channelId: channel.id, userId: user.id, status: 'pending' });
+		this.notify(inv.invitedById, 'Invitation accepted', `${user.name ?? user.username} accepted your invitation to ${channel.name}.`, channel.id);
+		return { status: 'member' };
+	}
+
+	/** Admins: the club's pending invitations, newest first. */
+	@bindThis
+	public async invitations(channel: MiChannel, viewer: MiUser) {
+		await this.assertAdmin(channel, viewer.id);
+		const rows = await this.db.query(`SELECT "id", "userId", "invitedById", "createdAt" FROM "club_invitation" WHERE "channelId" = $1 AND "status" = 'pending' ORDER BY "createdAt" DESC LIMIT 200`, [channel.id]) as { id: string; userId: string; invitedById: string; createdAt: Date }[];
+		const out = [];
+		for (const r of rows) out.push({ id: r.id, userId: r.userId, invitedById: r.invitedById, createdAt: new Date(r.createdAt).toISOString(), user: await this.userEntityService.pack(r.userId, viewer, { schema: 'UserLite' }).catch(() => null) });
+		return out;
+	}
+
+	/** Admins: withdraw a pending invitation. */
+	@bindThis
+	public async cancelInvitation(channel: MiChannel, by: MiUser, userId: string): Promise<{ status: 'cancelled' }> {
+		await this.assertAdmin(channel, by.id);
+		if (!(await this.myInvitation(channel.id, userId))) throw this.err('no_such_invitation', 'No pending invitation for this player.');
+		await this.db.query(`UPDATE "club_invitation" SET "status" = 'cancelled', "decidedAt" = now() WHERE "channelId" = $1 AND "userId" = $2 AND "status" = 'pending'`, [channel.id, userId]);
+		return { status: 'cancelled' };
+	}
+
+	/** A player's page "Invite to a club": the clubs the viewer owns or admins (not archived, max 50), each with that
+	 *  player's status there — member > invited > requested > declined (latest invitation) > none. */
+	@bindThis
+	public async invitationStatusFor(viewer: MiUser, userId: string): Promise<{ channelId: string; name: string; status: 'member' | 'invited' | 'requested' | 'declined' | 'none' }[]> {
+		const clubs = await this.db.query(`SELECT c."id", c."name", c."userId" FROM "channel" c LEFT JOIN "club_setting" s ON s."channelId" = c."id"
+			WHERE c."isArchived" = false AND (c."userId" = $1 OR $1 = ANY(s."adminIds")) ORDER BY c."id" DESC LIMIT 50`, [viewer.id]) as { id: string; name: string; userId: string | null }[];
+		if (!clubs.length) return [];
+		const ids = clubs.map(c => c.id);
+		const follows = new Set((await this.db.query(`SELECT "followeeId" FROM "channel_following" WHERE "followerId" = $1 AND "followeeId" = ANY($2)`, [userId, ids]) as { followeeId: string }[]).map(r => r.followeeId));
+		const invs = await this.db.query(`SELECT DISTINCT ON ("channelId") "channelId", "status" FROM "club_invitation" WHERE "userId" = $1 AND "channelId" = ANY($2) ORDER BY "channelId", "createdAt" DESC`, [userId, ids]) as { channelId: string; status: string }[];
+		const latestInv = new Map(invs.map(r => [r.channelId, r.status]));
+		const requested = new Set((await this.clubJoinRequestsRepository.find({ where: { userId, channelId: In(ids), status: 'pending' }, select: { channelId: true } })).map(r => r.channelId));
+		return clubs.map(c => ({
+			channelId: c.id,
+			name: c.name,
+			status: c.userId === userId || follows.has(c.id) ? 'member' as const
+				: latestInv.get(c.id) === 'pending' ? 'invited' as const
+				: requested.has(c.id) ? 'requested' as const
+				: latestInv.get(c.id) === 'declined' ? 'declined' as const
+				: 'none' as const,
+		}));
+	}
+
+	/** My pending invitation to a club (the club page shows Accept / Decline). */
+	@bindThis
+	public async myInvitation(channelId: string, userId: string): Promise<'pending' | null> {
+		const r = await this.db.query(`SELECT 1 FROM "club_invitation" WHERE "channelId" = $1 AND "userId" = $2 AND "status" = 'pending' LIMIT 1`, [channelId, userId]) as unknown[];
+		return r.length ? 'pending' : null;
+	}
+
 	// ------------------------------------------------------------------------------------- ownership
 	/** Reclub claim-club-ownership: a mirrored / orphaned club (no owner) is claimed by a member and verified by staff.
 	 *  CLUB-CLAIM-VERIFY-V1 (2026-09-19): the claim is a REQUEST (club_claim, status 'pending'); only GripBat staff's

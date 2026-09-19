@@ -212,6 +212,11 @@ export * as 'clubs/insights' from '@/modules/clubs/endpoints/insights.js';
 export * as 'clubs/claim' from '@/modules/clubs/endpoints/claim.js';
 export * as 'clubs/claims/list' from '@/modules/clubs/endpoints/claims-list.js'; // CLUB-CLAIM-VERIFY-V1
 export * as 'clubs/claims/decide' from '@/modules/clubs/endpoints/claims-decide.js'; // CLUB-CLAIM-VERIFY-V1
+export * as 'clubs/invitations/create' from '@/modules/clubs/endpoints/invitations-create.js'; // CLUB-INVITE-V1
+export * as 'clubs/invitations/respond' from '@/modules/clubs/endpoints/invitations-respond.js'; // CLUB-INVITE-V1
+export * as 'clubs/invitations/list' from '@/modules/clubs/endpoints/invitations-list.js'; // CLUB-INVITE-V1
+export * as 'clubs/invitations/cancel' from '@/modules/clubs/endpoints/invitations-cancel.js'; // CLUB-INVITE-V1
+export * as 'clubs/invitations/for-user' from '@/modules/clubs/endpoints/invitations-for-user.js'; // CLUB-INVITE-V1
 export * as 'clubs/posts/announce' from '@/modules/clubs/endpoints/posts-announce.js'; // CLUB-V3
 export * as 'clubs/admins/chat' from '@/modules/clubs/endpoints/admins-chat.js'; // CLUB-V3
 export * as 'clubs/schedules/list' from '@/modules/clubs/endpoints/schedules-list.js'; // CLUB-V3
