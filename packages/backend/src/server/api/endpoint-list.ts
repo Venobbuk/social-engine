@@ -186,6 +186,10 @@ export * as 'venues/locations/delete' from '@/modules/venues/endpoints/locations
 export * as 'venues/feedback' from '@/modules/venues/endpoints/feedback-create.js';
 export * as 'venues/feedback/list' from '@/modules/venues/endpoints/feedback-list.js';
 export * as 'venues/claim' from '@/modules/venues/endpoints/claim.js';
+export * as 'geo/search' from '@/modules/discover/endpoints/geo-search.js'; // DISCOVER-W2D
+export * as 'geo/reverse' from '@/modules/discover/endpoints/geo-reverse.js'; // DISCOVER-W2D
+export * as 'discover/search' from '@/modules/discover/endpoints/search.js'; // DISCOVER-W2D
+export * as 'social/badges' from '@/modules/discover/endpoints/badges.js'; // DISCOVER-W2D
 export * as 'stats/dupr-rankings' from '@/modules/stats/endpoints/dupr-rankings.js';
 export * as 'stats/pairings' from '@/modules/stats/endpoints/pairings.js';
 export * as 'stats/h2h' from '@/modules/stats/endpoints/h2h.js';

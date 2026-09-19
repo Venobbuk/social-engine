@@ -15,7 +15,7 @@ export const meta = {
 	prohibitMoved: true,
 	kind: 'write:account',
 	res: { type: 'object', optional: false, nullable: false, ref: 'UserLocation' },
-	errors: { tooManyLocations: venueErrors.tooManyLocations },
+	errors: { tooManyLocations: venueErrors.tooManyLocations, locationAlreadyAdded: venueErrors.locationAlreadyAdded },
 } as const;
 
 export const paramDef = {

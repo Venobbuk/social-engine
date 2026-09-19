@@ -260,6 +260,10 @@ export class VenueService {
 		let row = data.id ? await this.userLocationsRepository.findOneBy({ id: data.id, userId: user.id }) : null;
 		if (!row && data.kind !== 'favourite') row = await this.userLocationsRepository.findOneBy({ userId: user.id, kind: data.kind });
 		const fields = { kind: data.kind, label: data.label.slice(0, 128), address: data.address?.slice(0, 512) ?? null, lat: data.lat, lng: data.lng, radiusKm, updatedAt: new Date() };
+		// DISCOVER-W2D (Reclub E-upsert-location.04 "Already Added — this location is already in your list"): no second
+		// saved place on the same spot (within 50 m of another of my rows; the row being edited does not count)
+		const others = await this.userLocationsRepository.findBy({ userId: user.id });
+		if (others.some((o) => o.id !== row?.id && haversineKm(o.lat, o.lng, data.lat, data.lng) <= 0.05)) throw this.err('location_already_added', 'This location is already in your list.');
 		if (row) {
 			await this.userLocationsRepository.update(row.id, fields);
 			return await this.userLocationsRepository.findOneByOrFail({ id: row.id });
@@ -271,6 +275,10 @@ export class VenueService {
 
 	@bindThis
 	public async deleteLocation(user: MiUser, id: string): Promise<void> {
+		// DISCOVER-W2D (Reclub E-locations.05 "Can't delete this location — you need at least one saved location")
+		const row = await this.userLocationsRepository.findOneBy({ id, userId: user.id });
+		if (!row) return;
+		if (await this.userLocationsRepository.countBy({ userId: user.id }) <= 1) throw this.err('last_location', 'You need at least one saved location.');
 		await this.userLocationsRepository.delete({ id, userId: user.id });
 	}
 
@@ -312,6 +320,14 @@ export class VenueService {
 	public async resolveFeedback(id: string): Promise<void> {
 		await this.db.query('UPDATE venue_feedback SET status = $2 WHERE id = $1', [id, 'resolved']);
 	}
+}
+
+/** DISCOVER-W2D: great-circle km between two points (the saved-location duplicate guard). */
+function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+	const R = 6371, d2r = Math.PI / 180;
+	const dLat = (bLat - aLat) * d2r, dLng = (bLng - aLng) * d2r;
+	const h = Math.sin(dLat / 2) ** 2 + Math.cos(aLat * d2r) * Math.cos(bLat * d2r) * Math.sin(dLng / 2) ** 2;
+	return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
 export const venueFeedbackCategories = ['wrong_details', 'permanently_closed', 'safety_concern', 'incorrect_images', 'suspicious_fraudulent', 'owner_claim', 'other'] as const;

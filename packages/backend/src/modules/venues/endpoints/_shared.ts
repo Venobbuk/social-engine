@@ -16,6 +16,8 @@ export const venueErrors = {
 	placesUnconfigured: { message: 'Venue search is not configured on this server.', code: 'VENUE_PLACES_UNCONFIGURED', id: '7c2e1b4f-9a52-4d1c-8c8f-2b0000000004' },
 	placesFailed: { message: 'Venue search failed.', code: 'VENUE_PLACES_FAILED', id: '7c2e1b4f-9a52-4d1c-8c8f-2b0000000005' },
 	tooManyLocations: { message: 'You can save up to 20 locations.', code: 'VENUE_TOO_MANY_LOCATIONS', id: '7c2e1b4f-9a52-4d1c-8c8f-2b0000000006' },
+	locationAlreadyAdded: { message: 'This location is already in your list.', code: 'LOCATION_ALREADY_ADDED', id: '7c2e1b4f-9a52-4d1c-8c8f-2b0000000007' },   // DISCOVER-W2D
+	lastLocation: { message: 'You need at least one saved location.', code: 'LAST_LOCATION', id: '7c2e1b4f-9a52-4d1c-8c8f-2b0000000008' },   // DISCOVER-W2D
 } as const;
 
 const map: Record<string, keyof typeof venueErrors> = {
@@ -23,6 +25,8 @@ const map: Record<string, keyof typeof venueErrors> = {
 	'venue:places_unconfigured': 'placesUnconfigured',
 	'venue:places_failed': 'placesFailed',
 	'venue:too_many_locations': 'tooManyLocations',
+	'venue:location_already_added': 'locationAlreadyAdded',
+	'venue:last_location': 'lastLocation',
 };
 
 export function toVenueApiError(e: unknown): never {
