@@ -201,8 +201,15 @@ export function promoteGate(meet: MiMeet, now = Date.now()): PromoteGate {
  * The audience of one promotion: the host's followers plus every player whose saved home is within 20 km, both
  * limited to the meet's level band (by its level basis) when it has one, minus the host and everyone already on the
  * roster. Distinct user ids, capped.
+ *
+ * PROMOTE-AUDIENCE-V1 (W1 lane B1, triage A-promote-meet.03): Reclub's "CHOOSE YOUR AUDIENCE" — the host picks
+ *   'club'       the members of the meet's club (channel_following of meet.channelId, minus members on a break)
+ *   'proximity'  players whose saved home is within 20 km
+ *   'all'        (default, the V1 audience) followers + nearby
+ * The level band, the host and the roster exclusions apply to every audience.
  */
-export async function promoteAudience(db: DataSource, meet: MiMeet): Promise<{ userIds: string[]; followers: number; nearby: number }> {
+export type PromoteAudienceKind = 'all' | 'club' | 'proximity';
+export async function promoteAudience(db: DataSource, meet: MiMeet, audience: PromoteAudienceKind = 'all'): Promise<{ userIds: string[]; followers: number; nearby: number; club: number }> {
 	const level = meet.levelBasis === 'duprSingles' ? 'duprSingles' : meet.levelBasis === 'duprDoubles' ? 'duprDoubles' : 'selfLevel';
 	const band = meet.minLevel != null || meet.maxLevel != null;
 	const bandSql = band
@@ -211,7 +218,13 @@ export async function promoteAudience(db: DataSource, meet: MiMeet): Promise<{ u
 		: '';
 	const base = `FROM "user" u WHERE u."host" IS NULL AND u."isSuspended" = false AND u."isDeleted" = false AND u."id" <> $3 AND $2::varchar IS NOT NULL
 		AND NOT EXISTS (SELECT 1 FROM "meet_participant" p WHERE p."meetId" = $1 AND p."userId" = u."id") ${bandSql}`;
-	const followers = await db.query(`SELECT u."id" ${base} AND EXISTS (SELECT 1 FROM "following" f WHERE f."followeeId" = $3 AND f."followerId" = u."id") LIMIT ${PROMOTE_CAP}`, [meet.id, meet.sport, meet.hostId]) as { id: string }[];
+	if (audience === 'club') {
+		if (!meet.channelId) return { userIds: [], followers: 0, nearby: 0, club: 0 };
+		const club = await db.query(`SELECT u."id" ${base} AND EXISTS (SELECT 1 FROM "channel_following" cf WHERE cf."followeeId" = $4 AND cf."followerId" = u."id")
+			AND NOT EXISTS (SELECT 1 FROM "club_member_state" s WHERE s."channelId" = $4 AND s."userId" = u."id" AND s."pausedAt" IS NOT NULL) LIMIT ${PROMOTE_CAP}`, [meet.id, meet.sport, meet.hostId, meet.channelId]) as { id: string }[];
+		return { userIds: club.map((r) => r.id), followers: 0, nearby: 0, club: club.length };
+	}
+	const followers = audience === 'proximity' ? [] : await db.query(`SELECT u."id" ${base} AND EXISTS (SELECT 1 FROM "following" f WHERE f."followeeId" = $3 AND f."followerId" = u."id") LIMIT ${PROMOTE_CAP}`, [meet.id, meet.sport, meet.hostId]) as { id: string }[];
 	let nearby: { id: string }[] = [];
 	if (meet.lat != null && meet.lng != null) {
 		const lat = Number(meet.lat), lng = Number(meet.lng);
@@ -219,7 +232,7 @@ export async function promoteAudience(db: DataSource, meet: MiMeet): Promise<{ u
 		nearby = await db.query(`SELECT u."id" ${base} AND EXISTS (SELECT 1 FROM "user_location" h WHERE h."userId" = u."id" AND h."kind" = 'home' AND ${dist} <= ${PROMOTE_RADIUS_KM}) LIMIT ${PROMOTE_CAP}`, [meet.id, meet.sport, meet.hostId]) as { id: string }[];
 	}
 	const ids = Array.from(new Set([...followers.map((r) => r.id), ...nearby.map((r) => r.id)])).slice(0, PROMOTE_CAP);
-	return { userIds: ids, followers: followers.length, nearby: nearby.length };
+	return { userIds: ids, followers: followers.length, nearby: nearby.length, club: 0 };
 }
 
 /** Reclub `meets:notification.body` = "{{name}} is looking for {{num}} players {{datetime}} at {{location}}. Can you join?" — the app re-inserts the two captures. */
