@@ -125,7 +125,7 @@ function b64urlToBuf(s: string): Buffer {
 	return Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
 }
 
-type Claims = { iss: string; aud: string; sub: string; exp: number; iat?: number; jti?: string; row?: string; tenant?: string; name?: string | null; avatar?: string | null; role?: string | null; dupr_id?: string | null; dupr_rating?: number | null; home_club_id?: number | null; lang?: string };
+type Claims = { iss: string; aud: string; sub: string; exp: number; iat?: number; jti?: string; row?: string; tenant?: string; name?: string | null; avatar?: string | null; role?: string | null; dupr_id?: string | null; dupr_rating?: number | null; home_club_id?: number | null; lang?: string; purpose?: string };
 
 // SEC-ACCOUNT-DELETE-REAUTH-V1: exported so adapter/account/delete can demand a FRESH hkpl-signed proof (same
 // verification: signature, audience, mandatory iat, ≤ 5-min TTL, mandatory jti) before it destroys an account.
@@ -203,6 +203,12 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				try { const p = JSON.parse(b64urlToBuf(ps.jwt.split('.')[1] ?? '').toString('utf8')); hint = ` iss=${String(p.iss)} aud=${String(p.aud)} tenant=${String(p.tenant)}`; } catch { hint = ' (payload unreadable)'; }
 				this.logger.warn(`SSO token refused: ${e instanceof ApiError ? e.code : (e instanceof Error ? e.message : String(e))}${hint} (engine audience=${String(AUDIENCE)})`);
 				if (e instanceof ApiError) throw e;
+				throw new ApiError(meta.errors.invalidToken);
+			}
+			// SEC-ACCOUNT-DELETE-REAUTH-V1: a purpose-bound token (e.g. purpose 'account-delete', minted by hkpl's re-auth
+			// route) is NOT a login token — refuse it here so a deletion proof can never double as a sign-in.
+			if (claims.purpose != null) {
+				this.logger.warn(`SSO token refused: purpose-bound token (${String(claims.purpose)}) presented to login iss=${claims.iss}`);
 				throw new ApiError(meta.errors.invalidToken);
 			}
 
