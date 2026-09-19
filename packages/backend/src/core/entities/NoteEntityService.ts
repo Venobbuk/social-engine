@@ -23,6 +23,7 @@ import type { CustomEmojiService } from '../CustomEmojiService.js';
 import type { ReactionService } from '../ReactionService.js';
 import type { UserEntityService } from './UserEntityService.js';
 import type { DriveFileEntityService } from './DriveFileEntityService.js';
+import type { ClubService } from '@/modules/clubs/ClubService.js';
 
 // is-renote.tsとよしなにリンク
 function isPureRenote(note: MiNote): note is MiNote & { renoteId: MiNote['id']; renote: MiNote } {
@@ -68,6 +69,7 @@ export class NoteEntityService implements OnModuleInit {
 	private reactionsBufferingService: ReactionsBufferingService;
 	private idService: IdService;
 	private cacheService: CacheService;
+	private clubService: ClubService;
 	private noteLoader = new DebounceLoader(this.findNoteOrFail);
 
 	constructor(
@@ -115,6 +117,7 @@ export class NoteEntityService implements OnModuleInit {
 		this.reactionsBufferingService = this.moduleRef.get('ReactionsBufferingService');
 		this.idService = this.moduleRef.get('IdService');
 		this.cacheService = this.moduleRef.get('CacheService');
+		this.clubService = this.moduleRef.get('ClubService');
 	}
 
 	@bindThis
@@ -129,8 +132,15 @@ export class NoteEntityService implements OnModuleInit {
 	}
 
 	@bindThis
-	public async shouldHideNote(packedNote: Packed<'Note'>, meId: MiUser['id'] | null): Promise<boolean> {
+	public async shouldHideNote(packedNote: Packed<'Note'>, meId: MiUser['id'] | null, readableChannelIds?: string[]): Promise<boolean> {
 		if (meId === packedNote.userId) return false;
+
+		// CLUB-PRIVATE-V1 (W1): a post / comment in a PRIVATE club is hidden from anyone who is not its member, admin or owner —
+		// on every door that packs notes (notes/show, notes/children, users/notes, search, streams, notifications…).
+		// readableChannelIds = channels the caller already admitted (channels/timeline with the club's invite-link token).
+		if (packedNote.channelId && !(readableChannelIds && readableChannelIds.includes(packedNote.channelId)) && !(await this.clubService.mayReadClub(packedNote.channelId, meId))) {
+			return true;
+		}
 		// TODO: isVisibleForMe を使うようにしても良さそう(型違うけど)
 
 		if (packedNote.user.requireSigninToViewContents && meId == null) {
@@ -272,6 +282,10 @@ export class NoteEntityService implements OnModuleInit {
 
 	@bindThis
 	public async isVisibleForMe(note: MiNote, meId: MiUser['id'] | null): Promise<boolean> {
+		// CLUB-PRIVATE-V1 (batch-1 review fix): a note in a PRIVATE club is visible only to who may read the club (the author
+		// always); same rule as shouldHideNote, for the doors that ask isVisibleForMe instead of packing (translate, reactions,
+		// polls, reply / renote targets)
+		if (note.channelId && meId !== note.userId && !(await this.clubService.mayReadClub(note.channelId, meId))) return false;
 		// This code must always be synchronized with the checks in QueryService.generateVisibilityQuery.
 		// visibility が specified かつ自分が指定されていなかったら非表示
 		if (note.visibility === 'specified') {
@@ -347,6 +361,7 @@ export class NoteEntityService implements OnModuleInit {
 			detail?: boolean;
 			skipHide?: boolean;
 			withReactionAndUserPairCache?: boolean;
+			readableChannelIds?: string[]; // CLUB-PRIVATE-V1: see shouldHideNote
 			_hint_?: {
 				bufferedReactions: Map<MiNote['id'], { deltas: Record<string, number>; pairs: ([MiUser['id'], string])[] }> | null;
 				myReactions: Map<MiNote['id'], string | null>;
@@ -437,6 +452,7 @@ export class NoteEntityService implements OnModuleInit {
 					detail: false,
 					skipHide: opts.skipHide,
 					withReactionAndUserPairCache: opts.withReactionAndUserPairCache,
+					readableChannelIds: opts.readableChannelIds,
 					_hint_: options?._hint_,
 				})) : undefined,
 
@@ -445,6 +461,7 @@ export class NoteEntityService implements OnModuleInit {
 					detail: true,
 					skipHide: opts.skipHide,
 					withReactionAndUserPairCache: opts.withReactionAndUserPairCache,
+					readableChannelIds: opts.readableChannelIds,
 					_hint_: options?._hint_,
 				})) : undefined,
 
@@ -462,7 +479,7 @@ export class NoteEntityService implements OnModuleInit {
 
 		this.treatVisibility(packed);
 
-		if (!opts.skipHide && (await this.shouldHideNote(packed, meId))) {
+		if (!opts.skipHide && (await this.shouldHideNote(packed, meId, opts.readableChannelIds))) {
 			this.hideNote(packed);
 		}
 
@@ -476,6 +493,7 @@ export class NoteEntityService implements OnModuleInit {
 		options?: {
 			detail?: boolean;
 			skipHide?: boolean;
+			readableChannelIds?: string[]; // CLUB-PRIVATE-V1
 		},
 	) {
 		if (notes.length === 0) return [];

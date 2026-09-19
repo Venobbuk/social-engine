@@ -14,6 +14,8 @@ import { IdService } from '@/core/IdService.js';
 import { FanoutTimelineEndpointService } from '@/core/FanoutTimelineEndpointService.js';
 import { MiLocalUser } from '@/models/User.js';
 import { ChannelMutingService } from '@/core/ChannelMutingService.js';
+import { ClubService } from '@/modules/clubs/ClubService.js';
+import { clubErrors } from '@/modules/clubs/endpoints/_shared.js';
 import { ApiError } from '../../error.js';
 import { Brackets } from 'typeorm';
 
@@ -38,6 +40,7 @@ export const meta = {
 			code: 'NO_SUCH_CHANNEL',
 			id: '4d0eeeba-a02c-4c3c-9966-ef60d38d2e7f',
 		},
+		clubPrivate: clubErrors.clubPrivate, // CLUB-PRIVATE-V1 (W1)
 	},
 } as const;
 
@@ -51,6 +54,7 @@ export const paramDef = {
 		sinceDate: { type: 'integer' },
 		untilDate: { type: 'integer' },
 		allowPartial: { type: 'boolean', default: false }, // true is recommended but for compatibility false by default
+		accessToken: { type: 'string', nullable: true, maxLength: 32 }, // CLUB-PRIVATE-V1: the club's invite-link token (?at=)
 	},
 	required: ['channelId'],
 } as const;
@@ -73,6 +77,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private fanoutTimelineEndpointService: FanoutTimelineEndpointService,
 		private activeUsersChart: ActiveUsersChart,
 		private channelMutingService: ChannelMutingService,
+		private clubService: ClubService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const untilId = ps.untilId ?? (ps.untilDate ? this.idService.gen(ps.untilDate!) : null);
@@ -86,13 +91,18 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.noSuchChannel);
 			}
 
+			// CLUB-PRIVATE-V1 (W1): a private club's feed is its members', admins' and the invite-link holder's — this door was
+			// requireCredential:false with no check, so a private club's posts were readable signed-out.
+			if (!(await this.clubService.mayReadClub(channel.id, me?.id ?? null, ps.accessToken ?? null))) throw new ApiError(meta.errors.clubPrivate);
+			const packOpts = { readableChannelIds: [channel.id] };
+
 			if (me) this.activeUsersChart.read(me);
 
 			if (!this.serverSettings.enableFanoutTimeline) {
-				return await this.noteEntityService.packMany(await this.getFromDb({ untilId, sinceId, limit: ps.limit, channelId: channel.id }, me), me);
+				return await this.noteEntityService.packMany(await this.getFromDb({ untilId, sinceId, limit: ps.limit, channelId: channel.id }, me), me, packOpts);
 			}
 
-			return await this.fanoutTimelineEndpointService.timeline({
+			return await this.noteEntityService.packMany(await this.fanoutTimelineEndpointService.getMiNotes({
 				untilId,
 				sinceId,
 				limit: ps.limit,
@@ -105,7 +115,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				dbFallback: async (untilId, sinceId, limit) => {
 					return await this.getFromDb({ untilId, sinceId, limit, channelId: channel.id }, me);
 				},
-			});
+			}), me, packOpts);
 		});
 	}
 

@@ -53,6 +53,9 @@ export class FeedService {
 				userId: user.id,
 				renoteId: IsNull(),
 				visibility: In(['public', 'home']),
+				// CLUB-PRIVATE-V1 (batch-1 review fix): club notes stay out of the personal RSS / Atom / JSON feed (this door reads
+				// the table directly, so the packer's club gate never runs; a private club's post was published in full here)
+				channelId: IsNull(),
 			},
 			order: { id: -1 },
 			take: 20,

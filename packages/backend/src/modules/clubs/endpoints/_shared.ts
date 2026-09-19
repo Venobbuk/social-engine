@@ -14,6 +14,8 @@ export const clubErrors = {
 	notMember: { message: 'Only members can do that.', code: 'CLUB_NOT_MEMBER', id: 'c1b00000-0000-4000-8000-000000000011' },
 	chatOff: { message: 'This club has turned its chat off.', code: 'CLUB_CHAT_OFF', id: 'c1b00000-0000-4000-8000-000000000012' },
 	inviteOnly: { message: 'This club is invite-only.', code: 'CLUB_INVITE_ONLY', id: 'c1b00000-0000-4000-8000-000000000013' },
+	// CLUB-PRIVATE-V1 (W1): a private club's content, asked for by someone who is not a member / admin / link-token holder (403)
+	clubPrivate: { message: 'This club is private. Join it, or open its invite link, to see its posts.', code: 'CLUB_PRIVATE', id: 'c1b00000-0000-4000-8000-000000000014', kind: 'permission', httpStatusCode: 403 },
 	noSuchTag: { message: 'No such tag.', code: 'CLUB_NO_SUCH_TAG', id: 'c1b00000-0000-4000-8000-000000000021' },
 	tagExists: { message: 'This tag has already existed', code: 'CLUB_TAG_EXISTS', id: 'c1b00000-0000-4000-8000-000000000022' },
 	noSuchSchedule: { message: 'No such schedule.', code: 'CLUB_NO_SUCH_SCHEDULE', id: 'c1b00000-0000-4000-8000-000000000031' },
@@ -30,7 +32,7 @@ export const clubErrors = {
 } as const;
 
 const map: Record<string, keyof typeof clubErrors> = {
-	'club:no_such_club': 'noSuchClub', 'club:not_admin': 'notAdmin', 'club:not_member': 'notMember', 'club:chat_off': 'chatOff', 'club:invite_only': 'inviteOnly',
+	'club:no_such_club': 'noSuchClub', 'club:not_admin': 'notAdmin', 'club:not_member': 'notMember', 'club:chat_off': 'chatOff', 'club:invite_only': 'inviteOnly', 'club:private': 'clubPrivate',
 	'club:no_such_tag': 'noSuchTag', 'club:tag_exists': 'tagExists', 'club:no_such_schedule': 'noSuchSchedule', 'club:no_such_note': 'noSuchNote', 'club:no_admins': 'noAdmins', 'club:invalid': 'invalid',
 	'club:has_owner': 'hasOwner', 'club:no_such_claim': 'noSuchClaim', 'club:claim_decided': 'claimDecided', 'club:claim_cooldown': 'claimCooldown', 'club:not_staff': 'notStaff',
 };

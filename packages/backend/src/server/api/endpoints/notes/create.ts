@@ -11,6 +11,10 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { NoteCreateService } from '@/core/NoteCreateService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
+import { DI } from '@/di-symbols.js';
+import type { NotesRepository } from '@/models/_.js';
+import { ClubService } from '@/modules/clubs/ClubService.js';
+import { clubErrors } from '@/modules/clubs/endpoints/_shared.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -93,6 +97,8 @@ export const meta = {
 			code: 'NO_SUCH_CHANNEL',
 			id: 'b1653923-5453-4edc-b786-7c4f39bb0bbb',
 		},
+
+		clubPrivate: clubErrors.clubPrivate, // CLUB-PRIVATE-V1 (W1)
 
 		youHaveBeenBlocked: {
 			message: 'You have been blocked by this user.',
@@ -216,10 +222,24 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.notesRepository)
+		private notesRepository: NotesRepository,
 		private noteEntityService: NoteEntityService,
 		private noteCreateService: NoteCreateService,
+		private clubService: ClubService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// CLUB-PRIVATE-V1 (W1; batch-1 review fix): posting into a PRIVATE club, or commenting on one of its posts, is for its
+			// members / admins / owner (ClubService.mayPostInClub). EVERY club the note can end up in is checked: channelId and the
+			// reply's club — NoteCreateService.create() moves a reply into its post's club whatever channelId says. A renote or
+			// quote of a private club's note needs read access to that club.
+			const replyClub = ps.replyId ? (await this.notesRepository.findOne({ where: { id: ps.replyId }, select: { id: true, channelId: true } }))?.channelId ?? null : null;
+			for (const clubId of new Set([ps.channelId, replyClub].filter((x): x is string => !!x))) {
+				if (!(await this.clubService.mayPostInClub(clubId, me.id))) throw new ApiError(meta.errors.clubPrivate);
+			}
+			const renoteClub = ps.renoteId ? (await this.notesRepository.findOne({ where: { id: ps.renoteId }, select: { id: true, channelId: true } }))?.channelId ?? null : null;
+			if (renoteClub && !(await this.clubService.mayReadClub(renoteClub, me.id))) throw new ApiError(meta.errors.clubPrivate);
+
 			try {
 				const note = await this.noteCreateService.fetchAndCreate(me, {
 					createdAt: new Date(),

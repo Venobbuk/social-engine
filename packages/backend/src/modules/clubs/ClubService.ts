@@ -50,6 +50,45 @@ export class ClubService {
 
 	private err(id: string, message: string): IdentifiableError { return new IdentifiableError(`club:${id}`, message); }
 
+	// CLUB-PRIVATE-V1 (W1): the private clubs (visibility 'private') with who may read them, cached 30 s — the note packer asks
+	// for every club note it packs, so this is one small map, not a query per note. updateSettings() drops it.
+	private privateClubsCache: { at: number; map: Map<string, { ownerId: string | null; adminIds: string[]; accessToken: string | null }> } | null = null;
+
+	@bindThis
+	public async privateClubs(): Promise<Map<string, { ownerId: string | null; adminIds: string[]; accessToken: string | null }>> {
+		if (this.privateClubsCache && Date.now() - this.privateClubsCache.at < 30_000) return this.privateClubsCache.map;
+		const rows = await this.db.query(`SELECT s."channelId", s."adminIds", s."accessToken", c."userId" FROM "club_setting" s JOIN "channel" c ON c."id" = s."channelId" WHERE s."visibility" = 'private'`) as { channelId: string; adminIds: string[] | null; accessToken: string | null; userId: string | null }[];
+		const map = new Map(rows.map(r => [r.channelId, { ownerId: r.userId, adminIds: r.adminIds ?? [], accessToken: r.accessToken }]));
+		this.privateClubsCache = { at: Date.now(), map };
+		return map;
+	}
+
+	/** CLUB-PRIVATE-V1 (batch-1 review fix): THE write gate for a club's content — posting or commenting into a PRIVATE
+	 *  club is for its owner, its admins and its members only (an invite-link holder or an invited player may read, not
+	 *  write). A public club (or a channel with no club row) is open as before. */
+	@bindThis
+	public async mayPostInClub(channelId: string, userId: string): Promise<boolean> {
+		const p = (await this.privateClubs()).get(channelId);
+		if (!p) return true;
+		if (p.ownerId === userId || p.adminIds.includes(userId)) return true;
+		return await this.isMember(channelId, userId);
+	}
+
+	/** CLUB-PRIVATE-V1 (W1): THE read gate for a club's content (posts, comments, members-only reads). A public club (or a
+	 *  channel with no club row) is readable by anyone; a private one by its owner, its admins, its members, and whoever holds
+	 *  the club's invite-link token (Reclub ?at=). Used by the note packer (every note door), isVisibleForMe, channels/timeline and
+	 *  the renote check in notes/create; WRITING uses mayPostInClub.
+	 *  Membership is asked of isMember() only — never channel_following directly — so a new member model applies here as is. */
+	@bindThis
+	public async mayReadClub(channelId: string, userId: string | null | undefined, accessToken?: string | null): Promise<boolean> {
+		const p = (await this.privateClubs()).get(channelId);
+		if (!p) return true;
+		if (accessToken && p.accessToken && accessToken === p.accessToken) return true;
+		if (!userId) return false;
+		if (p.ownerId === userId || p.adminIds.includes(userId)) return true;
+		return await this.isMember(channelId, userId); // the ONE member definition (the club-tiers lane owns it)
+	}
+
 	@bindThis
 	public async channel(channelId: string): Promise<MiChannel> {
 		const c = await this.channelsRepository.findOneBy({ id: channelId });
@@ -88,6 +127,7 @@ export class ClubService {
 		await this.assertAdmin(channel, by.id);
 		const s = await this.settings(channel.id);
 		await this.clubSettingsRepository.update(s.channelId, { ...patch, updatedAt: new Date() });
+		this.privateClubsCache = null; // CLUB-PRIVATE-V1: visibility / admins may have changed
 		return await this.clubSettingsRepository.findOneByOrFail({ channelId: channel.id });
 	}
 
@@ -146,6 +186,7 @@ export class ClubService {
 			if (u) await this.channelFollowingService.unfollow(u as MiLocalUser, channel);
 		}
 		await this.clubSettingsRepository.update(channel.id, upd);
+		this.privateClubsCache = null; // CLUB-PRIVATE-V1: the admins may have changed
 	}
 
 	// ------------------------------------------------------------------------------------- joining
@@ -291,6 +332,7 @@ export class ClubService {
 			if (others.length) await m.query(`UPDATE "club_claim" SET "status" = 'rejected', "decidedAt" = now(), "decidedById" = $2 WHERE "id" = ANY($1)`, [others.map(x => x.id), staff.id]);
 			return { status: 'approved', club: c.name, told: [{ userId: k.userId, approved: true }, ...others.map(x => ({ userId: x.userId, approved: false }))] };
 		});
+		this.privateClubsCache = null; // CLUB-PRIVATE-V1: the owner may have changed
 		for (const t of out.told) {
 			this.notify(t.userId, t.approved ? 'Club ownership approved' : 'Club ownership claim declined', t.approved ? `You are now the owner of ${out.club}.` : `Your claim to own ${out.club} was declined.`, head.channelId);
 		}

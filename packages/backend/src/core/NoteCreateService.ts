@@ -862,8 +862,10 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 					if (!isThreadMuted) {
 						nm.push(data.reply.userId, 'reply');
-						this.globalEventService.publishMainStream(data.reply.userId, 'reply', noteObj);
-						this.webhookService.enqueueUserWebhook(data.reply.userId, 'reply', { note: noteObj });
+						// CLUB-PRIVATE-V1 (batch-1 review fix): a club note goes out packed for its recipient (the club read gate applies)
+						const replyObj = note.channelId ? await this.noteEntityService.pack(note, { id: data.reply.userId }, { withReactionAndUserPairCache: true }) : noteObj;
+						this.globalEventService.publishMainStream(data.reply.userId, 'reply', replyObj);
+						this.webhookService.enqueueUserWebhook(data.reply.userId, 'reply', { note: replyObj });
 					}
 				}
 			}
@@ -879,8 +881,10 @@ export class NoteCreateService implements OnApplicationShutdown {
 
 				// Publish event
 				if ((user.id !== data.renote.userId) && data.renote.userHost === null) {
-					this.globalEventService.publishMainStream(data.renote.userId, 'renote', noteObj);
-					this.webhookService.enqueueUserWebhook(data.renote.userId, 'renote', { note: noteObj });
+					// CLUB-PRIVATE-V1 (batch-1 review fix): as for replies
+					const renoteObj = note.channelId ? await this.noteEntityService.pack(note, { id: data.renote.userId }, { withReactionAndUserPairCache: true }) : noteObj;
+					this.globalEventService.publishMainStream(data.renote.userId, 'renote', renoteObj);
+					this.webhookService.enqueueUserWebhook(data.renote.userId, 'renote', { note: renoteObj });
 				}
 			}
 
