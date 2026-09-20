@@ -94,7 +94,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			query.andWhere(new Brackets(qb => {
 				qb.where(`COALESCE((SELECT cs.visibility FROM club_setting cs WHERE cs."channelId" = channel.id), 'public') <> 'private'`)
 					.orWhere(viewer == null ? 'FALSE' : `EXISTS (SELECT 1 FROM club_member cm WHERE cm."channelId" = channel.id AND cm."userId" = :viewer)`, { viewer })
-					.orWhere(viewer == null ? 'FALSE' : `EXISTS (SELECT 1 FROM club_setting cs2 WHERE cs2."channelId" = channel.id AND cs2."adminIds"::jsonb @> to_jsonb(:viewer::text))`, { viewer })
+					.orWhere(viewer == null ? 'FALSE' : `EXISTS (SELECT 1 FROM club_setting cs2 WHERE cs2."channelId" = channel.id AND :viewer = ANY(cs2."adminIds"))`, { viewer })
 					.orWhere(viewer == null ? 'FALSE' : 'channel."userId" = :viewer', { viewer });
 			}));
 
