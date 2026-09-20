@@ -185,9 +185,6 @@ export * as 'venues/locations/delete' from '@/modules/venues/endpoints/locations
 export * as 'venues/feedback' from '@/modules/venues/endpoints/feedback-create.js';
 export * as 'venues/feedback/list' from '@/modules/venues/endpoints/feedback-list.js';
 export * as 'venues/claim' from '@/modules/venues/endpoints/claim.js';
-export * as 'coaches/show' from '@/modules/coaches/endpoints/show.js';
-export * as 'coaches/update' from '@/modules/coaches/endpoints/update.js';
-export * as 'coaches/list' from '@/modules/coaches/endpoints/list.js';
 export * as 'stats/dupr-rankings' from '@/modules/stats/endpoints/dupr-rankings.js';
 export * as 'stats/pairings' from '@/modules/stats/endpoints/pairings.js';
 export * as 'stats/h2h' from '@/modules/stats/endpoints/h2h.js';

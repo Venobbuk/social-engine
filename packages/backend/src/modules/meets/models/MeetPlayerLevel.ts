@@ -50,22 +50,10 @@ export class MiMeetPlayerLevel {
 	@Column('timestamp with time zone', { nullable: true })
 	public updatedAt: Date | null;
 
-	// DISCOVER-V3 (coach): Reclub's Coach model (experience / rate / notes / status Active|Inactive), one per (user, sport).
-	@Column('varchar', { length: 16, nullable: true, comment: 'active | inactive; null = no coach profile' })
-	public coachStatus: string | null;
-
-	@Column('varchar', { length: 2048, nullable: true })
-	public coachExperience: string | null;
-
-	@Column('varchar', { length: 256, nullable: true })
-	public coachRate: string | null;
-
-	@Column('varchar', { length: 2048, nullable: true })
-	public coachNotes: string | null;
-
-	@Column('timestamp with time zone', { nullable: true })
-	public coachUpdatedAt: Date | null;
-
+	// NUKE-COACH-V1 (G11): the five coach* columns are gone. "This player coaches" is a moderator-granted native ROLE
+	// (role 'arc5w1aagbcoach1', isPublic + isExplorable + asBadge — admin/roles/assign grants it, roles/users lists the
+	// holders, users/show.roles reports it); the experience / rate / notes are the native profile fields[] (i/update).
+	// Nobody can declare themselves a coach any more, which is the whole point.
 	// ONBOARDED-V1: set once when the player finishes the app's onboarding for this sport; never cleared by the app.
 	@Column('timestamp with time zone', { nullable: true })
 	public onboardedAt: Date | null;
