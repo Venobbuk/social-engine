@@ -20,9 +20,6 @@ import { bindThis } from '@/decorators.js';
 // The hkpl ↔ engine server-to-server secret is ONE fact (ADAPTER_HKPL_S2S_SECRET), used in both directions:
 // the engine sends it to hkpl (MeetMatchService) and hkpl sends it here (adapter/venues/sync, adapter/clubs/sync).
 const S2S_SECRET = process.env.ADAPTER_HKPL_S2S_SECRET ?? '';
-// Google Places (New). UNVERIFIED licence for storing name/address/lat/lng of community-added venues beyond the
-// 30-day cache window (place ids may be stored indefinitely). Unset key → autocomplete answers 'unconfigured'.
-const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY ?? '';
 
 export type LeagueVenueInput = {
 	externalRef: string; name: string; address?: string | null; district?: string | null; city?: string | null;
@@ -201,51 +198,9 @@ export class VenueService {
 		return out;
 	}
 
-	// ------------------------------------------------------------------------------- Google Places (New)
-	@bindThis
-	public placesConfigured(): boolean { return PLACES_KEY.length > 0; }
-
-	@bindThis
-	public async autocomplete(opts: { input: string; sessionToken?: string | null; language?: string | null; country?: string | null; lat?: number | null; lng?: number | null }): Promise<{ externalId: string; primary: string; secondary: string }[]> {
-		if (!PLACES_KEY) throw this.err('places_unconfigured', 'Venue search is not configured on this server.');
-		const body: Record<string, unknown> = { input: opts.input.slice(0, 200) };
-		if (opts.sessionToken) body.sessionToken = opts.sessionToken;
-		if (opts.language) body.languageCode = opts.language;
-		if (opts.country) body.includedRegionCodes = [opts.country.toLowerCase()];
-		if (opts.lat != null && opts.lng != null) body.locationBias = { circle: { center: { latitude: opts.lat, longitude: opts.lng }, radius: 50_000 } };
-		const res = await this.httpRequestService.send('https://places.googleapis.com/v1/places:autocomplete', {
-			method: 'POST', headers: { 'content-type': 'application/json', 'X-Goog-Api-Key': PLACES_KEY }, body: JSON.stringify(body), timeout: 8_000,
-		}, { throwErrorWhenResponseNotOk: false });
-		const json = await res.json().catch(() => ({})) as { suggestions?: { placePrediction?: { placeId: string; structuredFormat?: { mainText?: { text?: string }; secondaryText?: { text?: string } }; text?: { text?: string } } }[] };
-		if (res.status !== 200) throw this.err('places_failed', `Venue search failed (${res.status}).`);
-		return (json.suggestions ?? []).map(s => s.placePrediction).filter((p): p is NonNullable<typeof p> => !!p).map(p => ({
-			externalId: p.placeId,
-			primary: p.structuredFormat?.mainText?.text ?? p.text?.text ?? '',
-			secondary: p.structuredFormat?.secondaryText?.text ?? '',
-		}));
-	}
-
-	@bindThis
-	public async resolvePlace(externalId: string, sessionToken?: string | null): Promise<{ externalId: string; name: string; address: string | null; lat: number; lng: number; country: string | null; district: string | null; city: string | null }> {
-		if (!PLACES_KEY) throw this.err('places_unconfigured', 'Venue search is not configured on this server.');
-		const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(externalId)}${sessionToken ? `?sessionToken=${encodeURIComponent(sessionToken)}` : ''}`;
-		const res = await this.httpRequestService.send(url, {
-			headers: { 'X-Goog-Api-Key': PLACES_KEY, 'X-Goog-FieldMask': 'id,displayName,formattedAddress,location,addressComponents' }, timeout: 8_000,
-		}, { throwErrorWhenResponseNotOk: false });
-		const j = await res.json().catch(() => ({})) as { id?: string; displayName?: { text?: string }; formattedAddress?: string; location?: { latitude: number; longitude: number }; addressComponents?: { longText?: string; shortText?: string; types?: string[] }[] };
-		if (res.status !== 200 || !j.location) throw this.err('places_failed', `Venue lookup failed (${res.status}).`);
-		const comp = (t: string, short = false) => j.addressComponents?.find(c => c.types?.includes(t))?.[short ? 'shortText' : 'longText'] ?? null;
-		return {
-			externalId: j.id ?? externalId,
-			name: j.displayName?.text ?? '',
-			address: j.formattedAddress ?? null,
-			lat: j.location.latitude,
-			lng: j.location.longitude,
-			country: comp('country', true),
-			district: comp('sublocality') ?? comp('neighborhood') ?? comp('administrative_area_level_2'),
-			city: comp('locality') ?? comp('administrative_area_level_1'),
-		};
-	}
+	// INT-BATCH2: the Google Places autocomplete / place-details path lived here (venues/autocomplete, venues/resolve).
+	// Deleted — DISCOVER-W2D geo/search + geo/reverse are the ONE place door (map link / "lat, lng" -> Google Places when
+	// GOOGLE_PLACES_API_KEY is set -> Photon/OSM without a key), and this one was key-only, so dead on this server.
 
 	// ------------------------------------------------------------------------------- saved locations
 	@bindThis

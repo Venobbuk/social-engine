@@ -176,8 +176,6 @@ export * as 'meets/matches/submit-dupr-all' from '@/modules/meets/endpoints/matc
 export * as 'venues/show' from '@/modules/venues/endpoints/show.js';
 export * as 'venues/search' from '@/modules/venues/endpoints/search.js';
 export * as 'venues/create' from '@/modules/venues/endpoints/create.js';
-export * as 'venues/autocomplete' from '@/modules/venues/endpoints/autocomplete.js';
-export * as 'venues/resolve' from '@/modules/venues/endpoints/resolve.js';
 export * as 'venues/staff-update' from '@/modules/venues/endpoints/staff-update.js';
 export * as 'venues/locations/list' from '@/modules/venues/endpoints/locations-list.js';
 export * as 'venues/locations/save' from '@/modules/venues/endpoints/locations-save.js';
