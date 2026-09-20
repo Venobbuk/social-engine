@@ -830,7 +830,12 @@ export class CompetitionService {
 		for (const o of others) {
 			const wasInvited = (o.invitedUserIds ?? []).includes(userId);
 			await this.entriesRepository.update(o.id, { invitedUserIds: (o.invitedUserIds ?? []).filter((x) => x !== userId), requestedUserIds: (o.requestedUserIds ?? []).filter((x) => x !== userId) });
-			if (wasInvited && o.captainId && o.captainId !== userId) this.notify(o.captainId, c, 'Team invitation closed', `${who} joined another team in ${c.name}; the place in ${o.name} is open again.`);
+			/* FRESH-EYES P2-13 (2026-09-20): a tester read "Mei Lam joined another team in [probe] W1B4-consent 2310;
+			 * the place in Amy Chan is open again." — Amy Chan being the READER'S OWN name. `o.name` is the ENTRY's
+			 * name, and an entry with no team name is named after its captain, who is exactly the person this
+			 * notification is addressed to. A sentence written to someone must never carry their own name as a
+			 * variable: from their side the entry is "your team". */
+			if (wasInvited && o.captainId && o.captainId !== userId) this.notify(o.captainId, c, 'Team invitation closed', `${who} joined another team in ${c.name}; your team has a place open again.`);
 		}
 	}
 

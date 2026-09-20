@@ -116,13 +116,29 @@ type LogRow = { matchId: string; source: string; partnerId: string | null; oppon
 
 /** The Edge for one player from their GripBat matches: rating + trend, partner chemistry, clutch, form, upsets. */
 export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball'): Promise<Record<string, unknown>> {
+	/* FRESH-EYES P1-2 (2026-09-20) — A RATING ROW CANNOT OUTLIVE THE MATCH THAT JUSTIFIED IT.
+	 *
+	 * pendingMatches() above refuses to rate a match in a cancelled meet, and MeetService.cancel() now takes back
+	 * what a meet had already written. This is the same rule applied where it cannot be bypassed: on the READ. A row
+	 * survives its match in two ways — the meet is cancelled after the rating ran, or the match row is deleted
+	 * outright (a probe tidying up after itself; measured 2026-09-20: 6 such rows in the sandbox, 3 of them one
+	 * player's, and they were the entire "GRIPBAT RATING 3.32 · 3 matches · On fire · Upsets 3" her Statistics
+	 * printed above "0 Meets played"). Nobody can check a row whose match is gone, so it does not count.
+	 *
+	 * The counter is asked with the SAME condition rather than read off gb_player_rating, because that column is a
+	 * running total and would keep reporting matches this query has just excluded — which is the contradiction. */
+	const GUARD = `(source <> 'meet' OR EXISTS (SELECT 1 FROM meet_match mm JOIN meet m ON m.id = mm."meetId" WHERE mm.id = gb_rating_log."matchId" AND m.status <> 'cancelled'))`;
 	const rows = (await db.query(
 		`SELECT "matchId", source, "partnerId", "opponentIds", pre, post, "teamRating", "oppRating", expected, won, games, "playedAt"
-		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped ORDER BY "playedAt" DESC LIMIT 300`, [userId, sport]) as LogRow[])
+		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD} ORDER BY "playedAt" DESC LIMIT 300`, [userId, sport]) as LogRow[])
 		.map((r) => ({ ...r, pre: Number(r.pre), post: Number(r.post), teamRating: Number(r.teamRating), oppRating: Number(r.oppRating), expected: Number(r.expected) }));
 	const rt = (await db.query('SELECT rating, matches FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [userId, sport]))[0];
-	const rating = rt ? Number(rt.rating) : null;
-	if (!rows.length) return { userId, sport, rating, matches: 0, provisional: true, empty: true };
+	const counted = Number(((await db.query(
+		`SELECT count(*)::int AS n FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD}`, [userId, sport]))[0] ?? { n: 0 }).n);
+	// No countable match means no rating to state: printing the stored number beside "No rated matches yet" is the
+	// contradiction this whole change exists to remove.
+	const rating = counted && rt ? Number(rt.rating) : null;
+	if (!rows.length) return { userId, sport, rating: null, matches: 0, provisional: true, empty: true };
 	// rating trend: last 30 days vs the rating before them
 	const monthAgo = Date.now() - 30 * 86400e3;
 	const older = rows.find((r) => new Date(r.playedAt).getTime() < monthAgo);
@@ -151,7 +167,7 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 	const upWon = rows.filter((r) => r.won && r.oppRating - r.teamRating >= 0.25).length;
 	const upLost = rows.filter((r) => !r.won && r.teamRating - r.oppRating >= 0.25).length;
 	return {
-		userId, sport, rating, matches: rt ? Number(rt.matches) : rows.length, provisional: (rt ? Number(rt.matches) : rows.length) < 10, trend30,
+		userId, sport, rating, matches: counted, provisional: counted < 10, trend30,
 		history: rows.slice(0, 30).map((r) => ({ at: r.playedAt, rating: r.post })).reverse(),
 		partners,
 		clutch: { closeGames: close, closeWon, closeRate: close ? closeWon / close : null, deciders: dec, decidersWon: decWon, deciderRate: dec ? decWon / dec : null },

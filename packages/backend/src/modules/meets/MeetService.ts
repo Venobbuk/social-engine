@@ -367,6 +367,45 @@ export class MeetService {
 		void meetSystemLine(this.chatService, meet, 'cancelled'); // CHAT-V2 system line in the room
 		const rows = await this.meetParticipantsRepository.findBy({ meetId: meet.id, status: In(['confirmed', 'waitlisted', 'requested', 'invited', 'hold', 'maybe']) });
 		for (const p of rows) if (p.userId && p.userId !== meet.hostId) this.notify(p.userId, meet, 'Cancelled', `${meet.name} has been cancelled by the host.`);
+		await this.retireRatings(meet);
+	}
+
+	/* FRESH-EYES P1-2 (2026-09-20) — CANCELLING A MEET RETIRES WHAT ITS MATCHES WROTE TO THE GRIPBAT RATING.
+	 *
+	 * The rule that a cancelled meet does not count already exists, and is only half applied: pendingMatches() in
+	 * modules/stats/GbRating.ts refuses a match whose meet is cancelled, but it asks at RATING time. A meet that was
+	 * rated first and cancelled afterwards keeps every gb_rating_log row it minted, for ever.
+	 *
+	 * MEASURED on UAT (probes/fresh-eyes.json P1-2). player-amy's Statistics read "GRIPBAT RATING 3.32 · +0.32 30d ·
+	 * 3 matches", "FORM On fire — 3 wins in 3" and "Upsets 3" directly above the tiles "0 Meets played / 0 Hosted".
+	 * All three of those matches came from meets that had since been cancelled (gb_rating_log.source='meet', matchId
+	 * → meet_match → meet.status='cancelled'), so the tiles were right and the Edge was the wrong number. A player
+	 * could not tell what their record was.
+	 *
+	 * The rule is now SYMMETRIC: what a cancelled meet wrote is taken back, and gb_player_rating is set to what the
+	 * REMAINING log says — the rating and the match count come from one place, whichever way a meet ends. Scoped to
+	 * the players the meet actually rated, and never allowed to fail the cancellation (the meet is already
+	 * cancelled by the time this runs; the sweep and the next rating pass reconcile anything left).
+	 *
+	 * G11: this is (2) EXTEND — no new endpoint or table. It is GripBat's own rating (modules/stats/GbRating.ts),
+	 * which Misskey has no equivalent of, kept consistent on the existing cancel path.
+	 */
+	private async retireRatings(meet: MiMeet): Promise<void> {
+		try {
+			const touched = await this.db.query(
+				'SELECT DISTINCT l."userId" AS "userId", l.sport AS sport FROM gb_rating_log l JOIN meet_match mm ON mm.id = l."matchId" WHERE l.source = $1 AND mm."meetId" = $2',
+				['meet', meet.id]) as { userId: string; sport: string }[];
+			if (!touched.length) return;
+			await this.db.query('DELETE FROM gb_rating_log l USING meet_match mm WHERE l.source = $1 AND l."matchId" = mm.id AND mm."meetId" = $2', ['meet', meet.id]);
+			for (const t of touched) {
+				if (!t.userId || t.userId === '-') continue;
+				const agg = (await this.db.query(
+					'SELECT count(*)::int AS cnt, (array_agg(post ORDER BY "playedAt" DESC))[1] AS last FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped',
+					[t.userId, t.sport]))[0] as { cnt: number; last: string | null } | undefined;
+				if (!agg || !agg.cnt) await this.db.query('DELETE FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport]);
+				else await this.db.query('UPDATE gb_player_rating SET matches = $3, rating = $4, "updatedAt" = now() WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport, agg.cnt, agg.last]);
+			}
+		} catch (e) { /* the cancellation stands; probes/_sweep.cjs and the next rating pass reconcile */ }
 	}
 
 	// ------------------------------------------------------------------------------------ the gate
