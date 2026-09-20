@@ -618,6 +618,9 @@ export class ClubService {
 	/** Reclub "Message Admins": one chat room per member with the club's admins (owner + adminIds), minted on first open. */
 	@bindThis
 	public async adminsRoom(channel: MiChannel, user: MiUser): Promise<{ roomId: string }> {
+		// SEC-CLUB-ADMINS-ROOM-V1: only someone attached to the club may open a thread with its admins — a stranger
+		// could otherwise create a room owned by the club owner and land in their inbox (control-trace, 2026-09-20).
+		if (!(await this.isMember(channel.id, user.id)) && !(await this.isAdmin(channel, user.id))) throw this.err('not_member', 'Only club members can message the admins.');
 		const s = await this.settings(channel.id);
 		const adminIds = Array.from(new Set([channel.userId, ...s.adminIds].filter((x): x is string => !!x && x !== user.id)));
 		if (!adminIds.length) throw this.err('no_admins', 'This club has no admins to message.');
