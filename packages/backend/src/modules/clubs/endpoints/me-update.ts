@@ -19,7 +19,7 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { channelId: { type: 'string', format: 'misskey:id' }, pinned: { type: 'boolean', nullable: true }, paused: { type: 'boolean', nullable: true } },
+	properties: { channelId: { type: 'string', format: 'misskey:id' }, paused: { type: 'boolean', nullable: true } },
 	required: ["channelId"],
 } as const;
 
@@ -28,10 +28,12 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(private clubService: ClubService) {
 		super(meta, paramDef, async (ps, me) => {
 			try {
-				// Reclub club kebab: Pin to home screen / Take a break (PUT /users/<id> {is_pinned} / {is_active})
+				// Reclub club kebab: Take a break (PUT /users/<id> {is_active}).
+				// NUKE-CLUB-PIN-V1 (G11): "Pin to home screen" is the NATIVE channels/favorite — this door never did it.
 				const c = await this.clubService.channel(ps.channelId);
-				const st = await this.clubService.updateMyState(c, me, { pinned: ps.pinned, paused: ps.paused });
-				return { pinned: !!st.pinnedAt, paused: !!st.pausedAt, pinnedAt: st.pinnedAt ? st.pinnedAt.toISOString() : null, pausedAt: st.pausedAt ? st.pausedAt.toISOString() : null };
+				const st = await this.clubService.updateMyState(c, me, { paused: ps.paused });
+				const pinned = (await this.clubService.pinnedChannelIds(me.id, [c.id])).has(c.id);
+				return { pinned, paused: !!st.pausedAt, pausedAt: st.pausedAt ? st.pausedAt.toISOString() : null };
 			} catch (e) {
 				return toApiError(e);
 			}

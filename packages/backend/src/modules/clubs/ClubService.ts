@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource, In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
-import type { ChannelsRepository, ChannelFollowingsRepository, ClubSettingsRepository, ClubJoinRequestsRepository, ClubMemberStatesRepository, NotesRepository, VenuesRepository, UsersRepository } from '@/models/_.js';
+import type { ChannelsRepository, ChannelFollowingsRepository, ChannelFavoritesRepository, ClubSettingsRepository, ClubJoinRequestsRepository, ClubMemberStatesRepository, NotesRepository, VenuesRepository, UsersRepository } from '@/models/_.js';
 import type { MiChannel } from '@/models/Channel.js';
 import type { MiUser, MiLocalUser } from '@/models/User.js';
 import type { MiClubSetting, MiClubJoinRequest, MiClubMemberState, ClubTag, ClubAward } from '@/modules/clubs/models/ClubSetting.js';
@@ -39,6 +39,8 @@ export class ClubService {
 		@Inject(DI.clubJoinRequestsRepository) private clubJoinRequestsRepository: ClubJoinRequestsRepository,
 		@Inject(DI.usersRepository) private usersRepository: UsersRepository,
 		@Inject(DI.clubMemberStatesRepository) private clubMemberStatesRepository: ClubMemberStatesRepository,
+		// NUKE-CLUB-PIN-V1: "Pin to home screen" IS Misskey's channel favourite — one store, the native one
+		@Inject(DI.channelFavoritesRepository) private channelFavoritesRepository: ChannelFavoritesRepository,
 		@Inject(DI.notesRepository) private notesRepository: NotesRepository,
 		@Inject(DI.venuesRepository) private venuesRepository: VenuesRepository,
 		private idService: IdService,
@@ -542,19 +544,31 @@ export class ClubService {
 	}
 
 	// ------------------------------------------------------------------------------------- CLUB-V3: per-member state
+	/** NUKE-CLUB-PIN-V1: the clubs `userId` has pinned = the channels they have FAVOURITED (native channel_favorite,
+	 *  written by channels/favorite / channels/unfavorite). We keep no pin column. */
+	@bindThis
+	public async pinnedChannelIds(userId: string, channelIds?: string[]): Promise<Set<string>> {
+		if (channelIds != null && channelIds.length === 0) return new Set();
+		const rows = await this.channelFavoritesRepository.find({
+			where: channelIds != null ? { userId, channelId: In(channelIds) } : { userId },
+			select: { channelId: true },
+		});
+		return new Set(rows.map(r => r.channelId));
+	}
+
 	@bindThis
 	public async myState(channelId: string, userId: string): Promise<MiClubMemberState | null> {
 		return await this.clubMemberStatesRepository.findOneBy({ channelId, userId });
 	}
 
-	/** Pin to home / Take a break (Reclub PUT /users/<id> {is_pinned} / {is_active}). Members only. */
+	/** Take a break (Reclub PUT /users/<id> {is_active}). Members only.
+	 *  NUKE-CLUB-PIN-V1: "Pin to home screen" left here — it is the native channels/favorite. */
 	@bindThis
-	public async updateMyState(channel: MiChannel, user: MiUser, patch: { pinned?: boolean | null; paused?: boolean | null }): Promise<MiClubMemberState> {
+	public async updateMyState(channel: MiChannel, user: MiUser, patch: { paused?: boolean | null }): Promise<MiClubMemberState> {
 		if (!(await this.isMember(channel.id, user.id)) && !(await this.isAdmin(channel, user.id))) throw this.err('not_member', 'Join the club first.');
 		let st = await this.myState(channel.id, user.id);
-		if (!st) st = await this.clubMemberStatesRepository.insertOne({ id: this.idService.gen(), channelId: channel.id, userId: user.id, pinnedAt: null, pausedAt: null, adminRoomId: null, updatedAt: new Date() });
+		if (!st) st = await this.clubMemberStatesRepository.insertOne({ id: this.idService.gen(), channelId: channel.id, userId: user.id, pausedAt: null, adminRoomId: null, updatedAt: new Date() });
 		const upd: Partial<MiClubMemberState> = { updatedAt: new Date() };
-		if (patch.pinned != null) upd.pinnedAt = patch.pinned ? new Date() : null;
 		if (patch.paused != null) upd.pausedAt = patch.paused ? new Date() : null;
 		await this.clubMemberStatesRepository.update(st.id, upd);
 		return await this.clubMemberStatesRepository.findOneByOrFail({ id: st.id });
@@ -569,13 +583,14 @@ export class ClubService {
 		if (!ids.length) return [];
 		const channels = await this.channelsRepository.find({ where: { id: In(ids), isArchived: false } });
 		const states = await this.clubMemberStatesRepository.find({ where: { userId: user.id, channelId: In(ids) } });
+		const pinned = await this.pinnedChannelIds(user.id, ids); // NUKE-CLUB-PIN-V1: native channel_favorite
 		const settings = await this.clubSettingsRepository.find({ where: { channelId: In(ids) } });
 		const byId = new Map(channels.map(c => [c.id, c]));
 		const out: { channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' }[] = [];
 		for (const id of ids) {
 			const c = byId.get(id); if (!c) continue;
 			const st = states.find(x => x.channelId === id); const s = settings.find(x => x.channelId === id);
-			out.push({ channel: c, pinned: !!(st && st.pinnedAt), paused: !!(st && st.pausedAt), role: c.userId === user.id ? 'owner' : s && s.adminIds.includes(user.id) ? 'admin' : 'member' });
+			out.push({ channel: c, pinned: pinned.has(id), paused: !!(st && st.pausedAt), role: c.userId === user.id ? 'owner' : s && s.adminIds.includes(user.id) ? 'admin' : 'member' });
 		}
 		return out.sort((a, b) => Number(b.pinned) - Number(a.pinned));
 	}
@@ -629,7 +644,7 @@ export class ClubService {
 		if (!room) {
 			const owner = await this.usersRepository.findOneByOrFail({ id: channel.userId ?? adminIds[0] });
 			room = await this.chatService.createRoom(owner, { name: `${channel.name} · admins`, description: `${user.name ?? user.username} ↔ the admins of ${channel.name}` });
-			if (!st) st = await this.clubMemberStatesRepository.insertOne({ id: this.idService.gen(), channelId: channel.id, userId: user.id, pinnedAt: null, pausedAt: null, adminRoomId: room.id, updatedAt: new Date() });
+			if (!st) st = await this.clubMemberStatesRepository.insertOne({ id: this.idService.gen(), channelId: channel.id, userId: user.id, pausedAt: null, adminRoomId: room.id, updatedAt: new Date() });
 			else await this.clubMemberStatesRepository.update(st.id, { adminRoomId: room.id, updatedAt: new Date() });
 		}
 		for (const uid of [user.id, ...adminIds]) {

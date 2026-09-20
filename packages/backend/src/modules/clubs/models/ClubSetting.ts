@@ -94,9 +94,8 @@ export class MiClubMemberState {
 	@Column(id())
 	public userId: MiUser['id'];
 
-	@Column('timestamp with time zone', { nullable: true, comment: 'Reclub is_pinned: the club sits on the Home pinned row' })
-	public pinnedAt: Date | null;
-
+	// NUKE-CLUB-PIN-V1: pinnedAt is gone — "Pin to home screen" IS the native channel favourite (channel_favorite,
+	// channels/favorite / channels/unfavorite / channels/my-favorites, and Channel.isFavorited on every packed club).
 	@Column('timestamp with time zone', { nullable: true, comment: 'Reclub is_active=false ("Take a break"): hidden from rosters, no club notifications, no auto-invites until resumed' })
 	public pausedAt: Date | null;
 
