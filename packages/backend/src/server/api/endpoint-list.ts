@@ -162,6 +162,7 @@ export * as 'meets/reviews/leaderboard' from '@/modules/meets/endpoints/reviews/
 export * as 'meets/promote' from '@/modules/meets/endpoints/promote.js';
 export * as 'meets/summary' from '@/modules/meets/endpoints/summary.js';
 export * as 'meets/extras/update' from '@/modules/meets/endpoints/extras-update.js';
+export * as 'meets/photos/list' from '@/modules/meets/endpoints/photos-list.js'; // NUKE-REVIEW-FIXES-V1: the Photos pane for the MEET's audience (read-only; write/delete stay native chat)
 export * as 'meets/matches/forfeit' from '@/modules/meets/endpoints/matches/forfeit.js';
 // HOST-TOOLS-V1 (2026-09-19): the host's roster tools
 export * as 'meets/participants/bulk' from '@/modules/meets/endpoints/participants/bulk.js';
@@ -205,6 +206,12 @@ export * as 'clubs/insights' from '@/modules/clubs/endpoints/insights.js';
 export * as 'clubs/claim' from '@/modules/clubs/endpoints/claim.js';
 export * as 'clubs/claims/list' from '@/modules/clubs/endpoints/claims-list.js'; // CLUB-CLAIM-VERIFY-V1
 export * as 'clubs/claims/decide' from '@/modules/clubs/endpoints/claims-decide.js'; // CLUB-CLAIM-VERIFY-V1
+// COACH-VERIFY-V1 (NUKE-REVIEW-FIXES-V1): the staff door NUKE-COACH-V1 shipped without. The Coach ROLE is still the
+// native one — these only record the application and hand the verdict to RoleService.assign / unassign.
+export * as 'coaches/apply' from '@/modules/coaches/endpoints/apply.js'; // COACH-VERIFY-V1
+export * as 'coaches/application' from '@/modules/coaches/endpoints/application.js'; // COACH-VERIFY-V1
+export * as 'coaches/applications/list' from '@/modules/coaches/endpoints/applications-list.js'; // COACH-VERIFY-V1 (staff)
+export * as 'coaches/applications/decide' from '@/modules/coaches/endpoints/applications-decide.js'; // COACH-VERIFY-V1 (staff)
 export * as 'clubs/invitations/create' from '@/modules/clubs/endpoints/invitations-create.js'; // CLUB-INVITE-V1
 export * as 'clubs/invitations/respond' from '@/modules/clubs/endpoints/invitations-respond.js'; // CLUB-INVITE-V1
 export * as 'clubs/invitations/list' from '@/modules/clubs/endpoints/invitations-list.js'; // CLUB-INVITE-V1

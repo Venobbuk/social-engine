@@ -100,7 +100,10 @@ export class MeetEntityService {
 		if (me) {
 			const mine = await this.meetParticipantsRepository.findOneBy({ meetId: meet.id, userId: me.id });
 			myStatus = mine?.status ?? null;
-			chatMuted = meet.chatRoomId ? await this.chatService.isRoomMuted(me.id, meet.chatRoomId).catch(() => false) : false;
+			// NUKE-REVIEW-FIXES-V1 (review finding 4): DETAILED only. The kebab that reads chatMuted lives on the meet
+			// PAGE (meets/show), and this pack runs for every row of every list — a 30-meet feed was +30 membership
+			// queries and up to +30 redis GETs per request. A list pack reports false and asks nothing.
+			chatMuted = (opts?.detailed && meet.chatRoomId) ? await this.chatService.isRoomMuted(me.id, meet.chatRoomId).catch(() => false) : false;
 			isHost = meet.hostId === me.id || (mine?.isHost ?? false);
 			const level = await this.meetPlayerLevelsRepository.findOneBy({ userId: me.id, sport: meet.sport });
 			myGate = this.meetLevelService.gateVerdict(meet, level);

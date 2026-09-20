@@ -80,6 +80,7 @@ import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { VenueService } from '@/modules/venues/VenueService.js';
 import { ClubService } from '@/modules/clubs/ClubService.js';
+import { CoachService } from '@/modules/coaches/CoachService.js'; // COACH-VERIFY-V1
 import { CompetitionService } from '@/modules/competitions/CompetitionService.js'; // TOURNAMENT-V1
 import { CompetitionEntityService } from '@/modules/competitions/CompetitionEntityService.js';
 import { ClubScheduleService } from '@/modules/clubs/ClubScheduleService.js'; // CLUB-V3
@@ -240,6 +241,7 @@ const $MeetLevelService: Provider = { provide: 'MeetLevelService', useExisting: 
 const $MeetMatchService: Provider = { provide: 'MeetMatchService', useExisting: MeetMatchService };
 const $VenueService: Provider = { provide: 'VenueService', useExisting: VenueService };
 const $ClubService: Provider = { provide: 'ClubService', useExisting: ClubService };
+const $CoachService: Provider = { provide: 'CoachService', useExisting: CoachService }; // COACH-VERIFY-V1
 const $CompetitionService: Provider = { provide: 'CompetitionService', useExisting: CompetitionService }; // TOURNAMENT-V1
 const $CompetitionEntityService: Provider = { provide: 'CompetitionEntityService', useExisting: CompetitionEntityService };
 const $ClubScheduleService: Provider = { provide: 'ClubScheduleService', useExisting: ClubScheduleService }; // CLUB-V3
@@ -402,6 +404,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MeetMatchService,
 		VenueService,
 		ClubService,
+		CoachService, // COACH-VERIFY-V1
 		CompetitionService, // TOURNAMENT-V1
 		CompetitionEntityService,
 		ClubScheduleService, // CLUB-V3
@@ -562,6 +565,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MeetMatchService,
 		$VenueService,
 		$ClubService,
+		$CoachService, // COACH-VERIFY-V1
 		$CompetitionService, // TOURNAMENT-V1
 		$CompetitionEntityService,
 		$ClubScheduleService, // CLUB-V3
@@ -722,6 +726,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		MeetMatchService,
 		VenueService,
 		ClubService,
+		CoachService, // COACH-VERIFY-V1
 		CompetitionService, // TOURNAMENT-V1
 		CompetitionEntityService,
 		ClubScheduleService, // CLUB-V3
@@ -880,6 +885,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$MeetMatchService,
 		$VenueService,
 		$ClubService,
+		$CoachService, // COACH-VERIFY-V1
 		$CompetitionService, // TOURNAMENT-V1
 		$CompetitionEntityService,
 		$ClubScheduleService, // CLUB-V3

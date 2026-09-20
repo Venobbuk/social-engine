@@ -292,6 +292,17 @@ export class ChatService {
 
 		const inserted = await this.chatMessagesRepository.insertOne(message);
 
+		// NUKE-REVIEW-FIXES-V1 (review finding 6): an album is ONE notification, not one per photo. A meet photo is now a
+		// file message (NUKE-MEET-PHOTOS-V1), and a host posting a 20-photo post-match album used to push 20 times to every
+		// player. A FILE-ONLY message (no text — i.e. an upload, never a typed line) from the same sender into the same
+		// room claims a 60 s window: the first one notifies, the rest of the burst do not. The unread marker and the
+		// room stream are untouched, so the badge and an open room are exactly as before — only the per-photo PUSH and its
+		// main-stream ping are coalesced. NX means the first message of the burst wins the window even under concurrency.
+		let burstFirst = true;
+		if (params.system == null && message.fileId != null && message.text == null) {
+			burstFirst = (await this.redisClient.set(`chatRoomFileBurst:${toRoom.id}:${fromUser.id}`, '1', 'EX', 60, 'NX')) === 'OK';
+		}
+
 		const packedMessage = await this.chatEntityService.packMessageLiteForRoom(inserted);
 
 		this.globalEventService.publishChatRoomStream(toRoom.id, 'message', packedMessage);
@@ -320,6 +331,9 @@ export class ChatService {
 
 			// CHAT-V2: a system line never pushes; a member who muted this room (or every chat) keeps the unread marker and gets no notification
 			if (params.system != null) return;
+			// NUKE-REVIEW-FIXES-V1: the 2nd..nth file of one upload burst keeps its unread marker and its room-stream
+			// message (an open room draws every photo); it gets no main-stream ping and no push.
+			if (!burstFirst) return;
 			const mutedIds = await this.mutedUserIdsForRoom(toRoom.id, membershipsOtherThanMe.map(m => m.userId));
 
 			for (let i = 0; i < membershipsOtherThanMe.length; i++) {
@@ -825,11 +839,19 @@ export class ChatService {
 	}
 
 	/** NUKE-CHAT-MUTE-V1: is this room muted for `userId`? Native state only — the membership flag, or (for the owner,
-	 *  who has no membership row) the redis flag muteRoom writes. One reader for rooms/show, the meet pack and the app. */
+	 *  who has no membership row) the redis flag muteRoom writes. One reader for rooms/show, the meet pack and the app.
+	 *
+	 *  NUKE-REVIEW-FIXES-V1 (review finding 1): the redis flag is the ROOM OWNER's, so it is only ever this caller's
+	 *  answer when this caller owns the room — exactly the gate ChatEntityService.packRoom applies. Without it every
+	 *  signed-in non-member read the host's mute as their own (MeetEntityService.pack calls this for every viewer of a
+	 *  meet, so one host muting a meet chat showed "chat notifications off" to everybody) and a toggle they never set
+	 *  failed when tapped. Anyone who is neither a member nor the owner has no mute here: false. */
 	@bindThis
 	public async isRoomMuted(userId: MiUser['id'], roomId: MiChatRoom['id']): Promise<boolean> {
 		const membership = await this.chatRoomMembershipsRepository.findOneBy({ roomId, userId });
 		if (membership != null) return membership.isMuted;
+		const room = await this.chatRoomsRepository.findOneBy({ id: roomId, ownerId: userId });
+		if (room == null) return false;
 		return (await this.redisClient.get(`chatRoomOwnerMuted:${roomId}`)) === '1';
 	}
 
