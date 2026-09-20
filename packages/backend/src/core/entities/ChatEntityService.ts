@@ -4,6 +4,7 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
+import * as Redis from 'ioredis';
 import { DI } from '@/di-symbols.js';
 import type { MiUser, ChatMessagesRepository, MiChatMessage, ChatRoomsRepository, MiChatRoom, MiChatRoomInvitation, ChatRoomInvitationsRepository, MiChatRoomMembership, ChatRoomMembershipsRepository } from '@/models/_.js';
 import { awaitAll } from '@/misc/prelude/await-all.js';
@@ -18,6 +19,9 @@ import { In } from 'typeorm';
 @Injectable()
 export class ChatEntityService {
 	constructor(
+		@Inject(DI.redis)
+		private redisClient: Redis.Redis,
+
 		@Inject(DI.chatMessagesRepository)
 		private chatMessagesRepository: ChatMessagesRepository,
 
@@ -266,7 +270,9 @@ export class ChatEntityService {
 			description: room.description,
 			ownerId: room.ownerId,
 			owner: options?._hint_?.packedOwners.get(room.ownerId) ?? (await this.userEntityService.pack(room.owner ?? room.ownerId, me)),
-			isMuted: membership != null ? membership.isMuted : false,
+			// NUKE-CHAT-MUTE-V1: the OWNER has no membership row (Misskey convention) and their mute lives in redis, so
+			// rooms/show used to answer isMuted:false for a meet host / club owner who had muted. It now tells the truth.
+			isMuted: membership != null ? membership.isMuted : (me != null && me.id === room.ownerId ? (await this.redisClient.get(`chatRoomOwnerMuted:${room.id}`)) === '1' : false),
 			invitationExists: invitation != null,
 			readOnlyAt: room.readOnlyAt ? room.readOnlyAt.toISOString() : null,
 		};

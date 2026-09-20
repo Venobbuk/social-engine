@@ -794,7 +794,6 @@ export class MeetService {
 					// CHAT-V2: "{name} has joined the conversation." (Reclub gate line)
 					const joined = await this.usersRepository.findOneBy({ id: p.userId });
 					await meetSystemLine(this.chatService, meet, 'joined', { name: joined?.name ?? joined?.username ?? null, userId: p.userId });
-					if (p.chatMuted) await this.chatService.muteRoom(p.userId, room.id, true).catch(() => undefined); // HOST-TOOLS-V1
 				}
 			} catch {
 				// chat is best-effort

@@ -102,10 +102,8 @@ export class MiMeetParticipant {
 	@Column('timestamp with time zone', { nullable: true })
 	public checkedInAt: Date | null;
 
-	// ---- HOST-TOOLS-V1 (2026-09-19): per-meet chat mute (Reclub kebab "Turn off chat notifications") + proof of payment (a drive file) ----
-	@Column('boolean', { default: false })
-	public chatMuted: boolean;
-
+	// ---- HOST-TOOLS-V1 (2026-09-19): proof of payment (a drive file). NUKE-CHAT-MUTE-V1 dropped chatMuted: the per-meet
+	// chat mute IS the native chat room mute (chat_room_membership.isMuted), read through ChatService.isRoomMuted. ----
 	@Column('varchar', { length: 32, nullable: true })
 	public receiptFileId: string | null;
 

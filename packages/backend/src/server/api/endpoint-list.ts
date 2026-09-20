@@ -172,7 +172,6 @@ export * as 'meets/participants/generate-teams' from '@/modules/meets/endpoints/
 export * as 'meets/participants/receipt' from '@/modules/meets/endpoints/participants/receipt.js';
 export * as 'meets/dupr-manager' from '@/modules/meets/endpoints/dupr-manager.js';
 export * as 'meets/matches/submit-dupr-all' from '@/modules/meets/endpoints/matches/submit-dupr-all.js';
-export * as 'meets/chat-mute' from '@/modules/meets/endpoints/chat-mute.js';
 export * as 'venues/show' from '@/modules/venues/endpoints/show.js';
 export * as 'venues/search' from '@/modules/venues/endpoints/search.js';
 export * as 'venues/create' from '@/modules/venues/endpoints/create.js';

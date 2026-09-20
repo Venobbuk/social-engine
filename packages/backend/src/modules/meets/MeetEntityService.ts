@@ -19,6 +19,7 @@ import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
+import { ChatService } from '@/core/ChatService.js';
 
 const ACTIVE_STATUSES = ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe'];
 
@@ -35,6 +36,7 @@ export class MeetEntityService {
 		private usersRepository: UsersRepository,
 		private userEntityService: UserEntityService,
 		private channelEntityService: ChannelEntityService,
+		private chatService: ChatService,
 		private meetService: MeetService,
 		private meetLevelService: MeetLevelService,
 		private meetMatchService: MeetMatchService,
@@ -71,8 +73,6 @@ export class MeetEntityService {
 			level: p.declaredLevel ?? this.meetLevelService.levelValue(level, meet.levelBasis),
 			statusChangedAt: p.statusChangedAt?.toISOString() ?? null,
 			checkedInAt: p.checkedInAt?.toISOString() ?? null,
-			// HOST-TOOLS-V1
-			chatMuted: p.chatMuted ?? false,
 			receiptUrl: p.receiptUrl ?? null,
 			receiptAt: p.receiptAt ? new Date(p.receiptAt).toISOString() : null,
 			receiptById: p.receiptById ?? null,
@@ -96,11 +96,11 @@ export class MeetEntityService {
 		let myStatus: Packed<'Meet'>['myStatus'] = null;
 		let myGate: Packed<'Meet'>['myGate'] = null;
 		let isHost = false;
-		let chatMuted = false; // HOST-TOOLS-V1
+		let chatMuted = false; // NUKE-CHAT-MUTE-V1: my mute of the meet's NATIVE chat room, no column of ours
 		if (me) {
 			const mine = await this.meetParticipantsRepository.findOneBy({ meetId: meet.id, userId: me.id });
 			myStatus = mine?.status ?? null;
-			chatMuted = mine?.chatMuted ?? false; // HOST-TOOLS-V1
+			chatMuted = meet.chatRoomId ? await this.chatService.isRoomMuted(me.id, meet.chatRoomId).catch(() => false) : false;
 			isHost = meet.hostId === me.id || (mine?.isHost ?? false);
 			const level = await this.meetPlayerLevelsRepository.findOneBy({ userId: me.id, sport: meet.sport });
 			myGate = this.meetLevelService.gateVerdict(meet, level);

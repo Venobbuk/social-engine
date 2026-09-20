@@ -10,9 +10,10 @@ import { ChatService } from '@/core/ChatService.js';
 import { ApiError } from '@/server/api/error.js';
 import type { UsersRepository } from '@/models/_.js';
 
-/* CHAT-V2 — "Turn off chat notifications" for one thread (Reclub ChannelUserNotifications None / All). The thread keeps
- * its unread marker; the other side's messages raise no newChatMessage event and no push for me while muted. Works for
- * a room's owner too (Misskey's chat/rooms/mute needs a membership row, which the owner never has). */
+/* CHAT-V2 — "Turn off chat notifications" for a 1-on-1 thread (Reclub ChannelUserNotifications None / All). The
+ * thread keeps its unread marker; the other side's messages raise no newChatMessage event and no push while muted.
+ * NUKE-CHAT-MUTE-V1 (G11): a ROOM is muted with the NATIVE chat/rooms/mute, so this door no longer takes a roomId.
+ * Misskey has no per-person chat mute, so only the 1-on-1 half stays ours (notification_mute scope 'user'). */
 export const meta = {
 	tags: ['chat'],
 
@@ -40,11 +41,10 @@ export const meta = {
 export const paramDef = {
 	type: 'object',
 	properties: {
-		roomId: { type: 'string', format: 'misskey:id' },
 		userId: { type: 'string', format: 'misskey:id' },
 		mute: { type: 'boolean' },
 	},
-	required: ['mute'],
+	required: ['userId', 'mute'],
 } as const;
 
 @Injectable()
@@ -58,16 +58,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			await this.chatService.checkChatAvailability(me.id, 'read');
 
-			if (ps.roomId) {
-				const room = await this.chatService.findRoomById(ps.roomId);
-				if (room == null || !(await this.chatService.isRoomMember(room, me.id))) throw new ApiError(meta.errors.noSuchThread);
-				await this.chatService.setNotificationMute(me.id, 'room', room.id, ps.mute);
-				// turning notifications back ON also lifts Misskey's per-membership mute (the meet kebab's meets/chat-mute writes that
-				// one and chat/threads/show reports either), so one switch reads and clears the truth; turning OFF touches only this
-				// table, so the thread keeps its unread marker and only the notification is silenced
-				if (!ps.mute) await this.chatService.muteRoom(me.id, room.id, false).catch(() => undefined);
-				return { muted: ps.mute };
-			}
 			if (ps.userId) {
 				const other = await this.usersRepository.findOneBy({ id: ps.userId });
 				if (other == null || other.id === me.id) throw new ApiError(meta.errors.noSuchThread);

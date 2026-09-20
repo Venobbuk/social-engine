@@ -298,8 +298,8 @@ export class ChatService {
 
 		const redisPipeline = this.redisClient.pipeline();
 		for (const membership of membershipsOtherThanMe) {
-			if (membership.isMuted) continue;
-
+			// NUKE-CHAT-MUTE-V1: a muted member still gets the UNREAD MARKER — only the notification is silenced (below).
+			// That is what our notification_mute scope 'room' used to buy; native mute now does it, so the side table is gone.
 			redisPipeline.set(`newRoomChatMessageExists:${membership.userId}:${toRoom.id}`, message.id);
 			redisPipeline.sadd(`newChatMessagesExists:${membership.userId}`, `room:${toRoom.id}`);
 		}
@@ -326,6 +326,7 @@ export class ChatService {
 				const marker = markers[i][1];
 				if (marker == null) continue;
 				if (mutedIds.has(membershipsOtherThanMe[i].userId)) continue;
+				if (membershipsOtherThanMe[i].isMuted) continue; // NUKE-CHAT-MUTE-V1: native chat/rooms/mute silences the push
 
 				this.globalEventService.publishMainStream(membershipsOtherThanMe[i].userId, 'newChatMessage', packedMessageForTo);
 				this.pushNotificationService.pushNotification(membershipsOtherThanMe[i].userId, 'newChatMessage', packedMessageForTo);
@@ -823,6 +824,15 @@ export class ChatService {
 		await this.chatRoomMembershipsRepository.update(membership.id, { isMuted: mute });
 	}
 
+	/** NUKE-CHAT-MUTE-V1: is this room muted for `userId`? Native state only — the membership flag, or (for the owner,
+	 *  who has no membership row) the redis flag muteRoom writes. One reader for rooms/show, the meet pack and the app. */
+	@bindThis
+	public async isRoomMuted(userId: MiUser['id'], roomId: MiChatRoom['id']): Promise<boolean> {
+		const membership = await this.chatRoomMembershipsRepository.findOneBy({ roomId, userId });
+		if (membership != null) return membership.isMuted;
+		return (await this.redisClient.get(`chatRoomOwnerMuted:${roomId}`)) === '1';
+	}
+
 	@bindThis
 	public async updateRoom(room: MiChatRoom, params: {
 		name?: string;
@@ -1069,17 +1079,16 @@ export class ChatService {
 		return rows.length > 0;
 	}
 
-	/** Of `userIds`, the ones who muted this room or every chat. */
+	/** Of `userIds`, the ones who turned every chat notification off (the settings toggle).
+	 *  NUKE-CHAT-MUTE-V1: the per-ROOM mute is native (chat_room_membership.isMuted / the owner's redis flag) and is read
+	 *  straight off the membership by the caller — this only answers the account-wide toggle Misskey has no place for. */
 	@bindThis
 	public async mutedUserIdsForRoom(roomId: MiChatRoom['id'], userIds: MiUser['id'][]): Promise<Set<string>> {
 		if (userIds.length === 0) return new Set();
 		const rows = await this.notificationMutesRepository.createQueryBuilder('m')
 			.select('m.userId', 'userId')
 			.where('m.userId IN (:...userIds)', { userIds })
-			.andWhere(new Brackets(qb => {
-				qb.where("m.scope = 'room' AND m.targetId = :roomId", { roomId })
-					.orWhere("m.scope = 'chat'");
-			}))
+			.andWhere("m.scope = 'chat'")
 			.getRawMany<{ userId: string }>();
 		return new Set(rows.map(r => r.userId));
 	}
