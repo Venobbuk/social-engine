@@ -55,7 +55,10 @@ export function pointInText(raw: string): { lat: number; lng: number } | null {
 		/@(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/,                                       // Google viewport centre
 		/[?&]mlat=(-?\d{1,2}\.\d+)&mlon=(-?\d{1,3}\.\d+)/,                          // OpenStreetMap marker
 		/#map=\d+\/(-?\d{1,2}\.\d+)\/(-?\d{1,3}\.\d+)/,                             // OpenStreetMap view
-		/^(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})$/,                          // typed "lat, lng"
+		// typed "lat, lng". INT-BATCH2: was \d{3,} decimals on BOTH parts, so "22.3, 114.17" — a perfectly ordinary
+		// way to type a point — fell through to the text geocoder and came back as a street in Bangkok (probed).
+		// One decimal place each is enough: the string must be the pair and nothing else, and no address looks like this.
+		/^(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)$/,
 	];
 	for (const re of pairs) {
 		const m = s.match(re);
