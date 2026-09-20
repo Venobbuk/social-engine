@@ -32,6 +32,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.db)
 		private db: DataSource,
 	) {
-		super(meta, paramDef, async (ps) => fairTeamsOf(this.db, ps.userIds, ps.sport));
+		super(meta, paramDef, async (ps, me) => fairTeamsOf(this.db, ps.userIds, ps.sport, me?.id ?? null));
 	}
 }

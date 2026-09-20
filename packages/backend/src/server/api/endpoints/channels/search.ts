@@ -86,6 +86,18 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 			}
 
+			// SEC-CLUB-READ-V1 (2026-09-21, permission-sweep hole 1): this path filtered isArchived and nothing else, so a
+			// PRIVATE club was listed to anonymous callers with its name, description and member count. The lat/lng path
+			// above already applies the rule (review-batch2 #3, clubs-near.ts notPrivateToThisViewer); this is the same
+			// rule in the keyword query, so the two paths cannot disagree. Owner, admins and members still see theirs.
+			const viewer = me?.id ?? null;
+			query.andWhere(new Brackets(qb => {
+				qb.where(`COALESCE((SELECT cs.visibility FROM club_setting cs WHERE cs."channelId" = channel.id), 'public') <> 'private'`)
+					.orWhere(viewer == null ? 'FALSE' : `EXISTS (SELECT 1 FROM club_member cm WHERE cm."channelId" = channel.id AND cm."userId" = :viewer)`, { viewer })
+					.orWhere(viewer == null ? 'FALSE' : `EXISTS (SELECT 1 FROM club_setting cs2 WHERE cs2."channelId" = channel.id AND cs2."adminIds"::jsonb @> to_jsonb(:viewer::text))`, { viewer })
+					.orWhere(viewer == null ? 'FALSE' : 'channel."userId" = :viewer', { viewer });
+			}));
+
 			const channels = await query
 				.limit(ps.limit)
 				.getMany();

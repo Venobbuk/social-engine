@@ -32,6 +32,21 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.db)
 		private db: DataSource,
 	) {
-		super(meta, paramDef, async (ps) => pairsOf(this.db, ps.pairs as [string, string][], ps.sport));
+		super(meta, paramDef, async (ps, me) => {
+			// SEC-ANON-CHEM-V1 (2026-09-21, permission-sweep hole 3): a NEGATIVE partner-chemistry score is private to
+			// the two players it is about. gb-edge already applies this rule (SEC-ANON-FIELDS-V1) and shows only
+			// positive-chemistry partners to anyone else; this door answered the same question in raw form — matches,
+			// wins and expected for ANY pair, 40 a call, with no credential — so edge = (wins - expected) / matches
+			// was computable for strangers. Scouting keeps what it needs (how often a pair has played, and a pair that
+			// is doing WELL); a pair the caller is not in keeps its bad news to itself.
+			const rows = await pairsOf(this.db, ps.pairs as [string, string][], ps.sport);
+			const meId = me?.id ?? null;
+			return rows.map(r => {
+				if (meId && (r.a === meId || r.b === meId)) return r;           // your own chemistry, in full
+				const edge = r.matches > 0 ? (r.wins - r.expected) / r.matches : 0;
+				if (edge >= 0) return r;                                         // positive chemistry is public, as on gb-edge
+				return { a: r.a, b: r.b, matches: r.matches, wins: null, expected: null, chemistryHidden: true };
+			});
+		});
 	}
 }

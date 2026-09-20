@@ -761,7 +761,18 @@ export class MeetService {
 	public async packReviews(targetUserId: MiUser['id'], viewerId: MiUser['id'] | null, users: UserEntityService): Promise<Packed<'PlayerReviews'>> {
 		const { reviews: visible, warningCount, warningsPublic } = await this.reviewsVisibleTo(targetUserId, viewerId);
 		const reviews = visible.filter(r => !r.archivedAt); // W2-F: an archived review leaves the tallies, the person's own view too
-		const packRow = async (r: MiMeetReview) => ({ author: await users.pack(r.authorId, null, { schema: 'UserLite' as const }).catch(() => null), body: r.body, createdAt: r.createdAt.toISOString() });
+		// SEC-WARN-ANON-V1 (2026-09-21, permission-sweep hole 4): a WARNING's author was packed like any other review,
+		// so the person warned was told who warned them. A safety report that names the reporter to the person reported
+		// is worse than no report — it invites retaliation and teaches everyone else not to file one. An endorsement or
+		// a piece of feedback is still attributed (that is the point of it); a warning is attributed only back to the
+		// person who wrote it, so they can see and withdraw their own.
+		const packRow = async (r: MiMeetReview) => ({
+			author: r.type === 'warning' && viewerId !== r.authorId
+				? null
+				: await users.pack(r.authorId, null, { schema: 'UserLite' as const }).catch(() => null),
+			body: r.body,
+			createdAt: r.createdAt.toISOString(),
+		});
 		const by = async (t: MiMeetReview['type']) => Promise.all(reviews.filter(r => r.type === t).map(packRow));
 		const kudos: Record<string, number> = {};
 		for (const r of reviews) if (r.type === 'endorsement' && r.body) for (const k of r.body.split(',').map(x => x.trim()).filter(Boolean)) kudos[k] = (kudos[k] ?? 0) + 1;

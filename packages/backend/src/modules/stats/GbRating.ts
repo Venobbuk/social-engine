@@ -177,11 +177,17 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 }
 
 /** Fairest doubles pairing of four players on GripBat ratings, nudged by their GripBat partner chemistry. */
-export async function fairTeamsOf(db: DataSource, userIds: string[], sport = 'pickleball'): Promise<{ teamA: string[]; teamB: string[]; teamAWinPct: number; fairness: number }[]> {
+export async function fairTeamsOf(db: DataSource, userIds: string[], sport = 'pickleball', viewerId: string | null = null): Promise<{ teamA: string[]; teamB: string[]; teamAWinPct: number; fairness: number }[]> {
 	const r = await Promise.all(userIds.map((u) => currentRating(db, u, sport).then((x) => x.rating)));
 	const chem = async (a: string, b: string): Promise<number> => {
 		const x = (await db.query(`SELECT count(*)::int n, sum(CASE WHEN won THEN 1 ELSE 0 END)::float w, sum(expected)::float e FROM gb_rating_log WHERE "userId" = $1 AND "partnerId" = $2 AND sport = $3 AND NOT skipped`, [a, b, sport]))[0];
-		return x && x.n >= 2 ? (x.w - x.e) / x.n : 0;
+		const c = x && x.n >= 2 ? (x.w - x.e) / x.n : 0;
+		// SEC-ANON-CHEM-V1 (2026-09-21, permission-sweep hole 5): a NEGATIVE chemistry score is private to the two
+		// players it is about, and it is recoverable from teamAWinPct by comparing the three splits against the
+		// ratings. So a caller who is not one of the pair sees the pair's chemistry only when it is positive — the
+		// same rule gb-edge and gb-pairs apply. Balancing still works: ratings carry it, good chemistry still counts.
+		if (c < 0 && !(viewerId && (viewerId === a || viewerId === b))) return 0;
+		return c;
 	};
 	const pairs: [number[], number[]][] = [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]];
 	const out = [];

@@ -9,6 +9,7 @@ import type { ChannelsRepository } from '@/models/_.js';
 import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '../../error.js';
+import { ClubService } from '@/modules/clubs/ClubService.js';
 
 export const meta = {
 	tags: ['channels'],
@@ -34,6 +35,7 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		channelId: { type: 'string', format: 'misskey:id' },
+		accessToken: { type: 'string', nullable: true },
 	},
 	required: ['channelId'],
 } as const;
@@ -45,6 +47,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private channelsRepository: ChannelsRepository,
 
 		private channelEntityService: ChannelEntityService,
+		private clubService: ClubService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const channel = await this.channelsRepository.findOneBy({
@@ -52,6 +55,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			});
 
 			if (channel == null) {
+				throw new ApiError(meta.errors.noSuchChannel);
+			}
+
+			// SEC-CLUB-READ-V1 (2026-09-21, permission-sweep hole 2): a PRIVATE club answered its full packed profile
+			// to anyone who knew the id — name, description, member count. channels/timeline was fixed with
+			// mayReadClub and its siblings never were. A refused caller gets "no such channel", not "forbidden":
+			// telling a stranger the club EXISTS is the disclosure.
+			if (!(await this.clubService.mayReadClub(channel.id, me?.id ?? null, ps.accessToken ?? null))) {
 				throw new ApiError(meta.errors.noSuchChannel);
 			}
 

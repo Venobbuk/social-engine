@@ -98,6 +98,8 @@ export class ChannelEntityService {
 		}
 
 		const tierCounts = (opts?.memberCounts ?? await this.memberCounts([channel])).get(channel.id);
+		// SEC-CLUB-COUNTS-V1: a private club this viewer is not in keeps its audience size to itself, whichever door packed it.
+		const countsHidden = (await this.closedPrivate([channel], me?.id ?? null)).has(channel.id);
 
 		const pinnedNotes = Array.of<MiNote>();
 		if (channel.pinnedNoteIds.length > 0) {
@@ -128,9 +130,9 @@ export class ChannelEntityService {
 			// and drifted from the roster on 8 of 8 sandbox clubs. The packed value is the roster size.
 			// CLUB-TIERS-V1: the roster is club_member (+ the owner), no longer the followers; followersCount is the follower
 			// tier only (members are not counted twice) — Reclub's 'Members · Followers'.
-			usersCount: tierCounts ? tierCounts.members : channel.usersCount,
-			membersCount: tierCounts ? tierCounts.members : 0,
-			followersCount: tierCounts ? tierCounts.followers : 0,
+			usersCount: countsHidden ? 0 : tierCounts ? tierCounts.members : channel.usersCount,
+			membersCount: countsHidden ? 0 : tierCounts ? tierCounts.members : 0,
+			followersCount: countsHidden ? 0 : tierCounts ? tierCounts.followers : 0,
 			notesCount: channel.notesCount,
 			isSensitive: channel.isSensitive,
 			allowRenoteToExternal: channel.allowRenoteToExternal,
@@ -226,6 +228,30 @@ export class ChannelEntityService {
 	@bindThis
 	private async memberCounts(channels: MiChannel[]): Promise<Map<MiChannel['id'], { members: number; followers: number }>> {
 		return await clubCounts(this.channelFollowingsRepository, channels.map(c => c.id));
+	}
+
+
+	/** SEC-CLUB-COUNTS-V1 (2026-09-21, permission-sweep hole 10): which of these clubs are PRIVATE and closed to this
+	 *  viewer. Gating the individual doors (channels/show, channels/search, clubs/schedules/*) fixes the doors we know
+	 *  about; a private club's audience size travelled through the PACKER, so any door that packs a channel published
+	 *  it. This is the same question asked once, where every door passes. */
+	@bindThis
+	private async closedPrivate(channels: MiChannel[], meId: MiUser['id'] | null): Promise<Set<MiChannel['id']>> {
+		if (channels.length === 0) return new Set();
+		const ids = channels.map(c => c.id);
+		const rows = await this.channelFollowingsRepository.query(
+			`SELECT cs."channelId" AS id, cs."adminIds" AS admins FROM "club_setting" cs
+			  WHERE cs."channelId" = ANY($1) AND COALESCE(cs.visibility, 'public') = 'private'`, [ids]) as { id: string; admins: unknown }[];
+		if (rows.length === 0) return new Set();
+		const mine = meId ? await this.membershipsOf(meId, channels) : new Set<string>();
+		const out = new Set<string>();
+		for (const r of rows) {
+			if (!meId) { out.add(r.id); continue; }
+			const admins = Array.isArray(r.admins) ? r.admins as string[] : [];
+			const owner = channels.find(c => c.id === r.id)?.userId === meId;
+			if (!owner && !admins.includes(meId) && !mine.has(r.id)) out.add(r.id);
+		}
+		return out;
 	}
 
 	/** CLUB-TIERS-V1: which of these clubs the viewer is a member of (club_member rows or ownership). */
