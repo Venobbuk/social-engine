@@ -771,7 +771,11 @@ export class MeetService {
 	}
 
 	private notify(userId: MiUser['id'], meet: MiMeet, header: string, body: string): void {
-		if (meet.sendNotifications === false) return;
+		// SEC-CASUAL-NOTIFY-V1: a casual game carries no announcements — its only notifications are the consent ask and
+		// its decisions — and log-casual creates it with sendNotifications:false, so suppressing them would hide the
+		// request the consent flow depends on (gate re-run D-1: opponent never notified → game could never count).
+		const consentCritical = Array.isArray((meet as { flags?: string[] }).flags) && (meet as { flags?: string[] }).flags!.includes('casual');
+		if (meet.sendNotifications === false && !consentCritical) return;
 		this.notificationService.createNotification(userId, 'app', {
 			customHeader: header,
 			customBody: body,
