@@ -21,7 +21,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 					<button v-if="thereIsTreasure" class="_button treasure" @click="getTreasure"><img src="/fluent-emoji/1f3c6.png" class="treasureImg"></button>
 				</div>
 				<div style="text-align: center;">
-					{{ i18n.ts._aboutMisskey.about }}<br><a href="https://misskey-hub.net/docs/about-misskey/" target="_blank" class="_link">{{ i18n.ts.learnMore }}</a>
+					<!-- GB-DEAD-LINK-V1 (2026-09-20): the "Learn more" link pointed at https://misskey-hub.net/docs/about-misskey/,
+					     which upstream retired — it answers 404 to a browser (GLOBAL-CONTRACT G8, gate 2026-09-20, on uat:/about-misskey
+					     and live:/about-misskey). It is removed rather than repointed: every candidate replacement URL on that host
+					     answers 403 to this box, so no replacement could be VERIFIED, and an unverified URL is how this rotted. The
+					     about text itself is unchanged. -->
+					{{ i18n.ts._aboutMisskey.about }}
 				</div>
 				<div v-if="$i != null" style="text-align: center;">
 					<MkButton primary rounded inline @click="iLoveMisskey">I <Mfm text="$[jelly ❤]"/> #Misskey</MkButton>
