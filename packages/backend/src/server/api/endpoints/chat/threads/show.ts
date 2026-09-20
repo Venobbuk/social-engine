@@ -7,16 +7,26 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import { ChatService } from '@/core/ChatService.js';
-import { ChatEntityService } from '@/core/entities/ChatEntityService.js';
-import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import type { UsersRepository } from '@/models/_.js';
 import type { DataSource } from 'typeorm';
 import { runsRoom, roomManagement } from '@/core/ChatModeration.js';
 
-/* CHAT-V2 — one thread's settings sheet in one read (Reclub chats/settings/[channelId]): muted?, read-only?, the members
- * (a room: owner first, then the memberships), whether I own it and may leave it. `roomId` for a meet / club / group
- * thread, `userId` for a 1-on-1. */
+/* CHAT-V2 — the GripBat-only half of a thread's settings sheet (Reclub chats/settings/[channelId]).
+ *
+ * NUKE-THREADS-SHOW-V1 (2026-09-20, G11 "adopt Misskey first"): this endpoint used to re-pack the room and its
+ * members, which is exactly what the NATIVE `chat/rooms/show` (ChatRoom: owner, name, isMuted, readOnlyAt) and
+ * `chat/rooms/members` (ChatRoomMembership[] with the UserLite) already answer. Those two are now what the client
+ * calls, and `isOwner` / `canLeave` / `readOnly` are read off the packed room. What is left here is only what
+ * Misskey has no concept of:
+ *   chatMuted   — the account-wide "chat notifications off" toggle (notification_mute scope 'chat')
+ *   muted       — this thread is muted. For a ROOM that is the NATIVE flag (chat_room_membership.isMuted, or the
+ *                 owner's redis flag) read through ChatService.isRoomMuted — no store of ours. For a 1-on-1 it is
+ *                 notification_mute scope 'user', because Misskey has no per-person chat mute.
+ *   canModerate — CHAT-MOD-V1: I may delete anyone's message here (club owner/admin, meet host/co-host, comp host)
+ *   managed     — the GripBat module that owns this room's membership (meet / club / competition), null = plain group
+ *   archived    — INBOX-ARCHIVE-V1: I archived this thread (notification_mute scope 'archiveRoom' / 'archiveUser')
+ */
 export const meta = {
 	tags: ['chat'],
 
@@ -28,22 +38,12 @@ export const meta = {
 		type: 'object',
 		optional: false, nullable: false,
 		properties: {
-			kind: { type: 'string', optional: false, nullable: false },
+			kind: { type: 'string', optional: false, nullable: false, enum: ['room', 'user'] },
 			muted: { type: 'boolean', optional: false, nullable: false },
 			chatMuted: { type: 'boolean', optional: false, nullable: false },
-			readOnlyAt: { type: 'string', optional: false, nullable: true },
-			readOnly: { type: 'boolean', optional: false, nullable: false },
-			isOwner: { type: 'boolean', optional: false, nullable: false },
-			canLeave: { type: 'boolean', optional: false, nullable: false },
-			// CHAT-MOD-V1: I may delete anyone's message here (room owner, club owner / admins, meet host / co-hosts, competition host)
 			canModerate: { type: 'boolean', optional: false, nullable: false },
-			// CHAT-MOD-V1: the module that keeps this room's membership (meet / club / competition); null = a plain group,
-			// whose owner may remove members (chat/rooms/members/remove)
 			managed: { type: 'string', optional: false, nullable: true, enum: ['meet', 'club', 'competition'] },
-			// INBOX-ARCHIVE-V1: I archived this thread (chat/threads/archive) — the inbox lists it under Archived
 			archived: { type: 'boolean', optional: false, nullable: false },
-			room: { type: 'object', optional: false, nullable: true, ref: 'ChatRoom' },
-			members: { type: 'array', optional: false, nullable: false, items: { type: 'object', optional: false, nullable: false, ref: 'UserLite' } },
 		},
 	},
 
@@ -73,8 +73,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private db: DataSource,
 
 		private chatService: ChatService,
-		private chatEntityService: ChatEntityService,
-		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			await this.chatService.checkChatAvailability(me.id, 'read');
@@ -84,24 +82,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (ps.roomId) {
 				const room = await this.chatService.findRoomById(ps.roomId);
 				if (room == null || !(await this.chatService.hasPermissionToViewRoomTimeline(me.id, room))) throw new ApiError(meta.errors.noSuchThread);
-				const memberships = await this.chatService.getRoomMembershipsWithPagination(room.id, 100);
-				const ids = [room.ownerId, ...memberships.map(m => m.userId).filter(id => id !== room.ownerId)];
-				const members = await this.userEntityService.packMany(ids, me);
-				const packedRoom = await this.chatEntityService.packRoom(room, me);
 				return {
 					kind: 'room',
-					// muted by this stream's switch OR by Misskey's membership mute (the meet kebab's meets/chat-mute)
-					muted: mutes.some(m => m.scope === 'room' && m.targetId === room.id) || packedRoom.isMuted === true,
+					muted: await this.chatService.isRoomMuted(me.id, room.id),
 					chatMuted,
-					readOnlyAt: room.readOnlyAt ? room.readOnlyAt.toISOString() : null,
-					readOnly: room.readOnlyAt != null && room.readOnlyAt.getTime() <= Date.now(),
-					isOwner: room.ownerId === me.id,
-					canLeave: room.ownerId !== me.id,
 					canModerate: await runsRoom(this.db, room.id, me.id),
 					managed: await roomManagement(this.db, room.id),
 					archived: mutes.some(m => m.scope === 'archiveRoom' && m.targetId === room.id),
-					room: packedRoom,
-					members,
 				};
 			}
 
@@ -112,15 +99,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					kind: 'user',
 					muted: mutes.some(m => m.scope === 'user' && m.targetId === other.id),
 					chatMuted,
-					readOnlyAt: null,
-					readOnly: false,
-					isOwner: false,
-					canLeave: false,
 					canModerate: false,
 					managed: null,
 					archived: mutes.some(m => m.scope === 'archiveUser' && m.targetId === other.id),
-					room: null,
-					members: await this.userEntityService.packMany([me.id, other.id], me),
 				};
 			}
 
