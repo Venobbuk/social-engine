@@ -18,7 +18,8 @@ export interface ClubTag { id: string; name: string; visibility: typeof clubTagV
 export interface ClubAward { title: string; event: string | null; date: string | null; placement: string | null }
 
 /**
- * CLUB-ADMIN-V1: Reclub's Group settings on top of a Misskey channel (the club). Membership stays channel_following;
+ * CLUB-ADMIN-V1: Reclub's Group settings on top of a Misskey channel (the club). Membership is club_member
+ * (CLUB-TIERS-V1; channel_following is the FOLLOWER tier — see modules/clubs/club-tiers.ts);
  * this row adds what a club owner manages — visibility, how people get in, who may create meets, the sport and
  * level, the admins, per-member tags (Reclub group tags), the venues the club plays at.
  */

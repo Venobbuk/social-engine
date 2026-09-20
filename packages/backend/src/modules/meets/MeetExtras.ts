@@ -5,6 +5,7 @@
 
 import type { DataSource } from 'typeorm';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
+import { memberExistsSql } from '@/modules/clubs/club-tiers.js'; // INT-BATCH2 × CLUB-TIERS-V1: the ONE membership rule
 
 /**
  * MEET-EXTRAS-V1 (2026-09-19) — the Reclub meet functions PARITY.md still listed as missing, as plain functions so
@@ -184,7 +185,8 @@ export function promoteGate(meet: MiMeet, now = Date.now()): PromoteGate {
  * roster. Distinct user ids, capped.
  *
  * PROMOTE-AUDIENCE-V1 (W1 lane B1, triage A-promote-meet.03): Reclub's "CHOOSE YOUR AUDIENCE" — the host picks
- *   'club'       the members of the meet's club (channel_following of meet.channelId, minus members on a break)
+ *   'club'       the members of the meet's club (INT-BATCH2 × CLUB-TIERS-V1: club_member of meet.channelId — NOT the
+ *                follower tier, which is channel_following; minus members on a break)
  *   'proximity'  players whose saved home is within 20 km
  *   'all'        (default, the V1 audience) followers + nearby
  * The level band, the host and the roster exclusions apply to every audience.
@@ -201,7 +203,7 @@ export async function promoteAudience(db: DataSource, meet: MiMeet, audience: Pr
 		AND NOT EXISTS (SELECT 1 FROM "meet_participant" p WHERE p."meetId" = $1 AND p."userId" = u."id") ${bandSql}`;
 	if (audience === 'club') {
 		if (!meet.channelId) return { userIds: [], followers: 0, nearby: 0, club: 0 };
-		const club = await db.query(`SELECT u."id" ${base} AND EXISTS (SELECT 1 FROM "channel_following" cf WHERE cf."followeeId" = $4 AND cf."followerId" = u."id")
+		const club = await db.query(`SELECT u."id" ${base} AND ${memberExistsSql('$4', 'u."id"')}
 			AND NOT EXISTS (SELECT 1 FROM "club_member_state" s WHERE s."channelId" = $4 AND s."userId" = u."id" AND s."pausedAt" IS NOT NULL) LIMIT ${PROMOTE_CAP}`, [meet.id, meet.sport, meet.hostId, meet.channelId]) as { id: string }[];
 		return { userIds: club.map((r) => r.id), followers: 0, nearby: 0, club: club.length };
 	}
