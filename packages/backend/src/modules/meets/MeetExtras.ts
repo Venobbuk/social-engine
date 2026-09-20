@@ -13,11 +13,10 @@ import type { MiMeet } from '@/modules/meets/models/Meet.js';
  *                 public meets only, ≤ 36 h before start, once per meet (spec_meets.md §8.1, §Y.6)
  *   reminders   — 24 h and 2 h before start, to confirmed players; honours meet.sendNotifications and a per-row mute
  *                 flag if another stream adds one (any of muted / isMuted / notificationsMuted read defensively)
- *   media       — the meet Photos pane: meet_media rows over drive files (spec_meets.md Y.9 GET/POST/DELETE /media)
+ *   (media      — GONE, NUKE-MEET-PHOTOS-V1: a meet photo is a FILE MESSAGE in the meet's native chat room)
  *   standings   — SET vs GAME scoring, standings modes and tiebreakers (spec_competition_dupr.md §2.3, §4.6), the
  *                 whole-meet summary card (§5.6 share-matches-summary)
- * Everything here is raw SQL on the DataSource: the meet_media table has no TypeORM entity on purpose (no entity list,
- * repository module or DI symbol to edit while other streams edit those files).
+ * What is left here is pure functions over what the caller already holds — no table of its own.
  */
 
 export const SCORING_TYPES = ['GAME', 'SET'] as const;
@@ -163,24 +162,6 @@ export function computeStandings(participantIds: string[], matches: MatchLike[],
 		r.place = place;
 	});
 	return ranked;
-}
-
-// ------------------------------------------------------------------------------------------------- media
-export interface MediaRow { id: string; meetId: string; userId: string; fileId: string; createdAt: Date }
-
-export async function listMedia(db: DataSource, meetId: string): Promise<MediaRow[]> {
-	return await db.query(`SELECT * FROM "meet_media" WHERE "meetId" = $1 ORDER BY "createdAt" DESC, "id" DESC`, [meetId]) as MediaRow[];
-}
-export async function addMedia(db: DataSource, row: MediaRow): Promise<MediaRow> {
-	const rows = await db.query(`INSERT INTO "meet_media" ("id","meetId","userId","fileId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING *`, [row.id, row.meetId, row.userId, row.fileId, row.createdAt]) as MediaRow[];
-	return rows[0];
-}
-export async function deleteMedia(db: DataSource, id: string): Promise<void> {
-	await db.query(`DELETE FROM "meet_media" WHERE "id" = $1`, [id]);
-}
-export async function findMedia(db: DataSource, meetId: string, id: string): Promise<MediaRow | null> {
-	const rows = await db.query(`SELECT * FROM "meet_media" WHERE "meetId" = $1 AND "id" = $2`, [meetId, id]) as MediaRow[];
-	return rows[0] ?? null;
 }
 
 // ------------------------------------------------------------------------------------------------- promote

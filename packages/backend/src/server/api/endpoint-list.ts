@@ -162,9 +162,6 @@ export * as 'meets/reviews/leaderboard' from '@/modules/meets/endpoints/reviews/
 export * as 'meets/promote' from '@/modules/meets/endpoints/promote.js';
 export * as 'meets/summary' from '@/modules/meets/endpoints/summary.js';
 export * as 'meets/extras/update' from '@/modules/meets/endpoints/extras-update.js';
-export * as 'meets/media/list' from '@/modules/meets/endpoints/media/list.js';
-export * as 'meets/media/add' from '@/modules/meets/endpoints/media/add.js';
-export * as 'meets/media/delete' from '@/modules/meets/endpoints/media/delete.js';
 export * as 'meets/matches/forfeit' from '@/modules/meets/endpoints/matches/forfeit.js';
 // HOST-TOOLS-V1 (2026-09-19): the host's roster tools
 export * as 'meets/participants/bulk' from '@/modules/meets/endpoints/participants/bulk.js';
