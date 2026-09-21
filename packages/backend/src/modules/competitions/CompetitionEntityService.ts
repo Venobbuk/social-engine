@@ -73,6 +73,9 @@ export class CompetitionEntityService {
 			entry1Id: m.entry1Id, entry2Id: m.entry2Id, entry1Status: m.entry1Status, entry2Status: m.entry2Status,
 			status: m.status, scores: m.scores, result: m.result, courtIndex: m.courtIndex,
 			startAt: m.startAt?.toISOString() ?? null, notes: m.notes, isExtra: m.isExtra,
+			// COMP-DUPR-V1: the DUPR receipt, exactly as the meet's packMatch carries it
+			duprStatus: m.duprStatus ?? null, duprSubmittedById: m.duprSubmittedById ?? null,
+			duprSubmittedAt: m.duprSubmittedAt?.toISOString() ?? null, duprRef: m.duprRef ?? null, duprError: m.duprError ?? null,
 			canScore: c.status === 'inProgress' && m.entry1Id != null && m.entry2Id != null && m.entry1Status !== 'bye' && m.entry2Status !== 'bye' && await this.competitionService.canScore(c, m, me?.id),
 			updatedAt: m.updatedAt.toISOString(),
 		};

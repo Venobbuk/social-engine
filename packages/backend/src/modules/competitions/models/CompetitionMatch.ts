@@ -18,6 +18,9 @@ export const competitionStages = ['regular', 'playoff', 'consolation'] as const;
 export const competitionMatchStatuses = ['pending', 'inProgress', 'completed', 'cancelled'] as const;
 export const competitionMatchSideStatuses = ['pending', 'confirmed', 'forfeit', 'bye'] as const;
 export const competitionScoreTypes = ['standard', 'tiebreaker', 'extra'] as const;
+// COMP-DUPR-V1: the same DUPRIntegrationStatus meet_match carries (MeetMatch.ts:12) — nothing yet -> queued at
+// hkpl -> submitted (locked) -> failed -> ineligible. DUPR itself lives on hkpl; this row keeps only the receipt.
+export const competitionMatchDuprStatuses = ['queued', 'submitted', 'failed', 'ineligible'] as const;
 export type CompetitionScoreSet = { t1: number; t2: number; type: typeof competitionScoreTypes[number] };
 export type CompetitionMatchResult = 'entry1' | 'entry2' | 'draw' | null;
 
@@ -82,6 +85,22 @@ export class MiCompetitionMatch {
 
 	@Column('varchar', { length: 512, nullable: true })
 	public notes: string | null;
+
+	// COMP-DUPR-V1 — mirrors MeetMatch.ts:54-67 exactly (same names, same types, same widths)
+	@Column('varchar', { length: 16, nullable: true })
+	public duprStatus: typeof competitionMatchDuprStatuses[number] | null;
+
+	@Column({ ...id(), nullable: true })
+	public duprSubmittedById: string | null;
+
+	@Column('timestamp with time zone', { nullable: true })
+	public duprSubmittedAt: Date | null;
+
+	@Column('varchar', { length: 128, nullable: true })
+	public duprRef: string | null;
+
+	@Column('varchar', { length: 512, nullable: true })
+	public duprError: string | null;
 
 	@Column('boolean', { default: false, comment: 'Reclub CompetitionMatchSourceType User:2 — added by the host, not generated.' })
 	public isExtra: boolean;

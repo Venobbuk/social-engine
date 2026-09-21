@@ -35,6 +35,8 @@ export const competitionErrors = {
 	blocked: { message: 'You cannot play in a team with this player.', code: 'COMPETITION_BLOCKED', id: '7c0a0000-0000-4000-8000-000000000016' },
 	noSuchInvitation: { message: 'No such invitation.', code: 'NO_SUCH_INVITATION', id: '7c0a0000-0000-4000-8000-000000000017' },
 	teamFull: { message: 'This team has no place left.', code: 'COMPETITION_TEAM_FULL', id: '7c0a0000-0000-4000-8000-000000000018' },
+	// COMP-DUPR-V1
+	duprLocked: { message: 'These matches have already been submitted to DUPR.', code: 'COMPETITION_DUPR_LOCKED', id: '7c0a0000-0000-4000-8000-00000000001a' },
 	noSuchAnnouncement: { message: 'No such announcement.', code: 'NO_SUCH_ANNOUNCEMENT', id: '7c0a0000-0000-4000-8000-000000000019' },
 } as const;
 

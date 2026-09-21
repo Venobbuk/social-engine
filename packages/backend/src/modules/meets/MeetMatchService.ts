@@ -15,6 +15,7 @@ import { IdService } from '@/core/IdService.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
+import { DuprSubmitService } from '@/core/DuprSubmitService.js';   // COMP-DUPR-V1: the ONE submitter, shared with tournaments
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { bindThis } from '@/decorators.js';
 import { generate as runGenerator, type Scheme, type RankingCriteria, type PlayerStat } from '@/modules/meets/MeetMatchGenerator.js';
@@ -23,12 +24,8 @@ import { generate as runGenerator, type Scheme, type RankingCriteria, type Playe
 export type DuprEligibilityCode = 'no_account' | 'no_scores' | 'not_connected' | 'not_singles_doubles' | 'uneven_teams';
 export type DuprEligibility = { isEligible: boolean; errors: { code: DuprEligibilityCode; affectedParticipantIds: string[] }[] };
 
-// The one hkpl door (SOCIAL-DUPR-V1): POST /api/v1/social/dupr/submit, GET /api/v1/social/dupr/status.
-// Both facts come from the environment and FAIL CLOSED: unset → the match is marked failed with a visible reason.
-const HKPL_URL = (process.env.ADAPTER_HKPL_URL ?? '').replace(/\/+$/, '');
-const HKPL_SECRET = process.env.ADAPTER_HKPL_S2S_SECRET ?? '';
-// hkpl-app runs on the same box (host.docker.internal:3939): the SSRF guard must admit that private address.
-const HKPL_ALLOW_LOCAL = process.env.ADAPTER_HKPL_ALLOW_LOCAL === '1';
+// COMP-DUPR-V1: the one hkpl door (SOCIAL-DUPR-V1) and its two env facts now live in core/DuprSubmitService,
+// which a tournament match uses too. Still FAILS CLOSED: unset → the match is marked failed with a visible reason.
 const CASUAL_UNCONFIRMED = 'Every player must confirm this casual game before it can be sent to DUPR.'; // SEC-CASUAL-CONSENT-V1
 
 /**
@@ -61,6 +58,7 @@ export class MeetMatchService {
 		private httpRequestService: HttpRequestService,
 		private meetService: MeetService,
 		private meetLevelService: MeetLevelService,
+		private duprSubmitService: DuprSubmitService,
 	) {
 	}
 
@@ -294,46 +292,21 @@ export class MeetMatchService {
 			await this.meetMatchesRepository.update(match.id, { ...patch, updatedAt: new Date() });
 			return await this.meetMatchesRepository.findOneByOrFail({ id: match.id });
 		};
-		if (!e.isEligible) return await mark({ duprStatus: 'ineligible', duprError: e.errors.map(x => x.code).join(',') });
-		if (!HKPL_URL || !HKPL_SECRET) return await mark({ duprStatus: 'failed', duprError: 'hkpl_unconfigured' });
+		if (!e.isEligible || e.format == null) return await mark({ duprStatus: 'ineligible', duprError: e.errors.map(x => x.code).join(',') });
+		if (!this.duprSubmitService.isConfigured()) return await mark({ duprStatus: 'failed', duprError: 'hkpl_unconfigured' });
 
-		const team = (duprIds: string[], side: 0 | 1) => {
-			const t: Record<string, unknown> = { player1: { dupr_id: duprIds[0] } };
-			if (duprIds[1]) t.player2 = { dupr_id: duprIds[1] };
-			match.scores.forEach((s, i) => { t[`game${i + 1}`] = s[side]; });
-			return t;
-		};
-		const body = {
-			match_id: `boyau:${match.id}`,
+		// COMP-DUPR-V1: the body, the POST, the retry and the fail-soft are core/DuprSubmitService now — the ONE
+		// submitter this path shares with a tournament match. Every status and every message is unchanged.
+		const r = await this.duprSubmitService.submit({
+			matchId: match.id,
 			format: e.format,
-			played_at: new Date(meet.startAt).toISOString(),
+			playedAt: new Date(meet.startAt),
 			event: meet.name,
 			location: meet.venueName ?? null,
-			teams: [team(e.duprIds[0], 0), team(e.duprIds[1], 1)],
-		};
-		try {
-			const res = await this.httpRequestService.send(`${HKPL_URL}/api/v1/social/dupr/submit`, {
-				method: 'POST',
-				headers: { 'content-type': 'application/json', 'x-social-secret': HKPL_SECRET },
-				body: JSON.stringify(body),
-				timeout: 10_000,
-				isLocalAddressAllowed: HKPL_ALLOW_LOCAL,
-			}, { throwErrorWhenResponseNotOk: false });
-			const json = await res.json().catch(() => ({})) as { ok?: boolean; via?: string; queue_id?: string | null; dupr_match_id?: string | null; error?: string; sandbox?: boolean };
-			if (res.status !== 200 || !json.ok) return await mark({ duprStatus: 'failed', duprError: `hkpl ${res.status} ${json.error ?? ''}`.trim().slice(0, 512) });
-			const submitted = json.via === 'partner' && !!json.dupr_match_id;
-			return await mark({
-				duprStatus: submitted ? 'submitted' : 'queued',
-				duprRef: (json.dupr_match_id ?? json.queue_id ?? null),
-				duprError: null,
-				duprSubmittedById: by.id,
-				duprSubmittedAt: new Date(),
-			});
-		} catch (err) {
-			// FAIL-SOFT-V1: the league server being down is not the player's failure — keep the row queued (no ref yet) and
-			// let list() retry it; the badge reads 'Submitting' until hkpl answers
-			return await mark({ duprStatus: 'queued', duprRef: null, duprSubmittedById: by.id, duprSubmittedAt: new Date(), duprError: `hkpl unreachable: ${(err as Error).message}`.slice(0, 512) });
-		}
+			duprIds: e.duprIds,
+			games: match.scores,
+		});
+		return await mark({ ...r.patch, ...(r.stamp ? { duprSubmittedById: by.id, duprSubmittedAt: new Date() } : {}) });
 	}
 
 	/**
@@ -425,17 +398,9 @@ export class MeetMatchService {
 	/** Ask hkpl whether a queued match has been drained to DUPR. */
 	@bindThis
 	public async refreshDupr(match: MiMeetMatch): Promise<MiMeetMatch> {
-		if (!HKPL_URL || !HKPL_SECRET) return match;
-		const res = await this.httpRequestService.send(`${HKPL_URL}/api/v1/social/dupr/status?match_id=${encodeURIComponent(`boyau:${match.id}`)}`, {
-			headers: { 'x-social-secret': HKPL_SECRET },
-			timeout: 5_000,
-			isLocalAddressAllowed: HKPL_ALLOW_LOCAL,
-		}, { throwErrorWhenResponseNotOk: false });
-		const json = await res.json().catch(() => ({})) as { ok?: boolean; found?: boolean; status?: string; dupr_match_id?: string | null; last_error?: string | null };
-		const patch: Partial<MiMeetMatch> = { updatedAt: new Date() };
-		if (res.status === 200 && json.found && json.status === 'DONE') { patch.duprStatus = 'submitted'; patch.duprRef = json.dupr_match_id ?? match.duprRef; patch.duprError = null; }
-		else if (res.status === 200 && json.found && json.last_error) patch.duprError = String(json.last_error).slice(0, 512); // still retrying at hkpl
-		await this.meetMatchesRepository.update(match.id, patch);
+		if (!this.duprSubmitService.isConfigured()) return match;
+		const patch = await this.duprSubmitService.refresh(match.id, match.duprRef);
+		await this.meetMatchesRepository.update(match.id, { ...patch, updatedAt: new Date() });
 		return await this.meetMatchesRepository.findOneByOrFail({ id: match.id });
 	}
 }

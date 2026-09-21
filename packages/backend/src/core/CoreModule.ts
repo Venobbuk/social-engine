@@ -83,6 +83,8 @@ import { ClubService } from '@/modules/clubs/ClubService.js';
 import { CoachService } from '@/modules/coaches/CoachService.js'; // COACH-VERIFY-V1
 import { CompetitionService } from '@/modules/competitions/CompetitionService.js'; // TOURNAMENT-V1
 import { CompetitionEntityService } from '@/modules/competitions/CompetitionEntityService.js';
+import { CompetitionDuprService } from '@/modules/competitions/CompetitionDuprService.js'; // COMP-DUPR-V1
+import { DuprSubmitService } from '@/core/DuprSubmitService.js'; // COMP-DUPR-V1: the one hkpl DUPR door
 import { ClubScheduleService } from '@/modules/clubs/ClubScheduleService.js'; // CLUB-V3
 import { ChatService } from './ChatService.js';
 import { RegistryApiService } from './RegistryApiService.js';
@@ -244,6 +246,8 @@ const $ClubService: Provider = { provide: 'ClubService', useExisting: ClubServic
 const $CoachService: Provider = { provide: 'CoachService', useExisting: CoachService }; // COACH-VERIFY-V1
 const $CompetitionService: Provider = { provide: 'CompetitionService', useExisting: CompetitionService }; // TOURNAMENT-V1
 const $CompetitionEntityService: Provider = { provide: 'CompetitionEntityService', useExisting: CompetitionEntityService };
+const $CompetitionDuprService: Provider = { provide: 'CompetitionDuprService', useExisting: CompetitionDuprService }; // COMP-DUPR-V1
+const $DuprSubmitService: Provider = { provide: 'DuprSubmitService', useExisting: DuprSubmitService }; // COMP-DUPR-V1
 const $ClubScheduleService: Provider = { provide: 'ClubScheduleService', useExisting: ClubScheduleService }; // CLUB-V3
 const $ChannelMutingService: Provider = { provide: 'ChannelMutingService', useExisting: ChannelMutingService };
 const $ChatService: Provider = { provide: 'ChatService', useExisting: ChatService };
@@ -407,6 +411,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		CoachService, // COACH-VERIFY-V1
 		CompetitionService, // TOURNAMENT-V1
 		CompetitionEntityService,
+		CompetitionDuprService, // COMP-DUPR-V1
+		DuprSubmitService,
 		ClubScheduleService, // CLUB-V3
 		ChannelMutingService,
 		ChatService,
@@ -568,6 +574,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$CoachService, // COACH-VERIFY-V1
 		$CompetitionService, // TOURNAMENT-V1
 		$CompetitionEntityService,
+		$CompetitionDuprService, // COMP-DUPR-V1
+		$DuprSubmitService,
 		$ClubScheduleService, // CLUB-V3
 		$ChannelMutingService,
 		$ChatService,
@@ -729,6 +737,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		CoachService, // COACH-VERIFY-V1
 		CompetitionService, // TOURNAMENT-V1
 		CompetitionEntityService,
+		CompetitionDuprService, // COMP-DUPR-V1
+		DuprSubmitService,
 		ClubScheduleService, // CLUB-V3
 		ChannelMutingService,
 		ChatService,
@@ -888,6 +898,8 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$CoachService, // COACH-VERIFY-V1
 		$CompetitionService, // TOURNAMENT-V1
 		$CompetitionEntityService,
+		$CompetitionDuprService, // COMP-DUPR-V1
+		$DuprSubmitService,
 		$ClubScheduleService, // CLUB-V3
 		$ChannelMutingService,
 		$ChatService,

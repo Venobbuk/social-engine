@@ -275,6 +275,8 @@ export * as 'competitions/entries/update' from '@/modules/competitions/endpoints
 export * as 'competitions/draw' from '@/modules/competitions/endpoints/draw.js';
 export * as 'competitions/matches/list' from '@/modules/competitions/endpoints/matches/list.js';
 export * as 'competitions/matches/upsert' from '@/modules/competitions/endpoints/matches/upsert.js';
+export * as 'competitions/matches/submit-dupr' from '@/modules/competitions/endpoints/matches/submit-dupr.js'; // COMP-DUPR-V1
+export * as 'competitions/matches/submit-dupr-all' from '@/modules/competitions/endpoints/matches/submit-dupr-all.js'; // COMP-DUPR-V1
 export * as 'competitions/standings' from '@/modules/competitions/endpoints/standings.js';
 export * as 'competitions/awards' from '@/modules/competitions/endpoints/awards.js';
 export * as 'competitions/awards/upsert' from '@/modules/competitions/endpoints/awards/upsert.js';
