@@ -20,7 +20,11 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { channelId: { type: 'string', format: 'misskey:id' } },
+	properties: {
+		channelId: { type: 'string', format: 'misskey:id' },
+		// INVITE-ACCESS-V1: the club's invite-link token (Reclub ?at=), exactly as channels/show and channels/timeline take it.
+		accessToken: { type: 'string', nullable: true, maxLength: 32 },
+	},
 	required: ["channelId"],
 } as const;
 
@@ -34,7 +38,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				// SEC-CLUB-READ-V1 (2026-09-21, permission-sweep holes 6-7): the weekly slots say WHEN and WHERE a club
 				// plays, with the venue and its coordinates. For a private club that is the most sensitive thing it owns,
 				// and this door had no gate at all. Same refusal shape as the club itself: no such club.
-				if (!(await this.clubService.mayReadClub(c.id, me?.id ?? null))) throw new ApiError(clubErrors.noSuchClub);
+				// INVITE-ACCESS-V1 (2026-09-21): closing hole 6 refused the INVITE-LINK holder too — the link is the members'
+				// to share (CLUB-V3 quick-join), so whoever may see the club may see when and where it plays. The gate is
+				// unchanged; it is now asked the same question channels/show asks it.
+				if (!(await this.clubService.mayReadClub(c.id, me?.id ?? null, ps.accessToken ?? null))) throw new ApiError(clubErrors.noSuchClub);
 				const rows = await this.clubScheduleService.list(c);
 				const out = [];
 				for (const s of rows) out.push(await this.clubScheduleService.pack(s, me ?? null));

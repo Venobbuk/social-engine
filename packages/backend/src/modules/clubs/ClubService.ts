@@ -98,6 +98,17 @@ export class ClubService {
 		return (await this.myInvitation(channelId, userId)) === 'pending'; // CLUB-INVITE-V1: an invited player reads the club to decide
 	}
 
+	/** INVITE-ACCESS-V1 (2026-09-21): does THIS invite-link token open THIS club? The token half of mayReadClub, asked
+	 *  on its own, so a door that has already let a token holder in can tell the PACKER "this caller proved access"
+	 *  instead of the packer re-deriving it or the door re-deriving counts. It never widens mayReadClub: a public club
+	 *  (or a channel with no club row) has no token here, answers false, and the packer falls back to membership. */
+	@bindThis
+	public async clubTokenGrants(channelId: string, accessToken: string | null | undefined): Promise<boolean> {
+		if (!accessToken) return false;
+		const p = (await this.privateClubs()).get(channelId);
+		return !!p && !!p.accessToken && p.accessToken === accessToken;
+	}
+
 	@bindThis
 	public async channel(channelId: string): Promise<MiChannel> {
 		const c = await this.channelsRepository.findOneBy({ id: channelId });

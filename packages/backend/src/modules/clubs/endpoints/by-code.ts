@@ -32,7 +32,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				// Reclub GET /groups/by-code/<code> (onboard/club-code): the club behind a six-char code; a wrong code is NO_SUCH_CLUB
 				const r = await this.clubService.byCode(ps.code);
 				if (!r) throw new IdentifiableError('club:no_such_club', 'The code you\'ve entered is invalid. Please try again');
-				return { ...(await this.channelEntityService.pack(r.channel, me ?? null, false)), gateType: r.settings.gateType, visibility: r.settings.visibility, sport: r.settings.sport, level: r.settings.level, refCode: r.settings.refCode };
+				// INVITE-ACCESS-V1: reaching this line means the caller produced the club's OWN ref code — that is the
+				// join preview's whole premise (CLUB-V3 / Reclub quick-join). "0 members" on that screen is worse than no
+				// number, so the packer is told access is proven rather than by-code counting anything itself.
+				return { ...(await this.channelEntityService.pack(r.channel, me ?? null, false, { accessProven: true })), gateType: r.settings.gateType, visibility: r.settings.visibility, sport: r.settings.sport, level: r.settings.level, refCode: r.settings.refCode };
 			} catch (e) {
 				return toApiError(e);
 			}

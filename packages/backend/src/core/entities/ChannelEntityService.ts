@@ -58,6 +58,10 @@ export class ChannelEntityService {
 			pinnedNotes?: Map<MiNote['id'], MiNote>;
 			memberCounts?: Map<MiChannel['id'], { members: number; followers: number }>;
 			memberships?: Set<MiChannel['id']>;
+			/** INVITE-ACCESS-V1: the DOOR has already proved this caller holds the club's invite-link token or its
+			 *  ref code (channels/show, clubs/by-code). Membership is not the only way in, and a join preview that
+			 *  reads "0 members" is worse than no number. Never set from user input — only from a checked token. */
+			accessProven?: boolean;
 		},
 	): Promise<Packed<'Channel'>> {
 		const channel = typeof src === 'object' ? src : await this.channelsRepository.findOneByOrFail({ id: src });
@@ -99,7 +103,9 @@ export class ChannelEntityService {
 
 		const tierCounts = (opts?.memberCounts ?? await this.memberCounts([channel])).get(channel.id);
 		// SEC-CLUB-COUNTS-V1: a private club this viewer is not in keeps its audience size to itself, whichever door packed it.
-		const countsHidden = (await this.closedPrivate([channel], me?.id ?? null)).has(channel.id);
+		// INVITE-ACCESS-V1: unless the door proved the caller holds the club's token/code — then they are IN, not a stranger.
+		// A caller with neither still gets 0/0/0: this only short-circuits a check the door already made.
+		const countsHidden = !opts?.accessProven && (await this.closedPrivate([channel], me?.id ?? null)).has(channel.id);
 
 		const pinnedNotes = Array.of<MiNote>();
 		if (channel.pinnedNoteIds.length > 0) {

@@ -20,7 +20,11 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { scheduleId: { type: 'string', format: 'misskey:id' } },
+	properties: {
+		scheduleId: { type: 'string', format: 'misskey:id' },
+		// INVITE-ACCESS-V1: the club's invite-link token (Reclub ?at=) — the sibling door takes it, so does this one.
+		accessToken: { type: 'string', nullable: true, maxLength: 32 },
+	},
 	required: ["scheduleId"],
 } as const;
 
@@ -32,7 +36,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const s = await this.clubScheduleService.get(ps.scheduleId);
 				// SEC-CLUB-READ-V1: the sibling of schedules/list — the same slot, reached by schedule id instead of
 				// club id. Guarding only the list would leave the door open one hop further along.
-				if (!(await this.clubService.mayReadClub(s.channelId, me?.id ?? null))) throw new ApiError(clubErrors.noSuchClub);
+				// INVITE-ACCESS-V1: same slot one hop along (by schedule id), so the same token opens it.
+				if (!(await this.clubService.mayReadClub(s.channelId, me?.id ?? null, ps.accessToken ?? null))) throw new ApiError(clubErrors.noSuchClub);
 				return await this.clubScheduleService.pack(s, me ?? null);
 			} catch (e) {
 				return toApiError(e);

@@ -66,7 +66,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.noSuchChannel);
 			}
 
-			return await this.channelEntityService.pack(channel, me, true);
+			// INVITE-ACCESS-V1: the same token that just opened the door tells the packer the counts are not a leak here
+			// (SEC-CLUB-COUNTS-V1 knows membership only). Asked of ClubService, never taken on trust from the parameter.
+			const accessProven = await this.clubService.clubTokenGrants(channel.id, ps.accessToken ?? null);
+			return await this.channelEntityService.pack(channel, me, true, { accessProven });
 		});
 	}
 }
