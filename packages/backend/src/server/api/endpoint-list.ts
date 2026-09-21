@@ -199,6 +199,7 @@ export * as 'stats/gb-fair' from '@/modules/stats/endpoints/gb-fair.js'; // GB-R
 export * as 'stats/gb-ratings' from '@/modules/stats/endpoints/gb-ratings.js'; // GB-RATING-V1
 export * as 'stats/gb-rising' from '@/modules/stats/endpoints/gb-rising.js'; // GB-RATING-V1
 export * as 'stats/gb-pairs' from '@/modules/stats/endpoints/gb-pairs.js'; // GB-RATING-V1
+export * as 'stats/gb-suggest' from '@/modules/stats/endpoints/gb-suggest.js'; // GB-FRIEND-SUGGEST-V1
 export * as 'stats/kudos-by-activity' from '@/modules/stats/endpoints/kudos-by-activity.js';
 export * as 'stats/matches' from '@/modules/stats/endpoints/matches.js'; // STATS-HISTORY-V1
 export * as 'stats/match-summary' from '@/modules/stats/endpoints/match-summary.js'; // STATS-HISTORY-V1
