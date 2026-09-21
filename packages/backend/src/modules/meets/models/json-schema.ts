@@ -38,6 +38,11 @@ export const packedMeetParticipantSchema = {
 		duprSingles: { type: 'number', optional: true, nullable: true },
 		duprDoubles: { type: 'number', optional: true, nullable: true },
 		duprConnected: { type: 'boolean', optional: true, nullable: false },
+		// COACHING-V1: the per-person price the student LOCKED at booking (research #2), the currency, and the weekly
+		// enrolment (series/pack) this row belongs to, if any.
+		agreedPrice: { type: 'number', optional: true, nullable: true },
+		agreedCurrency: { type: 'string', optional: true, nullable: true },
+		enrollmentId: { type: 'string', optional: true, nullable: true },
 	},
 } as const;
 
@@ -99,6 +104,10 @@ export const packedMeetSchema = {
 		submitMatches: { type: 'boolean', optional: false, nullable: false },
 		extras: { type: 'object', optional: true, nullable: true, description: 'MEET-EXTRAS-V1: externalUrl, contactInfo, promotedAt, promotedReach, scoringType, standingsMode, tiebreakers, forfeitScore, winPoints, lossPoints, drawPoints, tbWinPoints, tbLossPoints' },
 		seriesId: { type: 'string', optional: false, nullable: true },
+		// COACHING-V1: set when this meet is a coaching LESSON (its coach_schedule id), with the lesson's own copied
+		// price bands so it prices itself. Both null on a normal meet.
+		coachScheduleId: { type: 'string', optional: true, nullable: true },
+		priceTiers: { type: 'object', optional: true, nullable: true, description: 'COACHING-V1 price bands { version, tiers:[{minParticipants,maxParticipants,pricePerPerson,currency}] }' },
 		confirmedCount: { type: 'number', optional: false, nullable: false },
 		waitlistedCount: { type: 'number', optional: false, nullable: false },
 		requestedCount: { type: 'number', optional: false, nullable: false },

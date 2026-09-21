@@ -36,6 +36,7 @@ import { MiCompetitionMatch } from '@/modules/competitions/models/CompetitionMat
 import { MiCompetitionAward } from '@/modules/competitions/models/CompetitionAward.js';
 import { MiClubMemberState } from '@/modules/clubs/models/ClubSetting.js'; // CLUB-V3
 import { MiClubSchedule } from '@/modules/clubs/models/ClubSchedule.js'; // CLUB-V3
+import { MiCoachSchedule } from '@/modules/coaches/models/CoachSchedule.js'; // COACHING-V1
 import { MiChannelFavorite } from '@/models/ChannelFavorite.js';
 import { MiChannelFollowing } from '@/models/ChannelFollowing.js';
 import { MiChannelMuting } from "@/models/ChannelMuting.js";
@@ -187,6 +188,7 @@ export {
 	MiClubSetting,
 	MiClubMemberState, // CLUB-V3
 	MiClubSchedule, // CLUB-V3
+	MiCoachSchedule, // COACHING-V1
 	MiClubJoinRequest,
 	MiCompetition, // TOURNAMENT-V1
 	MiCompetitionEntry,
@@ -289,6 +291,7 @@ export type CompetitionMatchesRepository = Repository<MiCompetitionMatch> & MiRe
 export type CompetitionAwardsRepository = Repository<MiCompetitionAward> & MiRepository<MiCompetitionAward>;
 export type ClubMemberStatesRepository = Repository<MiClubMemberState> & MiRepository<MiClubMemberState>; // CLUB-V3
 export type ClubSchedulesRepository = Repository<MiClubSchedule> & MiRepository<MiClubSchedule>; // CLUB-V3
+export type CoachSchedulesRepository = Repository<MiCoachSchedule> & MiRepository<MiCoachSchedule>; // COACHING-V1
 export type RetentionAggregationsRepository = Repository<MiRetentionAggregation> & MiRepository<MiRetentionAggregation>;
 export type RolesRepository = Repository<MiRole> & MiRepository<MiRole>;
 export type RoleAssignmentsRepository = Repository<MiRoleAssignment> & MiRepository<MiRoleAssignment>;

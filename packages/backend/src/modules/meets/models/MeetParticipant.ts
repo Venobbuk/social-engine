@@ -115,4 +115,16 @@ export class MiMeetParticipant {
 
 	@Column('varchar', { length: 32, nullable: true })
 	public receiptById: string | null;
+
+	// ---- COACHING-V1 (2026-09-22): the per-person price the student LOCKED at booking (research #2 — a re-tier of
+	// the schedule never re-prices them), the currency, and the weekly enrolment (series/pack) this row was booked by. ----
+	@Column('integer', { nullable: true, comment: 'COACHING-V1: per-person lesson price in minor units, locked at booking.' })
+	public agreedPrice: number | null;
+
+	@Column('varchar', { length: 3, nullable: true })
+	public agreedCurrency: string | null;
+
+	@Index()
+	@Column('varchar', { length: 32, nullable: true, comment: 'COACHING-V1: coach_enrollment id, if this seat was booked by a series/pack enrolment.' })
+	public enrollmentId: string | null;
 }

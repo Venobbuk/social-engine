@@ -192,6 +192,16 @@ export class MiMeet {
 	@Column('varchar', { length: 32, nullable: true, comment: 'Series (recurring schedule) this meet was materialised from.' })
 	public seriesId: string | null;
 
+	// ---- COACHING-V1 (2026-09-22): a meet whose coachScheduleId is set IS a coaching LESSON. The thin coach flag
+	// (lighter than a parallel Lesson table): it reuses the whole meet state machine and carries the lesson's own
+	// copied price bands so it prices itself. Both null on a normal meet. ----
+	@Index()
+	@Column('varchar', { length: 32, nullable: true, comment: 'COACHING-V1: the coach_schedule this lesson belongs to; null = not a lesson.' })
+	public coachScheduleId: string | null;
+
+	@Column('jsonb', { nullable: true, comment: 'COACHING-V1: price bands copied from the coach schedule at materialise (coach-pricing.ts PriceTiers).' })
+	public priceTiers: import('@/modules/coaches/coach-pricing.js').PriceTiers | null;
+
 	// ---- MEET-EXTRAS-V1 (2026-09-19): listing link, promotion receipt, scoring rules, reminder receipts ----
 	@Column('varchar', { length: 512, nullable: true, comment: 'Listing: the external link (registration page, chat group…).' })
 	public externalUrl: string | null;

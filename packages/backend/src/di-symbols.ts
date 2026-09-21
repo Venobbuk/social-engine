@@ -85,6 +85,7 @@ export const DI = {
 	competitionAwardsRepository: Symbol('competitionAwardsRepository'),
 	clubMemberStatesRepository: Symbol('clubMemberStatesRepository'), // CLUB-V3
 	clubSchedulesRepository: Symbol('clubSchedulesRepository'), // CLUB-V3
+	coachSchedulesRepository: Symbol('coachSchedulesRepository'), // COACHING-V1
 	channelFollowingsRepository: Symbol('channelFollowingsRepository'),
 	channelFavoritesRepository: Symbol('channelFavoritesRepository'),
 	channelMutingRepository: Symbol('channelMutingRepository'),

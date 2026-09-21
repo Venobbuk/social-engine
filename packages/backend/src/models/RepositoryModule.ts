@@ -20,6 +20,7 @@ import { MiCompetitionMatch } from '@/modules/competitions/models/CompetitionMat
 import { MiCompetitionAward } from '@/modules/competitions/models/CompetitionAward.js';
 import { MiClubMemberState } from '@/modules/clubs/models/ClubSetting.js'; // CLUB-V3
 import { MiClubSchedule } from '@/modules/clubs/models/ClubSchedule.js'; // CLUB-V3
+import { MiCoachSchedule } from '@/modules/coaches/models/CoachSchedule.js'; // COACHING-V1
 import {
 	MiAbuseReportNotificationRecipient,
 	MiAbuseUserReport,
@@ -507,6 +508,11 @@ const $clubSchedulesRepository: Provider = { // CLUB-V3
 	useFactory: (db: DataSource) => db.getRepository(MiClubSchedule).extend(miRepository as MiRepository<MiClubSchedule>),
 	inject: [DI.db],
 };
+const $coachSchedulesRepository: Provider = { // COACHING-V1
+	provide: DI.coachSchedulesRepository,
+	useFactory: (db: DataSource) => db.getRepository(MiCoachSchedule).extend(miRepository as MiRepository<MiCoachSchedule>),
+	inject: [DI.db],
+};
 const $meetMatchesRepository: Provider = {
 	provide: DI.meetMatchesRepository,
 	useFactory: (db: DataSource) => db.getRepository(MiMeetMatch).extend(miRepository as MiRepository<MiMeetMatch>),
@@ -724,6 +730,7 @@ const $reversiGamesRepository: Provider = {
 		$competitionAwardsRepository,
 		$clubMemberStatesRepository, // CLUB-V3
 		$clubSchedulesRepository, // CLUB-V3
+		$coachSchedulesRepository, // COACHING-V1
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,
@@ -819,6 +826,7 @@ const $reversiGamesRepository: Provider = {
 		$competitionAwardsRepository,
 		$clubMemberStatesRepository, // CLUB-V3
 		$clubSchedulesRepository, // CLUB-V3
+		$coachSchedulesRepository, // COACHING-V1
 		$channelFollowingsRepository,
 		$channelFavoritesRepository,
 		$channelMutingRepository,

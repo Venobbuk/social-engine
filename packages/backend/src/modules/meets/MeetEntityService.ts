@@ -76,6 +76,9 @@ export class MeetEntityService {
 			receiptUrl: p.receiptUrl ?? null,
 			receiptAt: p.receiptAt ? new Date(p.receiptAt).toISOString() : null,
 			receiptById: p.receiptById ?? null,
+			agreedPrice: p.agreedPrice ?? null,          // COACHING-V1: the price this student locked at booking
+			agreedCurrency: p.agreedCurrency ?? null,
+			enrollmentId: p.enrollmentId ?? null,
 			selfLevel: level?.selfLevel ?? null,
 			duprSingles: level?.duprSingles ?? null,
 			duprDoubles: level?.duprDoubles ?? null,
@@ -195,6 +198,8 @@ export class MeetEntityService {
 				tbLossPoints: meet.tbLossPoints ?? 0,
 			},
 			seriesId: meet.seriesId,
+			coachScheduleId: meet.coachScheduleId ?? null,   // COACHING-V1: set → this meet is a lesson
+			priceTiers: meet.priceTiers ?? null,
 			confirmedCount: counts.confirmed,
 			waitlistedCount: counts.waitlisted,
 			requestedCount: counts.requested,

@@ -225,6 +225,23 @@ export * as 'coaches/apply' from '@/modules/coaches/endpoints/apply.js'; // COAC
 export * as 'coaches/application' from '@/modules/coaches/endpoints/application.js'; // COACH-VERIFY-V1
 export * as 'coaches/applications/list' from '@/modules/coaches/endpoints/applications-list.js'; // COACH-VERIFY-V1 (staff)
 export * as 'coaches/applications/decide' from '@/modules/coaches/endpoints/applications-decide.js'; // COACH-VERIFY-V1 (staff)
+// COACHING-V1 — lesson scheduling + booking (club owner/admin posts; students book single/series/pack).
+export * as 'coaches/schedules/create' from '@/modules/coaches/endpoints/schedules-create.js';
+export * as 'coaches/schedules/update' from '@/modules/coaches/endpoints/schedules-update.js';
+export * as 'coaches/schedules/delete' from '@/modules/coaches/endpoints/schedules-delete.js';
+export * as 'coaches/schedules/list' from '@/modules/coaches/endpoints/schedules-list.js';
+export * as 'coaches/schedules/show' from '@/modules/coaches/endpoints/schedules-show.js';
+export * as 'coaches/schedules/run' from '@/modules/coaches/endpoints/schedules-run.js';
+export * as 'coaches/schedules/of-user' from '@/modules/coaches/endpoints/schedules-of-user.js';
+export * as 'coaches/lessons/book' from '@/modules/coaches/endpoints/lessons-book.js';
+export * as 'coaches/lessons/enroll' from '@/modules/coaches/endpoints/lessons-enroll.js';
+export * as 'coaches/lessons/unenroll' from '@/modules/coaches/endpoints/lessons-unenroll.js';
+export * as 'coaches/lessons/skip' from '@/modules/coaches/endpoints/lessons-skip.js';
+export * as 'coaches/lessons/mine' from '@/modules/coaches/endpoints/lessons-mine.js';
+export * as 'coaches/lessons/broadcast' from '@/modules/coaches/endpoints/lessons-broadcast.js';
+export * as 'coaches/my-lessons' from '@/modules/coaches/endpoints/my-lessons.js';
+export * as 'coaches/profile/show' from '@/modules/coaches/endpoints/profile-show.js';
+export * as 'coaches/profile/update' from '@/modules/coaches/endpoints/profile-update.js';
 export * as 'clubs/invitations/create' from '@/modules/clubs/endpoints/invitations-create.js'; // CLUB-INVITE-V1
 export * as 'clubs/invitations/respond' from '@/modules/clubs/endpoints/invitations-respond.js'; // CLUB-INVITE-V1
 export * as 'clubs/invitations/list' from '@/modules/clubs/endpoints/invitations-list.js'; // CLUB-INVITE-V1

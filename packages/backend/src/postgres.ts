@@ -88,6 +88,7 @@ import { MiCompetitionMatch } from '@/modules/competitions/models/CompetitionMat
 import { MiCompetitionAward } from '@/modules/competitions/models/CompetitionAward.js';
 import { MiClubMemberState } from '@/modules/clubs/models/ClubSetting.js'; // CLUB-V3
 import { MiClubSchedule } from '@/modules/clubs/models/ClubSchedule.js'; // CLUB-V3
+import { MiCoachSchedule } from '@/modules/coaches/models/CoachSchedule.js'; // COACHING-V1
 import { MiRetentionAggregation } from '@/models/RetentionAggregation.js';
 import { MiRole } from '@/models/Role.js';
 import { MiRoleAssignment } from '@/models/RoleAssignment.js';
@@ -258,6 +259,7 @@ export const entities = [
 	MiClubSetting,
 	MiClubMemberState, // CLUB-V3
 	MiClubSchedule, // CLUB-V3
+	MiCoachSchedule, // COACHING-V1
 	MiClubJoinRequest,
 	MiChannelFollowing,
 	MiChannelFavorite,

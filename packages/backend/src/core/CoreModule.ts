@@ -86,6 +86,7 @@ import { CompetitionEntityService } from '@/modules/competitions/CompetitionEnti
 import { CompetitionDuprService } from '@/modules/competitions/CompetitionDuprService.js'; // COMP-DUPR-V1
 import { DuprSubmitService } from '@/core/DuprSubmitService.js'; // COMP-DUPR-V1: the one hkpl DUPR door
 import { ClubScheduleService } from '@/modules/clubs/ClubScheduleService.js'; // CLUB-V3
+import { CoachScheduleService } from '@/modules/coaches/CoachScheduleService.js'; // COACHING-V1
 import { ChatService } from './ChatService.js';
 import { RegistryApiService } from './RegistryApiService.js';
 import { ReversiService } from './ReversiService.js';
@@ -249,6 +250,7 @@ const $CompetitionEntityService: Provider = { provide: 'CompetitionEntityService
 const $CompetitionDuprService: Provider = { provide: 'CompetitionDuprService', useExisting: CompetitionDuprService }; // COMP-DUPR-V1
 const $DuprSubmitService: Provider = { provide: 'DuprSubmitService', useExisting: DuprSubmitService }; // COMP-DUPR-V1
 const $ClubScheduleService: Provider = { provide: 'ClubScheduleService', useExisting: ClubScheduleService }; // CLUB-V3
+const $CoachScheduleService: Provider = { provide: 'CoachScheduleService', useExisting: CoachScheduleService }; // COACHING-V1
 const $ChannelMutingService: Provider = { provide: 'ChannelMutingService', useExisting: ChannelMutingService };
 const $ChatService: Provider = { provide: 'ChatService', useExisting: ChatService };
 const $RegistryApiService: Provider = { provide: 'RegistryApiService', useExisting: RegistryApiService };
@@ -414,6 +416,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		CompetitionDuprService, // COMP-DUPR-V1
 		DuprSubmitService,
 		ClubScheduleService, // CLUB-V3
+		CoachScheduleService, // COACHING-V1
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -577,6 +580,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$CompetitionDuprService, // COMP-DUPR-V1
 		$DuprSubmitService,
 		$ClubScheduleService, // CLUB-V3
+		$CoachScheduleService, // COACHING-V1
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,
@@ -740,6 +744,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		CompetitionDuprService, // COMP-DUPR-V1
 		DuprSubmitService,
 		ClubScheduleService, // CLUB-V3
+		CoachScheduleService, // COACHING-V1
 		ChannelMutingService,
 		ChatService,
 		RegistryApiService,
@@ -901,6 +906,7 @@ const $ApQuestionService: Provider = { provide: 'ApQuestionService', useExisting
 		$CompetitionDuprService, // COMP-DUPR-V1
 		$DuprSubmitService,
 		$ClubScheduleService, // CLUB-V3
+		$CoachScheduleService, // COACHING-V1
 		$ChannelMutingService,
 		$ChatService,
 		$RegistryApiService,
