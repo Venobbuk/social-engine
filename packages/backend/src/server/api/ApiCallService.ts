@@ -294,6 +294,14 @@ export class ApiCallService implements OnApplicationShutdown {
 		}
 	}
 
+	// NULL-CALLER-401-V1: every meta flag that makes the dispatcher dereference the caller. requiredRolePolicy
+	// belongs here because :399 reads user!.id — without it an anonymous call to a requireCredential:false
+	// endpoint that carries a policy (users/search) died at 500 instead of answering 401.
+	@bindThis
+	private needsCallerNullCaller401V1(ep: IEndpoint & { exec: any }): boolean {
+		return !!(ep.meta.requireCredential || ep.meta.requireModerator || ep.meta.requireAdmin || ep.meta.requiredRolePolicy != null);
+	}
+
 	@bindThis
 	private async call(
 		ep: IEndpoint & { exec: any },
@@ -347,7 +355,7 @@ export class ApiCallService implements OnApplicationShutdown {
 			}
 		}
 
-		if (ep.meta.requireCredential || ep.meta.requireModerator || ep.meta.requireAdmin) {
+		if (this.needsCallerNullCaller401V1(ep)) {
 			if (user == null) {
 				throw new ApiError({
 					message: 'Credential required.',
@@ -396,9 +404,9 @@ export class ApiCallService implements OnApplicationShutdown {
 			}
 		}
 
-		if (ep.meta.requiredRolePolicy != null && (this.meta.rootUserId !== user!.id)) {
-			const myRoles = await this.roleService.getUserRoles(user!.id);
-			const policies = await this.roleService.getUserPolicies(user!.id);
+		if (ep.meta.requiredRolePolicy != null && user != null && (this.meta.rootUserId !== user.id)) {
+			const myRoles = await this.roleService.getUserRoles(user.id);
+			const policies = await this.roleService.getUserPolicies(user.id);
 			if (!policies[ep.meta.requiredRolePolicy] && !myRoles.some(r => r.isAdministrator)) {
 				throw new ApiError({
 					message: 'You are not assigned to a required role.',

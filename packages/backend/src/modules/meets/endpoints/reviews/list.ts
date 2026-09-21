@@ -40,6 +40,7 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		userId: { type: 'string', format: 'misskey:id', nullable: true },
+		meetId: { type: 'string', format: 'misskey:id', nullable: true },   // MEET-KUDOS-V1: the kudos of ONE meet
 		direction: { type: 'string', enum: ['received', 'given'], default: 'received' },
 		type: { type: 'string', enum: ['endorsement', 'feedback', 'warning'], nullable: true },
 		archived: { type: 'boolean', default: false },
@@ -77,6 +78,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				// review-batch2 #9: every review this person ever wrote used to be loaded and sliced in JS. One page in SQL; the
 				// tab counts stay what they were - one grouped query over all of them, not over the page.
 				const qb = this.meetReviewsRepository.createQueryBuilder('r').where('r.authorId = :u', { u: userId });
+				if (ps.meetId) qb.andWhere('r.meetId = :m', { m: ps.meetId });   // MEET-KUDOS-V1
 				for (const c of await qb.clone().select('r.type', 'type').addSelect('count(*)', 'n').groupBy('r.type').getRawMany() as { type: 'endorsement' | 'feedback' | 'warning'; n: string }[]) counts[c.type] = Number(c.n);
 				if (ps.type) qb.andWhere('r.type = :t', { t: ps.type });
 				givenTotal = await qb.getCount();
@@ -84,6 +86,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			} else {
 				const v = await this.meetService.reviewsVisibleTo(userId, me ? me.id : null);
 				rows = v.reviews.filter(r => ps.archived ? self && r.archivedAt != null : r.archivedAt == null);
+				if (ps.meetId) rows = rows.filter(r => r.meetId === ps.meetId);   // MEET-KUDOS-V1: narrows, never widens
 				warningCount = v.warningCount; warningsPublic = v.warningsPublic;
 			}
 			// the dimension totals are over the visible, unarchived endorsements (before the type filter and the page)

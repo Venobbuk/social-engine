@@ -33,7 +33,7 @@ export const paramDef = {
 		isCoach: { type: 'boolean', nullable: true },
 		isReferee: { type: 'boolean', nullable: true },
 		isPaymentCollector: { type: 'boolean', nullable: true },
-		tags: { type: 'array', nullable: true, items: { type: 'string', enum: ['paid', 'unpaid', 'cash', 'digital', 'membership', 'punch', 'feeWaived', 'refunded', 'checkedIn', 'noShow', 'late', 'excused', 'guest', 'dropper'] } },
+		tags: { type: 'array', nullable: true, items: { type: 'string', enum: ['paid', 'unpaid', 'paidClaim', 'cash', 'digital', 'membership', 'punch', 'feeWaived', 'refunded', 'checkedIn', 'noShow', 'late', 'excused', 'guest', 'dropper'] } },   // PLAYER-PAYS-V1
 		teamKey: { type: 'string', nullable: true, maxLength: 32 },
 		courtIndex: { type: 'integer', nullable: true, minimum: 0, maximum: 64 },
 		displayName: { type: 'string', nullable: true, maxLength: 128 },

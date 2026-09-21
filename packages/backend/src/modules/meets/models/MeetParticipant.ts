@@ -12,7 +12,7 @@ import { MiMeet } from './Meet.js';
 // MEET-V4: Reclub MeetParticipantStatus. removed/left are not states — the row is DELETED (Reclub fn#75239). spectator = a roster row holding no seat (host-only host).
 export const meetParticipantStatuses = ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe', 'declined', 'spectator'] as const;
 export const meetParticipantKinds = ['user', 'reserved', 'plusOne'] as const;
-export const meetParticipantTags = ['paid', 'unpaid', 'cash', 'digital', 'membership', 'punch', 'feeWaived', 'refunded', 'checkedIn', 'noShow', 'late', 'excused', 'guest', 'dropper'] as const; // three independent groups: attendance / payment / method
+export const meetParticipantTags = ['paid', 'unpaid', 'paidClaim', 'cash', 'digital', 'membership', 'punch', 'feeWaived', 'refunded', 'checkedIn', 'noShow', 'late', 'excused', 'guest', 'dropper'] as const; // PLAYER-PAYS-V1: paidClaim is the PLAYER's word; paid stays the host's // three independent groups: attendance / payment / method
 
 @Entity('meet_participant')
 @Index(['meetId', 'userId'], { unique: true, where: '"userId" IS NOT NULL' })

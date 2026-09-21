@@ -159,6 +159,7 @@ export * as 'meets/reviews/upsert' from '@/modules/meets/endpoints/reviews/upser
 export * as 'meets/reviews/show' from '@/modules/meets/endpoints/reviews/show.js';
 export * as 'meets/reviews/leaderboard' from '@/modules/meets/endpoints/reviews/leaderboard.js';
 export * as 'meets/reviews/list' from '@/modules/meets/endpoints/reviews/list.js'; // REVIEWS-LIST-V1 (W2-F)
+export * as 'meets/reviews/meet-summary' from '@/modules/meets/endpoints/reviews/meet-summary.js';   // MEET-KUDOS-V1
 export * as 'meets/reviews/delete' from '@/modules/meets/endpoints/reviews/delete.js'; // REVIEWS-LIST-V1 (W2-F)
 export * as 'meets/reviews/archive' from '@/modules/meets/endpoints/reviews/archive.js'; // REVIEWS-LIST-V1 (W2-F)
 // MEET-EXTRAS-V1
@@ -171,6 +172,7 @@ export * as 'meets/matches/forfeit' from '@/modules/meets/endpoints/matches/forf
 export * as 'meets/participants/bulk' from '@/modules/meets/endpoints/participants/bulk.js';
 export * as 'meets/participants/generate-teams' from '@/modules/meets/endpoints/participants/generate-teams.js';
 export * as 'meets/participants/receipt' from '@/modules/meets/endpoints/participants/receipt.js';
+export * as 'meets/participants/claim-payment' from '@/modules/meets/endpoints/participants/claim-payment.js';   // PLAYER-PAYS-V1
 export * as 'meets/dupr-manager' from '@/modules/meets/endpoints/dupr-manager.js';
 export * as 'meets/matches/submit-dupr-all' from '@/modules/meets/endpoints/matches/submit-dupr-all.js';
 export * as 'venues/show' from '@/modules/venues/endpoints/show.js';
