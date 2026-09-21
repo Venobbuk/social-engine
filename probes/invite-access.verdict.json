@@ -1,0 +1,580 @@
+{
+ "id": "invite-access",
+ "at": "2026-09-21T08:12:44.837Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "commit": "4dcf4f6785",
+ "shipped": {
+  "image": "ghcr.io/venobbuk/social-engine:sha-4dcf4f6 = :master",
+  "marker": "clubTokenGrants (a method name rolldown keeps; absent from every earlier image — /root/gen/ship-verify2.sh)",
+  "hosts": "social-engine-web-1 (prod) and social-engine-web-uat-1 both report the marker in their BUILT tree after the restart (L4)"
+ },
+ "fixes": [
+  {
+   "n": 1,
+   "endpoint": "clubs/schedules/list + clubs/schedules/show",
+   "before": "an invite-link (?at=) holder was refused NO_SUCH_CLUB — the weekly slots came back empty for the very link the club shares. Measured on web-uat :3961 (b5b4ddc330): F1.list.anon.inviteToken=REFUSED, F1.list.strangerWithToken=REFUSED, F1.show.anon.inviteToken=REFUSED",
+   "after": "both doors take the same optional accessToken channels/show takes and hand it to mayReadClub (unchanged). Token holder gets the venue and its coordinates; a WRONG token, a junk token and no token are all still refused.",
+   "family": "mayReadClub call sites that could have passed a token they did not",
+   "family_found": 2,
+   "family_fixed": 2,
+   "family_detail": [
+    {
+     "site": "server/api/endpoints/channels/show.ts:65",
+     "passes_token": true,
+     "action": "already correct"
+    },
+    {
+     "site": "server/api/endpoints/channels/timeline.ts:96",
+     "passes_token": true,
+     "action": "already correct"
+    },
+    {
+     "site": "modules/clubs/endpoints/schedules-list.ts",
+     "passes_token": false,
+     "action": "FIXED"
+    },
+    {
+     "site": "modules/clubs/endpoints/schedules-show.ts",
+     "passes_token": false,
+     "action": "FIXED"
+    },
+    {
+     "site": "server/api/endpoints/notes/create.ts:250",
+     "passes_token": false,
+     "action": "not applicable — a WRITE path with no token parameter; posting into a private club is mayPostInClub, and the link has never written"
+    },
+    {
+     "site": "core/entities/NoteEntityService.ts:141 (pack)",
+     "passes_token": false,
+     "action": "not applicable — a packer with no request token in scope"
+    },
+    {
+     "site": "core/entities/NoteEntityService.ts:288 (isVisibleForMe)",
+     "passes_token": false,
+     "action": "not applicable — same"
+    }
+   ],
+   "evidence_before": [
+    {
+     "check": "F1.list.anon.noToken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB",
+      "rows": 0
+     }
+    },
+    {
+     "check": "F1.list.anon.inviteToken",
+     "ok": false,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB",
+      "rows": 0,
+      "venue": null,
+      "lat": null
+     }
+    },
+    {
+     "check": "F1.list.strangerWithToken",
+     "ok": false,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB",
+      "rows": 0
+     }
+    },
+    {
+     "check": "F1.list.anon.WRONGtoken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB",
+      "rows": 0
+     }
+    },
+    {
+     "check": "F1.list.member",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "rows": 1
+     }
+    },
+    {
+     "check": "F1.list.PUBLIC-control.anon",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "rows": 1
+     }
+    },
+    {
+     "check": "F1.show.anon.noToken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB"
+     }
+    },
+    {
+     "check": "F1.show.anon.inviteToken",
+     "ok": false,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB"
+     }
+    },
+    {
+     "check": "F1.show.anon.WRONGtoken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB"
+     }
+    },
+    {
+     "check": "F1.show.PUBLIC-control.anon",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "id": "areir03o5jwo00kw"
+     }
+    }
+   ],
+   "evidence_after": [
+    {
+     "check": "F1.list.anon.noToken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB",
+      "rows": 0
+     }
+    },
+    {
+     "check": "F1.list.anon.inviteToken",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "rows": 1,
+      "venue": "[probe] SPX-ayfq4p secret court",
+      "lat": 22.2783
+     }
+    },
+    {
+     "check": "F1.list.strangerWithToken",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "rows": 1
+     }
+    },
+    {
+     "check": "F1.list.anon.WRONGtoken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB",
+      "rows": 0
+     }
+    },
+    {
+     "check": "F1.list.member",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "rows": 1
+     }
+    },
+    {
+     "check": "F1.list.PUBLIC-control.anon",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "rows": 1
+     }
+    },
+    {
+     "check": "F1.show.anon.noToken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB"
+     }
+    },
+    {
+     "check": "F1.show.anon.inviteToken",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "venue": "[probe] SPX-ayfq4p secret court",
+      "lat": 22.2783
+     }
+    },
+    {
+     "check": "F1.show.anon.WRONGtoken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CLUB"
+     }
+    },
+    {
+     "check": "F1.show.PUBLIC-control.anon",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "id": "areir03o5jwo00kw"
+     }
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "endpoint": "clubs/by-code + channels/show (via ChannelEntityService.pack)",
+   "before": "a private club's join preview answered usersCount 0 / membersCount 0 to the holder of its own ref code and to the holder of its invite-link token — SEC-CLUB-COUNTS-V1 knew membership only. Measured on :3961: by-code usersCount=0 where the roster is 3",
+   "after": "the packer takes an accessProven opt: the DOOR, which has already checked the token (ClubService.clubTokenGrants) or the code (by-code reached its line at all), tells the packer so. by-code derives no counts itself and mayReadClub is untouched. A caller with neither code nor token still gets 0/0/0 — proven on the packer door (meets/show of a public meet inside the private club) and on every no-token leg.",
+   "family": "doors that pack a channel for a caller who proved CLUB access by token or code",
+   "family_found": 2,
+   "family_fixed": 2,
+   "family_detail": [
+    {
+     "site": "modules/clubs/endpoints/by-code.ts (code)",
+     "action": "FIXED"
+    },
+    {
+     "site": "server/api/endpoints/channels/show.ts (accessToken)",
+     "action": "FIXED"
+    },
+    {
+     "site": "modules/meets/MeetEntityService.ts:113 — meets/show, summary, matches/list, photos-list take an accessToken",
+     "action": "NOT the same hole: that token is the MEET's (MeetService.mayViewPrivate), not the club's. A meet-link holder has proved nothing about the club, so its counts stay 0 — asserted as a leak leg (F2.meets-show.anon.noClubToken)"
+    },
+    {
+     "site": "modules/clubs/endpoints/settings-show.ts",
+     "action": "no hole: it never used the packer and its own hasAccess gate has taken the token since CLUB-V3 — the club page's member count already worked for a token holder"
+    },
+    {
+     "site": "the other 12 pack/packMany call sites (channels/search, featured, followed, owned, my-favorites, mute/list, create, update, clubs/mine, clubs/of-user, discover/search, ClientServerService x2)",
+     "action": "no club token or code is in scope at any of them; unchanged"
+    }
+   ],
+   "evidence_before": [
+    {
+     "check": "F2.by-code.anon.clubCode",
+     "ok": false,
+     "got": {
+      "status": 200,
+      "code": null,
+      "expect": 3,
+      "usersCount": 0,
+      "membersCount": 0,
+      "followersCount": 0,
+      "visibility": "private"
+     }
+    },
+    {
+     "check": "F2.by-code.PUBLIC-control",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "expect": 2,
+      "usersCount": 2,
+      "membersCount": 2,
+      "followersCount": 0
+     }
+    },
+    {
+     "check": "F2.channels-show.anon.noToken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CHANNEL"
+     }
+    },
+    {
+     "check": "F2.channels-show.anon.inviteToken",
+     "ok": false,
+     "got": {
+      "status": 200,
+      "code": null,
+      "expect": 3,
+      "usersCount": 0,
+      "membersCount": 0,
+      "followersCount": 0
+     }
+    },
+    {
+     "check": "F2.channels-show.anon.WRONGtoken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CHANNEL"
+     }
+    },
+    {
+     "check": "F2.channels-show.member",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "expect": 3,
+      "usersCount": 3,
+      "membersCount": 3,
+      "followersCount": 0
+     }
+    },
+    {
+     "check": "F2.channels-show.PUBLIC-control.anon",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "expect": 2,
+      "usersCount": 2,
+      "membersCount": 2,
+      "followersCount": 0
+     }
+    },
+    {
+     "check": "F2.meets-show.anon.noClubToken",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "channel": {
+       "usersCount": 0,
+       "membersCount": 0,
+       "followersCount": 0
+      }
+     }
+    },
+    {
+     "check": "F2.meets-show.member",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "expect": 3,
+      "channel": {
+       "usersCount": 3,
+       "membersCount": 3,
+       "followersCount": 0
+      }
+     }
+    }
+   ],
+   "evidence_after": [
+    {
+     "check": "F2.by-code.anon.clubCode",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "expect": 3,
+      "usersCount": 3,
+      "membersCount": 3,
+      "followersCount": 0,
+      "visibility": "private"
+     }
+    },
+    {
+     "check": "F2.by-code.PUBLIC-control",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "expect": 2,
+      "usersCount": 2,
+      "membersCount": 2,
+      "followersCount": 0
+     }
+    },
+    {
+     "check": "F2.channels-show.anon.noToken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CHANNEL"
+     }
+    },
+    {
+     "check": "F2.channels-show.anon.inviteToken",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "expect": 3,
+      "usersCount": 3,
+      "membersCount": 3,
+      "followersCount": 0
+     }
+    },
+    {
+     "check": "F2.channels-show.anon.WRONGtoken",
+     "ok": true,
+     "got": {
+      "status": 400,
+      "code": "NO_SUCH_CHANNEL"
+     }
+    },
+    {
+     "check": "F2.channels-show.member",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "code": null,
+      "expect": 3,
+      "usersCount": 3,
+      "membersCount": 3,
+      "followersCount": 0
+     }
+    },
+    {
+     "check": "F2.channels-show.PUBLIC-control.anon",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "expect": 2,
+      "usersCount": 2,
+      "membersCount": 2,
+      "followersCount": 0
+     }
+    },
+    {
+     "check": "F2.meets-show.anon.noClubToken",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "channel": {
+       "usersCount": 0,
+       "membersCount": 0,
+       "followersCount": 0
+      }
+     }
+    },
+    {
+     "check": "F2.meets-show.member",
+     "ok": true,
+     "got": {
+      "status": 200,
+      "expect": 3,
+      "channel": {
+       "usersCount": 3,
+       "membersCount": 3,
+       "followersCount": 0
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "self_test": {
+  "planted": 3,
+  "caught": 3,
+  "faults": [
+   {
+    "id": "P1.fixture-not-private",
+    "planted": "the private club is actually public — every [leak] leg must fail rather than read 'no leak'",
+    "caught": true,
+    "detail": {
+     "leaks_open": 8,
+     "failed": [
+      "F1.list.anon.noToken",
+      "F1.list.stranger.noToken",
+      "F1.list.staff.noToken",
+      "F1.show.anon.noToken",
+      "F1.show.stranger.noToken",
+      "F2.channels-show.anon.noToken",
+      "F2.channels-show.stranger.noToken",
+      "F2.meets-show.anon.noClubToken"
+     ]
+    }
+   },
+   {
+    "id": "P2.privacy-regressed",
+    "planted": "a caller with NO token gets the schedule and the counts (sha-3ea789f) — the leak legs must catch it",
+    "caught": true,
+    "detail": {
+     "leaks_open": 8,
+     "failed": [
+      "F1.list.anon.noToken",
+      "F1.list.stranger.noToken",
+      "F1.list.staff.noToken",
+      "F1.show.anon.noToken",
+      "F1.show.stranger.noToken",
+      "F2.channels-show.anon.noToken",
+      "F2.channels-show.stranger.noToken",
+      "F2.meets-show.anon.noClubToken"
+     ]
+    }
+   },
+   {
+    "id": "P3.entitled-legs-are-not-constants",
+    "planted": "every [feature] leg re-run with the stranger's session and the wrong club's token/code must fail",
+    "caught": true,
+    "detail": {
+     "feature_legs": 11,
+     "feature_failures": 11,
+     "still_passing": []
+    }
+   }
+  ]
+ },
+ "regression": {
+  "sec_perm_leaks_after": 0,
+  "how": "probes/sec-perm-fixes.probe.cjs (the previous lane's 68 assertions) run over the SAME fixture against the engine BEFORE this lane (:3961, b5b4ddc330) and the engine WITH it (:3965, sha-4dcf4f6): 0 verdict differences across 68 assertions.",
+  "suite_reported_leaks": {
+   "before_this_lane": 1,
+   "with_this_lane": 1
+  },
+  "the_one_non_pass": "H5.THREW on BOTH engines — a MEASUREMENT failure, not a leak: the rebuilt fixture has no fairFour/fairPredict block because sec-perm-fixes.fairfour.cjs refuses today's persona ratings (\"a prediction sits on the clamp (3)\"), so the probe's split() was handed an error object. Identical on both engines, and nothing in this commit touches stats/gb-fair.",
+  "hole5_measured_directly": "anonymous / GripBat staff / a POSITIVE-pair member all read teamAWinPct 4 while the NEGATIVE-pair member reads 3, identically on :3961 and :3965 — the private chemistry is still not visible to an outsider. On the pre-fix build :3963 every caller reads 3 (the leak). /root/gen/h5direct.cjs",
+  "legitimate_caller_failures_after": 0
+ },
+ "counts": {
+  "assertions_per_phase": 29,
+  "before": {
+   "leaks_open": 0,
+   "entitled_callers_refused": 5,
+   "control_failures": 0
+  },
+  "after": {
+   "leaks_open": 0,
+   "entitled_callers_refused": 0,
+   "control_failures": 0
+  },
+  "after_shipped_uat": {
+   "leaks_open": 0,
+   "entitled_callers_refused": 0,
+   "control_failures": 0
+  }
+ },
+ "fixture": {
+  "tag": "[probe] SPX-ayfq4p",
+  "private_club": "are9jy2n5jwo0095",
+  "public_control_club": "are9jy3o5jwo0096",
+  "roster": {
+   "priv": 3,
+   "pub": 2
+  },
+  "note": "rebuilt by probes/sec-perm-fixes.setup.cjs and re-read out of the database immediately before every measurement (another lane's probes/run.sh sweeps every [probe% artefact on this box); removed afterwards — probecount.sh reads zero on both databases."
+ },
+ "evidence": [
+  "BEFORE (2026-09-21T08:00:39.652Z, http://127.0.0.1:3961 = web-uat on b5b4ddc330): 29 assertions, 0 leaks open, 5 entitled callers refused — the two side-effects, reproduced — /root/gen/invite-access-before.json",
+  "AFTER  (2026-09-21T08:02:50.095Z, http://127.0.0.1:3965 = a throwaway engine on ghcr sha-4dcf4f6, grepped for clubTokenGrants + accessProven BEFORE measuring): 29 assertions, 0 leaks, 0 entitled callers refused, 0 control failures — /root/gen/invite-access-after.json",
+  "AFTER-SHIPPED (2026-09-21T08:09:21.507Z, http://127.0.0.1:3961 = web-uat restarted onto the shipped image): 29 assertions, 0/0/0 — /root/gen/invite-access-after-shipped.json",
+  "SELF-TEST: 3 of 3 planted faults caught — P1 the fixture flipped public (8 leak legs went red), P2 the real pre-fix build sha-3ea789f where a caller with NO token got the schedule and the counts (the same 8 went red), P3 every entitled leg run with an outsider credential (11 of 11 feature legs went red) — /root/gen/invite-access-selftest.json",
+  "REGRESSION: the previous lane's suite, both engines, same fixture — 0 verdict differences over 68 assertions; /root/gen/secperm2-3961-inviteacc.json vs /root/gen/secperm2-after-inviteacc.json (/root/gen/secperm-diff.cjs)",
+  "L3 (the image carries it): docker run --rm --entrypoint sh ghcr.io/venobbuk/social-engine:sha-4dcf4f6 -c \"grep -rl clubTokenGrants /misskey/packages/backend/built\"",
+  "L4 (the right code is RUNNING): docker exec social-engine-web-1 grep -rl clubTokenGrants /misskey/packages/backend/built -> 2 files; same for social-engine-web-uat-1; [shipv2] health prod=200 uat=200, done 4dcf4f67858cc15e132607f1e0058788ed90dd06",
+  "LIVE HOST (https://social.silkvo.com, read-only, nothing written to the social database): clubs/by-code V8C9W9 -> usersCount 19 = the 19 club_member rows in the database; channels/show with a BOGUS accessToken -> 200 and the same 19 (clubTokenGrants ran and said no); clubs/schedules/list with the NEW accessToken parameter -> 200 (the live schema accepts it); an unknown club and a bogus code -> NO_SUCH_CLUB. Production holds NO private club today, so FIX 1's refuse/grant behaviour is proved on UAT (L6) and on production only as far as \"the code is running and the public path is unchanged\" (L4 + L6-on-the-public-path).",
+  "tsc: /root/gen/tsc-check.sh against the patched src -> 9 errors, the baseline, none in the six touched files",
+  "G13: probes/sec-perm-fixes.cleanup.cjs + _sweep.cjs on both databases; bash /root/gen/probecount.sh reads 0/0/0/0 on `social` and `se_sbx`; se-after and se-before containers removed",
+  "scripts: probes/invite-access.probe.cjs (29 assertions x leak/feature/control, ENTITLED_AS=stranger for P3), probes/invite-access.selftest.cjs, /root/gen/invite-access.patch.cjs (the exact edits), /root/gen/local-build-marker.sh (the local rolldown build that chose the ship marker)"
+ ],
+ "open_fact_for_the_operator": "ENGINE-ONLY: the GripBat app does not yet send the token to these two doors — src/lib/social.ts clubSchedules(channelId) calls clubs/schedules/list with { channelId } and clubSchedule(scheduleId) with { scheduleId } (seen at /root/hkpl-taro-branch/src/lib/social.ts:571-572), while the club page already holds the ?at= token and passes it to clubs/settings/show (line 558) and clubs/join (559). FIX 1 is live in the engine and proved on UAT, but an invite-link holder will keep seeing an empty schedule until those two call sites pass the token through. Not touched here: it is the app repo, and hkpl deploys are batched to ~04:00 HKT."
+}
