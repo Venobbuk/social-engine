@@ -9,8 +9,9 @@ import { CompetitionService } from '@/modules/competitions/CompetitionService.js
 import { CompetitionEntityService } from '@/modules/competitions/CompetitionEntityService.js';
 import { competitionErrors, toApiError, anyObject } from './_shared.js';
 
-// TOURNAMENT-V1: generate the draw — round robin / pools (meets generator) or the knockout bracket (brackets-manager),
-// the playoffs of a pool competition once every pool match is complete. reset wipes the matches first.
+// COMP-T3-V1: Reclub "Join as a spectator" / "Cancel request" — the meet's spectator (a roster row holding no seat) on the
+// competition's own entry row: never counted, never drawn, hears announcements, reads the general chat. The free-agent
+// door's shape (free-agent.ts), a different status.
 export const meta = {
 	tags: ['competitions'],
 	requireCredential: true,
@@ -24,11 +25,8 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		competitionId: { type: 'string', format: 'misskey:id' },
-		stage: { type: 'string', enum: ['auto', 'regular', 'playoff'], default: 'auto' },
-		reset: { type: 'boolean', default: false },
-		// COMP-T3-V1 (Reclub Manage seeds): the host's playoff seed order, and a redraw of the playoff bracket alone
-		seedOrder: { type: 'array', nullable: true, maxItems: 256, items: { type: 'string', format: 'misskey:id' } },
-		resetPlayoff: { type: 'boolean', default: false },
+		leave: { type: 'boolean', nullable: true },
+		accessToken: { type: 'string', nullable: true, maxLength: 32 },
 	},
 	required: ['competitionId'],
 } as const;
@@ -39,9 +37,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				const c = await this.competitionService.get(ps.competitionId);
-				const r = await this.competitionService.draw(c, me, { stage: ps.stage, reset: ps.reset, seedOrder: ps.seedOrder ?? null, resetPlayoff: ps.resetPlayoff });
-				const fresh = await this.competitionService.get(c.id);
-				return { stage: r.stage, matches: await Promise.all(r.matches.map((m) => this.competitionEntityService.packMatch(m, fresh, me))), competition: await this.competitionEntityService.pack(fresh, me, { detailed: true }) };
+				await this.competitionService.spectate(c, me, { leave: ps.leave, accessToken: ps.accessToken });
+				return await this.competitionEntityService.pack(await this.competitionService.get(c.id), me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);
 			}

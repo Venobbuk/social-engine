@@ -21,7 +21,11 @@ export const competitionScoreTypes = ['standard', 'tiebreaker', 'extra'] as cons
 // COMP-DUPR-V1: the same DUPRIntegrationStatus meet_match carries (MeetMatch.ts:12) — nothing yet -> queued at
 // hkpl -> submitted (locked) -> failed -> ineligible. DUPR itself lives on hkpl; this row keeps only the receipt.
 export const competitionMatchDuprStatuses = ['queued', 'submitted', 'failed', 'ineligible'] as const;
-export type CompetitionScoreSet = { t1: number; t2: number; type: typeof competitionScoreTypes[number] };
+// COMP-T3-V1: a score set may carry its name (Reclub Manage score sets "Set name"); absent = "Game n"
+export type CompetitionScoreSet = { t1: number; t2: number; type: typeof competitionScoreTypes[number]; name?: string };
+// COMP-T3-V1: Reclub match availability "Can go / Maybe / Can't go" (the values of hkpl AVAILABILITY-V1, per match here)
+export const competitionAvailabilities = ['yes', 'maybe', 'no'] as const;
+export type CompetitionAvailability = typeof competitionAvailabilities[number];
 export type CompetitionMatchResult = 'entry1' | 'entry2' | 'draw' | null;
 
 @Entity('competition_match')
@@ -101,6 +105,14 @@ export class MiCompetitionMatch {
 
 	@Column('varchar', { length: 512, nullable: true })
 	public duprError: string | null;
+
+	// COMP-T3-V1: Reclub match manage "Referees: pick from Staff / Teams / Players" — this match's own referees (a competition
+	// referee, refereeIds on the competition, may still score any match)
+	@Column('varchar', { array: true, length: 32, default: '{}' })
+	public refereeIds: string[];
+
+	@Column('jsonb', { default: {}, comment: 'Reclub match availability { userId: yes | maybe | no }.' })
+	public availability: Record<string, CompetitionAvailability>;
 
 	@Column('boolean', { default: false, comment: 'Reclub CompetitionMatchSourceType User:2 — added by the host, not generated.' })
 	public isExtra: boolean;

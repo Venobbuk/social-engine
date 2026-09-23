@@ -7,9 +7,10 @@ import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { CompetitionService } from '@/modules/competitions/CompetitionService.js';
 import { CompetitionEntityService } from '@/modules/competitions/CompetitionEntityService.js';
-import { competitionErrors, toApiError, anyObject } from './_shared.js';
+import { competitionErrors, toApiError, anyObject } from './../_shared.js';
 
-// TOURNAMENT-V1: Reclub Cancel competition (entrants are notified).
+// COMP-T3-V1: Reclub Create / edit team — the CAPTAIN's door (the host's is entries/update): team name, description
+// (entry.notes) and avatar (a drive image the setter uploaded; null clears).
 export const meta = {
 	tags: ['competitions'],
 	requireCredential: true,
@@ -21,8 +22,14 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { competitionId: { type: 'string', format: 'misskey:id' }, message: { type: 'string', nullable: true, maxLength: 2000 } },   // COMP-T3-V1: optional cancellation announcement
-	required: ['competitionId'],
+	properties: {
+		competitionId: { type: 'string', format: 'misskey:id' },
+		entryId: { type: 'string', format: 'misskey:id' },
+		name: { type: 'string', nullable: true, maxLength: 128 },
+		notes: { type: 'string', nullable: true, maxLength: 512 },
+		avatarFileId: { type: 'string', format: 'misskey:id', nullable: true },
+	},
+	required: ['competitionId', 'entryId'],
 } as const;
 
 @Injectable()
@@ -31,7 +38,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				const c = await this.competitionService.get(ps.competitionId);
-				return await this.competitionEntityService.pack(await this.competitionService.cancel(c, me, ps.message ?? null), me, { detailed: true });
+				const e = await this.competitionService.editTeam(c, me, ps.entryId, { name: ps.name, notes: ps.notes, avatarFileId: ps.avatarFileId });
+				return await this.competitionEntityService.packEntry(e, me, c);
 			} catch (e) {
 				return toApiError(e);
 			}

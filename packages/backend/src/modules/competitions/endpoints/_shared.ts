@@ -38,6 +38,11 @@ export const competitionErrors = {
 	// COMP-DUPR-V1
 	duprLocked: { message: 'These matches have already been submitted to DUPR.', code: 'COMPETITION_DUPR_LOCKED', id: '7c0a0000-0000-4000-8000-00000000001a' },
 	noSuchAnnouncement: { message: 'No such announcement.', code: 'NO_SUCH_ANNOUNCEMENT', id: '7c0a0000-0000-4000-8000-000000000019' },
+	// COMP-T3-V1
+	badTimeline: { message: 'The registration dates are out of order.', code: 'COMPETITION_BAD_TIMELINE', id: '7c0a0000-0000-4000-8000-00000000001b' },
+	membersOnly: { message: 'This competition is for the club members only.', code: 'COMPETITION_MEMBERS_ONLY', id: '7c0a0000-0000-4000-8000-00000000001c' },
+	cannotDelete: { message: 'Cancel the competition first.', code: 'COMPETITION_CANNOT_DELETE', id: '7c0a0000-0000-4000-8000-00000000001d' },
+	noSuchFile: { message: 'No such file.', code: 'NO_SUCH_FILE', id: '7c0a0000-0000-4000-8000-00000000001e' },
 } as const;
 
 const map: Record<CompetitionErrorId, keyof typeof competitionErrors> = {
@@ -46,6 +51,7 @@ const map: Record<CompetitionErrorId, keyof typeof competitionErrors> = {
 	not_enough_entries: 'notEnoughEntries', too_many_entries: 'tooManyEntries', no_such_match: 'noSuchMatch', no_such_entry: 'noSuchEntry',
 	needs_winner: 'needsWinner', bracket_locked: 'bracketLocked', stage_incomplete: 'stageIncomplete', no_such_award: 'noSuchAward', forbidden: 'forbidden',
 	blocked: 'blocked', no_such_invitation: 'noSuchInvitation', team_full: 'teamFull', no_such_announcement: 'noSuchAnnouncement', // COMP-W1B4
+	bad_timeline: 'badTimeline', members_only: 'membersOnly', cannot_delete: 'cannotDelete', no_such_file: 'noSuchFile', // COMP-T3-V1
 };
 
 export function toApiError(e: unknown): never {
@@ -112,6 +118,14 @@ export const competitionParamProps = {
 	revealDraw: { type: 'boolean' },
 	showSeeds: { type: 'boolean' },
 	autoApprove: { type: 'boolean' },
+	// COMP-T3-V1
+	courtLabels: { type: 'array', maxItems: 16, items: { type: 'string', minLength: 1, maxLength: 32 } },
+	roundRobinCycles: { type: 'integer', minimum: 1, maximum: 3 },
+	feeFreeAgentAmount: { type: 'integer', nullable: true, minimum: 0 },
+	feeFreeAgentEarlyBirdAmount: { type: 'integer', nullable: true, minimum: 0 },
+	membersOnly: { type: 'boolean' },
+	stageNames: { type: 'object', properties: { regular: { type: 'string', maxLength: 32 }, playoff: { type: 'string', maxLength: 32 }, consolation: { type: 'string', maxLength: 32 } } },
+	matchRules: { type: 'string', nullable: true, maxLength: 2048 },
 } as const;
 
 const DATE_KEYS = ['registrationOpenAt', 'registrationCloseAt', 'earlyBirdAt', 'startAt'] as const;

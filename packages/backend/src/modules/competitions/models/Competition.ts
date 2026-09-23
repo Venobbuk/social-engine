@@ -224,6 +224,28 @@ export class MiCompetition {
 	@Column('jsonb', { default: [], comment: 'Announcements [{id, userId, text, createdAt}], newest first.' })
 	public announcements: CompetitionAnnouncement[];
 
+	// COMP-T3-V1 (2026-09-23): the T3 competition tail (reclub-triage family "competitions"), additive columns only
+	@Column('varchar', { array: true, length: 32, default: '{}', comment: 'Reclub Customize Courts: court labels in order (index = courtIndex), max 16.' })
+	public courtLabels: string[];
+
+	@Column('integer', { default: 1, comment: 'Reclub Single / Double / Triple round robin: how many times every pair meets (1..3).' })
+	public roundRobinCycles: number;
+
+	@Column('integer', { nullable: true, comment: 'Reclub feeFreeAgentAmount (minor units).' })
+	public feeFreeAgentAmount: number | null;
+
+	@Column('integer', { nullable: true, comment: 'Reclub feeFreeAgentEarlyBirdAmount (minor units).' })
+	public feeFreeAgentEarlyBirdAmount: number | null;
+
+	@Column('boolean', { default: false, comment: 'Club competition open to the club members only (Reclub club-only note).' })
+	public membersOnly: boolean;
+
+	@Column('jsonb', { default: {}, comment: 'Reclub stage names: { regular?, playoff?, consolation? } (blank = the default name).' })
+	public stageNames: { regular?: string; playoff?: string; consolation?: string };
+
+	@Column('varchar', { length: 2048, nullable: true, comment: 'Reclub MATCH RULES free text, shown on every match.' })
+	public matchRules: string | null;
+
 	@Column('jsonb', { nullable: true, comment: 'brackets-manager export (participant/stage/group/round/match) for the knockout stage(s).' })
 	public bracketData: BracketDb | null;
 

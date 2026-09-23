@@ -6,11 +6,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
-import type { CompetitionEntriesRepository, CompetitionMatchesRepository, UsersRepository } from '@/models/_.js';
+import type { CompetitionEntriesRepository, CompetitionMatchesRepository, UsersRepository, DriveFilesRepository } from '@/models/_.js';
 import type { MiUser } from '@/models/User.js';
 import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';   // COMP-T3-V1: the team avatar URL
 import { CompetitionService } from './CompetitionService.js';
 import type { MiCompetition } from './models/Competition.js';
 import type { MiCompetitionEntry } from './models/CompetitionEntry.js';
@@ -27,6 +28,9 @@ export class CompetitionEntityService {
 		private matchesRepository: CompetitionMatchesRepository,
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
+		@Inject(DI.driveFilesRepository)
+		private driveFilesRepository: DriveFilesRepository,
+		private driveFileEntityService: DriveFileEntityService,
 		private userEntityService: UserEntityService,
 		private competitionService: CompetitionService,
 		private idService: IdService,
@@ -40,12 +44,27 @@ export class CompetitionEntityService {
 		return ids.map((id) => byId.get(id)).filter((u): u is NonNullable<typeof u> => u != null) as Record<string, unknown>[];
 	}
 
+	/** COMP-T3-V1: the public URL of a team avatar (null when unset or the file is gone). */
+	private async avatarUrlOf(fileId: string | null | undefined): Promise<string | null> {
+		if (!fileId) return null;
+		const f = await this.driveFilesRepository.findOneBy({ id: fileId });
+		return f ? this.driveFileEntityService.getPublicUrl(f, 'avatar') : null;
+	}
+
 	@bindThis
-	public async packEntry(e: MiCompetitionEntry, me?: { id: MiUser['id'] } | null, comp?: MiCompetition | null): Promise<Record<string, unknown>> {
+	public async packEntry(e: MiCompetitionEntry, me?: { id: MiUser['id'] } | null, comp?: MiCompetition | null, elig?: { ineligibleUserIds: string[]; reasons: Record<string, string> } | null): Promise<Record<string, unknown>> {
 		// COMP-W1B4: consent + open places — invited partners (not seated yet), players asking to join, completeness
 		const c = comp ?? await this.competitionService.get(e.competitionId).catch(() => null);
 		const invited = e.invitedUserIds ?? [], requested = e.requestedUserIds ?? [];
+		// COMP-T3-V1: eligibility (batched by packEntries; a single entry computes its own) + the team avatar
+		const el = elig ?? (c && e.userIds.length ? (await this.competitionService.eligibilityOf(c, [e])).get(e.id) ?? null : null);
+		// the tag is public (Reclub shows "Ineligible" on the roster); WHY (a rating above the cap, no rating…) is for the
+		// managers and the team's own members only
+		const why = !!me && !!c && (this.competitionService.isHost(c, me.id) || e.userIds.includes(me.id));
 		return {
+			avatarUrl: await this.avatarUrlOf(e.avatarFileId),
+			ineligibleUserIds: el ? el.ineligibleUserIds : [], eligibilityReasons: el && why ? el.reasons : {}, eligibilityOverrides: why ? (e.eligibility ?? {}) : {},
+			spectator: e.status === 'spectator',
 			id: e.id, competitionId: e.competitionId, name: e.name, captainId: e.captainId, userIds: e.userIds,
 			users: await this.usersLite(e.userIds, me),
 			invitedUserIds: invited, invitedUsers: await this.usersLite(invited, me),
@@ -62,12 +81,21 @@ export class CompetitionEntityService {
 	@bindThis
 	public async packEntries(es: MiCompetitionEntry[], me?: { id: MiUser['id'] } | null, comp?: MiCompetition | null): Promise<Record<string, unknown>[]> {
 		const c = comp ?? (es[0] ? await this.competitionService.get(es[0].competitionId).catch(() => null) : null);
-		return await Promise.all(es.map((e) => this.packEntry(e, me, c)));
+		const elig = c ? await this.competitionService.eligibilityOf(c, es) : new Map();   // COMP-T3-V1: one levels read for the list
+		return await Promise.all(es.map((e) => this.packEntry(e, me, c, elig.get(e.id) ?? { ineligibleUserIds: [], reasons: {} })));
 	}
 
 	@bindThis
 	public async packMatch(m: MiCompetitionMatch, c: MiCompetition, me?: { id: MiUser['id'] } | null): Promise<Record<string, unknown>> {
+		// COMP-T3-V1: the match's own referees and its availability — the availability is for the people of the match
+		// (its players, its referees, the managers); anyone else reads none
+		const refs = m.refereeIds ?? [];
+		let insider = !!me && (this.competitionService.isHost(c, me.id) || this.competitionService.isReferee(c, me.id) || refs.includes(me.id));
+		if (me && !insider && (m.entry1Id || m.entry2Id)) insider = await this.entriesRepository.createQueryBuilder('e').where('e.id IN (:...ids)', { ids: [m.entry1Id, m.entry2Id].filter((x): x is string => !!x) }).andWhere(':uid = ANY(e."userIds")', { uid: me.id }).getExists();
+		const availability = insider ? (m.availability ?? {}) : {};
 		return {
+			refereeIds: refs, referees: await this.usersLite(refs, me), isMyRef: !!me && refs.includes(me.id),
+			availability, myAvailability: me ? ((m.availability ?? {})[me.id] ?? null) : null,
 			id: m.id, competitionId: m.competitionId, stage: m.stage, pool: m.pool, round: m.round, number: m.number,
 			bracketId: m.bracketId, bracketGroup: m.bracketGroup,
 			entry1Id: m.entry1Id, entry2Id: m.entry2Id, entry1Status: m.entry1Status, entry2Status: m.entry2Status,
@@ -134,6 +162,12 @@ export class CompetitionEntityService {
 			myInvitation: myInvitation ? await this.packEntry(myInvitation, me, c) : null,
 			myFreeAgent: myFreeAgent ? await this.packEntry(myFreeAgent, me, c) : null,
 			freeAgentsCount: n('freeAgent'),
+			// COMP-T3-V1 — t3 marks an engine that carries this batch (the app shows these controls only when it is present)
+			t3: 1, courtLabels: c.courtLabels ?? [], roundRobinCycles: c.roundRobinCycles ?? 1,
+			feeFreeAgentAmount: c.feeFreeAgentAmount ?? null, feeFreeAgentEarlyBirdAmount: c.feeFreeAgentEarlyBirdAmount ?? null,
+			membersOnly: c.membersOnly ?? false, mayJoinMembersOnly: await this.competitionService.passesMembersOnly(c, me?.id),
+			stageNames: c.stageNames ?? {}, matchRules: c.matchRules ?? null,
+			spectatorsCount: n('spectator'), mySpectator: me ? await this.competitionService.mySpectator(c, me.id).then((s) => (s ? { id: s.id } : null)) : null,
 			drawVisible: isHost || c.revealDraw || c.status === 'inProgress' || c.status === 'done',
 			isPast: c.status === 'done' || c.status === 'cancelled',
 			startedAt: c.startedAt?.toISOString() ?? null, endedAt: c.endedAt?.toISOString() ?? null, cancelledAt: c.cancelledAt?.toISOString() ?? null,

@@ -310,6 +310,11 @@ export * as 'competitions/free-agents/assign' from '@/modules/competitions/endpo
 export * as 'competitions/staff/update' from '@/modules/competitions/endpoints/staff/update.js'; // COMP-W1B4
 export * as 'competitions/announcements/post' from '@/modules/competitions/endpoints/announcements/post.js'; // COMP-W1B4
 export * as 'competitions/announcements/delete' from '@/modules/competitions/endpoints/announcements/delete.js'; // COMP-W1B4
+export * as 'competitions/delete' from '@/modules/competitions/endpoints/delete.js'; // COMP-T3-V1
+export * as 'competitions/spectate' from '@/modules/competitions/endpoints/spectate.js'; // COMP-T3-V1
+export * as 'competitions/entries/edit' from '@/modules/competitions/endpoints/entries/edit.js'; // COMP-T3-V1
+export * as 'competitions/matches/availability' from '@/modules/competitions/endpoints/matches/availability.js'; // COMP-T3-V1
+export * as 'competitions/photos/list' from '@/modules/competitions/endpoints/photos-list.js'; // COMP-T3-V1
 export * as 'channels/timeline' from './endpoints/channels/timeline.js';
 export * as 'channels/unfavorite' from './endpoints/channels/unfavorite.js';
 export * as 'channels/unfollow' from './endpoints/channels/unfollow.js';

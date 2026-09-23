@@ -33,6 +33,9 @@ export const paramDef = {
 		isPaid: { type: 'boolean', nullable: true },
 		notes: { type: 'string', nullable: true, maxLength: 512 },
 		remove: { type: 'boolean', nullable: true },
+		// COMP-T3-V1 (Reclub participant settings "Eligible"): the host's call on one member; eligible null = the automatic rule
+		eligibleUserId: { type: 'string', format: 'misskey:id', nullable: true },
+		eligible: { type: 'boolean', nullable: true },
 	},
 	required: ['competitionId'],
 } as const;
@@ -56,6 +59,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (ps.isPaid !== undefined) patch.isPaid = ps.isPaid;
 				if (ps.notes !== undefined) patch.notes = ps.notes;
 				if (ps.remove !== undefined) patch.remove = ps.remove;
+				if (ps.eligibleUserId) { patch.eligibleUserId = ps.eligibleUserId; patch.eligible = ps.eligible ?? null; }   // COMP-T3-V1
 				const e = await this.competitionService.hostUpdateEntry(c, me, ps.entryId, patch);
 				return e ? await this.competitionEntityService.packEntry(e, me) : null;
 			} catch (e) {

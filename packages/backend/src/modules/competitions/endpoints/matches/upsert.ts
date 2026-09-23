@@ -30,7 +30,7 @@ export const paramDef = {
 	properties: {
 		competitionId: { type: 'string', format: 'misskey:id' },
 		matchId: { type: 'string', format: 'misskey:id', nullable: true },
-		scores: { type: 'array', nullable: true, maxItems: 9, items: { type: 'object', properties: { t1: { type: 'integer', minimum: 0, maximum: 999 }, t2: { type: 'integer', minimum: 0, maximum: 999 }, type: { type: 'string', enum: ['standard', 'tiebreaker', 'extra'] } }, required: ['t1', 't2'] } },
+		scores: { type: 'array', nullable: true, maxItems: 9, items: { type: 'object', properties: { t1: { type: 'integer', minimum: 0, maximum: 999 }, t2: { type: 'integer', minimum: 0, maximum: 999 }, type: { type: 'string', enum: ['standard', 'tiebreaker', 'extra'] }, name: { type: 'string', nullable: true, maxLength: 32 } }, required: ['t1', 't2'] } },
 		forfeit: { type: 'string', nullable: true, enum: ['entry1', 'entry2', 'both'] },
 		finalize: { type: 'boolean', nullable: true },
 		reopen: { type: 'boolean', nullable: true },
@@ -40,6 +40,10 @@ export const paramDef = {
 		courtIndex: { type: 'integer', nullable: true, minimum: 0, maximum: 64 },
 		startAt: { type: 'string', nullable: true, maxLength: 40 },
 		notes: { type: 'string', nullable: true, maxLength: 512 },
+		// COMP-T3-V1: the match's own referees; Remove match / Unremove (a non-bracket match)
+		refereeIds: { type: 'array', nullable: true, maxItems: 4, items: { type: 'string', format: 'misskey:id' } },
+		remove: { type: 'boolean', nullable: true },
+		restore: { type: 'boolean', nullable: true },
 	},
 	required: ['competitionId'],
 } as const;
@@ -51,7 +55,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			try {
 				const c = await this.competitionService.get(ps.competitionId);
 				const data: Parameters<CompetitionService['upsertMatch']>[2] = { matchId: ps.matchId ?? null };
-				if (ps.scores != null) data.scores = ps.scores.map((s) => ({ t1: s.t1, t2: s.t2, type: (s.type ?? 'standard') as CompetitionScoreSet['type'] }));
+				if (ps.scores != null) data.scores = ps.scores.map((s) => ({ t1: s.t1, t2: s.t2, type: (s.type ?? 'standard') as CompetitionScoreSet['type'], ...(s.name ? { name: s.name } : {}) }));
 				if (ps.forfeit !== undefined) data.forfeit = ps.forfeit;
 				if (ps.finalize != null) data.finalize = ps.finalize;
 				if (ps.reopen != null) data.reopen = ps.reopen;
@@ -60,6 +64,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (ps.round !== undefined) data.round = ps.round;
 				if (ps.courtIndex !== undefined) data.courtIndex = ps.courtIndex;
 				if (ps.notes !== undefined) data.notes = ps.notes;
+				if (ps.refereeIds !== undefined) data.refereeIds = ps.refereeIds;   // COMP-T3-V1
+				if (ps.remove) data.remove = true;
+				if (ps.restore) data.restore = true;
 				if (ps.startAt !== undefined) { if (ps.startAt === null) data.startAt = null; else { const d = parseIsoDate(ps.startAt); if (!d) throw new ApiError(meta.errors.invalidDate); data.startAt = d; } }
 				const m = await this.competitionService.upsertMatch(c, me, data);
 				return await this.competitionEntityService.packMatch(m, await this.competitionService.get(c.id), me);
