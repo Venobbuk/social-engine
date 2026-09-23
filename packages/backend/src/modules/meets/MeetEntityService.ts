@@ -240,7 +240,7 @@ export class MeetEntityService {
 			winnerTeam,
 			// SEC-CASUAL-CONSENT-V1 (round-3 review): a casual game that has counted (rated, or sent to DUPR) is frozen —
 			// report it as not editable so the client hides the score sheet instead of failing on save.
-			canUpdateScore: canUpdateScore && m.duprStatus !== 'submitted' && (await this.meetMatchService.casualLockReason(meet, m)) == null,
+			canUpdateScore: canUpdateScore && m.duprStatus !== 'submitted' && m.duprStatus !== 'queued' && (await this.meetMatchService.casualLockReason(meet, m)) == null,
 			canManage: isHost,
 			duprStatus: m.duprStatus,
 			duprSubmittedBy: m.duprSubmittedById ? await this.userEntityService.pack(m.duprSubmittedById, me, { schema: 'UserLite' }).catch(() => null) : null,

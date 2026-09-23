@@ -59,7 +59,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			try { await this.meetService.assertHost(meet, me); } catch (e) { return toApiError(e); }
 			const match = await this.meetMatchesRepository.findOneBy({ id: ps.matchId, meetId: meet.id });
 			if (match == null) throw new ApiError(meta.errors.noSuchMatch);
-			if (match.duprStatus === 'submitted') throw new ApiError(meta.errors.duprLocked);
+			if (match.duprStatus === 'submitted' || match.duprStatus === 'queued') throw new ApiError(meta.errors.duprLocked); // UAT-DUPR-CAGE-V1: queued = sent
 			// SEC-CASUAL-CONSENT-V1: a forfeit rewrites the score — refused once another player confirmed a casual game
 			try { await this.meetMatchService.assertCasualUnlocked(meet, match); } catch (e) { return toApiError(e); }
 			const rules = scoringOf(meet as unknown as Record<string, unknown>);

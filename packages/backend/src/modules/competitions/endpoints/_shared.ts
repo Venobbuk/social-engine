@@ -36,7 +36,7 @@ export const competitionErrors = {
 	noSuchInvitation: { message: 'No such invitation.', code: 'NO_SUCH_INVITATION', id: '7c0a0000-0000-4000-8000-000000000017' },
 	teamFull: { message: 'This team has no place left.', code: 'COMPETITION_TEAM_FULL', id: '7c0a0000-0000-4000-8000-000000000018' },
 	// COMP-DUPR-V1
-	duprLocked: { message: 'These matches have already been submitted to DUPR.', code: 'COMPETITION_DUPR_LOCKED', id: '7c0a0000-0000-4000-8000-00000000001a' },
+	duprLocked: { message: 'These matches have already been submitted to DUPR.', code: 'COMPETITION_DUPR_LOCKED', id: '7c0a0000-0000-4000-8000-00000000001a', httpStatusCode: 409 }, // UAT-DUPR-CAGE-V1: 409
 	noSuchAnnouncement: { message: 'No such announcement.', code: 'NO_SUCH_ANNOUNCEMENT', id: '7c0a0000-0000-4000-8000-000000000019' },
 	// COMP-T3-V1
 	badTimeline: { message: 'The registration dates are out of order.', code: 'COMPETITION_BAD_TIMELINE', id: '7c0a0000-0000-4000-8000-00000000001b' },
@@ -52,6 +52,7 @@ const map: Record<CompetitionErrorId, keyof typeof competitionErrors> = {
 	needs_winner: 'needsWinner', bracket_locked: 'bracketLocked', stage_incomplete: 'stageIncomplete', no_such_award: 'noSuchAward', forbidden: 'forbidden',
 	blocked: 'blocked', no_such_invitation: 'noSuchInvitation', team_full: 'teamFull', no_such_announcement: 'noSuchAnnouncement', // COMP-W1B4
 	bad_timeline: 'badTimeline', members_only: 'membersOnly', cannot_delete: 'cannotDelete', no_such_file: 'noSuchFile', // COMP-T3-V1
+	dupr_locked: 'duprLocked', // UAT-DUPR-CAGE-V1
 };
 
 export function toApiError(e: unknown): never {

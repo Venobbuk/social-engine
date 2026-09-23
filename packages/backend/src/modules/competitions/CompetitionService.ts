@@ -31,7 +31,8 @@ export type CompetitionErrorId =
 	| 'not_entered' | 'started' | 'bad_team' | 'draw_exists' | 'not_enough_entries' | 'too_many_entries' | 'no_such_match'
 	| 'no_such_entry' | 'needs_winner' | 'bracket_locked' | 'stage_incomplete' | 'no_such_award' | 'forbidden'
 	| 'blocked' | 'no_such_invitation' | 'team_full' | 'no_such_announcement' // COMP-W1B4
-	| 'bad_timeline' | 'members_only' | 'cannot_delete' | 'no_such_file'; // COMP-T3-V1
+	| 'bad_timeline' | 'members_only' | 'cannot_delete' | 'no_such_file' // COMP-T3-V1
+	| 'dupr_locked'; // UAT-DUPR-CAGE-V1
 
 export type StatusAction = 'publish' | 'lock' | 'reopen' | 'start' | 'finish' | 'reopenEnded' | 'reset';
 
@@ -660,6 +661,12 @@ export class CompetitionService {
 			if (!found) throw this.err('no_such_match', 'No such match.');
 			m = found;
 			if (!(await this.canScore(c, m, user.id))) throw this.err('forbidden', 'Only the host or a player of this match can score it.');
+			// UAT-DUPR-CAGE-V1: a match sent to DUPR (queued at hkpl, or accepted) keeps its result — no re-score, forfeit,
+			// reopen, removal or change of sides (the app hides those buttons; a hidden button is not a guard). Scheduling
+			// fields (court, time, notes, referees) stay editable. Same lock the meet has (MeetMatchService.upsert).
+			const touchesResult = data.scores !== undefined || data.forfeit !== undefined || !!data.reopen || !!data.remove
+				|| (data.entry1Id !== undefined && data.entry1Id !== m.entry1Id) || (data.entry2Id !== undefined && data.entry2Id !== m.entry2Id);
+			if ((m.duprStatus === 'queued' || m.duprStatus === 'submitted') && touchesResult) throw this.err('dupr_locked', 'These matches have already been submitted to DUPR.');
 			// COMP-T3-V1: managing the match (its referees, removing / restoring it) is the host's; a player asking is refused,
 			// not silently ignored
 			if ((data.refereeIds !== undefined || data.remove || data.restore) && !this.isHost(c, user.id)) throw this.err('not_host', 'Only the host can do this.');

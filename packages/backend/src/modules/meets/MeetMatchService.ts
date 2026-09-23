@@ -127,6 +127,9 @@ export class MeetMatchService {
 		let match = data.matchId ? await this.meetMatchesRepository.findOneBy({ id: data.matchId, meetId: meet.id }) : null;
 		if (data.matchId && !match) throw this.err('no_such_match', 'No such match.');
 		if (match?.duprStatus === 'submitted') throw this.err('dupr_locked', 'These matches have already been submitted to DUPR.  Please note that manual submission through DUPR will not be reflected here.');
+		// UAT-DUPR-CAGE-V1: queued at hkpl is SENT too — its score and teams are locked (a re-score on a meet that does not
+		// auto-submit left hkpl's queued copy stale, and DUPR got the old result). Round / court stay editable.
+		if (match?.duprStatus === 'queued' && (data.scores !== undefined || data.team1Ids !== undefined || data.team2Ids !== undefined)) throw this.err('dupr_locked', 'These matches have already been submitted to DUPR.');
 
 		const structural = data.round !== undefined || data.courtIndex !== undefined || data.team1Ids !== undefined || data.team2Ids !== undefined;
 		if (!match || structural) {

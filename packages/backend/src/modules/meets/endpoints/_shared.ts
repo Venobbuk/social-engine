@@ -29,7 +29,7 @@ export const meetErrors = {
 	hostNeedsSeat: { message: 'The host cannot take a seat in a full meet.', code: 'MEET_HOST_NEEDS_SEAT', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000012' },
 	// MEET-MATCH-V1
 	noSuchMatch: { message: 'No such match.', code: 'NO_SUCH_MATCH', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000013' },
-	duprLocked: { message: 'These matches have already been submitted to DUPR.', code: 'MEET_DUPR_LOCKED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014' },
+	duprLocked: { message: 'These matches have already been submitted to DUPR.', code: 'MEET_DUPR_LOCKED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014', httpStatusCode: 409 }, // UAT-DUPR-CAGE-V1: 409
 	// T3-MEET-HOST-V1: meets/delete
 	hasMatches: { message: 'This meet has matches. Delete the matches first, or cancel the meet.', code: 'MEET_HAS_MATCHES', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000015' },
 	hasParticipants: { message: 'Players are on this meet. Cancel it instead, so they are told.', code: 'MEET_HAS_PARTICIPANTS', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000016' },
