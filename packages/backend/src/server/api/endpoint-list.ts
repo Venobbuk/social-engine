@@ -140,6 +140,8 @@ export * as 'channels/create' from './endpoints/channels/create.js';
 export * as 'meets/create' from '@/modules/meets/endpoints/create.js';
 export * as 'meets/update' from '@/modules/meets/endpoints/update.js';
 export * as 'meets/cancel' from '@/modules/meets/endpoints/cancel.js';
+export * as 'meets/delete' from '@/modules/meets/endpoints/delete.js';               // T3-MEET-HOST-V1
+export * as 'meets/chat-refresh' from '@/modules/meets/endpoints/chat-refresh.js';   // T3-MEET-HOST-V1
 export * as 'meets/show' from '@/modules/meets/endpoints/show.js';
 export * as 'meets/list' from '@/modules/meets/endpoints/list.js';
 export * as 'meets/join' from '@/modules/meets/endpoints/join.js';

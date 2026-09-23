@@ -10,6 +10,7 @@ import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { RoleService } from '@/core/RoleService.js';
 import { ApiError } from '../../error.js';
+import { isReservedClubName, reservedClubNameError } from '@/modules/clubs/club-names.js';   // CLUB-NAME-RESERVED-V1
 
 export const meta = {
 	tags: ['channels'],
@@ -25,6 +26,7 @@ export const meta = {
 	},
 
 	errors: {
+		nameReserved: reservedClubNameError,   // CLUB-NAME-RESERVED-V1
 		noSuchChannel: {
 			message: 'No such channel.',
 			code: 'NO_SUCH_CHANNEL',
@@ -92,6 +94,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (channel.userId !== me.id && !iAmModerator) {
 				throw new ApiError(meta.errors.accessDenied);
 			}
+			// CLUB-NAME-RESERVED-V1: a rename into the brand is refused too (unless a moderator does it); an existing name is left alone
+			if (ps.name !== undefined && ps.name !== channel.name && isReservedClubName(ps.name) && !iAmModerator) throw new ApiError(meta.errors.nameReserved);
 
 			// eslint:disable-next-line:no-unnecessary-initializer
 			let banner = undefined;

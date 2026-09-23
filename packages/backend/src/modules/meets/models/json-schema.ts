@@ -43,6 +43,7 @@ export const packedMeetParticipantSchema = {
 		agreedPrice: { type: 'number', optional: true, nullable: true },
 		agreedCurrency: { type: 'string', optional: true, nullable: true },
 		enrollmentId: { type: 'string', optional: true, nullable: true },
+		forceSkill: { type: 'number', optional: true, nullable: true },   // T3-MEET-HOST-V1
 	},
 } as const;
 
@@ -58,6 +59,7 @@ export const packedMeetSchema = {
 		channel: { type: 'object', optional: true, nullable: true, ref: 'Channel' },
 		chatRoomId: { type: 'string', optional: false, nullable: true, format: 'id' },
 		safety: { type: 'object', optional: true, nullable: true, description: 'SAFETY-V1: newHostUserIds + blockedUserIds for the viewer (Reclub Safety First interstitial)' },
+		hostBlockedMe: { type: 'boolean', optional: true, nullable: false, description: 'T3-MEET-HOST-V1: a host of this meet has blocked the viewer (the join would be refused)' },
 		type: { type: 'string', optional: false, nullable: false, enum: ['listing', 'managed'] },
 		sport: { type: 'string', optional: false, nullable: false },
 		format: { type: 'string', optional: false, nullable: true },

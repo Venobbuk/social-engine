@@ -12,6 +12,8 @@ import { IdService } from '@/core/IdService.js';
 import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '../../error.js';
+import { RoleService } from '@/core/RoleService.js';
+import { isReservedClubName, reservedClubNameError } from '@/modules/clubs/club-names.js';   // CLUB-NAME-RESERVED-V1
 
 export const meta = {
 	tags: ['channels'],
@@ -41,6 +43,7 @@ export const meta = {
 			code: 'NO_SUCH_FILE',
 			id: 'cd1e9f3e-5a12-4ab4-96f6-5d0a2cc32050',
 		},
+		nameReserved: reservedClubNameError,   // CLUB-NAME-RESERVED-V1
 	},
 } as const;
 
@@ -68,8 +71,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 		private idService: IdService,
 		private channelEntityService: ChannelEntityService,
+		private roleService: RoleService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			// CLUB-NAME-RESERVED-V1: the brand is for official accounts (a moderator may still use it)
+			if (isReservedClubName(ps.name) && !(await this.roleService.isModerator(me))) throw new ApiError(meta.errors.nameReserved);
 			let banner = null;
 			if (ps.bannerId != null) {
 				banner = await this.driveFilesRepository.findOneBy({

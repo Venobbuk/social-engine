@@ -30,6 +30,9 @@ export const meetErrors = {
 	// MEET-MATCH-V1
 	noSuchMatch: { message: 'No such match.', code: 'NO_SUCH_MATCH', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000013' },
 	duprLocked: { message: 'These matches have already been submitted to DUPR.', code: 'MEET_DUPR_LOCKED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014' },
+	// T3-MEET-HOST-V1: meets/delete
+	hasMatches: { message: 'This meet has matches. Delete the matches first, or cancel the meet.', code: 'MEET_HAS_MATCHES', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000015' },
+	hasParticipants: { message: 'Players are on this meet. Cancel it instead, so they are told.', code: 'MEET_HAS_PARTICIPANTS', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000016' },
 } as const;
 
 const map: Record<string, keyof typeof meetErrors> = {
@@ -52,6 +55,8 @@ const map: Record<string, keyof typeof meetErrors> = {
 	'meet:no_such_match': 'noSuchMatch',
 	'meet:no_such_participant': 'noSuchParticipant',
 	'meet:dupr_locked': 'duprLocked',
+	'meet:has_matches': 'hasMatches',             // T3-MEET-HOST-V1
+	'meet:has_participants': 'hasParticipants',   // T3-MEET-HOST-V1
 };
 
 export function parseIsoDate(v: string | undefined | null): Date | null {

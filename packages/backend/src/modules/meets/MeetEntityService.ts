@@ -22,6 +22,9 @@ import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 import { ChatService } from '@/core/ChatService.js';
 
 const ACTIVE_STATUSES = ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe'];
+// T3-MEET-HOST-V1 (Reclub triage A-meet-detail.43): the roster also lists who answered "Can't go" (Reclub's own section).
+// A declined row holds no seat and counts nowhere (counts() and the seat counter never read it); it is shown, not counted.
+const ROSTER_STATUSES = [...ACTIVE_STATUSES, 'declined'];
 
 @Injectable()
 export class MeetEntityService {
@@ -83,6 +86,7 @@ export class MeetEntityService {
 			duprSingles: level?.duprSingles ?? null,
 			duprDoubles: level?.duprDoubles ?? null,
 			duprConnected: !!(level && level.duprId),
+			forceSkill: p.forceSkill ?? null,   // T3-MEET-HOST-V1 (A-generate-teams.04): the host's per-meet skill override the team balancer reads
 		};
 	}
 
@@ -118,7 +122,7 @@ export class MeetEntityService {
 		let participants: Packed<'MeetParticipant'>[] | undefined = undefined;
 		if (opts?.detailed) {
 			const rows = await this.meetParticipantsRepository.find({
-				where: { meetId: meet.id, status: In(ACTIVE_STATUSES) },
+				where: { meetId: meet.id, status: In(ROSTER_STATUSES) },
 				order: { isHost: 'DESC', statusChangedAt: 'ASC' },
 			});
 			participants = await Promise.all(rows.map(r => this.packParticipant(r, meet, me)));
@@ -210,6 +214,9 @@ export class MeetEntityService {
 			chatMuted, // HOST-TOOLS-V1
 			participants,
 			safety: me ? await this.meetService.safetyContext(meet, me.id).catch(() => null) : null,
+			// T3-MEET-HOST-V1 (Reclub triage A-meet-detail.27): the footer says "the host has blocked you" BEFORE the viewer
+			// taps Join — the same rule MeetService.join refuses with (isBlockedWithHosts), read once for the viewer.
+			hostBlockedMe: me && !isHost && opts?.detailed ? await this.meetService.isBlockedWithHosts(meet, me.id).catch(() => false) : false,
 		};
 	}
 

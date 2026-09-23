@@ -39,7 +39,10 @@ export type MeetErrorId =
 	| 'invalid_transition'
 	| 'plus_one_not_allowed'
 	| 'capacity_below_confirmed'
-	| 'host_needs_seat';
+	| 'host_needs_seat'
+	| 'guest_limit'          // T3-MEET-HOST-V1: a confirmed player already has their +1
+	| 'has_matches'          // T3-MEET-HOST-V1: meets/delete
+	| 'has_participants';    // T3-MEET-HOST-V1: meets/delete
 
 const MAYBE_PURGE_MINUTES = 120;         // "People in Maybe list will be removed 2 hours before meet start."
 const INVITE_AUTO_CONFIRM_DAYS = 3;      // "You will be auto-confirmed in 3 days if no action is taken."
@@ -371,6 +374,53 @@ export class MeetService {
 		await this.retireRatings(meet);
 	}
 
+	/* T3-MEET-HOST-V1 (Reclub triage A-meet-detail.07) — the host kebab's "Delete meet". Reclub deletes only a meet
+	 * nothing has happened on; everything else is CANCELLED, because a cancel tells the roster and keeps history. So:
+	 * the creating host only (a co-host may cancel, not erase); never a schedule-made or coaching meet (the schedule
+	 * sweep owns those — deleting one would let the sweep make it again); refused while any match exists or anyone
+	 * but the host is on the roster. Checked and deleted under the meet lock, so a join cannot slip in between.
+	 * The FKs do the rest (meet_participant / meet_group / meet_match CASCADE, meet_review SET NULL); the meet's own
+	 * chat room goes with it through the native ChatService.deleteRoom. G11: EXTEND — no table, one door. */
+	@bindThis
+	public async deleteMeet(meet: MiMeet, user: MiUser): Promise<void> {
+		if (meet.hostId !== user.id) throw this.err('not_host', 'Only the host who created this meet can delete it.');
+		if (meet.seriesId || meet.coachScheduleId) throw this.err('invalid_transition', 'This meet belongs to a schedule. Cancel it instead.');
+		const roomId = await this.withMeetLock(meet.id, async (em, locked) => {
+			const matches = await em.query(`SELECT 1 FROM "meet_match" WHERE "meetId" = $1 LIMIT 1`, [meet.id]) as unknown[];
+			if (matches.length) throw this.err('has_matches', 'This meet has matches. Delete the matches first, or cancel the meet.');
+			const others = await em.query(`SELECT 1 FROM "meet_participant" WHERE "meetId" = $1 AND ("userId" IS NULL OR "userId" <> $2) LIMIT 1`, [meet.id, locked.hostId]) as unknown[];
+			if (others.length) throw this.err('has_participants', 'Players are on this meet. Cancel it instead, so they are told.');
+			await em.query(`DELETE FROM "meet" WHERE "id" = $1`, [meet.id]);
+			return locked.chatRoomId;
+		});
+		if (roomId) {
+			const room = await this.chatService.findRoomById(roomId).catch(() => null);
+			if (room) await this.chatService.deleteRoom(room).catch(() => undefined);
+		}
+	}
+
+	/* T3-MEET-HOST-V1 (Reclub triage A-meet-detail.10) — the host kebab's "Refresh meet chat": everyone who should be in
+	 * the meet's room (confirmed players and co-hosts) and is not — the join side effect is best-effort and can miss —
+	 * is put back through the same native invitation + join the confirmation uses. Returns how many were added. */
+	@bindThis
+	public async refreshRoom(meet: MiMeet): Promise<{ added: number }> {
+		if (!meet.chatRoomId) return { added: 0 };
+		const room = await this.chatService.findRoomById(meet.chatRoomId);
+		if (!room) return { added: 0 };
+		const rows = await this.db.query(`SELECT "userId" FROM "meet_participant" WHERE "meetId" = $1 AND "userId" IS NOT NULL AND ("status" = 'confirmed' OR "isHost" = true)`, [meet.id]) as { userId: string }[];
+		let added = 0;
+		for (const r of rows) {
+			if (r.userId === room.ownerId) continue;
+			if (await this.chatService.isRoomMember(room, r.userId)) continue;
+			try {
+				await this.chatService.createRoomInvitation(meet.hostId, room.id, r.userId, { notify: false }).catch((e: any) => { if (!/already invited/.test(String(e && e.message))) throw e; });
+				await this.chatService.joinToRoom(r.userId, room.id);
+				added++;
+			} catch { /* one refusal must not stop the others */ }
+		}
+		return { added };
+	}
+
 	/* FRESH-EYES P1-2 (2026-09-20) — CANCELLING A MEET RETIRES WHAT ITS MATCHES WROTE TO THE GRIPBAT RATING.
 	 *
 	 * The rule that a cancelled meet does not count already exists, and is only half applied: pendingMatches() in
@@ -479,6 +529,20 @@ export class MeetService {
 
 		return await this.withMeetLock(meet.id, async (em, locked) => {
 			const existing = (await em.query(`SELECT * FROM "meet_participant" WHERE "meetId" = $1 AND "userId" = $2`, [meet.id, user.id]) as Row[])[0];
+			// T3-MEET-HOST-V1 (Reclub triage A-meet-detail.35 "Request +1"): a player who is ALREADY confirmed asks for their one
+			// guest afterwards — the same guest row the join makes (kind plusOne, sponsorId = the player), the same seat rule
+			// (autoApprove inside the band → claimSeat, else a request the host decides). One guest per player, as at join.
+			if (existing && existing.status === 'confirmed' && plusOnes > 0) {
+				const had = await em.query(`SELECT 1 FROM "meet_participant" WHERE "meetId" = $1 AND "sponsorId" = $2 AND "kind" = 'plusOne' LIMIT 1`, [meet.id, user.id]) as unknown[];
+				if (had.length) throw this.err('guest_limit', 'You already have a +1 on this meet.');
+				const guest = (await em.query(
+					`INSERT INTO "meet_participant" ("id","meetId","userId","kind","sponsorId","displayName","status","isHost","tags","statusChangedAt")
+					 VALUES ($1,$2,NULL,'plusOne',$3,$4,'requested',false,'{guest}',now()) RETURNING *`,
+					[this.idService.gen(), meet.id, user.id, `${user.name ?? user.username} +1`]) as Row[])[0];
+				if (autoConfirm) await this.confirmOrFallback(em, locked, guest, 'waitlisted');
+				else if (meet.hostId !== user.id) this.notify(meet.hostId, meet, 'Request to join', `${user.name ?? user.username} has requested a +1 for ${meet.name}.`);
+				return existing as MiMeetParticipant;
+			}
 			if (existing && !['declined', 'maybe'].includes(existing.status)) throw this.err('already_participant', 'You already have a status on this meet.');
 
 			let row: Row;
