@@ -20,11 +20,12 @@ import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { generate as generateRoundRobin, LIMITS as RR_LIMITS } from '@/modules/meets/MeetMatchGenerator.js';
 import type { MiCompetition, CompetitionFormat, CompetitionAnnouncement } from './models/Competition.js';
 import type { MiCompetitionEntry } from './models/CompetitionEntry.js';
-import type { MiCompetitionMatch, CompetitionScoreSet } from './models/CompetitionMatch.js';
+import type { MiCompetitionMatch, CompetitionScoreSet, CompetitionServeTag } from './models/CompetitionMatch.js';
+import { competitionServeTags } from './models/CompetitionMatch.js';
 import type { MiCompetitionAward } from './models/CompetitionAward.js';
 import { computeStandings, decideResult, setsWon } from './CompetitionStandings.js';
 import type { StandingsRow } from './CompetitionStandings.js';
-import { createKnockoutStage, reportBracketMatch, resetBracketMatch, viewStage, bracketFinalStandings } from './CompetitionBracket.js';
+import { createKnockoutStage, reportBracketMatch, resetBracketMatch, viewStage, bracketFinalStandings, stageOfBracketMatch, stageIdByName } from './CompetitionBracket.js';
 import type { BracketDb, BracketMatchView } from './CompetitionBracket.js';
 
 export type CompetitionErrorId =
@@ -33,7 +34,8 @@ export type CompetitionErrorId =
 	| 'no_such_entry' | 'needs_winner' | 'bracket_locked' | 'stage_incomplete' | 'no_such_award' | 'forbidden'
 	| 'blocked' | 'no_such_invitation' | 'team_full' | 'no_such_announcement' // COMP-W1B4
 	| 'bad_timeline' | 'members_only' | 'cannot_delete' | 'no_such_file' // COMP-T3-V1
-	| 'dupr_locked'; // UAT-DUPR-CAGE-V1
+	| 'dupr_locked' // UAT-DUPR-CAGE-V1
+	| 'match_removed' | 'bad_lineup' | 'has_scores'; // COMP-FIXES-B
 
 export type StatusAction = 'publish' | 'lock' | 'reopen' | 'start' | 'finish' | 'reopenEnded' | 'reset';
 
@@ -193,11 +195,29 @@ export class CompetitionService {
 	}
 
 	@bindThis
-	public async update(c: MiCompetition, host: MiUser, data: Partial<MiCompetition>): Promise<MiCompetition> {
+	public async update(c: MiCompetition, host: MiUser, data: Partial<MiCompetition>, opts: { resetMatches?: 'all' | 'playoff' | null } = {}): Promise<MiCompetition> {
 		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
-		const drawn = await this.matchesRepository.existsBy({ competitionId: c.id });
-		const structural = (['format', 'participantType', 'numGroups', 'numContinue', 'teamMinSize', 'teamMaxSize', 'roundRobinCycles'] as const).filter((k) => data[k] !== undefined && data[k] !== c[k]);
-		if (drawn && structural.length) throw this.err('draw_exists', 'The draw is generated — reset the competition before changing its format.');
+		const all = await this.matches(c);
+		const drawn = all.length > 0;
+		// COMP-FIXES-B (Reclub upsert-match-format "These changes will reset all / playoff / consolation matches and scores."): a
+		// change to the whole format needs every match reset; a change to the playoffs only (winners per pool, third place,
+		// consolation) needs the playoff + consolation brackets reset, and only once they exist. The host may proceed: the app
+		// asks with the stage-specific warning and sends resetMatches; without it the engine refuses as before.
+		const structural = (['format', 'participantType', 'numGroups', 'teamMinSize', 'teamMaxSize', 'roundRobinCycles'] as const).filter((k) => data[k] !== undefined && data[k] !== c[k]);
+		const playoffOnly = (['numContinue', 'thirdPlaceMatch', 'consolationBracket'] as const).filter((k) => data[k] !== undefined && data[k] !== c[k]);
+		const ko = all.filter((m) => m.stage === 'playoff' || m.stage === 'consolation');
+		const needs: 'all' | 'playoff' | null = drawn && structural.length ? 'all' : ko.length && playoffOnly.length ? (c.format === 'poolPlayKnockout' ? 'playoff' : 'all') : null;
+		if (needs && !(opts.resetMatches === 'all' || (opts.resetMatches === 'playoff' && needs === 'playoff'))) throw this.err('draw_exists', 'The draw is generated — reset the competition before changing its format.');
+		if (needs) {
+			// only the owner wipes results (setStatus 'reset' rule), and a result already sent to DUPR is never wiped
+			if (!this.isOwner(c, host.id)) throw this.err('not_host', 'Only the host can reset the results.');
+			const hit = needs === 'all' ? all : ko;
+			if (hit.some((m) => m.duprStatus === 'queued' || m.duprStatus === 'submitted')) throw this.err('dupr_locked', 'These matches have already been submitted to DUPR.');
+			await this.matchesRepository.delete({ competitionId: c.id, ...(needs === 'all' ? {} : { stage: In(['playoff', 'consolation']) }) });
+			await this.competitionsRepository.update(c.id, { bracketData: null, manualSeeding: false });
+			if (needs === 'all') await this.entriesRepository.update({ competitionId: c.id, status: 'forfeit' }, { status: 'confirmed', statusChangedAt: new Date() });
+		}
+		if (data.scoreSetDefaults) data.scoreSetDefaults = data.scoreSetDefaults.slice(0, 7).map((s) => { const n = (s.name ?? '').trim().slice(0, 32); return { type: s.type === 'tiebreaker' ? 'tiebreaker' : 'standard', ...(n ? { name: n } : {}) }; });
 		// COMP-T3-V1: the timeline is checked when a date of it changes (a row saved before the rule still edits its notes)
 		if ((['registrationOpenAt', 'earlyBirdAt', 'registrationCloseAt', 'startAt'] as const).some((k) => data[k] !== undefined)) this.assertTimeline({ ...c, ...data });
 		if (data.coverFileIds) data.coverFileIds = await this.checkCovers(host, data.coverFileIds, c.coverFileIds ?? []);   // COMP-FIXES-A
@@ -512,7 +532,7 @@ export class CompetitionService {
 	 * "This is a preview of the competition's matchups") and inProgress.
 	 */
 	@bindThis
-	public async draw(c: MiCompetition, host: MiUser, opts: { stage: 'auto' | 'regular' | 'playoff'; reset: boolean; skipStatusCheck?: boolean; seedOrder?: string[] | null; resetPlayoff?: boolean }): Promise<{ stage: 'regular' | 'playoff'; matches: MiCompetitionMatch[] }> {
+	public async draw(c: MiCompetition, host: MiUser, opts: { stage: 'auto' | 'regular' | 'playoff'; reset: boolean; skipStatusCheck?: boolean; seedOrder?: string[] | null; resetPlayoff?: boolean; consolationOrder?: string[] | null }): Promise<{ stage: 'regular' | 'playoff'; matches: MiCompetitionMatch[] }> {
 		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
 		if (!opts.skipStatusCheck && !['open', 'closed', 'inProgress'].includes(c.status)) throw this.err('invalid_transition', `Cannot draw a competition that is ${c.status}.`);
 		// COMP-T3-V1: a manual seed order is checked BEFORE anything is reset, so a refused order never costs the bracket
@@ -533,9 +553,10 @@ export class CompetitionService {
 		// COMP-T3-V1 (Reclub Manage seeds "Update Seeds → Arranging matches"; "Seeds cannot be changed after playoff matches have
 		// already started."): the playoff bracket alone is set aside and drawn again, only while none of its matches is played
 		if (opts.resetPlayoff && !opts.reset) {
-			const ko = (await this.matches(c)).filter((m) => m.stage === 'playoff');
+			// COMP-FIXES-B: the consolation bracket lives in the same bracket store, so it is set aside and drawn again with it
+			const ko = (await this.matches(c)).filter((m) => m.stage === 'playoff' || m.stage === 'consolation');
 			if (ko.some((m) => m.status === 'completed' && m.entry1Status !== 'bye' && m.entry2Status !== 'bye')) throw this.err('bracket_locked', 'Seeds cannot be changed after playoff matches have already started.');
-			await this.matchesRepository.delete({ competitionId: c.id, stage: 'playoff' });
+			await this.matchesRepository.delete({ competitionId: c.id, stage: In(['playoff', 'consolation']) });
 			await this.competitionsRepository.update(c.id, { bracketData: null });
 			c = await this.get(c.id);
 		}
@@ -606,16 +627,41 @@ export class CompetitionService {
 		}
 		const type = c.format === 'doubleElim' ? 'double_elimination' : 'single_elimination';
 		const { data, stageId } = await createKnockoutStage(c.bracketData, { name: 'Playoffs', type, entryIds: seeded, consolationFinal: c.thirdPlaceMatch && seeded.length > 2 });
-		await this.competitionsRepository.update(c.id, { bracketData: data, updatedAt: new Date() });
-		await this.syncBracket(c.id, data, stageId);
+		let db = data;
+		await this.competitionsRepository.update(c.id, { bracketData: db, updatedAt: new Date() });
+		await this.syncBracket(c.id, db, stageId);
+		// COMP-FIXES-B (Reclub match format "Consolation Bracket"; manage-seeds/[stage] "Consolation Seeding"): in pool play the
+		// entries that did not advance play their own single-elimination bracket — a second stage of the same bracket store
+		// (brackets-manager, CompetitionBracket.createKnockoutStage), in the host's consolation order or by their pool places
+		if (c.format === 'poolPlayKnockout' && c.consolationBracket) {
+			const inMain = new Set(seeded);
+			let cons: string[];
+			if (opts.consolationOrder && opts.consolationOrder.length) {
+				const ok = new Set(confirmed.map((e) => e.id));
+				cons = Array.from(new Set(opts.consolationOrder));
+				if (cons.length !== opts.consolationOrder.length || cons.some((x) => !ok.has(x) || inMain.has(x))) throw this.err('no_such_entry', 'A consolation entry must be a confirmed entry that is not in the playoffs, once.');
+			} else {
+				const st = await this.standings(c);
+				const rest = st.pools.map((p) => p.rows.map((r) => r.entryId).filter((id) => !inMain.has(id)));
+				cons = [];
+				const depth = Math.max(0, ...rest.map((p) => p.length));
+				for (let rank = 0; rank < depth; rank++) { const order = rank % 2 === 0 ? rest : rest.slice().reverse(); for (const p of order) if (p[rank]) cons.push(p[rank]); }
+			}
+			if (cons.length >= 2) {
+				const r2 = await createKnockoutStage(db, { name: 'Consolation', type: 'single_elimination', entryIds: cons, consolationFinal: false });
+				db = r2.data;
+				await this.competitionsRepository.update(c.id, { bracketData: db, updatedAt: new Date() });
+				await this.syncBracket(c.id, db, r2.stageId, 'consolation');
+			}
+		}
 		if (!opts.skipStatusCheck) this.notifyDraw(c, host, confirmed);
-		return { stage, matches: (await this.matches(await this.get(c.id))).filter((m) => m.stage === 'playoff') };
+		return { stage, matches: (await this.matches(await this.get(c.id))).filter((m) => m.stage === 'playoff' || m.stage === 'consolation') };
 	}
 
 	/** Mirrors the bracket's matches into competition_match rows (insert on first sight, update after). */
-	private async syncBracket(competitionId: string, data: BracketDb, stageId: number): Promise<void> {
+	private async syncBracket(competitionId: string, data: BracketDb, stageId: number, stageKind: 'playoff' | 'consolation' = 'playoff'): Promise<void> {
 		const views = viewStage(data, stageId);
-		const rows = await this.matchesRepository.find({ where: { competitionId, stage: 'playoff' } });
+		const rows = await this.matchesRepository.find({ where: { competitionId, stage: stageKind } });   // COMP-FIXES-B: + the consolation stage
 		const byBracket = new Map<number, MiCompetitionMatch>(rows.filter((r) => r.bracketId != null).map((r) => [r.bracketId!, r]));
 		for (const v of views) {
 			const fields = this.rowFromView(v);
@@ -623,10 +669,13 @@ export class CompetitionService {
 			if (row) {
 				// never overwrite a reported score; only the structure (who plays whom, bye, status) follows the bracket
 				const upd: Partial<MiCompetitionMatch> = { entry1Id: fields.entry1Id, entry2Id: fields.entry2Id, entry1Status: fields.entry1Status, entry2Status: fields.entry2Status, round: fields.round, number: fields.number, bracketGroup: fields.bracketGroup, updatedAt: new Date() };
-				if (row.status !== 'completed' || fields.status === 'pending') { upd.status = fields.status; upd.result = fields.result; if (fields.status === 'pending') upd.scores = []; }
+				// COMP-FIXES-B: a player's provisional score on a match whose two sides did not move survives the sync (before, any
+				// other result reported in the bracket re-synced every Ready match to pending and wiped its entered games)
+				const keepsProvisional = row.status === 'inProgress' && row.entry1Id === fields.entry1Id && row.entry2Id === fields.entry2Id && fields.status !== 'completed';
+				if (!keepsProvisional && (row.status !== 'completed' || fields.status === 'pending')) { upd.status = fields.status; upd.result = fields.result; if (fields.status === 'pending') upd.scores = []; }
 				await this.matchesRepository.update(row.id, upd);
 			} else {
-				await this.matchesRepository.insertOne({ id: this.idService.gen(), competitionId, stage: 'playoff', pool: null, bracketId: v.bracketId, scores: [], courtIndex: null, startAt: null, notes: null, isExtra: false, createdAt: new Date(), updatedAt: new Date(), ...fields });
+				await this.matchesRepository.insertOne({ id: this.idService.gen(), competitionId, stage: stageKind, pool: null, bracketId: v.bracketId, scores: [], courtIndex: null, startAt: null, notes: null, isExtra: false, createdAt: new Date(), updatedAt: new Date(), ...fields });
 			}
 		}
 	}
@@ -659,19 +708,25 @@ export class CompetitionService {
 	 * result and, for a knockout match, advances the winner in the bracket.
 	 */
 	@bindThis
-	public async upsertMatch(c: MiCompetition, user: MiUser, data: { matchId: string | null; scores?: CompetitionScoreSet[]; forfeit?: 'entry1' | 'entry2' | 'both' | null; finalize?: boolean; entry1Id?: string | null; entry2Id?: string | null; round?: number | null; courtIndex?: number | null; startAt?: Date | null; notes?: string | null; reopen?: boolean; refereeIds?: string[] | null; remove?: boolean; restore?: boolean }): Promise<MiCompetitionMatch> {
+	public async upsertMatch(c: MiCompetition, user: MiUser, data: { matchId: string | null; scores?: CompetitionScoreSet[]; forfeit?: 'entry1' | 'entry2' | 'both' | null; finalize?: boolean; entry1Id?: string | null; entry2Id?: string | null; round?: number | null; courtIndex?: number | null; startAt?: Date | null; notes?: string | null; reopen?: boolean; refereeIds?: string[] | null; remove?: boolean; restore?: boolean; name?: string | null; lineups?: { set: number; side: 1 | 2; userIds: string[] }[] | null; clearLineups?: boolean; serve?: { set: number; tag: CompetitionServeTag | null } | null }): Promise<MiCompetitionMatch> {
 		if (c.status !== 'inProgress' && !(this.isHost(c, user.id) && (c.status === 'open' || c.status === 'closed'))) throw this.err('invalid_transition', 'Scores can be entered once the competition has started.');
 		let m: MiCompetitionMatch;
+		const sidesChange = (x: MiCompetitionMatch) => (data.entry1Id !== undefined && data.entry1Id !== x.entry1Id) || (data.entry2Id !== undefined && data.entry2Id !== x.entry2Id);
 		if (data.matchId) {
 			const found = await this.matchesRepository.findOneBy({ id: data.matchId, competitionId: c.id });
 			if (!found) throw this.err('no_such_match', 'No such match.');
 			m = found;
 			if (!(await this.canScore(c, m, user.id))) throw this.err('forbidden', 'Only the host or a player of this match can score it.');
+			// COMP-FIXES-B (Reclub "This match is no longer available."): a REMOVED match is read-only — no score, forfeit,
+			// finalize, reopen, line-up, serve or change of sides until the host puts it back (restore). Before, the app
+			// offered Input score on it and the engine saved the score, which silently un-removed the match.
+			const playsIt = data.scores !== undefined || data.forfeit !== undefined || !!data.reopen || data.finalize !== undefined || data.lineups != null || !!data.clearLineups || data.serve != null || sidesChange(m);
+			if (m.status === 'cancelled' && playsIt) throw this.err('match_removed', 'This match is no longer available.');
 			// UAT-DUPR-CAGE-V1: a match sent to DUPR (queued at hkpl, or accepted) keeps its result — no re-score, forfeit,
 			// reopen, removal or change of sides (the app hides those buttons; a hidden button is not a guard). Scheduling
 			// fields (court, time, notes, referees) stay editable. Same lock the meet has (MeetMatchService.upsert).
-			const touchesResult = data.scores !== undefined || data.forfeit !== undefined || !!data.reopen || !!data.remove
-				|| (data.entry1Id !== undefined && data.entry1Id !== m.entry1Id) || (data.entry2Id !== undefined && data.entry2Id !== m.entry2Id);
+			// COMP-FIXES-B: + its line-up (DUPR was told who played)
+			const touchesResult = data.scores !== undefined || data.forfeit !== undefined || !!data.reopen || !!data.remove || data.lineups != null || !!data.clearLineups || sidesChange(m);
 			if ((m.duprStatus === 'queued' || m.duprStatus === 'submitted') && touchesResult) throw this.err('dupr_locked', 'These matches have already been submitted to DUPR.');
 			// COMP-T3-V1: managing the match (its referees, removing / restoring it) is the host's; a player asking is refused,
 			// not silently ignored
@@ -679,10 +734,9 @@ export class CompetitionService {
 		} else {
 			if (!this.isHost(c, user.id)) throw this.err('not_host', 'Only the host can add a match.');
 			if (!data.entry1Id || !data.entry2Id || data.entry1Id === data.entry2Id) throw this.err('no_such_entry', 'Two different entries are needed.');
-			const n = await this.entriesRepository.countBy({ id: In([data.entry1Id, data.entry2Id]), competitionId: c.id });
-			if (n !== 2) throw this.err('no_such_entry', 'No such entry.');
+			await this.assertPlayingEntries(c, [data.entry1Id, data.entry2Id]);   // COMP-FIXES-B: two playing entries of THIS competition
 			const last = (await this.matches(c)).filter((x) => x.stage === 'regular');
-			m = await this.matchesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, stage: 'regular', pool: null, round: data.round ?? (last.length ? Math.max(...last.map((x) => x.round)) : 1), number: last.length + 1, bracketId: null, bracketGroup: null, entry1Id: data.entry1Id, entry2Id: data.entry2Id, entry1Status: 'confirmed', entry2Status: 'confirmed', status: 'pending', scores: [], result: null, courtIndex: data.courtIndex ?? null, startAt: data.startAt ?? null, notes: data.notes ?? null, isExtra: true, createdAt: new Date(), updatedAt: new Date() });
+			m = await this.matchesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, stage: 'regular', pool: null, round: data.round ?? (last.length ? Math.max(...last.map((x) => x.round)) : 1), number: last.length + 1, bracketId: null, bracketGroup: null, entry1Id: data.entry1Id, entry2Id: data.entry2Id, entry1Status: 'confirmed', entry2Status: 'confirmed', status: 'pending', scores: [], result: null, courtIndex: data.courtIndex ?? null, startAt: data.startAt ?? null, notes: data.notes ?? null, isExtra: true, name: this.cleanMatchName(data.name), createdAt: new Date(), updatedAt: new Date() });
 		}
 		const host = this.isHost(c, user.id);
 		if (host) {
@@ -690,7 +744,19 @@ export class CompetitionService {
 			if (data.courtIndex !== undefined) upd.courtIndex = data.courtIndex;
 			if (data.startAt !== undefined) upd.startAt = data.startAt;
 			if (data.notes !== undefined) upd.notes = data.notes;
-			if (m.bracketId == null) { if (data.entry1Id !== undefined && data.matchId) upd.entry1Id = data.entry1Id; if (data.entry2Id !== undefined && data.matchId) upd.entry2Id = data.entry2Id; if (data.round != null) upd.round = data.round; }
+			if (data.name !== undefined && data.matchId) upd.name = this.cleanMatchName(data.name);   // COMP-FIXES-B: Reclub Edit match "Name"
+			// COMP-FIXES-B (Reclub Edit match "Update match": the two teams of a user-created / round-robin match): the new sides are
+			// two different playing entries of this competition, and a match that already has games keeps its sides (clear first —
+			// games scored by one pairing are never credited to another). A bracket match's sides belong to the bracket.
+			if (data.matchId && sidesChange(m)) {
+				if (m.bracketId != null) throw this.err('bracket_locked', 'A bracket match keeps the sides the bracket gave it.');
+				if (m.scores.length || m.status === 'completed') throw this.err('has_scores', 'This match has scores. Clear them before changing the teams.');
+				const e1 = data.entry1Id !== undefined ? data.entry1Id : m.entry1Id, e2 = data.entry2Id !== undefined ? data.entry2Id : m.entry2Id;
+				if (!e1 || !e2 || e1 === e2) throw this.err('no_such_entry', 'Two different entries are needed.');
+				await this.assertPlayingEntries(c, [e1, e2]);
+				upd.entry1Id = e1; upd.entry2Id = e2; upd.entry1Status = 'confirmed'; upd.entry2Status = 'confirmed'; upd.availability = {};
+			}
+			if (m.bracketId == null && data.round != null) upd.round = data.round;
 			const moved = (data.startAt !== undefined && (data.startAt?.getTime() ?? null) !== (m.startAt?.getTime() ?? null)) || (data.courtIndex !== undefined && data.courtIndex !== m.courtIndex);
 			// COMP-T3-V1 (Reclub match manage "Referees: pick from Staff / Teams / Players"): the match's own referees
 			let newRefs: string[] = [];
@@ -723,33 +789,114 @@ export class CompetitionService {
 				let db: BracketDb;
 				try { db = await resetBracketMatch(c.bracketData, m.bracketId); } catch { throw this.err('bracket_locked', 'A later match already has a result — reopen that one first.'); }
 				await this.competitionsRepository.update(c.id, { bracketData: db });
-				await this.syncBracket(c.id, db, this.playoffStageId(db));
+				await this.syncBracketOf(c.id, db, m);   // COMP-FIXES-B: the match's own stage (playoff or consolation)
 			}
 			await this.matchesRepository.update(m.id, { status: 'pending', result: null, entry1Status: m.entry1Status === 'forfeit' ? 'confirmed' : m.entry1Status, entry2Status: m.entry2Status === 'forfeit' ? 'confirmed' : m.entry2Status, updatedAt: new Date() });
 			return (await this.matchesRepository.findOneBy({ id: m.id }))!;
 		}
+		const official = host || this.isReferee(c, user.id) || matchRef;   // COMP-W1B4: a referee's result is final like the host's (COMP-T3-V1: + the match's own)
+		// COMP-FIXES-B: who may write a side's line-up — the officials both sides, a team's captain their own side only (hkpl
+		// routes/captain.js _lineupActor / LINEUP-LOCK-V2: "a captain can only set THEIR side … an admin/registrar acting on
+		// their behalf" both); nobody else
+		const lineupSides = async (): Promise<(1 | 2)[]> => {
+			if (official) return [1, 2];
+			const es = await this.entriesRepository.findBy({ id: In([m.entry1Id, m.entry2Id].filter((x): x is string => !!x)) });
+			const capOf = (id: string | null) => !!id && es.some((e) => e.id === id && e.captainId === user.id);
+			return [...(capOf(m.entry1Id) ? [1 as const] : []), ...(capOf(m.entry2Id) ? [2 as const] : [])];
+		};
 		if (data.scores !== undefined || data.forfeit !== undefined) {
 			if (!m.entry1Id || !m.entry2Id) throw this.err('needs_winner', 'Both sides must be known before a score.');
 			if (m.entry1Status === 'bye' || m.entry2Status === 'bye') throw this.err('needs_winner', 'A bye has no score.');
 			const wasCompleted = m.status === 'completed';
-			const official = host || this.isReferee(c, user.id) || matchRef;   // COMP-W1B4: a referee's result is final like the host's (COMP-T3-V1: + the match's own)
-			await this.applyResult(await this.get(c.id), m, { scores: data.scores ?? m.scores, forfeit: data.forfeit ?? null, finalize: official ? (data.finalize !== false) : false });
+			// COMP-FIXES-B: a set's line-up in the score payload is kept only for the sides this caller may assign; any other side
+			// keeps the line-up already on file at that position (hkpl PRESERVE-LINEUP-V1, routes/captain.js:1277: a score submit
+			// never rewrites who played); every id is checked against its entry's members
+			const incoming = await this.withLineups(m, data.scores ?? m.scores, await lineupSides());
+			await this.applyResult(await this.get(c.id), m, { scores: incoming, forfeit: data.forfeit ?? null, finalize: official ? (data.finalize !== false) : false });
 			const after = await this.matchesRepository.findOneBy({ id: m.id });
 			// BACKEND-DELIVERY-V1: a finalized result (or a corrected one) reaches every player of the match but its scorer
 			if (after && after.status === 'completed' && (!wasCompleted || JSON.stringify(after.scores) !== JSON.stringify(m.scores))) {
 				const es = await this.entriesRepository.findBy({ id: In([after.entry1Id, after.entry2Id].filter((x): x is string => !!x)) });
 				for (const e of es) for (const uid of e.userIds) if (uid !== user.id) this.notify(uid, c, 'Match result', `Your match result in ${c.name} was recorded.`);
 			}
+			m = (await this.matchesRepository.findOneBy({ id: m.id }))!;
+		}
+		// COMP-FIXES-B (Reclub Assign players / Confirm assignments / Clear all assignment): the line-up of each score set
+		if (data.lineups != null || data.clearLineups) {
+			const sides = await lineupSides();
+			if (!sides.length) throw this.err('forbidden', 'Only the host, a referee or a team captain can assign players.');
+			const [e1, e2] = await Promise.all([m.entry1Id, m.entry2Id].map((id) => (id ? this.entriesRepository.findOneBy({ id, competitionId: c.id }) : Promise.resolve(null))));
+			const scores = m.scores.map((s) => ({ ...s }));
+			if (data.clearLineups) for (const s of scores) for (const side of sides) delete s[side === 1 ? 'p1' : 'p2'];
+			for (const l of data.lineups ?? []) {
+				if (!sides.includes(l.side)) throw this.err('forbidden', 'A captain assigns the players of their own team only.');
+				const s = scores[l.set];
+				if (!s) throw this.err('bad_lineup', 'There is no such game in this match.');
+				const members = (l.side === 1 ? e1 : e2)?.userIds ?? [];
+				const ids = Array.from(new Set(l.userIds));
+				if (ids.length > 4 || ids.some((x) => !members.includes(x))) throw this.err('bad_lineup', 'This player is not on that team.');
+				if (ids.length) s[l.side === 1 ? 'p1' : 'p2'] = ids; else delete s[l.side === 1 ? 'p1' : 'p2'];
+			}
+			await this.matchesRepository.update(m.id, { scores, updatedAt: new Date() });
+			m = (await this.matchesRepository.findOneBy({ id: m.id }))!;
+		}
+		// COMP-FIXES-B (Reclub PickleballServeIndicator, onUpdateServe): who serves in a game — any scorer of the match, while
+		// the match is not finalized (a finalized result is fixed; the indicator is a live-scoring aid)
+		if (data.serve != null) {
+			if (m.status === 'completed') throw this.err('invalid_transition', 'The match is finalized.');
+			const scores = m.scores.map((s) => ({ ...s }));
+			const s = scores[data.serve.set];
+			if (!s) throw this.err('bad_lineup', 'There is no such game in this match.');
+			if (data.serve.tag) s.serve = data.serve.tag; else delete s.serve;
+			await this.matchesRepository.update(m.id, { scores, updatedAt: new Date() });
 		}
 		return (await this.matchesRepository.findOneBy({ id: m.id }))!;
 	}
 
-	private playoffStageId(db: BracketDb): number { const s = db.stage.slice().sort((a, b) => b.number - a.number)[0]; return s ? Number(s.id) : 1; }
+	/** COMP-FIXES-B: two playing (confirmed / forfeit) entries of this competition. */
+	private async assertPlayingEntries(c: MiCompetition, ids: string[]): Promise<void> {
+		const es = await this.entriesRepository.findBy({ id: In(ids), competitionId: c.id });
+		if (es.length !== new Set(ids).size || es.some((e) => e.status !== 'confirmed' && e.status !== 'forfeit')) throw this.err('no_such_entry', 'No such entry.');
+	}
+
+	/** COMP-FIXES-B: a match name — trimmed, 64 chars, null when blank. */
+	private cleanMatchName(n: string | null | undefined): string | null { const v = (n ?? '').trim().slice(0, 64); return v || null; }
+
+	/**
+	 * COMP-FIXES-B: the score payload's line-ups, kept for the sides `sides` may write and checked against the members; for
+	 * any other side the line-up already on file at the same position is carried over (hkpl PRESERVE-LINEUP-V1).
+	 */
+	private async withLineups(m: MiCompetitionMatch, scores: CompetitionScoreSet[], sides: (1 | 2)[]): Promise<CompetitionScoreSet[]> {
+		const [e1, e2] = await Promise.all([m.entry1Id, m.entry2Id].map((id) => (id ? this.entriesRepository.findOneBy({ id }) : Promise.resolve(null))));
+		const clean = (ids: string[] | undefined, members: string[]): string[] | undefined => {
+			if (!ids || !ids.length) return undefined;
+			const u = Array.from(new Set(ids));
+			if (u.length > 4 || u.some((x) => !members.includes(x))) throw this.err('bad_lineup', 'This player is not on that team.');
+			return u;
+		};
+		return scores.map((s, i) => {
+			const prev = m.scores[i];
+			// a set that does not mention a side (no p1 / p2 key) keeps what is on file; an empty list clears it
+			const p1 = sides.includes(1) && s.p1 !== undefined ? clean(s.p1, e1?.userIds ?? []) : prev?.p1;
+			const p2 = sides.includes(2) && s.p2 !== undefined ? clean(s.p2, e2?.userIds ?? []) : prev?.p2;
+			return { ...s, ...(p1 ? { p1 } : { p1: undefined }), ...(p2 ? { p2 } : { p2: undefined }) };
+		});
+	}
+
+	/** The main playoff stage (named 'Playoffs'); an older bracket without names falls back to its newest stage. */
+	private playoffStageId(db: BracketDb): number { const n = stageIdByName(db, 'Playoffs'); if (n != null) return n; const s = db.stage.slice().sort((a, b) => b.number - a.number)[0]; return s ? Number(s.id) : 1; }
+
+	/** COMP-FIXES-B: re-sync the stage a bracket match belongs to (a consolation result is never synced into the playoffs). */
+	private async syncBracketOf(competitionId: string, db: BracketDb, m: MiCompetitionMatch): Promise<void> {
+		const sid = (m.bracketId != null ? stageOfBracketMatch(db, m.bracketId) : null) ?? this.playoffStageId(db);
+		await this.syncBracket(competitionId, db, sid, m.stage === 'consolation' ? 'consolation' : 'playoff');
+	}
 
 	private async applyResult(c: MiCompetition, m: MiCompetitionMatch, r: { scores: CompetitionScoreSet[]; forfeit: 'entry1' | 'entry2' | 'both' | null; finalize: boolean }): Promise<void> {
 		const knockout = m.bracketId != null;
 		// COMP-T3-V1: a set keeps its name (Reclub Manage score sets) — trimmed, 32 chars, absent when blank
-		const scores: CompetitionScoreSet[] = r.scores.map((s) => { const n = (s.name ?? '').trim().slice(0, 32); return { t1: Math.max(0, s.t1 | 0), t2: Math.max(0, s.t2 | 0), type: s.type ?? 'standard', ...(n ? { name: n } : {}) }; });
+		// COMP-FIXES-B: + its serve tag and its line-up (already checked by withLineups)
+		const scores: CompetitionScoreSet[] = r.scores.map((s) => { const n = (s.name ?? '').trim().slice(0, 32); return { t1: Math.max(0, s.t1 | 0), t2: Math.max(0, s.t2 | 0), type: s.type ?? 'standard', ...(n ? { name: n } : {}), ...(s.serve && (competitionServeTags as readonly string[]).includes(s.serve) ? { serve: s.serve } : {}), ...(s.p1 && s.p1.length ? { p1: s.p1 } : {}), ...(s.p2 && s.p2.length ? { p2: s.p2 } : {}) }; });
 		const result = decideResult(scores, r.forfeit, !knockout);
 		if (r.finalize && result == null) throw this.err('needs_winner', knockout ? 'A knockout match needs a winner — add a deciding set or a forfeit.' : 'Enter at least one set or a forfeit.');
 		const e1s: MiCompetitionMatch['entry1Status'] = r.forfeit === 'entry1' || r.forfeit === 'both' ? 'forfeit' : 'confirmed';
@@ -768,7 +915,7 @@ export class CompetitionService {
 			}
 			await this.matchesRepository.update(m.id, { scores, result, entry1Status: e1s, entry2Status: e2s, status: 'completed', updatedAt: new Date() });
 			await this.competitionsRepository.update(c.id, { bracketData: db, updatedAt: new Date() });
-			await this.syncBracket(c.id, db, this.playoffStageId(db));
+			await this.syncBracketOf(c.id, db, m);   // COMP-FIXES-B: the match's own stage
 			return;
 		}
 		await this.matchesRepository.update(m.id, { scores, result: r.finalize ? result : null, entry1Status: e1s, entry2Status: e2s, status: r.finalize ? 'completed' : (scores.length ? 'inProgress' : 'pending'), updatedAt: new Date() });
@@ -805,8 +952,48 @@ export class CompetitionService {
 		return { pools, placements, stageComplete };
 	}
 
+	/**
+	 * COMP-FIXES-B — Reclub Request support › Recalculate ("Results and matches are calculated and updated automatically. If
+	 * something doesn't look right, you can try to recalculate it."; HELP: it "forces the app to re-run the match generation and
+	 * seeding logic"). Standings are computed on every read, so what can drift is what is STORED from something else. This
+	 * re-derives each of those and reports what it corrected:
+	 *   1. every finalized non-bracket match's result, from its own score sets and forfeits (decideResult);
+	 *   2. every bracket row, from the bracket store (who plays whom, byes, who advanced), stage by stage;
+	 *   3. an ended competition's podium awards, from the placements (a player is told only when their place changed).
+	 * A result sent to DUPR is never changed (it is locked); it is counted as skipped.
+	 */
+	@bindThis
+	public async recalculate(c: MiCompetition, host: MiUser): Promise<{ checked: number; corrected: number; bracketRows: number; skippedLocked: number; awards: boolean }> {
+		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
+		const ms = await this.matches(c);
+		let corrected = 0, skippedLocked = 0, checked = 0;
+		for (const m of ms) {
+			if (m.bracketId != null || m.status !== 'completed') continue;
+			checked++;
+			const forfeit = m.entry1Status === 'forfeit' && m.entry2Status === 'forfeit' ? 'both' : m.entry1Status === 'forfeit' ? 'entry1' : m.entry2Status === 'forfeit' ? 'entry2' : null;
+			const should = decideResult(m.scores, forfeit, true);
+			if (should === m.result) continue;
+			if (m.duprStatus === 'queued' || m.duprStatus === 'submitted') { skippedLocked++; continue; }
+			// a finalized match whose games decide nothing (no set, no forfeit) goes back to being played
+			await this.matchesRepository.update(m.id, should == null ? { result: null, status: m.scores.length ? 'inProgress' : 'pending', updatedAt: new Date() } : { result: should, updatedAt: new Date() });
+			corrected++;
+		}
+		let bracketRows = 0;
+		if (c.bracketData) {
+			const snap = (rows: MiCompetitionMatch[]) => new Map(rows.map((r) => [r.id, [r.entry1Id, r.entry2Id, r.entry1Status, r.entry2Status, r.status, r.result, r.round, r.number, r.bracketGroup].join('|')]));
+			const before = snap(ms.filter((m) => m.bracketId != null));
+			for (const s of c.bracketData.stage) await this.syncBracket(c.id, c.bracketData, Number(s.id), s.name === 'Consolation' ? 'consolation' : 'playoff');
+			const after = snap((await this.matches(c)).filter((m) => m.bracketId != null));
+			for (const [id, v] of after) if (before.get(id) !== v) bracketRows++;
+		}
+		let awards = false;
+		if (c.status === 'done') { await this.writeSystemAwards(await this.get(c.id), true); awards = true; }
+		await this.competitionsRepository.update(c.id, { updatedAt: new Date() });
+		return { checked, corrected, bracketRows, skippedLocked, awards };
+	}
+
 	// ---------------------------------------------------------------------------------------------- awards
-	private async writeSystemAwards(c: MiCompetition): Promise<void> {
+	private async writeSystemAwards(c: MiCompetition, quiet = false): Promise<void> {
 		const st = await this.standings(c);
 		let places = st.placements;
 		if (!places) {
@@ -833,7 +1020,8 @@ export class CompetitionService {
 				} else {
 					await this.awardsRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, type: t.type, name: t.type === 'coThird' ? '3rd place' : s.name, description: null, entryId: entry?.id ?? null, userIds: entry?.userIds ?? [], enabled: true, awardedAt: entry ? new Date() : null, createdAt: new Date() });
 				}
-				if (entry) for (const uid of entry.userIds) this.notify(uid, c, 'You placed!', `${entry.name} finished ${t.type === 'coThird' ? '3rd' : s.name.replace(' place', '')} in ${c.name}.`);
+				// COMP-FIXES-B: a Recalculate (quiet) tells only a player whose placement actually changed
+				if (entry && (!quiet || (row?.entryId ?? null) !== entry.id)) for (const uid of entry.userIds) this.notify(uid, c, 'You placed!', `${entry.name} finished ${t.type === 'coThird' ? '3rd' : s.name.replace(' place', '')} in ${c.name}.`);
 			}
 		}
 	}
@@ -1241,7 +1429,8 @@ export class CompetitionService {
 	public async setAvailability(c: MiCompetition, actor: MiUser, matchId: string, userId: string | null, status: 'yes' | 'maybe' | 'no' | null): Promise<MiCompetitionMatch> {
 		const m = await this.matchesRepository.findOneBy({ id: matchId, competitionId: c.id });
 		if (!m) throw this.err('no_such_match', 'No such match.');
-		if (c.status === 'done' || c.status === 'cancelled' || m.status === 'completed' || m.status === 'cancelled') throw this.err('invalid_transition', 'This match is over.');
+		if (m.status === 'cancelled') throw this.err('match_removed', 'This match is no longer available.');   // COMP-FIXES-B: the removed-match family
+		if (c.status === 'done' || c.status === 'cancelled' || m.status === 'completed') throw this.err('invalid_transition', 'This match is over.');
 		const uid = userId ?? actor.id;
 		const es = await this.entriesRepository.findBy({ id: In([m.entry1Id, m.entry2Id].filter((x): x is string => !!x)) });
 		const entry = es.find((e) => e.userIds.includes(uid));

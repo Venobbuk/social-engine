@@ -132,6 +132,19 @@ export function viewStage(data: BracketDb, stageId: number): BracketMatchView[] 
 	});
 }
 
+/** COMP-FIXES-B: the stage a bracket match belongs to (a result is synced back into ITS stage, not the newest one). */
+export function stageOfBracketMatch(data: BracketDb, bracketId: number): number | null {
+	const m = data.match.find((x) => Number(x.id) === bracketId);
+	return m ? Number(m.stage_id) : null;
+}
+
+/** COMP-FIXES-B: a stage by its name ('Playoffs' | 'Consolation'); the highest-numbered one when several share it. */
+export function stageIdByName(data: BracketDb | null, name: string): number | null {
+	if (!data) return null;
+	const s = data.stage.filter((x) => x.name === name).sort((a, b) => b.number - a.number)[0];
+	return s ? Number(s.id) : null;
+}
+
 /** Final placements of a completed knockout stage (rank → entry ids); null while the final is undecided. */
 export async function bracketFinalStandings(data: BracketDb, stageId: number): Promise<{ entryId: string; rank: number }[] | null> {
 	try {

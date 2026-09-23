@@ -22,7 +22,13 @@ export const competitionScoreTypes = ['standard', 'tiebreaker', 'extra'] as cons
 // hkpl -> submitted (locked) -> failed -> ineligible. DUPR itself lives on hkpl; this row keeps only the receipt.
 export const competitionMatchDuprStatuses = ['queued', 'submitted', 'failed', 'ineligible'] as const;
 // COMP-T3-V1: a score set may carry its name (Reclub Manage score sets "Set name"); absent = "Game n"
-export type CompetitionScoreSet = { t1: number; t2: number; type: typeof competitionScoreTypes[number]; name?: string };
+// COMP-FIXES-B (2026-09-23): Reclub CompetitionScore tags + score participants —
+//   serve   the pickleball serve indicator (CompetitionScoreTag PBT1S1…PBT2S2: team n is serving, server 1 or 2)
+//   p1 / p2 the line-up of this set: which members of entry 1 / entry 2 played it (Reclub "Assign players"; hkpl
+//           routes/captain.js LINEUP-LOCK-V2 per-game line-ups). Absent = not assigned.
+export const competitionServeTags = ['PBT1S1', 'PBT1S2', 'PBT2S1', 'PBT2S2'] as const;
+export type CompetitionServeTag = typeof competitionServeTags[number];
+export type CompetitionScoreSet = { t1: number; t2: number; type: typeof competitionScoreTypes[number]; name?: string; serve?: CompetitionServeTag; p1?: string[]; p2?: string[] };
 // COMP-T3-V1: Reclub match availability "Can go / Maybe / Can't go" (the values of hkpl AVAILABILITY-V1, per match here)
 export const competitionAvailabilities = ['yes', 'maybe', 'no'] as const;
 export type CompetitionAvailability = typeof competitionAvailabilities[number];
@@ -116,6 +122,10 @@ export class MiCompetitionMatch {
 
 	@Column('boolean', { default: false, comment: 'Reclub CompetitionMatchSourceType User:2 — added by the host, not generated.' })
 	public isExtra: boolean;
+
+	// COMP-FIXES-B: Reclub Create / Edit match "Name" (a match may carry the host's name for it: "Exhibition", "Rematch")
+	@Column('varchar', { length: 64, nullable: true })
+	public name: string | null;
 
 	@Column('timestamp with time zone', { default: () => 'now()' })
 	public createdAt: Date;

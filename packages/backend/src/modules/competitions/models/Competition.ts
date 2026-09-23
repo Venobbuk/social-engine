@@ -258,6 +258,13 @@ export class MiCompetition {
 
 	@Column('jsonb', { default: {}, comment: 'Extra chat rooms { captain?, staff?, forum? } (team rooms live on the entry).' })
 	public chatRooms: { captain?: string; staff?: string; forum?: string };
+	// COMP-FIXES-B (2026-09-23): Reclub match format "Consolation Bracket" (pool play: the entries that do not advance play
+	// their own knockout) and the score-set configuration (step 2 "Set name" + Tiebreaker) as defaults for every match
+	@Column('boolean', { default: false, comment: 'Reclub consolation bracket for the entries that do not advance (pool play).' })
+	public consolationBracket: boolean;
+
+	@Column('jsonb', { default: [], comment: 'Reclub score-set configuration: [{ name?, type standard|tiebreaker }] — the default sets of every match.' })
+	public scoreSetDefaults: { name?: string; type: 'standard' | 'tiebreaker' }[];
 
 	@Column('jsonb', { nullable: true, comment: 'brackets-manager export (participant/stage/group/round/match) for the knockout stage(s).' })
 	public bracketData: BracketDb | null;

@@ -113,11 +113,28 @@ export class CompetitionDuprService {
 		const errors: DuprEligibility['errors'] = [];
 		const [e1, e2] = await this.entriesOf(match);
 		const members = (e: MiCompetitionEntry | null) => (e?.userIds ?? []).filter(Boolean);
-		const m1 = members(e1), m2 = members(e2);
+		let m1 = members(e1), m2 = members(e2);
+		// COMP-FIXES-B (Reclub "Assign players" → score participants; hkpl routes/captain.js:1277-1305 PRESERVE-LINEUP-V1 /
+		// ANTI-CHEAT-PLAYERS-SERVER-V2: DUPR is told who played from the line-up on file, never guessed from the roster): when the
+		// games carry line-ups, the players sent are the line-up's. One DUPR match holds one set of players, so every game must
+		// have the SAME line-up; a team that changed its players between games is refused with the reason (lineup_varies) rather
+		// than sent under the wrong names. A team entry of 3+ without line-ups is told to assign them (lineup_missing).
+		const games = (match.scores ?? []).slice(0, 5);
+		const lined = games.filter((s) => (s.p1?.length ?? 0) > 0 || (s.p2?.length ?? 0) > 0);
+		let lineupError: string | null = null;
+		if (lined.length) {
+			const key = (s: { p1?: string[]; p2?: string[] }) => [...(s.p1 ?? [])].sort().join(',') + '|' + [...(s.p2 ?? [])].sort().join(',');
+			if (lined.length !== games.length || games.some((s) => !(s.p1?.length) || !(s.p2?.length))) lineupError = 'lineup_incomplete';
+			else if (new Set(games.map(key)).size > 1) lineupError = 'lineup_varies';
+			else { m1 = games[0].p1 ?? []; m2 = games[0].p2 ?? []; }
+		} else if (m1.length > 2 || m2.length > 2) lineupError = 'lineup_missing';
+		// the three line-up codes are tournament-only; the shared union lives in the meets module (MeetMatchService.ts:24), which
+		// this lane does not own — the value is a plain string in the JSON either way
+		if (lineupError) errors.push({ code: lineupError as unknown as DuprEligibility['errors'][number]['code'], affectedParticipantIds: [] });
 		const n1 = m1.length, n2 = m2.length;
-		if (n1 !== n2 || n1 === 0) errors.push({ code: 'uneven_teams', affectedParticipantIds: [] });
-		const format = n1 === n2 && n1 === 1 ? 'SINGLES' : n1 === n2 && n1 === 2 ? 'DOUBLES' : null;
-		if (n1 === n2 && n1 > 0 && format == null) errors.push({ code: 'not_singles_doubles', affectedParticipantIds: [] });
+		if (!lineupError && (n1 !== n2 || n1 === 0)) errors.push({ code: 'uneven_teams', affectedParticipantIds: [] });
+		const format = !lineupError && n1 === n2 && n1 === 1 ? 'SINGLES' : !lineupError && n1 === n2 && n1 === 2 ? 'DOUBLES' : null;
+		if (!lineupError && n1 === n2 && n1 > 0 && format == null) errors.push({ code: 'not_singles_doubles', affectedParticipantIds: [] });
 		if ((match.scores ?? []).length === 0) errors.push({ code: 'no_scores', affectedParticipantIds: [] });
 
 		const ids = [...m1, ...m2];

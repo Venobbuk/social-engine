@@ -23,7 +23,9 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { competitionId: { type: 'string', format: 'misskey:id' }, ...competitionParamProps },
+	// COMP-FIXES-B (Reclub "These changes will reset all / playoff / consolation matches and scores."): the host proceeds with a
+	// format change after the draw by naming what is reset; absent = refused as before (COMPETITION_DRAW_EXISTS)
+	properties: { competitionId: { type: 'string', format: 'misskey:id' }, ...competitionParamProps, resetMatches: { type: 'string', enum: ['all', 'playoff'] } },
 	required: ['competitionId'],
 } as const;
 
@@ -35,7 +37,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (badDate) throw new ApiError(meta.errors.invalidDate);
 			try {
 				const c = await this.competitionService.get(ps.competitionId);
-				const updated = await this.competitionService.update(c, me, fields as Partial<MiCompetition>);
+				const updated = await this.competitionService.update(c, me, fields as Partial<MiCompetition>, { resetMatches: ps.resetMatches ?? null });
 				return await this.competitionEntityService.pack(updated, me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);

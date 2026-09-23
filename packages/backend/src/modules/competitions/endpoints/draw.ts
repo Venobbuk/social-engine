@@ -29,6 +29,8 @@ export const paramDef = {
 		// COMP-T3-V1 (Reclub Manage seeds): the host's playoff seed order, and a redraw of the playoff bracket alone
 		seedOrder: { type: 'array', nullable: true, maxItems: 256, items: { type: 'string', format: 'misskey:id' } },
 		resetPlayoff: { type: 'boolean', default: false },
+		// COMP-FIXES-B (Reclub "Consolation Seeding" + the other-bracket toggle): the host's consolation order
+		consolationOrder: { type: 'array', nullable: true, maxItems: 256, items: { type: 'string', format: 'misskey:id' } },
 	},
 	required: ['competitionId'],
 } as const;
@@ -39,7 +41,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				const c = await this.competitionService.get(ps.competitionId);
-				const r = await this.competitionService.draw(c, me, { stage: ps.stage, reset: ps.reset, seedOrder: ps.seedOrder ?? null, resetPlayoff: ps.resetPlayoff });
+				const r = await this.competitionService.draw(c, me, { stage: ps.stage, reset: ps.reset, seedOrder: ps.seedOrder ?? null, resetPlayoff: ps.resetPlayoff, consolationOrder: ps.consolationOrder ?? null });
 				const fresh = await this.competitionService.get(c.id);
 				return { stage: r.stage, matches: await Promise.all(r.matches.map((m) => this.competitionEntityService.packMatch(m, fresh, me))), competition: await this.competitionEntityService.pack(fresh, me, { detailed: true }) };
 			} catch (e) {

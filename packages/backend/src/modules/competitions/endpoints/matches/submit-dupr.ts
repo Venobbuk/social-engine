@@ -56,6 +56,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (match == null) throw new ApiError(meta.errors.noSuchMatch);
 				if (!this.competitionService.isHost(c, me.id)) throw new ApiError(meta.errors.notHost);
 				if (match.duprStatus === 'submitted') throw new ApiError(meta.errors.duprLocked);
+				// COMP-FIXES-B: a removed match is no result (409), and only a finalized match is sent (a provisional score is not)
+				if (match.status === 'cancelled') throw new ApiError(meta.errors.matchRemoved);
+				if (ps.confirm === true && match.status !== 'completed') throw new ApiError({ ...meta.errors.invalidTransition, message: 'Finalize the match before sending it to DUPR.' });
 				if (ps.confirm !== true) return await this.competitionDuprService.preview(c, match);
 				const m = await this.competitionDuprService.submitDupr(c, match, me);
 				return { confirmed: true, match: await this.competitionEntityService.packMatch(m, c, me) };

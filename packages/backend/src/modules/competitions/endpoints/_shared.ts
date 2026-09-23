@@ -43,6 +43,10 @@ export const competitionErrors = {
 	membersOnly: { message: 'This competition is for the club members only.', code: 'COMPETITION_MEMBERS_ONLY', id: '7c0a0000-0000-4000-8000-00000000001c' },
 	cannotDelete: { message: 'Cancel the competition first.', code: 'COMPETITION_CANNOT_DELETE', id: '7c0a0000-0000-4000-8000-00000000001d' },
 	noSuchFile: { message: 'No such file.', code: 'NO_SUCH_FILE', id: '7c0a0000-0000-4000-8000-00000000001e' },
+	// COMP-FIXES-B (ids in the b1.. range so a sibling lane's additions never collide)
+	matchRemoved: { message: 'This match is no longer available.', code: 'COMPETITION_MATCH_REMOVED', id: '7c0a0000-0000-4000-8000-0000000000b1', httpStatusCode: 409 },
+	badLineup: { message: 'This player is not on that team.', code: 'COMPETITION_BAD_LINEUP', id: '7c0a0000-0000-4000-8000-0000000000b2' },
+	hasScores: { message: 'This match has scores. Clear them before changing the teams.', code: 'COMPETITION_MATCH_HAS_SCORES', id: '7c0a0000-0000-4000-8000-0000000000b3', httpStatusCode: 409 },
 } as const;
 
 const map: Record<CompetitionErrorId, keyof typeof competitionErrors> = {
@@ -53,6 +57,7 @@ const map: Record<CompetitionErrorId, keyof typeof competitionErrors> = {
 	blocked: 'blocked', no_such_invitation: 'noSuchInvitation', team_full: 'teamFull', no_such_announcement: 'noSuchAnnouncement', // COMP-W1B4
 	bad_timeline: 'badTimeline', members_only: 'membersOnly', cannot_delete: 'cannotDelete', no_such_file: 'noSuchFile', // COMP-T3-V1
 	dupr_locked: 'duprLocked', // UAT-DUPR-CAGE-V1
+	match_removed: 'matchRemoved', bad_lineup: 'badLineup', has_scores: 'hasScores', // COMP-FIXES-B
 };
 
 export function toApiError(e: unknown): never {
@@ -131,6 +136,9 @@ export const competitionParamProps = {
 	hideRoster: { type: 'boolean' },
 	spectatorAutoApprove: { type: 'boolean' },
 	coverFileIds: { type: 'array', maxItems: 10, items: { type: 'string', format: 'misskey:id' } },
+	// COMP-FIXES-B: Reclub Consolation Bracket + the score-set configuration (defaults for every match)
+	consolationBracket: { type: 'boolean' },
+	scoreSetDefaults: { type: 'array', maxItems: 7, items: { type: 'object', properties: { name: { type: 'string', maxLength: 32 }, type: { type: 'string', enum: ['standard', 'tiebreaker'] } }, required: ['type'] } },
 } as const;
 
 const DATE_KEYS = ['registrationOpenAt', 'registrationCloseAt', 'earlyBirdAt', 'startAt'] as const;

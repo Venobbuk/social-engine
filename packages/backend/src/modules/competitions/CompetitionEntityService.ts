@@ -108,7 +108,12 @@ export class CompetitionEntityService {
 			// COMP-DUPR-V1: the DUPR receipt, exactly as the meet's packMatch carries it
 			duprStatus: m.duprStatus ?? null, duprSubmittedById: m.duprSubmittedById ?? null,
 			duprSubmittedAt: m.duprSubmittedAt?.toISOString() ?? null, duprRef: m.duprRef ?? null, duprError: m.duprError ?? null,
-			canScore: c.status === 'inProgress' && m.entry1Id != null && m.entry2Id != null && m.entry1Status !== 'bye' && m.entry2Status !== 'bye' && await this.competitionService.canScore(c, m, me?.id),
+			// COMP-FIXES-B: Reclub DUPR badge "Submitted by {{name}}" — who pressed Submit (a UserLite, null when nobody did)
+			duprSubmittedBy: m.duprSubmittedById ? (await this.usersLite([m.duprSubmittedById], me))[0] ?? null : null,
+			// COMP-FIXES-B: the host's name for the match (Reclub Create / Edit match "Name")
+			name: m.name ?? null,
+			// COMP-FIXES-B: a removed match is read-only (the engine refuses its score with COMPETITION_MATCH_REMOVED)
+			canScore: c.status === 'inProgress' && m.status !== 'cancelled' && m.entry1Id != null && m.entry2Id != null && m.entry1Status !== 'bye' && m.entry2Status !== 'bye' && await this.competitionService.canScore(c, m, me?.id),
 			updatedAt: m.updatedAt.toISOString(),
 		};
 	}
@@ -171,6 +176,8 @@ export class CompetitionEntityService {
 			feeFreeAgentAmount: c.feeFreeAgentAmount ?? null, feeFreeAgentEarlyBirdAmount: c.feeFreeAgentEarlyBirdAmount ?? null,
 			membersOnly: c.membersOnly ?? false, mayJoinMembersOnly: await this.competitionService.passesMembersOnly(c, me?.id),
 			stageNames: c.stageNames ?? {}, matchRules: c.matchRules ?? null,
+			// COMP-FIXES-B: consolation bracket + the default score sets; fb === 1 marks an engine carrying this batch
+			consolationBracket: c.consolationBracket ?? false, scoreSetDefaults: c.scoreSetDefaults ?? [], fb: 1,
 			spectatorsCount: n('spectator'), mySpectator: me ? await this.competitionService.mySpectator(c, me.id).then((s) => (s ? { id: s.id } : null)) : null,
 			...(await this.packFixesA(c, me, isHost, myEntry)),   // COMP-FIXES-A
 			drawVisible: isHost || c.revealDraw || c.status === 'inProgress' || c.status === 'done',

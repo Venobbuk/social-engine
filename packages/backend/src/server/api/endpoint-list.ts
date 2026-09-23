@@ -317,6 +317,8 @@ export * as 'competitions/spectate' from '@/modules/competitions/endpoints/spect
 export * as 'competitions/entries/edit' from '@/modules/competitions/endpoints/entries/edit.js'; // COMP-T3-V1
 export * as 'competitions/matches/availability' from '@/modules/competitions/endpoints/matches/availability.js'; // COMP-T3-V1
 export * as 'competitions/photos/list' from '@/modules/competitions/endpoints/photos-list.js'; // COMP-T3-V1
+export * as 'competitions/recalculate' from '@/modules/competitions/endpoints/recalculate.js'; // COMP-FIXES-B
+export * as 'competitions/dupr-manager' from '@/modules/competitions/endpoints/dupr-manager.js'; // COMP-FIXES-B
 export * as 'channels/timeline' from './endpoints/channels/timeline.js';
 export * as 'channels/unfavorite' from './endpoints/channels/unfavorite.js';
 export * as 'channels/unfollow' from './endpoints/channels/unfollow.js';

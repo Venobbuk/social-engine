@@ -45,7 +45,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const c = await this.competitionService.get(ps.competitionId);
 				if (!this.competitionService.isHost(c, me.id)) throw new ApiError(meta.errors.notHost);
 				const ms = await this.competitionService.matches(c);
-				const sendable = ms.filter(m => (m.scores ?? []).length > 0 && m.duprStatus !== 'submitted' && m.duprStatus !== 'queued');
+				// COMP-FIXES-B: only a FINALIZED match is a result — a player's provisional score (inProgress) and a removed match
+				// (cancelled) were candidates too, so Submit all could send an unfinalized or removed game to DUPR
+				const isResult = (m: typeof ms[number]) => m.status === 'completed' && m.entry1Status !== 'bye' && m.entry2Status !== 'bye';
+				const sendable = ms.filter(m => isResult(m) && (m.scores ?? []).length > 0 && m.duprStatus !== 'submitted' && m.duprStatus !== 'queued');
 
 				if (ps.confirm !== true) {
 					const previews: CompetitionDuprPreview[] = [];
@@ -62,7 +65,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const counts = { submitted: 0, queued: 0, failed: 0, ineligible: 0, skipped: 0 };
 				const results: { matchId: string; duprStatus: string | null; duprError: string | null }[] = [];
 				for (const m of ms) {
-					if ((m.scores ?? []).length === 0 || m.duprStatus === 'submitted' || m.duprStatus === 'queued') { counts.skipped++; results.push({ matchId: m.id, duprStatus: m.duprStatus, duprError: m.duprError }); continue; }
+					if (!isResult(m) || (m.scores ?? []).length === 0 || m.duprStatus === 'submitted' || m.duprStatus === 'queued') { counts.skipped++; results.push({ matchId: m.id, duprStatus: m.duprStatus, duprError: m.duprError }); continue; }
 					// consent: a match with an unconfirmed entrant is skipped (submitDupr would refuse it)
 					if ((await this.competitionDuprService.pendingConsent(c, m)).length > 0) { counts.skipped++; results.push({ matchId: m.id, duprStatus: m.duprStatus, duprError: 'entry_unconfirmed' }); continue; }
 					const r = await this.competitionDuprService.submitDupr(c, m, me);
