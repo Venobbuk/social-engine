@@ -8,6 +8,7 @@ import type { DataSource } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import type { Packed } from '@/misc/json-schema.js';
 
 // GB-FRIEND-SUGGEST-V1 (2026-09-21): friend suggestions that carry their REASON.
 //
@@ -135,7 +136,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					: { kind: r.meets >= 2 ? 'played_together' : 'played_once', meets: r.meets, matches, wins: null, losses: null };
 				return {
 					userId: r.uid,
-					user: null as unknown,
+					user: null as Packed<'UserLite'> | null,
 					state: r.follows_me ? 'incoming' : 'none',
 					score: (r.meets * 10) + (matches * 2) + (positive ? 5 : 0),
 					reason,
