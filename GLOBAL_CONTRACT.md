@@ -248,6 +248,13 @@ user-friendly, or closer to what the user needs." So when a product choice comes
     would have emailed a working sign-in token on any host an attacker names — account takeover. Caught before ship.
 14. **hkpl is the production league system.** Restarts happen only in the 03:30–06:00 HKT window through
     `/root/gen/hkpl-batch.sh` (it refuses outside the window without `FORCE=1`, and FORCE is the operator's call).
+15. **GripBat owns its accounts (operator 2026-09-23; SUPERSEDES the 2026-09-17 shared-identity decision).** Sign-up,
+    sign-in, password reset, email change, username and profile name live in the ENGINE (Misskey native auth — G11, reuse
+    it). hkpl is no longer GripBat's identity provider; it is a server-to-server SERVICE for DUPR only (submit/status, plus
+    a DUPR-connect door for a GripBat user). Nothing a GripBat user sees depends on an hkpl account. Existing engine users
+    keep their rows and get native logins; nobody uses prod yet, so no public migration is owed. A "link your league
+    account" button may come later as an OPTIONAL link — never a requirement. Usernames are chosen by the user and never
+    derived from an email address.
 
 ## G16 — Verification traps (each one fooled a check this week; every probe must avoid all of them)
 G12 says checks prove function. These are the specific ways a check lied to us, 2026-09-20..23 — five instruments
