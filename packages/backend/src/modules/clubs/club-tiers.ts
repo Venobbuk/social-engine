@@ -30,17 +30,21 @@ export function adminExistsSql(channelExpr: string, userExpr: string): string {
 /** Members and followers per club, one query for any number of clubs.
  *  members   = club_member rows other than the owner's, + 1 for an owned club
  *  followers = channel_following rows of people who are NOT members (the follower tier only, owner excluded) —
- *              so members + followers is the club's whole audience, nobody counted twice. */
-export async function clubCounts(db: { query: (sql: string, params?: unknown[]) => Promise<unknown> }, channelIds: string[]): Promise<Map<string, { members: number; followers: number }>> {
+ *              so members + followers is the club's whole audience, nobody counted twice.
+ *  notes     = GB-NOTESCOUNT-LIVE-V1 (2026-09-23): the club's note rows that exist NOW. Misskey's channel.notesCount is a
+ *              running total (NoteCreateService increments it, NoteDeleteService never decrements it) — measured 17 on a
+ *              club whose timeline has 7 posts (probes/page-agreement, counter_not_its_rows). Counted like members. */
+export async function clubCounts(db: { query: (sql: string, params?: unknown[]) => Promise<unknown> }, channelIds: string[]): Promise<Map<string, { members: number; followers: number; notes: number }>> {
 	if (channelIds.length === 0) return new Map();
 	const rows = await db.query(
 		`SELECT c."id",
 		        ((SELECT count(*) FROM "club_member" m WHERE m."channelId" = c."id" AND m."userId" IS DISTINCT FROM c."userId")
 		         + (CASE WHEN c."userId" IS NOT NULL THEN 1 ELSE 0 END))::int AS "members",
 		        (SELECT count(*) FROM "channel_following" f WHERE f."followeeId" = c."id" AND f."followerId" IS DISTINCT FROM c."userId"
-		           AND NOT EXISTS (SELECT 1 FROM "club_member" m2 WHERE m2."channelId" = c."id" AND m2."userId" = f."followerId"))::int AS "followers"
-		   FROM "channel" c WHERE c."id" = ANY($1)`, [channelIds]) as { id: string; members: number | string; followers: number | string }[];
-	return new Map(rows.map(r => [r.id, { members: Number(r.members), followers: Number(r.followers) }]));
+		           AND NOT EXISTS (SELECT 1 FROM "club_member" m2 WHERE m2."channelId" = c."id" AND m2."userId" = f."followerId"))::int AS "followers",
+		        (SELECT count(*) FROM "note" n WHERE n."channelId" = c."id")::int AS "notesLive"
+		   FROM "channel" c WHERE c."id" = ANY($1)`, [channelIds]) as { id: string; members: number | string; followers: number | string; notesLive: number | string }[];
+	return new Map(rows.map(r => [r.id, { members: Number(r.members), followers: Number(r.followers), notes: Number(r.notesLive) }]));
 }
 
 /** Reclub club forum: may this user post (or comment, or renote) in the club? Admins always; members while the forum is

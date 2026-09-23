@@ -250,8 +250,8 @@ export class ClubService {
 
 	/** Members and followers of one club (club-tiers.ts, the same numbers every surface prints). */
 	@bindThis
-	public async counts(channelId: string): Promise<{ members: number; followers: number }> {
-		return (await clubCounts(this.db, [channelId])).get(channelId) ?? { members: 0, followers: 0 };
+	public async counts(channelId: string): Promise<{ members: number; followers: number; notes: number }> {
+		return (await clubCounts(this.db, [channelId])).get(channelId) ?? { members: 0, followers: 0, notes: 0 };
 	}
 
 	/** Reclub meets:no_club_note — "you must be an admin of the club or the club allows members to create meets". */

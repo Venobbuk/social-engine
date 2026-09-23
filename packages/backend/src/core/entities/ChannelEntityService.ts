@@ -56,7 +56,7 @@ export class ChannelEntityService {
 			favorites?: Set<MiChannel['id']>;
 			muting?: Set<MiChannel['id']>;
 			pinnedNotes?: Map<MiNote['id'], MiNote>;
-			memberCounts?: Map<MiChannel['id'], { members: number; followers: number }>;
+			memberCounts?: Map<MiChannel['id'], { members: number; followers: number; notes: number }>;
 			memberships?: Set<MiChannel['id']>;
 			/** INVITE-ACCESS-V1: the DOOR has already proved this caller holds the club's invite-link token or its
 			 *  ref code (channels/show, clubs/by-code). Membership is not the only way in, and a join preview that
@@ -139,7 +139,9 @@ export class ChannelEntityService {
 			usersCount: countsHidden ? 0 : tierCounts ? tierCounts.members : channel.usersCount,
 			membersCount: countsHidden ? 0 : tierCounts ? tierCounts.members : 0,
 			followersCount: countsHidden ? 0 : tierCounts ? tierCounts.followers : 0,
-			notesCount: channel.notesCount,
+			// GB-NOTESCOUNT-LIVE-V1: the stored column is Misskey's running total (never decremented on delete); the packed
+			// value is the club's live note rows, from the same clubCounts query usersCount reads.
+			notesCount: tierCounts ? tierCounts.notes : channel.notesCount,
 			isSensitive: channel.isSensitive,
 			allowRenoteToExternal: channel.allowRenoteToExternal,
 
@@ -232,7 +234,7 @@ export class ChannelEntityService {
 	/** BACKEND-DELIVERY-V1 → CLUB-TIERS-V1: members (club_member + the owner) and followers (the follower tier only) per
 	 *  channel — club-tiers.ts, the rule ClubService counts with. One query for any number of channels. */
 	@bindThis
-	private async memberCounts(channels: MiChannel[]): Promise<Map<MiChannel['id'], { members: number; followers: number }>> {
+	private async memberCounts(channels: MiChannel[]): Promise<Map<MiChannel['id'], { members: number; followers: number; notes: number }>> {
 		return await clubCounts(this.channelFollowingsRepository, channels.map(c => c.id));
 	}
 
