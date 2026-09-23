@@ -1,0 +1,215 @@
+{
+  "id": "t3-competitions-ui.probe",
+  "at": "2026-09-23T06:42:31.912Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "fails": 0,
+  "checks": [
+    {
+      "item": "setup.signin",
+      "what": "personas signed in (real SSO)",
+      "pass": true,
+      "evidence": "[\"ken\",\"amy\",\"mei\",\"tom\",\"admin\",\"tester1\",\"tester2\"]"
+    },
+    {
+      "item": "setup.fixture",
+      "what": "fixture built: started double round robin, 2 matches, a spectator, a match referee",
+      "pass": true,
+      "evidence": "{\"cid\":\"arhatsrhoslc00os\",\"matches\":2}"
+    },
+    {
+      "item": "D-comp-detail.02",
+      "what": "a sub-tab deep link (?tab=entries&pane=spectators) opens the Spectators pane with the spectator",
+      "pass": true,
+      "evidence": "{\"hasPane\":true}"
+    },
+    {
+      "item": "D-comp-detail.38",
+      "what": "the host sees the spectator with a Remove action",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-match-format.03",
+      "what": "the format pane states \"Each team will play the other teams twice.\"",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-match-format.04",
+      "what": "the number boxes (Rounds, Matches per team, Matches per round, Total matches)",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-detail.45",
+      "what": "the format pane carries POINT VALUES + How points work",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-match-format.17",
+      "what": "How points work opens the score-values explanation",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-detail.48",
+      "what": "the host sees \"Add match\" on a round robin",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-sublocations.01.ui",
+      "what": "a match shows the court label (\"Centre\"; the row is CSS-uppercased)",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-match-manage.03.ui",
+      "what": "a match row names its referee (\"· REF <name>\", CSS-uppercased)",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-detail.09",
+      "what": "Download scoresheets prints one sheet per open match (team names, Game boxes, signatures)",
+      "pass": true,
+      "evidence": "{\"opened\":true,\"len\":1825}"
+    },
+    {
+      "item": "D-comp-detail.55",
+      "what": "standings show the tiebreaker column (TB W/L)",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-detail.60.ui",
+      "what": "the Media pane (Photos) is on the results side",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-match-format.14.ui",
+      "what": "Match rules card on the overview",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-detail.22",
+      "what": "Notes carry a Copy action",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-match-format.02.ui",
+      "what": "the wizard offers Single / Double / Triple round robin",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-match-format.11",
+      "what": "the wizard sets the point values (Standard win / loss, Tiebreaker win / loss, Draws)",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-match-format.09",
+      "what": "the wizard sets the forfeit winning score",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-match-format.16",
+      "what": "a drawn competition warns that format changes need a reset",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-sublocations.01",
+      "what": "the wizard edits court labels (Courts + Add court)",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "i18n.zh_Hant",
+      "what": "繁 render: the format sentence and number boxes are Chinese (每隊與其他隊伍各比賽兩次 / 每隊場數)",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-detail.66",
+      "what": "the spectator footer: \"You are spectating this competition.\" + Stop spectating",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-detail.63",
+      "what": "the referee footer: \"You are the referee of 1 upcoming matches.\"",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-match-detail.07.ui",
+      "what": "the player sees \"Are you able to attend this match?\"",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-availability.01.browser",
+      "what": "pressing Maybe in the browser stored { mei: maybe } (se_sbx row)",
+      "pass": true,
+      "evidence": "{\"pressed\":true,\"row\":\"{\\\"argp1io2j7so0006\\\": \\\"maybe\\\"}\"}"
+    },
+    {
+      "item": "D-comp-team-detail.03.ui",
+      "what": "the captain sees Edit team + Add Team Avatar",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-upsert-team.06.browser",
+      "what": "Edit team → Save in the browser renamed the team (se_sbx row)",
+      "pass": true,
+      "evidence": "{\"name\":\"[probe] UI Alpha Renamed\"}"
+    },
+    {
+      "item": "D-comp-detail.67",
+      "what": "the entrant footer counts their upcoming matches",
+      "pass": true,
+      "evidence": "{}"
+    }
+  ],
+  "evidence": [
+    "pass setup.signin: personas signed in (real SSO) -> [\"ken\",\"amy\",\"mei\",\"tom\",\"admin\",\"tester1\",\"tester2\"]",
+    "pass setup.fixture: fixture built: started double round robin, 2 matches, a spectator, a match referee -> {\"cid\":\"arhatsrhoslc00os\",\"matches\":2}",
+    "pass D-comp-detail.02: a sub-tab deep link (?tab=entries&pane=spectators) opens the Spectators pane with the spectator -> {\"hasPane\":true}",
+    "pass D-comp-detail.38: the host sees the spectator with a Remove action -> {}",
+    "pass D-match-format.03: the format pane states \"Each team will play the other teams twice.\" -> {}",
+    "pass D-match-format.04: the number boxes (Rounds, Matches per team, Matches per round, Total matches) -> {}",
+    "pass D-comp-detail.45: the format pane carries POINT VALUES + How points work -> {}",
+    "pass D-match-format.17: How points work opens the score-values explanation -> {}",
+    "pass D-comp-detail.48: the host sees \"Add match\" on a round robin -> {}",
+    "pass D-comp-sublocations.01.ui: a match shows the court label (\"Centre\"; the row is CSS-uppercased) -> {}",
+    "pass D-comp-match-manage.03.ui: a match row names its referee (\"· REF <name>\", CSS-uppercased) -> {}",
+    "pass D-comp-detail.09: Download scoresheets prints one sheet per open match (team names, Game boxes, signatures) -> {\"opened\":true,\"len\":1825}",
+    "pass D-comp-detail.55: standings show the tiebreaker column (TB W/L) -> {}",
+    "pass D-comp-detail.60.ui: the Media pane (Photos) is on the results side -> {}",
+    "pass D-match-format.14.ui: Match rules card on the overview -> {}",
+    "pass D-comp-detail.22: Notes carry a Copy action -> {}",
+    "pass D-match-format.02.ui: the wizard offers Single / Double / Triple round robin -> {}",
+    "pass D-match-format.11: the wizard sets the point values (Standard win / loss, Tiebreaker win / loss, Draws) -> {}",
+    "pass D-match-format.09: the wizard sets the forfeit winning score -> {}",
+    "pass D-match-format.16: a drawn competition warns that format changes need a reset -> {}",
+    "pass D-comp-sublocations.01: the wizard edits court labels (Courts + Add court) -> {}",
+    "pass i18n.zh_Hant: 繁 render: the format sentence and number boxes are Chinese (每隊與其他隊伍各比賽兩次 / 每隊場數) -> {}",
+    "pass D-comp-detail.66: the spectator footer: \"You are spectating this competition.\" + Stop spectating -> {}",
+    "pass D-comp-detail.63: the referee footer: \"You are the referee of 1 upcoming matches.\" -> {}",
+    "pass D-comp-match-detail.07.ui: the player sees \"Are you able to attend this match?\" -> {}",
+    "pass D-comp-availability.01.browser: pressing Maybe in the browser stored { mei: maybe } (se_sbx row) -> {\"pressed\":true,\"row\":\"{\\\"argp1io2j7so0006\\\": \\\"maybe\\\"}\"}",
+    "pass D-comp-team-detail.03.ui: the captain sees Edit team + Add Team Avatar -> {}",
+    "pass D-comp-upsert-team.06.browser: Edit team → Save in the browser renamed the team (se_sbx row) -> {\"name\":\"[probe] UI Alpha Renamed\"}",
+    "pass D-comp-detail.67: the entrant footer counts their upcoming matches -> {}"
+  ],
+  "shots": "/root/walk/t3-competitions"
+}

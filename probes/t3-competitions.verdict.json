@@ -1,0 +1,1346 @@
+{
+  "id": "t3-competitions",
+  "at": "2026-09-23T06:43:54.675Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "totals": {
+    "items": 106,
+    "built_already": 11,
+    "design_diff": 4,
+    "out_of_scope": 2,
+    "missing_found": 89,
+    "built_now": 82,
+    "deferred": 7
+  },
+  "built_now_by_proof_level": {
+    "L6": 38,
+    "L5": 15,
+    "L4": 29
+  },
+  "deduped_totals": {
+    "functions": 92,
+    "built_already": 7,
+    "design_diff": 4,
+    "out_of_scope": 1,
+    "built_now": 74,
+    "deferred": 6,
+    "merged_within_list": 9,
+    "repeats_of_t1_t2_items": 5
+  },
+  "deduped_external_repeats": [
+    {
+      "id": "D-comp-team-detail.01",
+      "duplicate_of": "D-comp-detail.34",
+      "status": "built"
+    },
+    {
+      "id": "D-comp-team-detail.05",
+      "duplicate_of": "D-comp-detail.29",
+      "status": "built_now"
+    },
+    {
+      "id": "D-comp-team-detail.07",
+      "duplicate_of": "D-comp-detail.34",
+      "status": "built"
+    },
+    {
+      "id": "D-comp-join.04",
+      "duplicate_of": "D-comp-detail.37",
+      "status": "built"
+    },
+    {
+      "id": "D-dupr-activity-manager.07",
+      "duplicate_of": "D-comp-detail.10",
+      "status": "out_of_scope"
+    }
+  ],
+  "removed_by_verification": {
+    "stale_t3_gaps": 106,
+    "already_built": 11,
+    "design_diff": 4,
+    "other_lane": 2,
+    "real_gaps": 89
+  },
+  "items": [
+    {
+      "id": "D-comp-create.08",
+      "triage_status": "PARTIAL",
+      "screen": "Create / update competition wizard",
+      "text": "Timeline ordering enforced (open ≤ early bird ≤ deadline ≤ start)",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "engine CompetitionService.assertTimeline (create; update when a date changes) + wizard pickers clamped (When min/max) and order check before Next step. probe D-comp-create.08.refuse PASS; probe D-comp-create.08.update PASS",
+      "reuse": "EXTENDED create/update (social-engine dca07429b3..07e8ee2baf)"
+    },
+    {
+      "id": "D-comp-create.13",
+      "triage_status": "MISSING",
+      "screen": "Create / update competition wizard",
+      "text": "Free-agent fee amounts (feeFreeAgentAmount, feeFreeAgentEarlyBirdAmount)",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "competition.feeFreeAgentAmount / feeFreeAgentEarlyBirdAmount (migration comp-t3-v1), wizard fee fields, overview \"Free agent fee\". probe D-comp-create.13.stored PASS",
+      "reuse": "EXTENDED competitionParamProps"
+    },
+    {
+      "id": "D-comp-create.18",
+      "triage_status": "MISSING",
+      "screen": "Create / update competition wizard",
+      "text": "Account restricted: \"You can't create competitions right now. Contact support…\"",
+      "status": "deferred",
+      "proof_level": "L2",
+      "evidence": "MISSING: no per-host \"cannot create competitions\" restriction. Deferred: who gets restricted is an operator policy decision; the native path is a Misskey role policy (RoleService) — not invented here.",
+      "reuse": "NEW would be needed — searched Misskey roles/policies (core/RoleService.ts) and hkpl admin tooling"
+    },
+    {
+      "id": "D-match-format.02",
+      "triage_status": "PARTIAL",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Type chips Single / Double / Triple (double & triple round robin / pool play; double elimination)",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "roundRobinCycles 1..3 (Single / Double / Triple round robin); each later cycle repeats the schedule with sides swapped after the last round; wizard chips; double elimination already existed (competitionFormats doubleElim). probe D-match-format.02.stored PASS; probe D-match-format.02 PASS; probe D-match-format.02.ui PASS",
+      "reuse": "REUSED pattern hkpl lib/schedule-generator.js:56-59 (doubleRoundRobin) on the engine generator MeetMatchGenerator"
+    },
+    {
+      "id": "D-match-format.03",
+      "triage_status": "MISSING",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Summary sentence \"Each team will play the other teams once/twice/three times …\"",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "formatSentence (\"Each team will play the other teams once/twice/three times …\") on the Matches › Format pane and the wizard. probe D-match-format.03 PASS",
+      "reuse": "NEW (copy) in lib/competitions.ts"
+    },
+    {
+      "id": "D-match-format.04",
+      "triage_status": "MISSING",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Number boxes: rounds, matches per team/player, matches per round, total matches (preview numbers)",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "formatNumbers + FormatSummary number boxes (rounds, matches per team, per round, total) for n entries. probe D-match-format.04 PASS",
+      "reuse": "NEW components/CompetitionT3.tsx (searched hkpl schedule-generator: it lays fixtures, it does not preview counts)"
+    },
+    {
+      "id": "D-match-format.06",
+      "triage_status": "MISSING",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Stage names for pool / playoffs / consolation stages",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "competition.stageNames {regular, playoff, consolation}; wizard inputs; used on match groups, match page title, scoresheets. probe D-match-format.06.stored PASS",
+      "reuse": "EXTENDED competition columns"
+    },
+    {
+      "id": "D-match-format.08",
+      "triage_status": "MISSING",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Consolation bracket (for teams that do not advance)",
+      "status": "deferred",
+      "proof_level": "L2",
+      "evidence": "MISSING: consolation bracket for non-advancing teams. Deferred: a second brackets-manager stage + seeding + UI (M-L); hkpl has no side draws either (routes/tournament.js:21 \"out of scope: Side draws (consolation bracket)\"). A third-place match exists (thirdPlaceMatch).",
+      "reuse": "searched hkpl routes/tournament.js, lib/playoff-seeding; engine CompetitionBracket (brackets-manager consolationFinal = 3rd place only)"
+    },
+    {
+      "id": "D-match-format.09",
+      "triage_status": "MISSING",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Forfeit winning score",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "wizard Forfeit winning score stepper; the engine field + standings use existed (CompetitionStandings.ts:79-87 effectiveSets). probe D-match-format.09 PASS",
+      "reuse": "REUSED engine field forfeitWinScore"
+    },
+    {
+      "id": "D-match-format.11",
+      "triage_status": "PARTIAL",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Point values steppers: standard win / loss, tiebreaker win / loss, draw",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "wizard point-value steppers (standard win/loss, tiebreaker win/loss, draw); engine fields existed. probe D-match-format.11 PASS",
+      "reuse": "REUSED engine fields"
+    },
+    {
+      "id": "D-match-format.13",
+      "triage_status": "PARTIAL",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Score sets configuration (Set name, Tiebreaker flag, add/delete) as defaults for every match",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "per-game Tiebreaker flag + name in the typed ScoreSheet (competitions), stored on the match (scores[].type/name); count per match = setsPerMatch. Chose per-match set names over Reclub's competition-wide default names because a tiebreaker game is decided when it is played (G15.0). probe D-comp-detail.46.ref-official PASS",
+      "reuse": "EXTENDED components/ScoreSheet.tsx (optional typed mode; the meet page unchanged)"
+    },
+    {
+      "id": "D-match-format.14",
+      "triage_status": "MISSING",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "MATCH RULES free text",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "competition.matchRules; wizard field; overview card, every match page, the scoresheets. probe D-match-format.14.stored PASS; probe D-match-format.14.ui PASS",
+      "reuse": "EXTENDED competition columns"
+    },
+    {
+      "id": "D-match-format.15",
+      "triage_status": "MISSING",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Preview sheet (\"Review\": teams, pools, rounds, total matches…) + Back to editing / Confirm",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "wizard Review sheet (FormatSummary + Back to editing / Confirm) before Save as draft / Update; publish goes through PublishReview. Deployed (both webroots carry the bundle); not walked by the UI probe.",
+      "reuse": "NEW sheet reusing FormatSummary"
+    },
+    {
+      "id": "D-match-format.16",
+      "triage_status": "PARTIAL",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Reset warning \"These changes will reset all / playoff / consolation matches and scores.\"",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "wizard warns on a drawn competition that format changes need a reset (the engine refuses structural changes: draw_exists). probe D-match-format.16 PASS; probe family.header-safe PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-match-format.17",
+      "triage_status": "MISSING",
+      "screen": "Match format setup (Setup / Edit match format)",
+      "text": "Learn more about competition formats / point calculation (FAQ links), \"?\" score-values popup",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "\"How points work\" → Score values explanation (ask.modal) on the format pane, standings legend and wizard. probe D-match-format.17 PASS",
+      "reuse": "REUSED components/Ask"
+    },
+    {
+      "id": "D-comp-detail.02",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Deep links to a tab / subtab (?tab=matches, participants_pending, …)",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "tab deep link existed (tournament/index.tsx params.tab); now ?pane= (entries) and ?filter= (matches) too. probe D-comp-detail.02 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.03",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Header: name, lock when private, status line (Draft / opening in N days / hours / open / closed / started / ended / cancelled), Manager badge",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "header status \"Registration opens in N days / hours\" while open with a future registrationOpenAt (Manager badge, lock existed).",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.08",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Kebab: Delete competition (\"Are you sure you want to delete this competition?\")",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "competitions/delete (owner; refused with people in it — cancel first; refused once started). Chose \"cancel first when people joined\" over Reclub's unconditional delete so every player is told (G15.0). probe D-comp-detail.08 PASS; probe D-comp-detail.08.refuse-people PASS; probe D-comp-detail.08.refuse-owner PASS",
+      "reuse": "NEW door (Misskey has no competition); chat room removed with native ChatService.deleteRoom"
+    },
+    {
+      "id": "D-comp-detail.09",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Kebab: Download Scoresheets (printable score sheets export)",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "Download scoresheets → a printable sheet per open match (print window). probe D-comp-detail.09 PASS",
+      "reuse": "NEW lib/competition-print.ts — searched hkpl scoresheet.html (captains' interactive entry for league fixtures) and hkpl lib/pdf.js (server-side, hkpl documents): neither reads an engine competition"
+    },
+    {
+      "id": "D-comp-detail.11",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Kebab: Request support",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "kebab \"Request support\" opens the one feedback panel (the report carries the page address).",
+      "reuse": "REUSED lib/discover-w2d.ts openFeedback + components/FeedbackWidget"
+    },
+    {
+      "id": "D-comp-detail.15",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Tabs Details / Registration / Matches / Results / Discussion with review dots (pending entries, unfinalized matches)",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "review dots on the Entries (pending entries) and Matches (scores waiting to be finalized) tabs for the host.",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.16",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Details: cover photo carousel; admin Add (primary) cover photo, replace, delete",
+      "status": "design_diff",
+      "proof_level": "L2",
+      "evidence": "DESIGN-DIFF: the competition header uses GripBat's generated art (meetArt), exactly as a meet does (G15.12 GripBat design); photos of a competition live in its Media pane (D-comp-detail.60, built now).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-detail.17",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Details: club tag (tap → club)",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "overview \"Club\" row (tap → the club page) for a club competition; the club name read through native channels/show so the club's own privacy decides. Deployed; the UI probe fixture had no club.",
+      "reuse": "REUSED native channels/show"
+    },
+    {
+      "id": "D-comp-detail.19",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Details: venue row with see map; See venue details / Open in Maps / Copy address; admin Edit address",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "overview See venue details (venueId → venue page) + Copy address; see map existed.",
+      "reuse": "REUSED pages/venue"
+    },
+    {
+      "id": "D-comp-detail.22",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Details: notes card with Copy notes / Edit notes",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "Notes card \"Copy\". probe D-comp-detail.22 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.26",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Registration: sub-tabs Staff / Your team / Confirmed / Pending / Free agents / Spectator / Withdrawn / Invited with counts",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: Confirmed / Pending / Withdrawn / Free agents panes (tournament/index.tsx TabStrip entryPane), Staff (CompetitionParts StaffCard), Your team (pages/tournament-team), Invited (invitedUsers on rows + team page Cancel). The Spectators pane is counted once under D-comp-join.05 (built now).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-detail.27",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Registration sort: seeds / alphabetical / teams / gender / unpaid",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "Entries sort: Seeds / A–Z / Unpaid first.",
+      "reuse": "REUSED TabStrip"
+    },
+    {
+      "id": "D-comp-detail.28",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Invite box: Reserve (team / player spot) + Invite (Add club member / Add outsider)",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: Invite box — Reserve (search a player → added at once, or reserve a named spot) + Invite friends (share link) (tournament/index.tsx entries tab; engine hostAddEntry CompetitionService).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-detail.32",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Seeds modal: Randomize seeds, Show seeds to everyone",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "Randomize seeds + \"Show seeds to everyone\" switch (engine showSeeds field existed).",
+      "reuse": "REUSED competitions/update + entries/update"
+    },
+    {
+      "id": "D-comp-detail.33",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Entry card: avatar, name, member avatars, Paid / Unpaid / Pending / Forfeited tags, \"only n spot(s) left\" / \"Need n player(s)\"",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: \"Need {n} more\" / \"Open for {n} more\" on rows (lib/competitions.ts openSlotsLabel) and the footer \"{n} spots left\"; Paid/Unpaid/Forfeited tags existed.",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-detail.36",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Pending: Approve; Hide roster toggle; Ineligible tag",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "eligibility: automatic (level cap / gender / age group from the meets' levels) + the host's call per member; Ineligible tag (reasons to managers and the team only); Hide roster view toggle. probe D-comp-detail.36.auto PASS; probe D-comp-detail.36.private PASS",
+      "reuse": "REUSED rule hkpl lib/eligibility-auto.js (rating cap, play-up allowed, NR flagged) + engine MeetLevelService.gateVerdict gates; EXTENDED competition_entry.eligibility"
+    },
+    {
+      "id": "D-comp-detail.38",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Spectators pane: Auto approve switch, Requested / Approved lists, invite spectator to team",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Spectators pane (auto-approved), host Remove; spectators hear announcements. Chose always-auto-approve over Reclub's switch because a spectator holds no seat and sees only what the competition's visibility already allows (G15.0). probe D-comp-join.05 PASS; probe D-comp-detail.38.announce PASS; probe D-comp-detail.38 PASS",
+      "reuse": "EXTENDED meet spectator model (MeetParticipant.ts:12) onto the competition entry row"
+    },
+    {
+      "id": "D-comp-detail.39",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Invited pane: invited players, cancel invitation",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: invited partners are listed (\"Waiting for {names}\") and cancellable on the team page (tournament-team/index.tsx invitedUsers + setPartners cancel).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-detail.41",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Your team pane: Confirmed/Pending/Withdrawn, team members, requested/invited rows, spots remaining + Recruit now, \"You have not joined any teams yet\" Find a team / Create a new team",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "the \"Your team\" card now always shows for an entrant (was only while an invite/request waited); the team page existed.",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.42",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Ineligible note \"You are marked as ineligible… contact admin\"",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "a member marked ineligible is notified (\"Marked ineligible\") and sees the note on the team page. probe D-comp-detail.42 PASS",
+      "reuse": "REUSED NotificationService"
+    },
+    {
+      "id": "D-comp-detail.43",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Participant settings sheet: roles Admin / Referee / Captain / Member, Set staff, Paid, Eligible, positions, set pool, Approve / Decline / Remove, Forfeit / Unforfeit, Move to spectator / free agent, Swap from community",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "participant settings: Unforfeit (reopens the forfeited matches), eligibility per member, assign a player to a singles reserved spot; roles = staff card (existed), paid/pool/approve/decline/remove/forfeit existed. Residual not built: move an entry to spectator / free agent by the host. probe D-comp-detail.43.eligible PASS; probe D-comp-detail.43.refuse PASS",
+      "reuse": "EXTENDED entries/update"
+    },
+    {
+      "id": "D-comp-detail.44",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Reserved-spot editor: name, gender, age group, skill level",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "reserved spot: rename + (singles) assign a player. Gender / age / skill of a placeholder is a DESIGN-DIFF: the player assigned brings their own.",
+      "reuse": "REUSED entries/update"
+    },
+    {
+      "id": "D-comp-detail.45",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Matches: Format pane (reveal draw switch, format summary, Change Format, rounds / pools / winners per pool, 3rd place, consolation, standings calculation + explain, tiebreaker priority, POINT VALUES, Reset matches)",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "Matches › Format pane (summary, numbers, point values, How points work, Change format → wizard step 2). probe D-comp-detail.45 PASS",
+      "reuse": "NEW FormatSummary"
+    },
+    {
+      "id": "D-comp-detail.46",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Matches list filters All / Your matches / Remaining / Reffing / Completed",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Reffing filter (this match's referee, or all for a competition referee). probe D-comp-detail.63 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.48",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Admin \"Add match\" footers for regular / playoffs / consolation stages",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "host \"Add match\" (round robin / pools) — engine extra-match path existed. probe D-comp-detail.48 PASS; probe D-comp-add-match.01 PASS",
+      "reuse": "REUSED competitions/matches/upsert (no matchId)"
+    },
+    {
+      "id": "D-comp-detail.50",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Empties: \"Your filters have no matches.\", \"Matches are pending setup.\", \"not enough competitors\", pools not assigned + Review teams",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "empties say why: \"Your filters have no matches.\", \"Matches are pending setup.\", not enough competitors, pools not assigned + Review teams.",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.52",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Bracket settings: Automatic / Manual seeding (View / Update) → manage seeds",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Bracket seeding (Automatic / Manual) → Manage seeds. probe D-comp-manage-seeds.02 PASS",
+      "reuse": "EXTENDED competitions/draw (seedOrder)"
+    },
+    {
+      "id": "D-comp-detail.54",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Playoff preview warning \"…not finalized until all pool matches are completed\"; empty bracket + Review teams; Updated stamp",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "provisional playoff preview while pools are played (the engine's own advancing order, autoSeedOrder) + \"not finalized until all pool matches are completed\" + Updated stamp.",
+      "reuse": "REUSED the engine order (CompetitionService.draw)"
+    },
+    {
+      "id": "D-comp-detail.55",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Standings tables per pool with calculation-driven columns (Points, Wins, Loss, Draws, TB Wins/Loss, Win %, H2H, Score Diff, Sets…), N/A, tap → team detail; POINT VALUES legend; empties",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "standings TB W/L and H2H columns; rows open the team page. probe D-comp-detail.55 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.60",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Results: Media pane (photo grid, Add photo, highlights)",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Media pane: competitions/photos/list = the image messages of the competition chat, for the competition's audience; Add photo / delete via native chat doors. probe D-comp-detail.60 PASS; probe D-comp-detail.60.private PASS; probe D-comp-detail.60.ui PASS",
+      "reuse": "REUSED meets/photos/list (modules/meets/endpoints/photos-list.ts) + lib/meet-extras addMeetPhoto/deleteMeetPhoto + blocks/meet-photos.scss"
+    },
+    {
+      "id": "D-comp-detail.61",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Discussion: Forum + General / Team / Captain / Staff chats with archive notes",
+      "status": "deferred",
+      "proof_level": "L2",
+      "evidence": "PARTIAL: the general chat exists (competitions/chat); Team / Captain / Staff chats are not built. Deferred: three more native rooms per competition with membership sync (M) — next family.",
+      "reuse": "would REUSE native Misskey chat rooms (ChatService.createRoom)"
+    },
+    {
+      "id": "D-comp-detail.63",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Footer referee state \"You are the referee…\"",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "referee footer \"You are the referee of {n} upcoming matches.\" probe D-comp-detail.63 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.64",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Footer invited state: Join as a player / Decline",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: invited footer (Accept invitation) + InvitationCard Accept / Decline (tournament/index.tsx footer + CompetitionParts InvitationCard).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-detail.65",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Footer not-joined: Join competition / Join as a spectator; club-only note",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Join as a spectator; club-members-only competitions (membersOnly, the club-tiers member rule) + the footer note. probe D-comp-detail.65 PASS; probe D-comp-detail.65.refuse PASS; probe D-comp-detail.65.pack PASS",
+      "reuse": "REUSED club-tiers.ts memberExistsSql (= ClubService.isMember)"
+    },
+    {
+      "id": "D-comp-detail.66",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Footer spectator / free agent states (Cancel request, Go to forum, Find teams)",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "spectator footer (Stop spectating, Join as a player); free-agent footer existed + Find teams. probe D-comp-detail.66 PASS; probe D-comp-detail.66.leave PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.67",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Footer team invitation / pending / confirmed / withdrawn states (Accept invitation, See your team, Withdraw, Reactivate team / Join again, upcoming matches count)",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "entrant footer counts upcoming matches; team invitations existed; \"Join again\" after a withdrawal = the Join footer (existed). probe D-comp-detail.67 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.68",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Footer waiting-to-start / ended / cancelled",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "waiting-to-start footer (\"Registration is closed. The competition starts {when}.\" / \"Starts {when}\").",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-detail.69",
+      "triage_status": "PARTIAL",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Join modal (single player): Join as a player / Join as a spectator",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "single-player join sheet: Join as a player / Join as a spectator.",
+      "reuse": "REUSED components/Ask sheet"
+    },
+    {
+      "id": "D-comp-detail.70",
+      "triage_status": "MISSING",
+      "screen": "Competition detail hub (tabs / subtabs)",
+      "text": "Ended popup: Congratulations (1st / 2nd / 3rd) or admin \"write a congratulatory note\" + See standings / Post congratulations",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "ended competition: congratulations card for a placed entrant; host \"Post congratulations\" (an announcement to every player).",
+      "reuse": "REUSED competitions/announcements/post"
+    },
+    {
+      "id": "D-comp-team-detail.01",
+      "triage_status": "MISSING",
+      "screen": "Competition team detail",
+      "text": "Team card: avatar (admin/captain change), name, pool + Set pool, status tag, \"This team has ineligible member(s).\"",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: the team page (pages/tournament-team, W1_B4_MATCH_PAGES on). Now also: team avatar, Set pool from the team page, ineligible tags (built now under .03/.05 and D-comp-upsert-team.02).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-team-detail.03",
+      "triage_status": "PARTIAL",
+      "screen": "Competition team detail",
+      "text": "Kebab: Edit team / Join team / Forfeit team / Unforfeit / Reactivate team / Delete team",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "team kebab: Edit team (captain/host), Forfeit / Unforfeit (host); Join team existed (Ask to join). probe D-comp-team-detail.03.ui PASS; probe D-comp-upsert-team.06.browser PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-team-detail.04",
+      "triage_status": "PARTIAL",
+      "screen": "Competition team detail",
+      "text": "Roster grid: members with captain/admin/ref badges, positions, paid, ineligible; requested / invited members with Approve / Cancel; empty slots → Invite friends / Reserve / Assign player / Join team / Add club member",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: roster with captain badge, invited (Cancel), requested (Accept / Decline), Invite a partner to an empty place (tournament-team/index.tsx); ineligible tag added now.",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-team-detail.05",
+      "triage_status": "MISSING",
+      "screen": "Competition team detail",
+      "text": "Member sheet: roles, positions, eligibility, set staff, remove",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "host member menu: remove a member (before the draw), eligibility per member; roles = staff card.",
+      "reuse": "REUSED entries/update"
+    },
+    {
+      "id": "D-comp-team-detail.06",
+      "triage_status": "PARTIAL",
+      "screen": "Competition team detail",
+      "text": "Self options: Edit team / Leave team / Withdraw / Reactivate / Delete team and leave competition",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Leave team (a member; the team stays entered) — the engine used to withdraw the WHOLE team when any member left. probe D-comp-team-detail.06 PASS; probe D-comp-team-detail.06.notify PASS",
+      "reuse": "EXTENDED competitions/withdraw"
+    },
+    {
+      "id": "D-comp-team-detail.07",
+      "triage_status": "MISSING",
+      "screen": "Competition team detail",
+      "text": "Review matches link; pull-to-refresh",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: the team page lists its matches (Review matches). Pull-to-refresh is a DESIGN-DIFF (pages reload on open).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-confirm-cancel.02",
+      "triage_status": "PARTIAL",
+      "screen": "Confirm cancel competition",
+      "text": "Body \"Cancelling this competition will send a notification to all participants…\"",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "the cancel sheet states the notification; the engine notifies every active entrant, invited partner, spectator and staff member (was: every entry row, withdrawn included). probe D-comp-confirm-cancel.03 PASS",
+      "reuse": "EXTENDED competitions/cancel"
+    },
+    {
+      "id": "D-comp-confirm-cancel.03",
+      "triage_status": "MISSING",
+      "screen": "Confirm cancel competition",
+      "text": "Optional cancellation announcement text",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "optional cancellation message on the one notice + kept as an announcement. probe D-comp-confirm-cancel.03 PASS",
+      "reuse": "EXTENDED competitions/cancel"
+    },
+    {
+      "id": "D-comp-confirm-lock.02",
+      "triage_status": "MISSING",
+      "screen": "Confirm lock registration",
+      "text": "Review participants list (confirmed entries with Paid / Unpaid / Reserved) inside the confirm",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "lock confirm lists the confirmed entries with Paid / Unpaid / Reserved.",
+      "reuse": "REUSED Ask modal"
+    },
+    {
+      "id": "D-comp-confirm-publish.02",
+      "triage_status": "MISSING",
+      "screen": "Confirm publish (guidelines + review)",
+      "text": "Intro \"You're about to publish…\" + push notification to the community for public competitions",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "publish review intro + one push on publish of a public competition: club members (minus members on a break) or the host's followers. probe D-comp-confirm-publish.02 PASS",
+      "reuse": "REUSED MeetExtras promoteAudience 'club' query shape + club-tiers memberExistsSql"
+    },
+    {
+      "id": "D-comp-confirm-publish.03",
+      "triage_status": "MISSING",
+      "screen": "Confirm publish (guidelines + review)",
+      "text": "REVIEW GUIDELINES (9 host guidelines) + I agree checkbox",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "REVIEW GUIDELINES (9 GripBat host guidelines) + I agree switch; Publish disabled until ticked.",
+      "reuse": "NEW copy (GripBat's own guidelines, G15.11-style plain text)"
+    },
+    {
+      "id": "D-comp-confirm-publish.04",
+      "triage_status": "MISSING",
+      "screen": "Confirm publish (guidelines + review)",
+      "text": "REVIEW COMPETITION (details card) + Reviewed checkbox; Publish disabled until both checked",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "REVIEW COMPETITION (details rows) + Reviewed switch.",
+      "reuse": "NEW components/CompetitionT3.tsx PublishReview"
+    },
+    {
+      "id": "D-comp-confirm-reset.02",
+      "triage_status": "PARTIAL",
+      "screen": "Confirm reset competition",
+      "text": "List of consequences: Registration open \"Changes to teams will now be allowed.\" / Matches reset \"All matches will be zero'd…\"",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "reset confirm lists the consequences (registration reopens, matches zeroed, podium removed).",
+      "reuse": "REUSED Ask modal"
+    },
+    {
+      "id": "D-comp-confirm-start.03",
+      "triage_status": "PARTIAL",
+      "screen": "Confirm start competition",
+      "text": "Success modal \"Your competition has started!\" + See matches",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "start success modal \"Your competition has started!\" + See matches (was a toast).",
+      "reuse": "REUSED Ask modal"
+    },
+    {
+      "id": "D-comp-join.04",
+      "triage_status": "MISSING",
+      "screen": "Join competition (team / free agent / spectator)",
+      "text": "Join as a free agent (with notes)",
+      "status": "built",
+      "proof_level": "L5",
+      "evidence": "BUILT: Join as a free agent with notes (competitions/free-agent; tournament/index.tsx join sheet) — re-measured built by the T2 lane.",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-join.05",
+      "triage_status": "MISSING",
+      "screen": "Join competition (team / free agent / spectator)",
+      "text": "Join as a spectator",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "competitions/spectate (join / leave). probe D-comp-join.05 PASS; probe D-comp-join.05.chat PASS; probe D-comp-detail.66.leave PASS",
+      "reuse": "EXTENDED meet spectator model"
+    },
+    {
+      "id": "D-comp-manage-seeds.01",
+      "triage_status": "MISSING",
+      "screen": "Manage seeds (playoffs / consolation seeding)",
+      "text": "Manual seeding switch; \"Seeds cannot be changed after playoff matches have already started.\"",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "manual seeding; \"Seeds cannot be changed after playoff matches have already started.\" probe D-comp-manage-seeds.01.lock PASS; probe D-comp-manage-seeds.01.refuse PASS",
+      "reuse": "EXTENDED competitions/draw"
+    },
+    {
+      "id": "D-comp-manage-seeds.02",
+      "triage_status": "MISSING",
+      "screen": "Manage seeds (playoffs / consolation seeding)",
+      "text": "Seeded list \"#seed · name\", \"#place in pool n\", up/down, Disqualify / Qualify; other-bracket toggle",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "seeded list with up / down, Disqualify / Qualify; a refused order changes nothing. probe D-comp-manage-seeds.02 PASS; probe D-comp-manage-seeds.02.refuse PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-manage-seeds.03",
+      "triage_status": "PARTIAL",
+      "screen": "Manage seeds (playoffs / consolation seeding)",
+      "text": "Update Seeds → re-arranges matches (\"Arranging matches\")",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Update seeds re-arranges the playoff bracket (resetPlayoff + seedOrder). probe D-comp-manage-seeds.03 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-sublocations.01",
+      "triage_status": "MISSING",
+      "screen": "Manage courts (customize court labels)",
+      "text": "Customize Courts: rename labels, add (max 16), remove, Save",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "court labels (max 16) in the wizard; court pickers and match rows use them. probe D-comp-sublocations.01.stored PASS; probe D-comp-sublocations.01 PASS",
+      "reuse": "EXTENDED competition.courtLabels"
+    },
+    {
+      "id": "D-comp-match-manage.03",
+      "triage_status": "MISSING",
+      "screen": "Match manage sheet (schedule / court / referees)",
+      "text": "Referees: pick from Staff / Teams / Players",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "a match's referees picked from staff / other players; the referee scores and finalizes that match. probe D-comp-match-manage.03 PASS; probe D-comp-match-manage.03.refuse PASS; probe D-comp-detail.46.ref-official PASS",
+      "reuse": "EXTENDED competition_match.refereeIds (competition-level refereeIds existed)"
+    },
+    {
+      "id": "D-comp-request-support.01",
+      "triage_status": "MISSING",
+      "screen": "Request support (Recalculate / feedback)",
+      "text": "Recalculate results and matches (\"Recalculating results...\")",
+      "status": "design_diff",
+      "proof_level": "L2",
+      "evidence": "DESIGN-DIFF: nothing to recalculate — standings are computed from the matches on every read (CompetitionService.standings / CompetitionStandings.computeStandings). Request support itself is D-comp-detail.11.",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-add-match.01",
+      "triage_status": "MISSING",
+      "screen": "Add / edit extra competition match",
+      "text": "Create match: name + two entries for a stage; Edit match (user-created)",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Add match (two entries) in the UI; the engine path existed. probe D-comp-add-match.01 PASS",
+      "reuse": "REUSED competitions/matches/upsert"
+    },
+    {
+      "id": "D-comp-add-match.02",
+      "triage_status": "MISSING",
+      "screen": "Add / edit extra competition match",
+      "text": "Invalid state \"You can only create matches during the round robin or group stage…\"",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "knockout formats show \"You can only create matches during the round robin or group stage…\".",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-score-sets.01",
+      "triage_status": "PARTIAL",
+      "screen": "Manage score sets",
+      "text": "Rename sets, mark Tiebreaker, delete (prompt when it has scores), Add score set, Save",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "games renamed + marked Tiebreaker in the typed score sheet; add / delete existed. probe D-comp-detail.46.ref-official PASS",
+      "reuse": "EXTENDED components/ScoreSheet.tsx"
+    },
+    {
+      "id": "D-comp-assign-players.01",
+      "triage_status": "MISSING",
+      "screen": "Assign players to score sets",
+      "text": "Per score set, pick which team members played (captain / admin / ref), Adjust, Clear all assignment, Confirm assignments",
+      "status": "deferred",
+      "proof_level": "L2",
+      "evidence": "MISSING: per-game line-up in team competitions. Deferred: the line-up is exactly what a team match's DUPR payload is built from, and competition→DUPR is another lane's (COMP-DUPR-V1); building it here would fork that payload.",
+      "reuse": "would EXTEND scores[] with player ids"
+    },
+    {
+      "id": "D-comp-award-podium.02",
+      "triage_status": "PARTIAL",
+      "screen": "Podium award editor (1st / 2nd / 3rd / 4th)",
+      "text": "Award name + description (Example: MVP… / Vouchers, Cash…)",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "Edit award (name + description) for podium awards; the engine accepted it already (upsertAward).",
+      "reuse": "REUSED competitions/awards/upsert"
+    },
+    {
+      "id": "D-comp-award-custom.02",
+      "triage_status": "MISSING",
+      "screen": "Custom award editor (add / edit)",
+      "text": "Description field",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "award description field + shown on the award.",
+      "reuse": "REUSED competitions/awards/upsert"
+    },
+    {
+      "id": "D-comp-award-custom.04",
+      "triage_status": "PARTIAL",
+      "screen": "Custom award editor (add / edit)",
+      "text": "Edit / Delete custom award (\"Are you sure you want to delete this award?\")",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "Edit a custom award (delete existed).",
+      "reuse": "REUSED competitions/awards/upsert"
+    },
+    {
+      "id": "D-comp-upsert-team.02",
+      "triage_status": "MISSING",
+      "screen": "Create / edit / reserve a competition team",
+      "text": "Team avatar (\"Add Team Avatar\")",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "team avatar = a drive image of the captain / host; someone else's file refused. probe D-comp-upsert-team.02 PASS; probe D-comp-upsert-team.02.refuse PASS",
+      "reuse": "REUSED Misskey drive (drive/files/create via lib/social uploadPhoto)"
+    },
+    {
+      "id": "D-comp-upsert-team.03",
+      "triage_status": "MISSING",
+      "screen": "Create / edit / reserve a competition team",
+      "text": "Team description",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "team description (entry.notes) edited by the captain; another team's player refused. probe D-comp-upsert-team.06 PASS; probe D-comp-upsert-team.03.refuse PASS",
+      "reuse": "REUSED entry.notes"
+    },
+    {
+      "id": "D-comp-upsert-team.04",
+      "triage_status": "MISSING",
+      "screen": "Create / edit / reserve a competition team",
+      "text": "Warning \"Create a new team will also remove you from {{teamName}}\"",
+      "status": "design_diff",
+      "proof_level": "L2",
+      "evidence": "DESIGN-DIFF: GripBat refuses a second team (already_entered) and never moves a player silently, so the \"will also remove you from {team}\" warning has nothing to warn about; the footer never offers a second team to an entrant.",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-upsert-team.06",
+      "triage_status": "MISSING",
+      "screen": "Create / edit / reserve a competition team",
+      "text": "Edit team afterwards",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Edit team afterwards (competitions/entries/edit), pressed in the browser. probe D-comp-upsert-team.06 PASS; probe D-comp-upsert-team.06.browser PASS",
+      "reuse": "NEW captain door (the host door entries/update existed)"
+    },
+    {
+      "id": "D-comp-availability.01",
+      "triage_status": "MISSING",
+      "screen": "Update match availability (Can go / Maybe / Can't go)",
+      "text": "\"Are you able to attend this match?\" Can go / Maybe / Can't go (self, or staff for a player)",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "Can go / Maybe / Can't go per match (self; host / referee / captain for a player), pressed in the browser. Visible to the match's people only. probe D-comp-availability.01 PASS; probe D-comp-availability.01.refuse PASS; probe D-comp-availability.01.browser PASS",
+      "reuse": "REUSED values of hkpl AVAILABILITY-V1 (prisma schema availability), per match here; EXTENDED competition_match.availability"
+    },
+    {
+      "id": "D-match-share-image.02",
+      "triage_status": "MISSING",
+      "screen": "Match share image",
+      "text": "Share a competition match from its detail kebab",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "Share match from the match kebab / header (ShareSheet: the match link + \"A vs B at …\"). No match-specific share image: the link shares the page (OG card is the app's).",
+      "reuse": "REUSED components/ShareSheet"
+    },
+    {
+      "id": "D-comp-match-detail.01",
+      "triage_status": "MISSING",
+      "screen": "Competition match detail",
+      "text": "Header stage/round title; team header with scores, swap, tap team → team detail",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: the match page (pages/tournament-match; team tap → team page).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-match-detail.02",
+      "triage_status": "PARTIAL",
+      "screen": "Competition match detail",
+      "text": "Kebab: Share match / Manage score sets / Clear scores and stats / Clear all assignment / Edit match / Remove match / Forfeit per team (+ Unforfeit) / Set availability",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "match kebab: Share, Clear scores, Forfeit per side, Unforfeit (reopen), Remove / Unremove; Edit / score sets via the typed sheet; availability. probe D-comp-match-detail.02.remove PASS; probe D-comp-match-detail.02.restore PASS",
+      "reuse": "EXTENDED competitions/matches/upsert"
+    },
+    {
+      "id": "D-comp-match-detail.03",
+      "triage_status": "PARTIAL",
+      "screen": "Competition match detail",
+      "text": "Score sets pane with per-set labels, serve indicator, Edit set / Remove set / Add set",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "per-set labels (name or Game n, TB); serve indicator deferred with D-comp-score.03. probe D-comp-detail.46.ref-official PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-match-detail.04",
+      "triage_status": "MISSING",
+      "screen": "Competition match detail",
+      "text": "Players pane with availability chips",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "players pane with availability chips. probe D-comp-match-detail.04.private PASS; probe D-comp-match-detail.07.ui PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-match-detail.05",
+      "triage_status": "MISSING",
+      "screen": "Competition match detail",
+      "text": "Details: Schedule (change / clear), Court (Add / Change), address (Open in Maps / Copy), Referees (Assign ref), notes (Add / Edit notes), Match rules",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "match details: venue row (maps / copy), the match's referees (Assign), notes Add / Edit, match rules; schedule + court existed. probe D-comp-match-manage.03 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-match-detail.06",
+      "triage_status": "MISSING",
+      "screen": "Competition match detail",
+      "text": "DUPR badge \"Submitted by {{name}}\"",
+      "status": "out_of_scope",
+      "proof_level": "L2",
+      "evidence": "OUT OF THIS LANE: competition DUPR belongs to the COMP-DUPR lane — and it is built there (hkpl-taro-branch 10547d8 COMP-DUPR-APP-V1: the match page shows \"DUPR · Submitted\"). Tournament DUPR stays off production submits by operator decision.",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-match-detail.07",
+      "triage_status": "MISSING",
+      "screen": "Competition match detail",
+      "text": "Own availability Yes / Maybe / No; \"You are reffing\"; reserved slot edit",
+      "status": "built_now",
+      "proof_level": "L6",
+      "evidence": "own availability Yes / Maybe / No; \"You are the referee of this match.\"; reserved slot edit on the hub. probe D-comp-availability.01.browser PASS; probe D-comp-detail.63 PASS",
+      "reuse": "EXTENDED"
+    },
+    {
+      "id": "D-comp-match-detail.08",
+      "triage_status": "PARTIAL",
+      "screen": "Competition match detail",
+      "text": "Footer: Finalize match (enabled when a winner exists) / \"This match has been finalized.\" + Unfinalize / Unremove / Start competition",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "Finalize match (a player's provisional score, as it stands), \"This match has been finalized.\" + Unfinalize for the official scorers.",
+      "reuse": "REUSED competitions/matches/upsert finalize / reopen"
+    },
+    {
+      "id": "D-comp-match-detail.09",
+      "triage_status": "MISSING",
+      "screen": "Competition match detail",
+      "text": "Unavailable match \"This match is no longer available.\"",
+      "status": "built",
+      "proof_level": "L2",
+      "evidence": "BUILT: \"This match is not in the competition.\" (tournament-match/index.tsx empty state).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-score.02",
+      "triage_status": "PARTIAL",
+      "screen": "Scoreboard for a competition set (upsert competition score)",
+      "text": "LIVE pill while in progress",
+      "status": "design_diff",
+      "proof_level": "L2",
+      "evidence": "DESIGN-DIFF: GripBat scores by game, not point by point; an in-progress match carries the \"In progress\" chip (tournament/index.tsx MatchRow). A live point-by-point mode is D-comp-score.03/.04 (deferred).",
+      "reuse": "—"
+    },
+    {
+      "id": "D-comp-score.03",
+      "triage_status": "MISSING",
+      "screen": "Scoreboard for a competition set (upsert competition score)",
+      "text": "Pickleball Serve toggle per team (PBT1S1…PBT2S2 tags)",
+      "status": "deferred",
+      "proof_level": "L2",
+      "evidence": "MISSING: serve indicator. Deferred: belongs to a live point-by-point scoring mode that neither the engine nor hkpl's referee-live has (searched pages/referee-live, hkpl routes).",
+      "reuse": "searched hkpl referee-live / live-score"
+    },
+    {
+      "id": "D-comp-score.04",
+      "triage_status": "MISSING",
+      "screen": "Scoreboard for a competition set (upsert competition score)",
+      "text": "Stopwatch and countdown Timer with duration picker",
+      "status": "deferred",
+      "proof_level": "L2",
+      "evidence": "MISSING: stopwatch / countdown timer. Deferred with the live scoring mode (D-comp-score.03).",
+      "reuse": "searched app + hkpl: no match timer"
+    },
+    {
+      "id": "D-comp-score.06",
+      "triage_status": "PARTIAL",
+      "screen": "Scoreboard for a competition set (upsert competition score)",
+      "text": "Kebab Edit set / Remove set / Clear all assignment / Assign players",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "set kebab: edit (name, TB) and remove set in the typed sheet; Assign players = D-comp-assign-players.01 (deferred).",
+      "reuse": "EXTENDED ScoreSheet"
+    },
+    {
+      "id": "D-score-board.02",
+      "triage_status": "PARTIAL",
+      "screen": "Scoreboard (meet or competition context)",
+      "text": "Score-type sheet Standard ⇄ Tiebreaker, delete score, See stat definitions",
+      "status": "built_now",
+      "proof_level": "L4",
+      "evidence": "score-type Standard ⇄ Tiebreaker per game (typed sheet switch). \"See stat definitions\" not built (no stat panel on competition scoring).",
+      "reuse": "EXTENDED ScoreSheet"
+    },
+    {
+      "id": "D-score-board.03",
+      "triage_status": "MISSING",
+      "screen": "Scoreboard (meet or competition context)",
+      "text": "Stopwatch / timer",
+      "status": "deferred",
+      "proof_level": "L2",
+      "evidence": "duplicate of D-comp-score.04 (stopwatch / timer) — deferred with it.",
+      "reuse": "—"
+    },
+    {
+      "id": "D-match-format-popup.01",
+      "triage_status": "MISSING",
+      "screen": "Competition match-format score values popup",
+      "text": "\"Score values\" popup: Standard win / loss, Tiebreaker win / loss, Draw with descriptions",
+      "status": "built_now",
+      "proof_level": "L5",
+      "evidence": "same explanation as D-match-format.17 (deduped: one function). probe D-match-format.17 PASS",
+      "reuse": "REUSED"
+    },
+    {
+      "id": "D-dupr-activity-manager.07",
+      "triage_status": "MISSING",
+      "screen": "DUPR Manager (activity manager)",
+      "text": "DUPR Manager for a competition",
+      "status": "out_of_scope",
+      "proof_level": "L2",
+      "evidence": "OUT OF THIS LANE: the competition DUPR manager is the COMP-DUPR lane's — built there (10547d8: \"Submit all to DUPR\" card + per-match chips on the hub).",
+      "reuse": "—"
+    }
+  ],
+  "families_closed": [
+    {
+      "name": "spectators",
+      "ids": [
+        "D-comp-join.05",
+        "D-comp-detail.38",
+        "D-comp-detail.65",
+        "D-comp-detail.66",
+        "D-comp-detail.69"
+      ],
+      "found": 5,
+      "fixed": 5
+    },
+    {
+      "name": "eligibility",
+      "ids": [
+        "D-comp-detail.36",
+        "D-comp-detail.42",
+        "D-comp-detail.43",
+        "D-comp-team-detail.05"
+      ],
+      "found": 4,
+      "fixed": 4
+    },
+    {
+      "name": "per-match referees",
+      "ids": [
+        "D-comp-match-manage.03",
+        "D-comp-detail.46",
+        "D-comp-detail.63",
+        "D-comp-match-detail.05"
+      ],
+      "found": 4,
+      "fixed": 4
+    },
+    {
+      "name": "match availability",
+      "ids": [
+        "D-comp-availability.01",
+        "D-comp-match-detail.04",
+        "D-comp-match-detail.07"
+      ],
+      "found": 3,
+      "fixed": 3
+    },
+    {
+      "name": "manual playoff seeding",
+      "ids": [
+        "D-comp-detail.52",
+        "D-comp-manage-seeds.01",
+        "D-comp-manage-seeds.02",
+        "D-comp-manage-seeds.03"
+      ],
+      "found": 4,
+      "fixed": 4
+    },
+    {
+      "name": "format settings + preview",
+      "ids": [
+        "D-match-format.02",
+        "D-match-format.03",
+        "D-match-format.04",
+        "D-match-format.06",
+        "D-match-format.09",
+        "D-match-format.11",
+        "D-match-format.13",
+        "D-match-format.14",
+        "D-match-format.15",
+        "D-match-format.16",
+        "D-match-format.17",
+        "D-match-format-popup.01",
+        "D-comp-create.08",
+        "D-comp-create.13",
+        "D-comp-sublocations.01",
+        "D-comp-detail.45"
+      ],
+      "found": 16,
+      "fixed": 16
+    },
+    {
+      "name": "team editing",
+      "ids": [
+        "D-comp-upsert-team.02",
+        "D-comp-upsert-team.03",
+        "D-comp-upsert-team.06",
+        "D-comp-team-detail.03",
+        "D-comp-team-detail.06"
+      ],
+      "found": 5,
+      "fixed": 5
+    },
+    {
+      "name": "match management + score sets",
+      "ids": [
+        "D-comp-add-match.01",
+        "D-comp-add-match.02",
+        "D-comp-detail.48",
+        "D-comp-match-detail.02",
+        "D-comp-match-detail.03",
+        "D-comp-match-detail.08",
+        "D-comp-score-sets.01",
+        "D-score-board.02",
+        "D-comp-score.06",
+        "D-match-share-image.02"
+      ],
+      "found": 10,
+      "fixed": 10
+    },
+    {
+      "name": "lifecycle confirms + delete",
+      "ids": [
+        "D-comp-confirm-cancel.02",
+        "D-comp-confirm-cancel.03",
+        "D-comp-confirm-lock.02",
+        "D-comp-confirm-publish.02",
+        "D-comp-confirm-publish.03",
+        "D-comp-confirm-publish.04",
+        "D-comp-confirm-reset.02",
+        "D-comp-confirm-start.03",
+        "D-comp-detail.08"
+      ],
+      "found": 9,
+      "fixed": 9
+    },
+    {
+      "name": "hub detail",
+      "ids": [
+        "D-comp-detail.02",
+        "D-comp-detail.03",
+        "D-comp-detail.09",
+        "D-comp-detail.11",
+        "D-comp-detail.15",
+        "D-comp-detail.17",
+        "D-comp-detail.19",
+        "D-comp-detail.22",
+        "D-comp-detail.27",
+        "D-comp-detail.32",
+        "D-comp-detail.41",
+        "D-comp-detail.44",
+        "D-comp-detail.50",
+        "D-comp-detail.54",
+        "D-comp-detail.55",
+        "D-comp-detail.60",
+        "D-comp-detail.67",
+        "D-comp-detail.68",
+        "D-comp-detail.70"
+      ],
+      "found": 19,
+      "fixed": 19
+    },
+    {
+      "name": "awards",
+      "ids": [
+        "D-comp-award-podium.02",
+        "D-comp-award-custom.02",
+        "D-comp-award-custom.04"
+      ],
+      "found": 3,
+      "fixed": 3
+    },
+    {
+      "name": "FAMILY (engine-wide): refusals with a non-Latin-1 message answered 500",
+      "ids": [
+        "found by D-comp-detail.08.refuse-people"
+      ],
+      "found": 16,
+      "fixed": 16,
+      "note": "ApiCallService copied err.message into WWW-Authenticate; Node refused the header (ERR_INVALID_CHAR). Fixed once at the root (headerSafe); 16 throw sites (14 competitions, 2 clubs). Re-measure: grep -rnP \"(this\\.err\\()[^;]*[^\\x00-\\x7F]\" packages/backend/src/modules | wc -l, then call any of them — probe family.header-safe."
+    }
+  ],
+  "deferred": [
+    {
+      "id": "D-comp-create.18",
+      "reason": "MISSING: no per-host \"cannot create competitions\" restriction. Deferred: who gets restricted is an operator policy decision; the native path is a Misskey role policy (RoleService) — not invented here."
+    },
+    {
+      "id": "D-match-format.08",
+      "reason": "MISSING: consolation bracket for non-advancing teams. Deferred: a second brackets-manager stage + seeding + UI (M-L); hkpl has no side draws either (routes/tournament.js:21 \"out of scope: Side draws (consolation bracket)\"). A third-place match exists (thirdPlaceMatch)."
+    },
+    {
+      "id": "D-comp-detail.61",
+      "reason": "PARTIAL: the general chat exists (competitions/chat); Team / Captain / Staff chats are not built. Deferred: three more native rooms per competition with membership sync (M) — next family."
+    },
+    {
+      "id": "D-comp-assign-players.01",
+      "reason": "MISSING: per-game line-up in team competitions. Deferred: the line-up is exactly what a team match's DUPR payload is built from, and competition→DUPR is another lane's (COMP-DUPR-V1); building it here would fork that payload."
+    },
+    {
+      "id": "D-comp-score.03",
+      "reason": "MISSING: serve indicator. Deferred: belongs to a live point-by-point scoring mode that neither the engine nor hkpl's referee-live has (searched pages/referee-live, hkpl routes)."
+    },
+    {
+      "id": "D-comp-score.04",
+      "reason": "MISSING: stopwatch / countdown timer. Deferred with the live scoring mode (D-comp-score.03)."
+    },
+    {
+      "id": "D-score-board.03",
+      "reason": "duplicate of D-comp-score.04 (stopwatch / timer) — deferred with it."
+    }
+  ],
+  "product_choices_G15": [
+    "Delete: chose \"cancel first when people joined\" over Reclub's unconditional delete — every player is told (cancel notifies); a finished competition keeps its podium on profiles and is never deleted.",
+    "Spectators: chose always auto-approved over Reclub's approve switch — a spectator holds no seat, and a private competition still needs its link.",
+    "Free agents without a team become spectators at the start (Reclub's own copy \"Free Agents will be moved to Spectators when competition starts\") instead of being withdrawn.",
+    "Eligibility: chose hkpl's league rule (the level cap is the gate, playing up below the minimum is allowed, an unrated player is flagged when there is a cap) over a strict min–max band; the host's call always wins; WHY is shown to the managers and the team only.",
+    "Availability is visible to the match's people (players, referees, managers) only, not to every reader.",
+    "Remove match = set aside (cancelled, restorable, out of the standings) rather than a hard delete; bracket matches are never removed.",
+    "Score sets: per-match names + Tiebreaker flag instead of competition-wide default set names.",
+    "Leave team: a non-captain member leaves the TEAM (the team stays entered with an open place) — the engine used to withdraw the whole team when any member left."
+  ],
+  "evidence": [
+    "engine probe probes/t3-competitions.probe.cjs → t3-competitions.probe.verdict.json: 52/52 pass (UAT, real SSO, API + se_sbx read-back, refusals)",
+    "UI probe probes/t3-competitions-ui.probe.cjs → t3-competitions-ui.probe.verdict.json: 29/29 pass (headless Chrome on the deployed app; availability + edit team pressed in the browser and read back from se_sbx; 繁 render)",
+    "engine commits dca07429b3 (batch + migration 1789097500000-comp-t3-v1), 5c20ac8544, d8b6f911c8, 07e8ee2baf (header family fix); web-uat runs revision 07e8ee2baf (image label org.opencontainers.image.revision) — L4",
+    "migration rehearsed on pg_dump copies of se_sbx and social: up OK, re-up no-op, down restores, up again; existing rows read the defaults (4/4, 11/11, 8/8 on se_sbx)",
+    "engine tsc: 10 errors = HEAD baseline 10 at the time (none in competitions); planted fault in spectate.ts → 11",
+    "app commit hkpl-taro-branch 51cb1e5: tsc 0 (planted fault → 1), ui-guard OK, class-owner OK, inner-component OK, control-guard PASS, i18n-coverage OK (208 EN/繁/简 rows); tools/deploy-boyau.sh published both webroots; both bundles carry competitions/spectate + competitions/photos/list",
+    "marker trap recorded: a grep marker ('manualOrder') matched production's unrelated MetaEntityService field — ship gating moved to the image revision label",
+    "G13: fixtures '[probe] T3 …' cancelled + deleted by the probes' finally; no '[probe] T3' competition left on se_sbx"
+  ]
+}

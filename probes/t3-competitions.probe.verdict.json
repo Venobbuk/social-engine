@@ -1,0 +1,375 @@
+{
+  "id": "t3-competitions.probe",
+  "at": "2026-09-23T06:41:21.213Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "fails": 0,
+  "checks": [
+    {
+      "item": "setup.signin",
+      "what": "seven personas signed in through the real UAT SSO",
+      "pass": true,
+      "evidence": "{\"ken\":true,\"amy\":true,\"mei\":true,\"tom\":true,\"tester1\":true,\"tester2\":true,\"admin\":true}"
+    },
+    {
+      "item": "D-comp-create.08.refuse",
+      "what": "registration deadline after the start is refused (COMPETITION_BAD_TIMELINE)",
+      "pass": true,
+      "evidence": "{\"status\":400,\"code\":\"COMPETITION_BAD_TIMELINE\",\"msg\":\"Start cannot be before registration deadline.\"}"
+    },
+    {
+      "item": "setup.create",
+      "what": "host creates a [probe] public doubles round robin with the new fields",
+      "pass": true,
+      "evidence": "{\"status\":200,\"code\":null}"
+    },
+    {
+      "item": "D-match-format.02.stored",
+      "what": "double round robin stored (roundRobinCycles=2, se_sbx row)",
+      "pass": true,
+      "evidence": "{\"row0\":\"2\"}"
+    },
+    {
+      "item": "D-comp-sublocations.01.stored",
+      "what": "court labels stored trimmed",
+      "pass": true,
+      "evidence": "{\"labels\":\"Centre,Court B\"}"
+    },
+    {
+      "item": "D-match-format.06.stored",
+      "what": "stage names stored",
+      "pass": true,
+      "evidence": "{\"stageNames\":\"{\\\"playoff\\\": \\\"Knockouts\\\", \\\"regular\\\": \\\"Group stage\\\"}\"}"
+    },
+    {
+      "item": "D-match-format.14.stored",
+      "what": "match rules stored",
+      "pass": true,
+      "evidence": "{\"matchRules\":\"Rally to 11, win by 2.\"}"
+    },
+    {
+      "item": "D-comp-create.13.stored",
+      "what": "free-agent fee + early bird stored",
+      "pass": true,
+      "evidence": "{\"fa\":\"100\",\"faEb\":\"80\"}"
+    },
+    {
+      "item": "t3.pack",
+      "what": "competitions/show carries the batch (t3 marker + fields) to a stranger",
+      "pass": true,
+      "evidence": "{\"t3\":1,\"cycles\":2,\"labels\":[\"Centre\",\"Court B\"]}"
+    },
+    {
+      "item": "D-comp-create.08.update",
+      "what": "an update that puts registration open after the start is refused",
+      "pass": true,
+      "evidence": "{\"status\":400,\"code\":\"COMPETITION_BAD_TIMELINE\"}"
+    },
+    {
+      "item": "D-comp-confirm-publish.02",
+      "what": "publishing a public competition notified the host's follower (amy: \"New competition\")",
+      "pass": true,
+      "evidence": "{\"follow\":\"made\",\"found\":true}"
+    },
+    {
+      "item": "D-comp-join.05",
+      "what": "join as a spectator: mySpectator set, spectatorsCount 1, a spectator row holding no seat",
+      "pass": true,
+      "evidence": "{\"status\":200,\"mySpectator\":{\"id\":\"arhatr5aoslc00nz\"},\"count\":1,\"spotsLeft\":8}"
+    },
+    {
+      "item": "D-comp-join.05.chat",
+      "what": "a spectator opens the general chat; before spectating it was refused",
+      "pass": true,
+      "evidence": "{\"before\":\"COMPETITION_FORBIDDEN\",\"after\":200}"
+    },
+    {
+      "item": "D-comp-detail.38.announce",
+      "what": "an announcement reaches the spectator",
+      "pass": true,
+      "evidence": "{\"status\":200}"
+    },
+    {
+      "item": "D-comp-detail.66.leave",
+      "what": "the spectator cancels (leave) — mySpectator null, count 0",
+      "pass": true,
+      "evidence": "{\"mySpectator\":null,\"count\":0}"
+    },
+    {
+      "item": "D-comp-team-detail.06",
+      "what": "a non-captain member leaves the TEAM: the team stays confirmed, mei is out (se_sbx row)",
+      "pass": true,
+      "evidence": "{\"status\":200,\"row\":[\"confirmed\",\"argp1hagj7so0001\"]}"
+    },
+    {
+      "item": "D-comp-team-detail.06.notify",
+      "what": "the captain heard it (\"Player left your team\")",
+      "pass": true,
+      "evidence": "{}"
+    },
+    {
+      "item": "D-comp-upsert-team.06",
+      "what": "the captain renames the team + writes its description (se_sbx row)",
+      "pass": true,
+      "evidence": "{\"status\":200,\"row\":[\"[probe] Team Alpha\",\"We play fast.\"]}"
+    },
+    {
+      "item": "D-comp-upsert-team.02",
+      "what": "the team avatar is the captain's uploaded image; packEntry carries avatarUrl",
+      "pass": true,
+      "evidence": "{\"avatarUrl\":true,\"fileId\":\"arhatth5oslc00pr\"}"
+    },
+    {
+      "item": "D-comp-upsert-team.02.refuse",
+      "what": "someone else's drive file is refused (NO_SUCH_FILE)",
+      "pass": true,
+      "evidence": "{\"code\":\"NO_SUCH_FILE\"}"
+    },
+    {
+      "item": "D-comp-upsert-team.03.refuse",
+      "what": "a player of another team cannot edit it (COMPETITION_FORBIDDEN)",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_FORBIDDEN\"}"
+    },
+    {
+      "item": "D-comp-detail.36.auto",
+      "what": "with a 2.0 cap the automatic rule flags members (no rating / above the cap) — reasons to the host",
+      "pass": true,
+      "evidence": "{\"ineligible\":[\"argp1hagj7so0001\",\"argp1io2j7so0006\"],\"reasons\":{\"argp1hagj7so0001\":\"no_rating\",\"argp1io2j7so0006\":\"above_max\"}}"
+    },
+    {
+      "item": "D-comp-detail.36.private",
+      "what": "a stranger sees the tag but not the reasons",
+      "pass": true,
+      "evidence": "{\"strangerReasons\":{}}"
+    },
+    {
+      "item": "D-comp-detail.43.eligible",
+      "what": "the host marks the member eligible: the override is stored and the tag clears",
+      "pass": true,
+      "evidence": "{\"status\":200,\"row\":\"{\\\"argp1hagj7so0001\\\": true}\"}"
+    },
+    {
+      "item": "D-comp-detail.42",
+      "what": "marked ineligible: tagged, and the player is told (\"Marked ineligible\")",
+      "pass": true,
+      "evidence": "{\"tagged\":true}"
+    },
+    {
+      "item": "D-comp-detail.43.refuse",
+      "what": "a player cannot set eligibility (COMPETITION_NOT_HOST)",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_NOT_HOST\"}"
+    },
+    {
+      "item": "D-match-format.02",
+      "what": "double round robin: 2 teams meet twice, sides swapped, round 2 after round 1",
+      "pass": true,
+      "evidence": "{\"n\":2,\"rounds\":[1,2],\"sides\":[[\"B\",\"A\"],[\"A\",\"B\"]]}"
+    },
+    {
+      "item": "family.header-safe",
+      "what": "a refusal with a non-ASCII message (\"The draw is generated — reset…\") is a 400 with its code, not a 500",
+      "pass": true,
+      "evidence": "{\"status\":400,\"code\":\"COMPETITION_DRAW_EXISTS\"}"
+    },
+    {
+      "item": "D-comp-match-manage.03",
+      "what": "the host assigns a referee to one match (se_sbx row) and it is packed (isMyRef for them)",
+      "pass": true,
+      "evidence": "{\"status\":200,\"row\":\"ar89kz29mnr7001o\"}"
+    },
+    {
+      "item": "D-comp-match-manage.03.refuse",
+      "what": "a player of the match cannot assign referees (COMPETITION_NOT_HOST)",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_NOT_HOST\"}"
+    },
+    {
+      "item": "D-comp-detail.63",
+      "what": "the match referee reads isMyRef and canScore on that match only",
+      "pass": true,
+      "evidence": "{\"isMyRef\":true,\"canScore\":true}"
+    },
+    {
+      "item": "D-comp-detail.46.ref-official",
+      "what": "the match referee's score is official (completed) and keeps set names + the tiebreaker type",
+      "pass": true,
+      "evidence": "{\"status\":200,\"row\":[\"completed\",\"[{\\\"t1\\\": 11, \\\"t2\\\": 7, \\\"name\\\": \\\"Opener\\\", \\\"type\\\": \\\"standard\\\"}, {\\\"t1\\\": 9, \\\"t2\\\": 11, \\\"type\\\": \\\"standard\\\"}, {\\\"t1\\\": 5, \\\"t2\\\": 3, \\\"name\\\": \\\"Decider\\\", \\\"type\\\": \\\"tiebreaker\\\"}]\"]}"
+    },
+    {
+      "item": "D-comp-availability.01",
+      "what": "a player sets their own availability; the host sets it for a player (se_sbx row)",
+      "pass": true,
+      "evidence": "{\"row\":\"{\\\"argp1io2j7so0006\\\": \\\"maybe\\\", \\\"argp1j9lj7so0009\\\": \\\"no\\\"}\"}"
+    },
+    {
+      "item": "D-comp-availability.01.refuse",
+      "what": "a player cannot set another team's player (COMPETITION_FORBIDDEN)",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_FORBIDDEN\"}"
+    },
+    {
+      "item": "D-comp-match-detail.04.private",
+      "what": "a stranger reads no availability; the players pane is for the match's people",
+      "pass": true,
+      "evidence": "{\"strangerAvail\":{}}"
+    },
+    {
+      "item": "D-comp-add-match.01",
+      "what": "the host adds an extra match (isExtra)",
+      "pass": true,
+      "evidence": "{\"status\":200}"
+    },
+    {
+      "item": "D-comp-match-detail.02.remove",
+      "what": "Remove match sets it aside (cancelled, se_sbx); a player asking is refused",
+      "pass": true,
+      "evidence": "{\"row\":\"cancelled\",\"player\":\"COMPETITION_NOT_HOST\"}"
+    },
+    {
+      "item": "D-comp-match-detail.02.restore",
+      "what": "Unremove puts it back (pending)",
+      "pass": true,
+      "evidence": "{\"status\":200}"
+    },
+    {
+      "item": "D-comp-detail.60",
+      "what": "a photo posted in the competition chat is on its Media pane, readable anonymously for a public competition",
+      "pass": true,
+      "evidence": "{\"post\":200,\"n\":1}"
+    },
+    {
+      "item": "D-comp-confirm-cancel.03",
+      "what": "the cancellation message rides on the notice and stays as an announcement",
+      "pass": true,
+      "evidence": "{\"status\":200}"
+    },
+    {
+      "item": "D-comp-detail.60.private",
+      "what": "a private competition's photos are refused to a stranger (COMPETITION_PRIVATE)",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_PRIVATE\"}"
+    },
+    {
+      "item": "D-comp-manage-seeds.02",
+      "what": "the host's seed order draws the bracket (its own first-round pairs, not the sign-up order's) and marks manual seeding",
+      "pass": true,
+      "evidence": "{\"status\":200,\"layout\":\"inner_outer\",\"wasDefault\":false}"
+    },
+    {
+      "item": "D-comp-manage-seeds.03",
+      "what": "Update seeds re-arranges the bracket; a disqualified entry (admin) is out",
+      "pass": true,
+      "evidence": "{\"status\":200,\"admin_in\":false}"
+    },
+    {
+      "item": "D-comp-manage-seeds.02.refuse",
+      "what": "a seed that is not a confirmed entry of THIS competition is refused (NO_SUCH_ENTRY) and the refused order does not cost the bracket",
+      "pass": true,
+      "evidence": "{\"status\":400,\"code\":\"NO_SUCH_ENTRY\",\"playoffMatchesAfter\":3}"
+    },
+    {
+      "item": "D-comp-manage-seeds.01.refuse",
+      "what": "a player cannot reseed (COMPETITION_NOT_HOST)",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_NOT_HOST\"}"
+    },
+    {
+      "item": "D-comp-manage-seeds.01.lock",
+      "what": "\"Seeds cannot be changed after playoff matches have already started.\"",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_BRACKET_LOCKED\"}"
+    },
+    {
+      "item": "D-comp-detail.08.refuse-people",
+      "what": "a competition with people in it cannot be deleted (cancel first)",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_CANNOT_DELETE\"}"
+    },
+    {
+      "item": "D-comp-detail.08.refuse-owner",
+      "what": "only the owner deletes",
+      "pass": true,
+      "evidence": "{\"code\":\"COMPETITION_NOT_HOST\"}"
+    },
+    {
+      "item": "D-comp-detail.08",
+      "what": "the owner deletes an empty competition: show answers NO_SUCH_COMPETITION, the row is gone",
+      "pass": true,
+      "evidence": "{\"del\":200,\"show\":\"NO_SUCH_COMPETITION\"}"
+    },
+    {
+      "item": "D-comp-detail.65.refuse",
+      "what": "a non-member cannot enter a members-only club competition (COMPETITION_MEMBERS_ONLY)",
+      "pass": true,
+      "evidence": "{\"t2Member\":false,\"code\":\"COMPETITION_MEMBERS_ONLY\"}"
+    },
+    {
+      "item": "D-comp-detail.65",
+      "what": "a club member enters it",
+      "pass": true,
+      "evidence": "{\"status\":200,\"code\":null}"
+    },
+    {
+      "item": "D-comp-detail.65.pack",
+      "what": "show carries membersOnly + mayJoinMembersOnly for the reader",
+      "pass": true,
+      "evidence": "{\"membersOnly\":true,\"may\":false}"
+    }
+  ],
+  "evidence": [
+    "pass setup.signin: seven personas signed in through the real UAT SSO -> {\"ken\":true,\"amy\":true,\"mei\":true,\"tom\":true,\"tester1\":true,\"tester2\":true,\"admin\":true}",
+    "pass D-comp-create.08.refuse: registration deadline after the start is refused (COMPETITION_BAD_TIMELINE) -> {\"status\":400,\"code\":\"COMPETITION_BAD_TIMELINE\",\"msg\":\"Start cannot be before registration deadline.\"}",
+    "pass setup.create: host creates a [probe] public doubles round robin with the new fields -> {\"status\":200,\"code\":null}",
+    "pass D-match-format.02.stored: double round robin stored (roundRobinCycles=2, se_sbx row) -> {\"row0\":\"2\"}",
+    "pass D-comp-sublocations.01.stored: court labels stored trimmed -> {\"labels\":\"Centre,Court B\"}",
+    "pass D-match-format.06.stored: stage names stored -> {\"stageNames\":\"{\\\"playoff\\\": \\\"Knockouts\\\", \\\"regular\\\": \\\"Group stage\\\"}\"}",
+    "pass D-match-format.14.stored: match rules stored -> {\"matchRules\":\"Rally to 11, win by 2.\"}",
+    "pass D-comp-create.13.stored: free-agent fee + early bird stored -> {\"fa\":\"100\",\"faEb\":\"80\"}",
+    "pass t3.pack: competitions/show carries the batch (t3 marker + fields) to a stranger -> {\"t3\":1,\"cycles\":2,\"labels\":[\"Centre\",\"Court B\"]}",
+    "pass D-comp-create.08.update: an update that puts registration open after the start is refused -> {\"status\":400,\"code\":\"COMPETITION_BAD_TIMELINE\"}",
+    "pass D-comp-confirm-publish.02: publishing a public competition notified the host's follower (amy: \"New competition\") -> {\"follow\":\"made\",\"found\":true}",
+    "pass D-comp-join.05: join as a spectator: mySpectator set, spectatorsCount 1, a spectator row holding no seat -> {\"status\":200,\"mySpectator\":{\"id\":\"arhatr5aoslc00nz\"},\"count\":1,\"spotsLeft\":8}",
+    "pass D-comp-join.05.chat: a spectator opens the general chat; before spectating it was refused -> {\"before\":\"COMPETITION_FORBIDDEN\",\"after\":200}",
+    "pass D-comp-detail.38.announce: an announcement reaches the spectator -> {\"status\":200}",
+    "pass D-comp-detail.66.leave: the spectator cancels (leave) — mySpectator null, count 0 -> {\"mySpectator\":null,\"count\":0}",
+    "pass D-comp-team-detail.06: a non-captain member leaves the TEAM: the team stays confirmed, mei is out (se_sbx row) -> {\"status\":200,\"row\":[\"confirmed\",\"argp1hagj7so0001\"]}",
+    "pass D-comp-team-detail.06.notify: the captain heard it (\"Player left your team\") -> {}",
+    "pass D-comp-upsert-team.06: the captain renames the team + writes its description (se_sbx row) -> {\"status\":200,\"row\":[\"[probe] Team Alpha\",\"We play fast.\"]}",
+    "pass D-comp-upsert-team.02: the team avatar is the captain's uploaded image; packEntry carries avatarUrl -> {\"avatarUrl\":true,\"fileId\":\"arhatth5oslc00pr\"}",
+    "pass D-comp-upsert-team.02.refuse: someone else's drive file is refused (NO_SUCH_FILE) -> {\"code\":\"NO_SUCH_FILE\"}",
+    "pass D-comp-upsert-team.03.refuse: a player of another team cannot edit it (COMPETITION_FORBIDDEN) -> {\"code\":\"COMPETITION_FORBIDDEN\"}",
+    "pass D-comp-detail.36.auto: with a 2.0 cap the automatic rule flags members (no rating / above the cap) — reasons to the host -> {\"ineligible\":[\"argp1hagj7so0001\",\"argp1io2j7so0006\"],\"reasons\":{\"argp1hagj7so0001\":\"no_rating\",\"argp1io2j7so0006\":\"above_max\"}}",
+    "pass D-comp-detail.36.private: a stranger sees the tag but not the reasons -> {\"strangerReasons\":{}}",
+    "pass D-comp-detail.43.eligible: the host marks the member eligible: the override is stored and the tag clears -> {\"status\":200,\"row\":\"{\\\"argp1hagj7so0001\\\": true}\"}",
+    "pass D-comp-detail.42: marked ineligible: tagged, and the player is told (\"Marked ineligible\") -> {\"tagged\":true}",
+    "pass D-comp-detail.43.refuse: a player cannot set eligibility (COMPETITION_NOT_HOST) -> {\"code\":\"COMPETITION_NOT_HOST\"}",
+    "pass D-match-format.02: double round robin: 2 teams meet twice, sides swapped, round 2 after round 1 -> {\"n\":2,\"rounds\":[1,2],\"sides\":[[\"B\",\"A\"],[\"A\",\"B\"]]}",
+    "pass family.header-safe: a refusal with a non-ASCII message (\"The draw is generated — reset…\") is a 400 with its code, not a 500 -> {\"status\":400,\"code\":\"COMPETITION_DRAW_EXISTS\"}",
+    "pass D-comp-match-manage.03: the host assigns a referee to one match (se_sbx row) and it is packed (isMyRef for them) -> {\"status\":200,\"row\":\"ar89kz29mnr7001o\"}",
+    "pass D-comp-match-manage.03.refuse: a player of the match cannot assign referees (COMPETITION_NOT_HOST) -> {\"code\":\"COMPETITION_NOT_HOST\"}",
+    "pass D-comp-detail.63: the match referee reads isMyRef and canScore on that match only -> {\"isMyRef\":true,\"canScore\":true}",
+    "pass D-comp-detail.46.ref-official: the match referee's score is official (completed) and keeps set names + the tiebreaker type -> {\"status\":200,\"row\":[\"completed\",\"[{\\\"t1\\\": 11, \\\"t2\\\": 7, \\\"name\\\": \\\"Opener\\\", \\\"type\\\": \\\"standard\\\"}, {\\\"t1\\\": 9, \\\"t2\\\": 11, \\\"type\\\": \\\"standard\\\"}, {\\\"t1\\\": 5, \\\"t2\\\": 3, \\\"name\\\": \\\"Decider\\\", \\\"type\\\": \\\"tiebreaker\\\"}]\"]}",
+    "pass D-comp-availability.01: a player sets their own availability; the host sets it for a player (se_sbx row) -> {\"row\":\"{\\\"argp1io2j7so0006\\\": \\\"maybe\\\", \\\"argp1j9lj7so0009\\\": \\\"no\\\"}\"}",
+    "pass D-comp-availability.01.refuse: a player cannot set another team's player (COMPETITION_FORBIDDEN) -> {\"code\":\"COMPETITION_FORBIDDEN\"}",
+    "pass D-comp-match-detail.04.private: a stranger reads no availability; the players pane is for the match's people -> {\"strangerAvail\":{}}",
+    "pass D-comp-add-match.01: the host adds an extra match (isExtra) -> {\"status\":200}",
+    "pass D-comp-match-detail.02.remove: Remove match sets it aside (cancelled, se_sbx); a player asking is refused -> {\"row\":\"cancelled\",\"player\":\"COMPETITION_NOT_HOST\"}",
+    "pass D-comp-match-detail.02.restore: Unremove puts it back (pending) -> {\"status\":200}",
+    "pass D-comp-detail.60: a photo posted in the competition chat is on its Media pane, readable anonymously for a public competition -> {\"post\":200,\"n\":1}",
+    "pass D-comp-confirm-cancel.03: the cancellation message rides on the notice and stays as an announcement -> {\"status\":200}",
+    "pass D-comp-detail.60.private: a private competition's photos are refused to a stranger (COMPETITION_PRIVATE) -> {\"code\":\"COMPETITION_PRIVATE\"}",
+    "pass D-comp-manage-seeds.02: the host's seed order draws the bracket (its own first-round pairs, not the sign-up order's) and marks manual seeding -> {\"status\":200,\"layout\":\"inner_outer\",\"wasDefault\":false}",
+    "pass D-comp-manage-seeds.03: Update seeds re-arranges the bracket; a disqualified entry (admin) is out -> {\"status\":200,\"admin_in\":false}",
+    "pass D-comp-manage-seeds.02.refuse: a seed that is not a confirmed entry of THIS competition is refused (NO_SUCH_ENTRY) and the refused order does not cost the bracket -> {\"status\":400,\"code\":\"NO_SUCH_ENTRY\",\"playoffMatchesAfter\":3}",
+    "pass D-comp-manage-seeds.01.refuse: a player cannot reseed (COMPETITION_NOT_HOST) -> {\"code\":\"COMPETITION_NOT_HOST\"}",
+    "pass D-comp-manage-seeds.01.lock: \"Seeds cannot be changed after playoff matches have already started.\" -> {\"code\":\"COMPETITION_BRACKET_LOCKED\"}",
+    "pass D-comp-detail.08.refuse-people: a competition with people in it cannot be deleted (cancel first) -> {\"code\":\"COMPETITION_CANNOT_DELETE\"}",
+    "pass D-comp-detail.08.refuse-owner: only the owner deletes -> {\"code\":\"COMPETITION_NOT_HOST\"}",
+    "pass D-comp-detail.08: the owner deletes an empty competition: show answers NO_SUCH_COMPETITION, the row is gone -> {\"del\":200,\"show\":\"NO_SUCH_COMPETITION\"}",
+    "pass D-comp-detail.65.refuse: a non-member cannot enter a members-only club competition (COMPETITION_MEMBERS_ONLY) -> {\"t2Member\":false,\"code\":\"COMPETITION_MEMBERS_ONLY\"}",
+    "pass D-comp-detail.65: a club member enters it -> {\"status\":200,\"code\":null}",
+    "pass D-comp-detail.65.pack: show carries membersOnly + mayJoinMembersOnly for the reader -> {\"membersOnly\":true,\"may\":false}"
+  ]
+}
