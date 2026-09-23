@@ -1,0 +1,129 @@
+{
+ "id": "t3-clubs-meets.fix-recheck",
+ "at": "2026-09-23T07:30:42.570Z",
+ "pass": 16,
+ "fail": 0,
+ "checks": [
+  {
+   "name": "1·0 fixture: amy has a pending request and an invitation",
+   "pass": true,
+   "detail": {
+    "join": {
+     "status": "requested"
+    },
+    "myRequest": "pending",
+    "invite": 200
+   }
+  },
+  {
+   "name": "1·1 the Reviewing section lists both rows",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "1·2 Cancel request: the page stayed on My clubs (the row tap did not fire)",
+   "pass": true,
+   "detail": {
+    "url": "https://uat.social.silkvo.com/app/pages/community/index?lang=en"
+   }
+  },
+  {
+   "name": "1·3 …and the request is cancelled IN THE ENGINE (read back)",
+   "pass": true,
+   "detail": {
+    "myRequest": null
+   }
+  },
+  {
+   "name": "1·4 Accept: amy is a member (read back) and the page stayed on My clubs",
+   "pass": true,
+   "detail": {
+    "url": "https://uat.social.silkvo.com/app/pages/community/index?lang=en",
+    "member": true
+   }
+  },
+  {
+   "name": "3·1 a stranger sees the generic private-or-gone screen",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "3·2 …which does not name the club (G15.5)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "3·3 planted: the owner opening the same link sees the club (name on screen)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "4·1 the private club's card says Private",
+   "pass": true,
+   "detail": {
+    "card": "[probe] t3fix hidden muds8uisPrivate · Pickleball · 1 members · 0 upcoming activities"
+   }
+  },
+  {
+   "name": "4·2 planted: a public club's card still says Public",
+   "pass": true,
+   "detail": {
+    "card": "[probe] t3fix approval muds8uh5Public · Pickleball · 1 members · 1 followers · 0 upcoming activities"
+   }
+  },
+  {
+   "name": "4·3 the engine pack carries visibility=private",
+   "pass": true,
+   "detail": {
+    "visibility": "private"
+   }
+  },
+  {
+   "name": "2·1 create keeps the venue id (meets/show + DB)",
+   "pass": true,
+   "detail": {
+    "sent": "ar7iv18ojhqz0004",
+    "packed": "ar7iv18ojhqz0004"
+   }
+  },
+  {
+   "name": "2·2 update changes it (read back from the DB)",
+   "pass": true,
+   "detail": {
+    "packed": "ar7iv1byjhqz000j"
+   }
+  },
+  {
+   "name": "2·3 planted: an id that is no venue is not stored",
+   "pass": true,
+   "detail": {
+    "packed": null
+   }
+  },
+  {
+   "name": "5·1 a member opening one post is not told to join a club",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "6·1 the new post shows its author's current engine name, never \"A player\"",
+   "pass": true,
+   "detail": {
+    "card": "UAT Paddle ClubQuestionTom Ho · 23 Sept, 03:30 pm···More[probe] t3fix question😊 ReactComment",
+    "nowName": "Tom Ho",
+    "renamedTo": "[probe] Tom T3 9tod"
+   }
+  }
+ ],
+ "shots": [
+  "/root/walk/_t3fix-1a-review.png",
+  "/root/walk/_t3fix-1b-cancel-dialog.png",
+  "/root/walk/_t3fix-1c-after-cancel.png",
+  "/root/walk/_t3fix-1d-after-accept.png",
+  "/root/walk/_t3fix-3a-private-stranger.png",
+  "/root/walk/_t3fix-3b-private-owner.png",
+  "/root/walk/_t3fix-4-owner-list.png",
+  "/root/walk/_t3fix-5-post-detail.png",
+  "/root/walk/_t3fix-6-forum-after-rename.png"
+ ]
+}

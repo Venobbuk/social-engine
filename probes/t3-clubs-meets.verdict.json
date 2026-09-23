@@ -1630,5 +1630,68 @@
    "reason": "Comes with allowOutsideLinks (B-set-comms.03)."
   }
  ],
- "app_head": "51cb1e5 COMP-T3-V1 (app): the competitions tail — hub, wizard, match and team pages on the engine's new doors"
+ "app_head": "51cb1e5 COMP-T3-V1 (app): the competitions tail — hub, wizard, match and team pages on the engine's new doors",
+ "l6_fix_round": {
+  "source": "probes/l6-scope-S3-clubs.verdict.json (matrix /root/gen/l6-scope/S3-clubs/matrix.json), run against the 14:17 build",
+  "recheck": "probes/t3-fix-recheck.probe.cjs → probes/t3-clubs-meets.fix-recheck.json: 16/16 pass at 2026-09-23T07:30:42.570Z",
+  "commits": {
+   "app": "8a9557c (deployed 15:18 HKT, EXIT=0)",
+   "engine": "37d649c306 (web + web-uat on the same image, marker venuesRepository.exists absent before / present after in both built trees)"
+  },
+  "bugs": [
+   {
+    "n": 1,
+    "what": "a control inside a tappable row also fired the row (Reviewing Cancel request navigated away; the request stayed pending)",
+    "family": "Row/Card onClick holding an inner control",
+    "found": 4,
+    "fixed": 4,
+    "scan": "/root/gen/rowbtn-scan.cjs (SELFTEST=1 plants a leak and finds it) — 19 containers in src, 0 leaking after",
+    "where": "community Reviewing rows · the two admin nudge rows · club-admin venues-lock rows",
+    "proof": "1·0 PASS, 1·1 PASS, 1·2 PASS, 1·3 PASS, 1·4 PASS"
+   },
+   {
+    "n": 2,
+    "what": "the meet form sent venueId, meets/create + meets/update dropped it (not in meetParamProps): 0 of 165 UAT meets carried one",
+    "family": "meet fields the model has but the doors drop",
+    "found": 1,
+    "fixed": 1,
+    "proof": "2·1 PASS, 2·2 PASS, 2·3 PASS"
+   },
+   {
+    "n": 3,
+    "what": "a private club opened by a stranger rendered a blank page (channels/show 400)",
+    "family": "club page when the club is not readable",
+    "found": 1,
+    "fixed": 1,
+    "choice": "Chose ONE generic screen for private and for gone (\"This club is private or no longer exists…\", Join by code, Back to clubs) over Reclub's private-club preview with Request to join: G15.5 lets only owner / admins / members / invite holders learn the club exists, and an invite holder has the link or the code.",
+    "proof": "3·1 PASS, 3·2 PASS, 3·3 PASS"
+   },
+   {
+    "n": 4,
+    "what": "every club card said \"Public\" (hard-coded), private clubs included",
+    "family": "club visibility shown from data, not a literal",
+    "found": 1,
+    "fixed": 1,
+    "proof": "4·1 PASS, 4·2 PASS, 4·3 PASS"
+   },
+   {
+    "n": 5,
+    "what": "a single post (?note=) showed a member \"Join a club to see its posts here\"",
+    "family": "list-view empty states on a single-item view",
+    "found": 2,
+    "fixed": 2,
+    "where": "feed: the join-a-club empty and the nothing-posted empty, both now list-only",
+    "proof": "5·1 PASS"
+   },
+   {
+    "n": 6,
+    "what": "a fresh post showed its author as \"A player\" until reload (the embedded packed user was stale)",
+    "family": "author drawn from an embedded user",
+    "found": 1,
+    "fixed": 1,
+    "proof": "6·1 PASS",
+    "level_note": "L6 for the invariant (the card shows the author's current engine name, never A player). The exact stale-cache race could not be re-created: the page's SSO sign-in re-syncs the name from the league profile, undoing the probe's rename — the fix's path (own posts drawn from `i`) is L5."
+   }
+  ]
+ }
 }
