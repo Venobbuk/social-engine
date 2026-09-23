@@ -24,6 +24,7 @@ export const meta = {
 			chat: { type: 'boolean', optional: false, nullable: false },
 			promoted: { type: 'boolean', optional: false, nullable: false },
 			updates: { type: 'boolean', optional: false, nullable: false },
+			meets: { type: 'boolean', optional: false, nullable: false },   // ACCOUNT-BUGS-V1: Settings › Meet updates
 			mutedRoomIds: { type: 'array', optional: false, nullable: false, items: { type: 'string', optional: false, nullable: false } },
 			mutedUserIds: { type: 'array', optional: false, nullable: false, items: { type: 'string', optional: false, nullable: false } },
 		},
@@ -48,6 +49,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				chat: !off('chat'),
 				promoted: !off('promoted'),
 				updates: !off('updates'),
+				meets: !off('meets'),   // ACCOUNT-BUGS-V1
 				mutedRoomIds: mutes.filter(m => m.scope === 'room').map(m => m.targetId),
 				mutedUserIds: mutes.filter(m => m.scope === 'user').map(m => m.targetId),
 			};

@@ -5,8 +5,8 @@
  * adapter/sso — host single sign-on (spec §2b item 1, §6 A1).
  * A host (hkpl today, pyke next) mints a short-lived RS256 JWT for its signed-in member; this endpoint verifies
  * it against the host's public key, finds-or-creates the matching local account (username derived from the
- * host id + external id, so the mapping is deterministic and needs no schema change), refreshes the display
- * name, and returns a credential for the client to log in with. No password is ever set that anyone knows;
+ * host id + external id, so the mapping is deterministic and needs no schema change), seeds the display
+ * name (ACCOUNT-BUGS-V1 below: only while the account has none of its own), and returns a credential for the client to log in with. No password is ever set that anyone knows;
  * these accounts can only be entered through the host.
  *
  * SSO-SEAM-V2 (2026-09-16) — four changes from the dry run of 2026-09-12:
@@ -47,6 +47,7 @@ import { RoleService } from '@/core/RoleService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { isDuplicateKeyValueError } from '@/misc/is-duplicate-key-value-error.js';
 import { STAFF_ROLE_ID } from '@/modules/staff.js';
+import { isReservedClubName } from '@/modules/clubs/club-names.js';   // ACCOUNT-BUGS-V1
 import { SignupService } from '@/core/SignupService.js';
 import { IdService } from '@/core/IdService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
@@ -164,6 +165,12 @@ export function usernameFor(iss: string, sub: string): string {
 	return `${iss}_${createHash('sha256').update(`${iss}:${sub}`).digest('hex').slice(0, 12)}`.toLowerCase();
 }
 
+/** ACCOUNT-BUGS-V1: the account already carries a name of its own — not null / blank, and not a machine handle. */
+function hasOwnName(n: string | null | undefined): boolean {
+	const s = (n ?? '').trim();
+	return s !== '' && !/^@?hkpl_[0-9a-f]{12}$/i.test(s);
+}
+
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	private logger: Logger;
@@ -223,6 +230,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 			const username = usernameFor(claims.iss, claims.sub);
 			const displayName = (claims.name ?? '').toString().slice(0, 50) || null;
+			// ACCOUNT-BUGS-V1: a brand name from the host is never written (the rule i/update applies to a person's own edit)
+			const seedName = displayName && displayName.trim() && !isReservedClubName(displayName) ? displayName.trim() : null;
 			const lang = typeof claims.lang === 'string' && claims.lang.length <= 12 ? claims.lang : null;
 
 			// SEC-SSO-HYGIENE-V1: link by the hkpl IDENTITY, not a mutable name. `username` is a pure, one-way function
@@ -233,8 +242,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// engine-batch1 entity-list edits; see report.)
 			const existing = await this.usersRepository.findOneBy({ usernameLower: username, host: null as never });
 			if (existing) {
-				if (displayName && existing.name !== displayName) {
-					await this.usersRepository.update(existing.id, { name: displayName });
+				/* ACCOUNT-BUGS-V1 (2026-09-23) — WHICH NAME WINS: THE PERSON'S OWN GRIPBAT NAME.
+				 * hkpl's name SEEDS the GripBat display name: it is written when the account has no name of its own (null,
+				 * blank, or the machine handle hkpl_<hex>), and NEVER over a name the account already has. Before this, every
+				 * sign-in exchange rewrote the name from hkpl, so a name the person edited in GripBat (i/update) silently
+				 * reverted at the next session (L6 S7, E-update-profile). The cost, accepted: renaming yourself on the league
+				 * (hkpl) no longer renames you on GripBat — you edit your GripBat name in GripBat, where you see it. */
+				if (seedName && !hasOwnName(existing.name)) {
+					await this.usersRepository.update(existing.id, { name: seedName });
 				}
 				const ratingSynced = await this.syncLevel(existing.id, claims);
 				const staff = await this.syncStaffRole(existing.id, claims);
@@ -252,7 +267,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// CHAT-SCOPE-V1: a Reclub member can message anyone in the app (Reclub inbox → any player). Misskey's default
 			// 'mutual' (both must follow) made every first message 'recipient is cannot chat'; a person can still narrow it
 			// in i/update. Existing accounts were moved to 'everyone' by SQL on 2026-09-17.
-			await this.usersRepository.update(account.id, { chatScope: 'everyone', ...(displayName ? { name: displayName } : {}) });
+			await this.usersRepository.update(account.id, { chatScope: 'everyone', ...(seedName ? { name: seedName } : {}) });
 			const ratingSynced = await this.syncLevel(account.id, claims);
 			const staff = await this.syncStaffRole(account.id, claims);
 			const token = await this.issueCredential(account.id, claims);

@@ -17,6 +17,38 @@ import type { DataSource } from 'typeorm';
 //            result, games, partner, opponents — the Edge reads nothing else. Idempotent: a match is rated once.
 // The minute sweep (MeetSweepProcessorService) calls processRatings(); the backfill is the same call looping.
 
+/* ACCOUNT-BUGS-V1 (2026-09-23, L6 verifier S7 D-stats-team-summary.02) — ONE RULE, EVERY DOOR: a match in a cancelled
+ * meet or competition is not history. pendingMatches() applied it to meets only, edgeOf()'s guard likewise, the
+ * chemistry / pairs / rising reads not at all, and MatchHistory's competition branch not at all — so My history and
+ * the player match lists showed the matches of cancelled competitions while the pair record (logVisible) hid them.
+ * liveLog(alias) is the rule for a gb_rating_log row: it counts only while its match row exists and the meet /
+ * competition it was played in is not cancelled (open play has no container). MatchHistory.logVisible composes the
+ * same rule with visibility; the SQL reads of meets / competitions say `status <> 'cancelled'` directly. */
+export const liveLog = (l: string): string => `(${l}.source = 'openplay'
+	OR (${l}.source = 'meet' AND EXISTS (SELECT 1 FROM meet_match lmm JOIN meet lm ON lm.id = lmm."meetId" WHERE lmm.id = ${l}."matchId" AND lm.status <> 'cancelled'))
+	OR (${l}.source = 'competition' AND EXISTS (SELECT 1 FROM competition_match lcm JOIN competition lc ON lc.id = lcm."competitionId" WHERE lcm.id = ${l}."matchId" AND lc.status <> 'cancelled')))`;
+
+/** ACCOUNT-BUGS-V1: cancelling a COMPETITION takes back what its matches wrote to the GripBat rating — the same
+ *  take-back MeetService.retireRatings() does for a meet (FRESH-EYES P1-2), so gb_player_rating says what the remaining
+ *  log says. Never fails the cancellation (the competition is already cancelled when this runs). */
+export async function retireCompetitionRatings(db: DataSource, competitionId: string): Promise<void> {
+	try {
+		const touched = await db.query(
+			'SELECT DISTINCT l."userId" AS "userId", l.sport AS sport FROM gb_rating_log l JOIN competition_match cm ON cm.id = l."matchId" WHERE l.source = $1 AND cm."competitionId" = $2',
+			['competition', competitionId]) as { userId: string; sport: string }[];
+		if (!touched.length) return;
+		await db.query('DELETE FROM gb_rating_log l USING competition_match cm WHERE l.source = $1 AND l."matchId" = cm.id AND cm."competitionId" = $2', ['competition', competitionId]);
+		for (const t of touched) {
+			if (!t.userId || t.userId === '-') continue;
+			const agg = (await db.query(
+				'SELECT count(*)::int AS cnt, (array_agg(post ORDER BY "playedAt" DESC))[1] AS last FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped',
+				[t.userId, t.sport]))[0] as { cnt: number; last: string | null } | undefined;
+			if (!agg || !agg.cnt) await db.query('DELETE FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport]);
+			else await db.query('UPDATE gb_player_rating SET matches = $3, rating = $4, "updatedAt" = now() WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport, agg.cnt, agg.last]);
+		}
+	} catch { /* the cancellation stands; the read-side liveLog() keeps the numbers honest meanwhile */ }
+}
+
 const CURVE = 1.2;
 export const expectedOf = (a: number, b: number): number => 1 / (1 + Math.pow(10, -(a - b) * CURVE));
 const clamp = (x: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, x));
@@ -51,7 +83,7 @@ async function pendingMatches(db: DataSource, limit: number): Promise<Raw[]> {
 		 FROM competition_match cm JOIN competition c ON c.id = cm."competitionId"
 		 LEFT JOIN competition_entry e1 ON e1.id = cm."entry1Id" LEFT JOIN competition_entry e2 ON e2.id = cm."entry2Id"
 		 WHERE cm.status = 'completed' AND jsonb_array_length(cm.scores) > 0
-		   AND NOT EXISTS (SELECT 1 FROM gb_rating_log l WHERE l.source = 'competition' AND l."matchId" = cm.id)
+		   AND c.status <> 'cancelled' AND NOT EXISTS (SELECT 1 FROM gb_rating_log l WHERE l.source = 'competition' AND l."matchId" = cm.id)
 		 ORDER BY 2 ASC LIMIT $1`, [limit]) as { id: string; playedAt: Date; sport: string; u1: string[] | null; u2: string[] | null; scores: { t1: number; t2: number; type: string }[] }[];
 	for (const r of comp) {
 		out.push({ source: 'competition', id: r.id, playedAt: new Date(r.playedAt), sport: r.sport || 'pickleball', sides: [{ userIds: r.u1 ?? [] }, { userIds: r.u2 ?? [] }], games: (r.scores ?? []).filter((g) => g.type !== 'extra').map((g) => [Number(g.t1), Number(g.t2)] as [number, number]) });
@@ -127,7 +159,7 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 	 *
 	 * The counter is asked with the SAME condition rather than read off gb_player_rating, because that column is a
 	 * running total and would keep reporting matches this query has just excluded — which is the contradiction. */
-	const GUARD = `(source <> 'meet' OR EXISTS (SELECT 1 FROM meet_match mm JOIN meet m ON m.id = mm."meetId" WHERE mm.id = gb_rating_log."matchId" AND m.status <> 'cancelled'))`;
+	const GUARD = liveLog('gb_rating_log');   // ACCOUNT-BUGS-V1: meets AND competitions, and an orphaned row (match gone) of either
 	const rows = (await db.query(
 		`SELECT "matchId", source, "partnerId", "opponentIds", pre, post, "teamRating", "oppRating", expected, won, games, "playedAt"
 		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD} ORDER BY "playedAt" DESC LIMIT 300`, [userId, sport]) as LogRow[])
@@ -180,7 +212,7 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 export async function fairTeamsOf(db: DataSource, userIds: string[], sport = 'pickleball', viewerId: string | null = null): Promise<{ teamA: string[]; teamB: string[]; teamAWinPct: number; fairness: number }[]> {
 	const r = await Promise.all(userIds.map((u) => currentRating(db, u, sport).then((x) => x.rating)));
 	const chem = async (a: string, b: string): Promise<number> => {
-		const x = (await db.query(`SELECT count(*)::int n, sum(CASE WHEN won THEN 1 ELSE 0 END)::float w, sum(expected)::float e FROM gb_rating_log WHERE "userId" = $1 AND "partnerId" = $2 AND sport = $3 AND NOT skipped`, [a, b, sport]))[0];
+		const x = (await db.query(`SELECT count(*)::int n, sum(CASE WHEN won THEN 1 ELSE 0 END)::float w, sum(expected)::float e FROM gb_rating_log WHERE "userId" = $1 AND "partnerId" = $2 AND sport = $3 AND NOT skipped AND ${liveLog('gb_rating_log')}`, [a, b, sport]))[0];
 		const c = x && x.n >= 2 ? (x.w - x.e) / x.n : 0;
 		// SEC-ANON-CHEM-V1 (2026-09-21, permission-sweep hole 5): a NEGATIVE chemistry score is private to the two
 		// players it is about, and it is recoverable from teamAWinPct by comparing the three splits against the
@@ -214,7 +246,7 @@ export async function risingOf(db: DataSource, sport = 'pickleball', limit = 20)
 		          (array_agg(pre ORDER BY "playedAt" ASC))[1] AS first_pre,
 		          (array_agg(post ORDER BY "playedAt" DESC))[1] AS last_post,
 		          sum(CASE WHEN won AND "oppRating" - "teamRating" >= 0.25 THEN 1 ELSE 0 END)::int AS upsets
-		   FROM gb_rating_log WHERE sport = $1 AND NOT skipped AND "playedAt" > now() - interval '30 days'
+		   FROM gb_rating_log WHERE sport = $1 AND NOT skipped AND "playedAt" > now() - interval '30 days' AND ${liveLog('gb_rating_log')}
 		   GROUP BY "userId")
 		 SELECT "userId", last_post AS rating, (last_post - first_pre) AS gain, n AS matches, upsets FROM w
 		 WHERE n >= 5 AND last_post > first_pre ORDER BY gain DESC LIMIT $2`, [sport, limit]) as { userId: string; rating: string; gain: string; matches: number; upsets: number }[];
@@ -225,7 +257,7 @@ export async function risingOf(db: DataSource, sport = 'pickleball', limit = 20)
 export async function pairsOf(db: DataSource, pairs: [string, string][], sport = 'pickleball'): Promise<{ a: string; b: string; matches: number; wins: number; expected: number }[]> {
 	const out = [];
 	for (const [a, b] of pairs.slice(0, 40)) {
-		const x = (await db.query(`SELECT count(*)::int n, coalesce(sum(CASE WHEN won THEN 1 ELSE 0 END),0)::int w, coalesce(sum(expected),0)::float e FROM gb_rating_log WHERE "userId" = $1 AND "partnerId" = $2 AND sport = $3 AND NOT skipped`, [a, b, sport]))[0];
+		const x = (await db.query(`SELECT count(*)::int n, coalesce(sum(CASE WHEN won THEN 1 ELSE 0 END),0)::int w, coalesce(sum(expected),0)::float e FROM gb_rating_log WHERE "userId" = $1 AND "partnerId" = $2 AND sport = $3 AND NOT skipped AND ${liveLog('gb_rating_log')}`, [a, b, sport]))[0];
 		out.push({ a, b, matches: x ? x.n : 0, wins: x ? x.w : 0, expected: x ? Math.round(x.e * 100) / 100 : 0 });
 	}
 	return out;

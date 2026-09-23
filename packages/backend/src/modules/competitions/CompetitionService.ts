@@ -9,6 +9,7 @@ import type { DataSource } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { CompetitionsRepository, CompetitionEntriesRepository, CompetitionMatchesRepository, CompetitionAwardsRepository, UsersRepository, BlockingsRepository, DriveFilesRepository, MeetPlayerLevelsRepository } from '@/models/_.js';
 import { memberExistsSql } from '@/modules/clubs/club-tiers.js';   // COMP-T3-V1: the ONE club-member rule, raw-SQL form
+import { retireCompetitionRatings } from '@/modules/stats/GbRating.js';   // ACCOUNT-BUGS-V1
 import type { MiUser } from '@/models/User.js';
 import { IdService } from '@/core/IdService.js';
 import { ChatService } from '@/core/ChatService.js';
@@ -279,6 +280,7 @@ export class CompetitionService {
 		const msg = (message ?? '').trim().slice(0, 2000);
 		const announcements = msg ? [{ id: this.idService.gen(), userId: host.id, text: msg, createdAt: new Date().toISOString() }, ...(c.announcements ?? [])].slice(0, 50) : c.announcements ?? [];
 		await this.competitionsRepository.update(c.id, { status: 'cancelled', cancelledAt: new Date(), updatedAt: new Date(), announcements });
+		await retireCompetitionRatings(this.db, c.id);   // ACCOUNT-BUGS-V1: its matches stop counting (as MeetService.retireRatings for a meet)
 		const body = `${c.name} has been cancelled by the host.` + (msg ? ` ${msg.length > 140 ? msg.slice(0, 139) + '…' : msg}` : '');
 		const told = new Set<string>();
 		for (const e of await this.entries(c)) {

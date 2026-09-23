@@ -14,6 +14,7 @@ import type { DataSource } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { remindUpcoming } from '@/modules/meets/MeetExtras.js'; // MEET-EXTRAS-V1
+import { meetUpdatesMuted } from '@/modules/meets/meet-updates-mute.js';   // ACCOUNT-BUGS-V1
 import { processRatings, importOpenPlay } from '@/modules/stats/GbRating.js'; // GB-RATING-V1
 import type { Config } from '@/config.js';
 
@@ -45,7 +46,7 @@ export class MeetSweepProcessorService {
 		// SEC-CASUAL-CONSENT-V1: send the deferred DUPR submissions of casual games that are now fully confirmed (safety
 		// net; meets/respond submits at the moment of the last confirmation). Idempotent — only unsent matches are touched.
 		await this.meetMatchService.submitDeferredCasual().then((n) => { if (n) this.logger.info('casual dupr submitted after consent: ' + n); }).catch((e) => this.logger.warn('casual deferred dupr: ' + (e as Error).message));
-		const rem = await remindUpcoming(this.db, (userId, header, body, link) => this.notificationService.createNotification(userId, 'app', { customHeader: header, customBody: body, customIcon: null, appAccessTokenId: null, customLink: link }), new Date()).catch((e) => { this.logger.warn('meet reminders: ' + (e as Error).message); return null; });
+		const rem = await remindUpcoming(this.db, (userId, header, body, link) => { void meetUpdatesMuted(this.db, userId).then((muted) => { if (!muted) this.notificationService.createNotification(userId, 'app', { customHeader: header, customBody: body, customIcon: null, appAccessTokenId: null, customLink: link }); }); }, new Date()).catch((e) => { this.logger.warn('meet reminders: ' + (e as Error).message); return null; });
 		if (rem && rem.sent) this.logger.info(`meet reminders: ${rem.meets24} meets at 24 h, ${rem.meets2} at 2 h, ${rem.sent} notifications`);
 		if (r.purgedMaybes || r.autoConfirmedInvites || r.waitlistedInvites) {
 			this.logger.info(`meet sweep: maybes purged ${r.purgedMaybes}, invites auto-confirmed ${r.autoConfirmedInvites}, invites waitlisted (meet full) ${r.waitlistedInvites}`);

@@ -53,6 +53,8 @@ function meetGames(raw: unknown): [number, number][] {
 	return (Array.isArray(raw) ? raw : []).map((g: any) => [Number(g[0]), Number(g[1])] as [number, number]);
 }
 
+// ACCOUNT-BUGS-V1: a match in a cancelled meet OR competition is not history (GbRating.liveLog; the competition branch
+// below lacked `c.status <> 'cancelled'`, so My history listed what the pair record hid).
 // The SQL that lists a player's scored matches (newest first). $1 player, $2 sport, $3 viewer ('' = anonymous),
 // $4 limit, $5 offset, $6 context id or NULL, $7 partner id or NULL, $8 opponent ids (varchar[]) or NULL.
 const HISTORY_SQL = `
@@ -75,7 +77,7 @@ WITH h AS (
 	JOIN competition_match cm ON cm."competitionId" = e."competitionId" AND (cm."entry1Id" = e.id OR cm."entry2Id" = e.id)
 	JOIN competition c ON c.id = cm."competitionId"
 	LEFT JOIN competition_entry e1 ON e1.id = cm."entry1Id" LEFT JOIN competition_entry e2 ON e2.id = cm."entry2Id"
-	WHERE $1 = ANY(e."userIds") AND c.sport = $2 AND cm.status = 'completed' AND jsonb_array_length(cm.scores) > 0
+	WHERE $1 = ANY(e."userIds") AND c.sport = $2 AND c.status <> 'cancelled' AND cm.status = 'completed' AND jsonb_array_length(cm.scores) > 0
 	  AND ($3 = $1 OR ${compVisible('c', '$3')})
 	  AND ($6::varchar IS NULL OR c.id = $6)
 	UNION ALL
@@ -191,7 +193,7 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 			        c.id AS "compId", c.name, c."startAt", c."venueName", c.visibility, e1."userIds" AS u1, e2."userIds" AS u2, e1.name AS n1, e2.name AS n2
 			 FROM competition_match cm JOIN competition c ON c.id = cm."competitionId"
 			 LEFT JOIN competition_entry e1 ON e1.id = cm."entry1Id" LEFT JOIN competition_entry e2 ON e2.id = cm."entry2Id"
-			 WHERE cm.id = $1 AND ${compVisible('c', '$2')}`, [matchId, viewer]))[0];
+			 WHERE cm.id = $1 AND c.status <> 'cancelled' AND ${compVisible('c', '$2')}`, [matchId, viewer]))[0];
 		if (!r) return null;
 		await loadLogs();
 		const games = compGames(r.scores);

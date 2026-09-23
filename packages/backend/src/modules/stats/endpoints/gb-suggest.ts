@@ -8,6 +8,7 @@ import type { DataSource } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
+import { liveLog } from '@/modules/stats/GbRating.js';   // ACCOUNT-BUGS-V1: a cancelled meet / competition is not history
 import type { Packed } from '@/misc/json-schema.js';
 
 // GB-FRIEND-SUGGEST-V1 (2026-09-21): friend suggestions that carry their REASON.
@@ -119,7 +120,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				        coalesce(sum(CASE WHEN won THEN 1 ELSE 0 END), 0)::int AS w,
 				        coalesce(sum(expected), 0)::float AS e
 				   FROM gb_rating_log
-				  WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND "partnerId" IS NOT NULL
+				  WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND "partnerId" IS NOT NULL AND ${liveLog('gb_rating_log')}
 				  GROUP BY 1`,
 				[me.id, ps.sport]) as { pid: string; n: number; w: number; e: number }[];
 			const chemBy = new Map(chem.map(c => [c.pid, c]));

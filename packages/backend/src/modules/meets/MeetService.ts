@@ -19,6 +19,7 @@ import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
 import { meetSystemLine, meetUpdateSystemKey, sweepEndedMeetChats } from '@/modules/meets/MeetChatSystem.js';
 import { bindThis } from '@/decorators.js';
 import { memberExistsSql, adminExistsSql } from '@/modules/clubs/club-tiers.js';   // CLUB-TIERS-V1
+import { meetUpdatesMuted } from '@/modules/meets/meet-updates-mute.js';   // ACCOUNT-BUGS-V1: Settings › Meet updates
 import type { Packed } from '@/misc/json-schema.js';
 import type { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { secureRndstr, L_CHARS } from '@/misc/secure-rndstr.js';
@@ -894,12 +895,17 @@ export class MeetService {
 		// request the consent flow depends on (gate re-run D-1: opponent never notified → game could never count).
 		const consentCritical = Array.isArray((meet as { flags?: string[] }).flags) && (meet as { flags?: string[] }).flags!.includes('casual');
 		if (meet.sendNotifications === false && !consentCritical) return;
-		this.notificationService.createNotification(userId, 'app', {
-			customHeader: header,
-			customBody: body,
-			customIcon: null,
-			appAccessTokenId: null,
-			customLink: 'meet:' + meet.id,
+		// ACCOUNT-BUGS-V1: the person switched Settings › Meet updates off (meet-updates-mute.ts). The consent ask of a casual
+		// game still goes — it is the request the game depends on, not an update.
+		void (consentCritical ? Promise.resolve(false) : meetUpdatesMuted(this.db, userId)).then((muted) => {
+			if (muted) return;
+			this.notificationService.createNotification(userId, 'app', {
+				customHeader: header,
+				customBody: body,
+				customIcon: null,
+				appAccessTokenId: null,
+				customLink: 'meet:' + meet.id,
+			});
 		});
 	}
 }

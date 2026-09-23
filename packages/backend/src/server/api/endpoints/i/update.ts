@@ -34,6 +34,7 @@ import type { Config } from '@/config.js';
 import { safeForSql } from '@/misc/safe-for-sql.js';
 import { AvatarDecorationService } from '@/core/AvatarDecorationService.js';
 import { notificationRecieveConfig } from '@/models/json-schema/user.js';
+import { isReservedClubName } from '@/modules/clubs/club-names.js';   // ACCOUNT-BUGS-V1: the one brand rule, for people too
 import { ApiLoggerService } from '../../ApiLoggerService.js';
 import { ApiError } from '../../error.js';
 
@@ -120,6 +121,21 @@ export const meta = {
 			message: 'Your new name contains prohibited words.',
 			code: 'YOUR_NAME_CONTAINS_PROHIBITED_WORDS',
 			id: '0b3f9f6a-2f4d-4b1f-9fb4-49d3a2fd7191',
+			httpStatusCode: 422,
+		},
+
+		// ACCOUNT-BUGS-V1 (GripBat, Reclub "Please enter your name" / reserved names): see the name block below
+		nameRequired: {
+			message: 'Please enter your name.',
+			code: 'NAME_REQUIRED',
+			id: 'b96b5c33-5f4d-44eb-864f-d6e38d7d2923',
+			httpStatusCode: 422,
+		},
+
+		nameReserved: {
+			message: 'Names containing "GripBat" are reserved for official accounts.',
+			code: 'NAME_RESERVED',
+			id: '93b88081-3060-4f2c-ab5d-cd4f41063fa5',
 			httpStatusCode: 422,
 		},
 	},
@@ -278,12 +294,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			let policies: RolePolicies | null = null;
 
 			if (ps.name !== undefined) {
-				if (ps.name === null) {
-					updates.name = null;
-				} else {
-					const trimmedName = ps.name.trim();
-					updates.name = trimmedName === '' ? null : trimmedName;
-				}
+				// ACCOUNT-BUGS-V1 (G11: EXTEND the native door, no new endpoint). Misskey lets a name be cleared to null and
+				// falls back to the username; on GripBat that username is the machine handle hkpl_<hex>, so a cleared name
+				// reads "A player" everywhere (L6 S7 E-onb-basic.02). A person's name is required, and it may not carry the
+				// brand (modules/clubs/club-names.ts — the rule clubs already use; a moderator may, and a name the account
+				// already has is left alone, as channels/update does).
+				const trimmedName = (ps.name ?? '').trim();
+				if (trimmedName === '') throw new ApiError(meta.errors.nameRequired);
+				if (trimmedName !== user.name && isReservedClubName(trimmedName) && !(await this.roleService.isModerator(user))) throw new ApiError(meta.errors.nameReserved);
+				updates.name = trimmedName;
 			}
 			if (ps.description !== undefined) profileUpdates.description = ps.description;
 			if (ps.followedMessage !== undefined) profileUpdates.followedMessage = ps.followedMessage;
