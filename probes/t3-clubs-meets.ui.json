@@ -1,0 +1,100 @@
+{
+ "id": "t3-clubs-meets.ui",
+ "at": "2026-09-23T06:45:28.869Z",
+ "base": "https://uat.social.silkvo.com/app",
+ "pass": 13,
+ "fail": 0,
+ "checks": [
+  {
+   "name": "U0 planted: an assertion for a string this screen must not show fails (Delete meet is host-only)",
+   "pass": true,
+   "detail": {
+    "found": false
+   }
+  },
+  {
+   "name": "U1a Details carries Contact hosts (the fact label is CSS-uppercased, so innerText reads CONTACT HOSTS)",
+   "pass": true,
+   "detail": {
+    "hit": "CONTACT HOSTS"
+   }
+  },
+  {
+   "name": "U1b the Club row names the club",
+   "pass": true,
+   "detail": {
+    "club": "UAT Paddle Club"
+   }
+  },
+  {
+   "name": "U1c Notes with Copy",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "U1d the confirmed footer: line + Request +1 + See matches",
+   "pass": true,
+   "detail": {
+    "line": "You are confirmed to play. Please be on time."
+   }
+  },
+  {
+   "name": "U4 Matches: the Stats chip and the ask-your-host empty state",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "U5 zh_Hant: Contact hosts / Request +1 / the confirmed line render in Chinese, not English",
+   "pass": true,
+   "detail": {
+    "en_left": []
+   }
+  },
+  {
+   "name": "U2 host kebab: Refresh meet chat + Delete meet",
+   "pass": true,
+   "detail": {
+    "clicked": 2
+   }
+  },
+  {
+   "name": "U3a the roster lists CAN'T GO with the declined invitee",
+   "pass": true,
+   "detail": {
+    "hit": "CAN'T GO • 1 ▾"
+   }
+  },
+  {
+   "name": "U3b Sort offers By teams / By gender / By payment",
+   "pass": true,
+   "detail": {
+    "clicked": true
+   }
+  },
+  {
+   "name": "U6 My clubs: Clubs / Need review chips, Sort, the Admin section",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "U7 the owner's club page: the two nudges + Discussion",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "U8 the meet form: 1 day duration, Learn more, the freeze set with 4 h / 8 h",
+   "pass": true,
+   "detail": {}
+  }
+ ],
+ "shots": [
+  "/root/walk/_t3cm-u1-player-details.png",
+  "/root/walk/_t3cm-u4-player-matches.png",
+  "/root/walk/_t3cm-u5-player-details-zhHant.png",
+  "/root/walk/_t3cm-u2-host-kebab.png",
+  "/root/walk/_t3cm-u3-host-participants.png",
+  "/root/walk/_t3cm-u6-club-list.png",
+  "/root/walk/_t3cm-u7-club-overview.png",
+  "/root/walk/_t3cm-u8-meet-form.png"
+ ]
+}

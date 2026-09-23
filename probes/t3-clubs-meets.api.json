@@ -1,0 +1,305 @@
+{
+ "id": "t3-clubs-meets.api",
+ "at": "2026-09-23T06:21:01.360Z",
+ "base": "https://uat.social.silkvo.com",
+ "pass": 32,
+ "fail": 0,
+ "checks": [
+  {
+   "name": "D1 a stranger cannot delete someone else's meet (MEET_NOT_HOST)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "MEET_NOT_HOST"
+   }
+  },
+  {
+   "name": "D2 the host deletes an empty meet → {deleted:true}",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "body": {
+     "deleted": true
+    }
+   }
+  },
+  {
+   "name": "D3 read back: meets/show of the deleted meet → NO_SUCH_MEET (L6)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "NO_SUCH_MEET"
+   }
+  },
+  {
+   "name": "D4 its native chat room is gone too",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "NO_SUCH_ROOM"
+   }
+  },
+  {
+   "name": "D5 a meet with a player on it → MEET_HAS_PARTICIPANTS (cancel instead)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "MEET_HAS_PARTICIPANTS"
+   }
+  },
+  {
+   "name": "D6 …and it still exists with its player (nothing half-deleted)",
+   "pass": true,
+   "detail": {
+    "status": "active",
+    "n": 2
+   }
+  },
+  {
+   "name": "D7 a meet with a match → MEET_HAS_MATCHES",
+   "pass": true,
+   "detail": {
+    "guestAdd": 200,
+    "match": 200,
+    "status": 400,
+    "code": "MEET_HAS_MATCHES"
+   }
+  },
+  {
+   "name": "R0 planted: the confirmed player left the room natively (not a member any more)",
+   "pass": true,
+   "detail": {
+    "leave": 204,
+    "before": true,
+    "after": false
+   }
+  },
+  {
+   "name": "R1 a player cannot refresh the meet chat (MEET_NOT_HOST)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "MEET_NOT_HOST"
+   }
+  },
+  {
+   "name": "R2 the host refreshes: {added>=1} and the player is back in the room (read back)",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "body": {
+     "added": 1
+    },
+    "back": true
+   }
+  },
+  {
+   "name": "R3 a second refresh adds nobody (idempotent)",
+   "pass": true,
+   "detail": {
+    "body": {
+     "added": 0
+    }
+   }
+  },
+  {
+   "name": "P1 a confirmed player asks for a +1 afterwards → the guest row exists (read back)",
+   "pass": true,
+   "detail": {
+    "first": "confirmed",
+    "status": 200,
+    "guest": {
+     "status": "confirmed",
+     "name": "Tom Ho +1"
+    }
+   }
+  },
+  {
+   "name": "P2 a second +1 → MEET_GUEST_LIMIT",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "MEET_GUEST_LIMIT"
+   }
+  },
+  {
+   "name": "P3 planted: a plain re-join by a confirmed player is still refused (MEET_ALREADY_PARTICIPANT)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "MEET_ALREADY_PARTICIPANT"
+   }
+  },
+  {
+   "name": "B1 the viewer the host blocked reads hostBlockedMe=true before tapping Join",
+   "pass": true,
+   "detail": {
+    "block": 200,
+    "amy": true
+   }
+  },
+  {
+   "name": "B2 another viewer reads hostBlockedMe=false",
+   "pass": true,
+   "detail": {
+    "mei": false
+   }
+  },
+  {
+   "name": "B3 …and the engine still refuses the blocked viewer's join (MEET_BLOCKED)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "MEET_BLOCKED"
+   }
+  },
+  {
+   "name": "B4 planted: after the unblock hostBlockedMe reads false again",
+   "pass": true,
+   "detail": {
+    "amy": false
+   }
+  },
+  {
+   "name": "C1 the declined invitee is on the roster as declined (Can't go), read back",
+   "pass": true,
+   "detail": {
+    "invite": 200,
+    "respond": 200,
+    "row": "declined"
+   }
+  },
+  {
+   "name": "C2 …and holds no seat: confirmed / spotsLeft unchanged",
+   "pass": true,
+   "detail": {
+    "before": [
+     3,
+     3
+    ],
+    "after": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "name": "F1 the host sets a per-meet skill override and reads it back (forceSkill 4.5)",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "forceSkill": 4.5
+   }
+  },
+  {
+   "name": "F2 a player may not set it (MEET_NOT_HOST)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "MEET_NOT_HOST"
+   }
+  },
+  {
+   "name": "N1 a club named with the brand → CLUB_NAME_RESERVED",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "CLUB_NAME_RESERVED"
+   }
+  },
+  {
+   "name": "N2 …spacing and case do not get round it",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "CLUB_NAME_RESERVED"
+   }
+  },
+  {
+   "name": "N3 planted: a plain name still creates (the rule is not a wall)",
+   "pass": true,
+   "detail": {
+    "status": 200
+   }
+  },
+  {
+   "name": "N4 a rename into the brand is refused",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "CLUB_NAME_RESERVED"
+   }
+  },
+  {
+   "name": "I1 the invited player sees the club in clubs/invitations/mine",
+   "pass": true,
+   "detail": {
+    "invite": 200,
+    "n": 1,
+    "who": "player-amy"
+   }
+  },
+  {
+   "name": "I2 another player does not (only their own invitations)",
+   "pass": true,
+   "detail": {
+    "who": "host-ken",
+    "n": 0
+   }
+  },
+  {
+   "name": "I3 planted: after the admin cancels, it is gone from the list",
+   "pass": true,
+   "detail": {
+    "n": 0
+   }
+  },
+  {
+   "name": "V1 a club member reads who voted: choice B lists mei (read back)",
+   "pass": true,
+   "detail": {
+    "vote": 204,
+    "status": 200,
+    "groups": [
+     {
+      "choice": 1,
+      "count": 1,
+      "voters": [
+       {
+        "id": "argp1io2j7so0006",
+        "name": "Mei Lam",
+        "username": "hkpl_15492f28f6ea",
+        "host": null,
+        "avatarUrl": "https://uat.social.silkvo.com/identicon/hkpl_15492f28f6ea@uat.social.silkvo.com",
+        "avatarBlurhash": null,
+        "avatarDecorations": [],
+        "isBot": false,
+        "isCat": false,
+        "emojis": {},
+        "onlineStatus": "active",
+        "badgeRoles": []
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "V2 a non-member → CLUB_NOT_MEMBER (the voters stay in the club)",
+   "pass": true,
+   "detail": {
+    "who": "player-amy",
+    "status": 400,
+    "code": "CLUB_NOT_MEMBER"
+   }
+  },
+  {
+   "name": "V3 a poll outside any club → CLUB_NO_SUCH_NOTE (Misskey's own polls stay private)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "CLUB_NO_SUCH_NOTE"
+   }
+  }
+ ]
+}

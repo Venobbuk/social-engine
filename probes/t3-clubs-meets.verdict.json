@@ -1,0 +1,1634 @@
+{
+ "id": "t3-clubs-meets",
+ "at": "2026-09-23T06:53:33.393Z",
+ "condition_fired": true,
+ "verdict": "All 139 T3 items in clubs / meet host tools / meet form were re-verified against the current app + engine (the triage was 2026-09-19). 13 were already built, 6 are deliberate design differences, and the rest were real gaps: 88 built in full and 10 built in part this lane, 22 deferred with a reason (mostly engine columns needing a rehearsed migration). Proven on UAT: engine probe 32/32 (every door by its registered name, each yes with its refusal, read back) and UI probe 13/13 (rendered page, EN + zh_Hant, planted fault first). Prod and UAT engines run the same image.",
+ "totals": {
+  "items": 139,
+  "built_already": 13,
+  "design_diff": 6,
+  "out_of_scope": 0,
+  "missing_found": 120,
+  "built_now": 88,
+  "built_now_partial": 10,
+  "deferred": 22
+ },
+ "by_family": {
+  "clubs": {
+   "items": 64,
+   "built_already": 7,
+   "design_diff": 2,
+   "out_of_scope": 0,
+   "missing_found": 55,
+   "built_now": 37,
+   "built_now_partial": 5,
+   "deferred": 13
+  },
+  "meet_host": {
+   "items": 55,
+   "built_already": 3,
+   "design_diff": 3,
+   "out_of_scope": 0,
+   "missing_found": 49,
+   "built_now": 43,
+   "built_now_partial": 2,
+   "deferred": 4
+  },
+  "meet_form": {
+   "items": 20,
+   "built_already": 3,
+   "design_diff": 1,
+   "out_of_scope": 0,
+   "missing_found": 16,
+   "built_now": 8,
+   "built_now_partial": 3,
+   "deferred": 5
+  }
+ },
+ "items": [
+  {
+   "id": "A-privacy-chooser.04",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet-create/index.tsx:283; app src/pages/help/index.tsx:48",
+   "reuse": "REUSED help page Host tab (pages/help)",
+   "note": "Learn more on the Visibility row → Help › Host."
+  },
+  {
+   "id": "A-meet-form.32",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet-create/index.tsx:153; app src/components/InviteToActivity.tsx:48",
+   "reuse": "REUSED meet-create picked-invitees path (addParticipant invited on create), native users/show",
+   "note": null
+  },
+  {
+   "id": "A-meet-notes.02",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:950; U1c PASS",
+   "reuse": "REUSED SectionHead action + Taro clipboard",
+   "note": null
+  },
+  {
+   "id": "A-meet-notes.03",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "engine meet_match has no notes column (models/MeetMatch.ts)",
+   "reuse": null,
+   "note": "Needs a meet_match column + migration rehearsed on a pg_dump copy; not in this window."
+  },
+  {
+   "id": "A-meet-detail.07",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "engine modules/meets/MeetService.ts:385; engine modules/meets/endpoints/delete.ts:42; app src/pages/meet/index.tsx:508; D1 PASS, D2 PASS, D3 PASS, D4 PASS, D5 PASS, D6 PASS, D7 PASS, U2 PASS",
+   "reuse": "EXTENDED MeetService (withMeetLock, FK cascades) + native ChatService.deleteRoom; NEW door meets/delete (searched: Misskey has no meet concept; meets/cancel is the existing sibling)",
+   "note": "Chose Reclub's rule (delete only an untouched meet; anything with a roster or matches is cancelled so people are told) — same as Meetup/Spond, where delete is for drafts and cancel notifies."
+  },
+  {
+   "id": "A-meet-detail.10",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "engine modules/meets/MeetService.ts:406; app src/pages/meet/index.tsx:515; R0 PASS, R1 PASS, R2 PASS, R3 PASS, U2 PASS",
+   "reuse": "REUSED native ChatService.createRoomInvitation + joinToRoom (the confirmation path); NEW door meets/chat-refresh",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.12",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:954",
+   "reuse": "REUSED lib/social myFollowing (native following/users)",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.13",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:733; U1a PASS, U5 PASS",
+   "reuse": "REUSED pages/chat ?user= (native direct chat)",
+   "note": "Chose a direct chat with the host (or the co-host the reader picks) over Reclub's host group room: no new room per question, and the host sees it in the inbox they already read."
+  },
+  {
+   "id": "A-meet-detail.15",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:925; app src/pages/meet/index.tsx:723; U1b PASS",
+   "reuse": "REUSED meets/show packed channel, lib/club-tiers followClubOnly/unfollowClubOnly (native channels/follow), clubs/schedules/show",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.17",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:713; app src/pages/meet/index.tsx:923",
+   "reuse": "REUSED lib/openmap, lib/meet-extras myHome/homeDistance, venue page",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.25",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:301; app src/pages/meet/index.tsx:331",
+   "reuse": "REUSED engine meets/level (gender/ageGroup on the level row the gate already reads)",
+   "note": "Chose to save the missing fact to the profile once (every restricted meet reuses it) over Reclub's per-join prompt."
+  },
+  {
+   "id": "A-meet-detail.27",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "engine modules/meets/MeetEntityService.ts:219; app src/pages/meet/index.tsx:289; B1 PASS, B2 PASS, B3 PASS, B4 PASS",
+   "reuse": "EXTENDED meets/show pack (MeetService.isBlockedWithHosts, native blocking)",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.28",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "DESIGN_DIFF",
+   "evidence": "engine meets/show refuses a private meet to a non-invited reader (modules/meets/endpoints/show.ts private rule)",
+   "reuse": null,
+   "note": "G15.5 \"private means private\": a banner + Message host would need the engine to reveal the meet and its host to someone it must not; the reader gets the engine's own private message."
+  },
+  {
+   "id": "A-meet-detail.31",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:293",
+   "reuse": "REUSED existing maybe footer (W1-B1) + meets/respond",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.33",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:288; app src/pages/meet/index.tsx:313",
+   "reuse": "REUSED pages/chat ?user=",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.34",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:293",
+   "reuse": "REUSED footer hint card",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.35",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "engine modules/meets/MeetService.ts:532; app src/pages/meet/index.tsx:278; P1 PASS, P2 PASS, P3 PASS, U1d PASS, U5 PASS",
+   "reuse": "EXTENDED MeetService.join (the same guest row + claimSeat rule as at join)",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.36",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:307",
+   "reuse": "REUSED packed participant isCoach/isReferee",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.38",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:315; app src/lib/meet-host-tools.ts:27",
+   "reuse": "REUSED engine freeze rule (MeetService.inFreezeWindow mirrored for display; the engine still refuses)",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.41",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "DESIGN_DIFF",
+   "evidence": "clubs/meets/invite-members invites a club's MEMBERS as people (app lib/meet-hosts inviteClubMembers)",
+   "reuse": null,
+   "note": "No club-level invitation object in GripBat: a club's members are invited individually and show under Invited; reward-network payment tags are out of scope (no gateway, G15.6)."
+  },
+  {
+   "id": "A-meet-detail.43",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "engine modules/meets/MeetEntityService.ts:27; app src/pages/meet/index.tsx:1052; C1 PASS, C2 PASS, U3a PASS",
+   "reuse": "EXTENDED meets/show roster (declined rows shown, never counted)",
+   "note": "Invited-clubs section: design-diff as A-meet-detail.41."
+  },
+  {
+   "id": "A-meet-detail.44",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:89; U3b PASS",
+   "reuse": "EXTENDED the HOST-TOOLS-V1 sort menu",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.45",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/meet/index.tsx:82",
+   "reuse": "REUSED clubs/members tagDetails",
+   "note": "Show club tags built. Chose per-viewer Show settings over Reclub's host-wide persisted visibility: each player reads the columns they care about; nothing the host sets overrides a reader."
+  },
+  {
+   "id": "A-meet-detail.47",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/meet/index.tsx:590",
+   "reuse": "REUSED participant kind",
+   "note": "Guest / Reserved chip built; the no-show count is on the player profile (player page \"No showed N times\"), Swap (replace me with a member) deferred — needs an engine swap door."
+  },
+  {
+   "id": "A-meet-detail.50",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:1023",
+   "reuse": "REUSED clubs/members + meets/participants/add",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.58",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:1111; U4 PASS",
+   "reuse": "REUSED EmptyState",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.59",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:1107; U4 PASS",
+   "reuse": "REUSED engine meets/summary (the Share summary's source)",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.60",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:757; app src/lib/meet-host-tools.ts:44",
+   "reuse": "REUSED meets/update allowPlayerScoring, meets/matches/delete; NEW printable scoresheet page (client-only)",
+   "note": null
+  },
+  {
+   "id": "A-meet-detail.61",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:1114",
+   "reuse": "REUSED meets/matches/delete (DUPR-submitted kept)",
+   "note": null
+  },
+  {
+   "id": "A-roles-action.02",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:1158",
+   "reuse": "REUSED pages/chat ?user=",
+   "note": null
+  },
+  {
+   "id": "A-roles-action.04",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:1161",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "A-roles-action.07",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:387",
+   "reuse": "REUSED engine tag enum (MeetParticipant.ts meetParticipantTags)",
+   "note": null
+  },
+  {
+   "id": "A-roles-action.11",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:745; app src/pages/meet/index.tsx:748",
+   "reuse": "REUSED meets/participants/update displayName/declaredLevel/extGender/extAge",
+   "note": null
+  },
+  {
+   "id": "A-roles-action.12",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "DESIGN_DIFF",
+   "evidence": "app src/pages/meet/index.tsx:1157",
+   "reuse": null,
+   "note": "The player page already lists the clubs a player belongs to (W2_F_PLAYER_CLUBS); a second \"club member profile\" page would duplicate it. The per-member club activity list is B-group-user.02 (deferred)."
+  },
+  {
+   "id": "A-generate-matches.02",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:1081",
+   "reuse": "REUSED meets/matches/generate sublocations (max 20)",
+   "note": null
+  },
+  {
+   "id": "A-preview-matches.03",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:775; app src/pages/meet/index.tsx:790",
+   "reuse": "REUSED meets/matches/upsert",
+   "note": null
+  },
+  {
+   "id": "A-generate-teams.04",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "engine modules/meets/MeetEntityService.ts:89; app src/pages/meet/index.tsx:1199; F1 PASS, F2 PASS",
+   "reuse": "REUSED engine forceSkill (generate-teams already reads it); EXTENDED the participant pack",
+   "note": "Bib numbers: no GripBat concept (team jersey colour is the identifier) — not built."
+  },
+  {
+   "id": "A-generate-teams.05",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:802; app src/pages/meet/index.tsx:810",
+   "reuse": "REUSED meets/participants/bulk teamKey",
+   "note": null
+  },
+  {
+   "id": "A-see-receipt.02",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:1217",
+   "reuse": "REUSED the participant sheet",
+   "note": null
+  },
+  {
+   "id": "A-promote-meet.02",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/blocks/meet-promote.tsx:63",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "A-promote-meet.04",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "DEFERRED",
+   "evidence": "engine meets/promote takes audience club|proximity|all only (modules/meets/endpoints/promote.ts)",
+   "reuse": null,
+   "note": "Level / gender / age filters need MeetExtras.promoteAudience to take them; the audience is already level-banded by the meet. Engine work for a later lane."
+  },
+  {
+   "id": "A-promote-meet.06",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/blocks/meet-promote.tsx:56",
+   "reuse": "REUSED ShareSheet shareLink + lib/share-text activityShareText",
+   "note": null
+  },
+  {
+   "id": "A-share-sheet.06",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/components/ShareSheet.tsx:80",
+   "reuse": "EXTENDED components/ShareSheet (one share door for every page)",
+   "note": null
+  },
+  {
+   "id": "A-share-chat.01",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/components/ShareSheet.tsx:40",
+   "reuse": "REUSED native chat/history + lib/chat-v2 sendMeetCard (the chat composer's meet card)",
+   "note": null
+  },
+  {
+   "id": "A-invite-to-activity.02",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/components/InviteToActivity.tsx:48",
+   "reuse": "EXTENDED components/InviteToActivity",
+   "note": null
+  },
+  {
+   "id": "A-join-deeplink.02",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:317",
+   "reuse": "REUSED clubs/join",
+   "note": "Same build as B-quick-join.01 (the deep link lands on the meet page, whose join now offers the club)."
+  },
+  {
+   "id": "A-join-deeplink.03",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:301",
+   "reuse": "REUSED meets/level",
+   "note": "Same build as A-meet-detail.25."
+  },
+  {
+   "id": "A-short-links.01",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "DEFERRED",
+   "evidence": "app src/pages/meet/index.tsx:940",
+   "reuse": null,
+   "note": "A /m/<code> short link is an nginx rewrite on BOTH public hosts (shared proxy, outside this lane); the join code is already shown on the meet and resolved by Discover search."
+  },
+  {
+   "id": "A-meet-listings-popup.01",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meets/index.tsx:264",
+   "reuse": "REUSED Discover chip + the meet page's existing listing note (blocks/meet-photos)",
+   "note": "Chose a Listing chip on the card + the explainer on the meet page over Reclub's interrupting popup."
+  },
+  {
+   "id": "A-meet-listings-popup.02",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "engine MeetService.join refuses a listing; no saved-activity store",
+   "reuse": null,
+   "note": "Saving a listing to My activities needs an engine bookmark (or a spectator row allowed on listings)."
+  },
+  {
+   "id": "D-meet-custom-match.03",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:820; app src/pages/meet/index.tsx:822",
+   "reuse": "REUSED TeamSwatch + meets/matches/upsert",
+   "note": null
+  },
+  {
+   "id": "D-meet-custom-match.04",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/meet/index.tsx:471",
+   "reuse": null,
+   "note": "W1-B1 Edit match (teams / round / court)."
+  },
+  {
+   "id": "D-meet-score-sheet.02",
+   "family": "meet host tools",
+   "triage_status": "MISSING",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/meet/index.tsx:471",
+   "reuse": null,
+   "note": "Round + court are set on the match's Edit sheet (the ••• menu beside the score), not on the numpad sheet."
+  },
+  {
+   "id": "D-meet-score-sheet.03",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/meet/index.tsx:468",
+   "reuse": null,
+   "note": "Edit + Delete in the match menu."
+  },
+  {
+   "id": "D-meet-score-sheet.04",
+   "family": "meet host tools",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:422",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "A-meet-form.06",
+   "family": "meet form",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/meet-create/index.tsx:51",
+   "reuse": "REUSED Chips",
+   "note": "Hours to 1 day built; 2+ day meets need the engine durationMinutes cap (1440) raised — left for the engine owner."
+  },
+  {
+   "id": "A-meet-form.15",
+   "family": "meet form",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet-create/index.tsx:226",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "A-meet-form.21",
+   "family": "meet form",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet-create/index.tsx:60",
+   "reuse": "engine already takes 0–168 h",
+   "note": null
+  },
+  {
+   "id": "A-meet-form.26",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/meet-create/index.tsx:279",
+   "reuse": null,
+   "note": "W1-B1 Hosts & coaches strip (flag on), applied on create."
+  },
+  {
+   "id": "A-select-club.01",
+   "family": "meet form",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet-create/index.tsx:183",
+   "reuse": "REUSED clubs/mine role + clubs/settings/show createMeetPermission",
+   "note": null
+  },
+  {
+   "id": "A-select-club.02",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/meet-create/index.tsx:276",
+   "reuse": null,
+   "note": "W1-B1 club tag chips under the chosen club."
+  },
+  {
+   "id": "A-club-activity-picker.02",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/meet-create/index.tsx:276",
+   "reuse": null,
+   "note": "Duplicate of A-select-club.02."
+  },
+  {
+   "id": "A-club-activity-picker.03",
+   "family": "meet form",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet-create/index.tsx:274",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "A-meet-hosts-picker.03",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "DESIGN_DIFF",
+   "evidence": "app src/components/HostPicker.tsx:22",
+   "reuse": null,
+   "note": "The creator is always the host in GripBat, so \"Need at least 1 host\" can never fire; picks apply live, so there is nothing to discard. \"Invite {name} to Reclub\" = the share sheet."
+  },
+  {
+   "id": "A-upsert-schedule.06",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/club-schedule/index.tsx:47",
+   "reuse": "REUSED engine ClubSchedule levelBasis/gateType (columns existed, form lacked them)",
+   "note": "Level basis + level gate built; Meet feature (listing) and DUPR-account gate on a schedule need ClubSchedule columns (migration) — deferred."
+  },
+  {
+   "id": "A-upsert-schedule.09",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "engine ClubSchedule has no cancellationFreezeHours (modules/clubs/models/ClubSchedule.ts)",
+   "reuse": null,
+   "note": "Column + migration + copy onto each created meet (ClubScheduleService)."
+  },
+  {
+   "id": "A-upsert-schedule.11",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "no schedule-participants store in the engine",
+   "reuse": null,
+   "note": "A schedule participants table + the sweep copying roles onto each meet: engine M with migration."
+  },
+  {
+   "id": "A-upsert-schedule.14",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-schedule/index.tsx:144",
+   "reuse": "REUSED clubs/settings/update venueIds",
+   "note": null
+  },
+  {
+   "id": "A-confirm-schedule-meets.01",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-schedule/index.tsx:124",
+   "reuse": "NEW occurrence math on the client (mirrors the schedule's weekday / startTime / publishLeadHours)",
+   "note": null
+  },
+  {
+   "id": "A-confirm-schedule-meets.02",
+   "family": "meet form",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-schedule/index.tsx:135",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "A-meet-becomes-past.01",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "engine clubs/schedules/update returns updatedMeetIds only",
+   "reuse": null,
+   "note": "Needs the engine to return the meets it skipped because they would move into the past."
+  },
+  {
+   "id": "A-schedule-detail.02",
+   "family": "meet form",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/club-schedule/index.tsx:252",
+   "reuse": "REUSED schedule.hostId",
+   "note": "Host variant built; the coach variant needs schedule roles (A-upsert-schedule.11)."
+  },
+  {
+   "id": "A-schedule-detail.04",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "no per-member opt-out on schedule invitations",
+   "reuse": null,
+   "note": "Needs an engine opt-out (tag-based invites have no exclusion list)."
+  },
+  {
+   "id": "A-schedule-participants.01",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "as A-upsert-schedule.11",
+   "reuse": null,
+   "note": "Same engine table."
+  },
+  {
+   "id": "A-create-meet-permission.02",
+   "family": "meet form",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-admin/index.tsx:173",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "A-schedule-detail.06",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-schedule/index.tsx:257",
+   "reuse": "REUSED clubMeets(past) filtered by seriesId",
+   "note": null
+  },
+  {
+   "id": "A-scheduled-meet-detail.01",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-schedule/index.tsx:263",
+   "reuse": "REUSED clubs/schedules/run for Create now",
+   "note": null
+  },
+  {
+   "id": "B-my-clubs.03",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:568; engine modules/clubs/endpoints/invitations-mine.ts:41; I1 PASS, I2 PASS, I3 PASS, U6 PASS",
+   "reuse": "NEW door clubs/invitations/mine (searched: clubs/invitations/for-user is the admin view of one player; Misskey has no club invitations)",
+   "note": null
+  },
+  {
+   "id": "B-my-clubs.04",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:581; U6 PASS",
+   "reuse": "REUSED clubs/mine role",
+   "note": null
+  },
+  {
+   "id": "B-my-clubs.05",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/community/index.tsx:368",
+   "reuse": "REUSED clubMeets + clubs/requests",
+   "note": "Upcoming-activities and new-requests counts built; my tags on the row not shown (needs a per-club members read per card)."
+  },
+  {
+   "id": "B-my-clubs.06",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:278",
+   "reuse": "REUSED clubs/invitations/respond, clubs/requests/cancel",
+   "note": null
+  },
+  {
+   "id": "B-my-clubs.08",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:286",
+   "reuse": "REUSED lib/store (per device)",
+   "note": null
+  },
+  {
+   "id": "B-tutorial.01",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/lib/club-levels.ts:12; app src/pages/community/index.tsx:544",
+   "reuse": "NEW copy list (lib/club-levels)",
+   "note": "Chose six rows on the create card over swipeable panes: the same six lines, readable at a glance before the name field."
+  },
+  {
+   "id": "B-wiz-sport.02",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:112; app src/lib/club-levels.ts:8",
+   "reuse": "REUSED clubs/settings/update level",
+   "note": "Chose half-step levels (2.0 … 5.0+) over Reclub's quarter steps so a club reads in the same units as GripBat's meet bands and ratings."
+  },
+  {
+   "id": "B-wiz-name.04",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "engine modules/clubs/club-names.ts:13; engine server/api/endpoints/channels/create.ts:16; N1 PASS, N2 PASS, N3 PASS, N4 PASS",
+   "reuse": "EXTENDED native channels/create + channels/update (searched: Misskey meta.preservedUsernames covers user names only)",
+   "note": null
+  },
+  {
+   "id": "B-onboard-join-club.02",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/onboard/index.tsx:43",
+   "reuse": "REUSED channels/search (discover clubsNear) + clubs/by-code",
+   "note": null
+  },
+  {
+   "id": "B-onboard-join-club.03",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/onboard/index.tsx:139",
+   "reuse": "REUSED channels/search lat/lng distanceKm + meet-extras fmtKm",
+   "note": null
+  },
+  {
+   "id": "B-onboard-join-club.05",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/onboard/index.tsx:140",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "B-quick-join.01",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet/index.tsx:317",
+   "reuse": "REUSED clubs/join (the club's own gate decides member / request)",
+   "note": null
+  },
+  {
+   "id": "B-club-home.07",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:464; U7 PASS",
+   "reuse": "REUSED ShareSheet + the Let's play chooser",
+   "note": null
+  },
+  {
+   "id": "B-club-home.09",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:152; U7 PASS",
+   "reuse": "REUSED native channels/timeline",
+   "note": null
+  },
+  {
+   "id": "B-club-home.10",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:461",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "B-club-home.13",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-admin/index.tsx:66",
+   "reuse": "REUSED clubMeets venueId + clubs/settings/update venueIds",
+   "note": "Chose a \"Lock your club's venues in\" card in Manage club › Venues over a one-time overlay on the club page: it stays where the admin manages venues and cannot be missed by dismissing it."
+  },
+  {
+   "id": "B-club-home.19",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/components/ClubTier.tsx:43",
+   "reuse": null,
+   "note": "CLUB-TIERS-V1 Cancel request (engine clubs/requests/cancel), W1_TIERS_V1 on."
+  },
+  {
+   "id": "B-club-home.24",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/community/index.tsx:436",
+   "reuse": null,
+   "note": "The in-app share sheet says \"· N activities\"; the server-rendered link preview (OG-SHARE) is unchanged — engine owner."
+  },
+  {
+   "id": "B-club-about.01",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:461",
+   "reuse": null,
+   "note": "Duplicate of B-club-home.10."
+  },
+  {
+   "id": "B-club-about.02",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/community/index.tsx:452",
+   "reuse": null,
+   "note": "CLUB-TIERS-V1 Followers tile."
+  },
+  {
+   "id": "B-club-about.03",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:462",
+   "reuse": "REUSED clubs/schedules/list weekdays",
+   "note": null
+  },
+  {
+   "id": "B-club-detail.04",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:150",
+   "reuse": "REUSED competitions/list scope club",
+   "note": null
+  },
+  {
+   "id": "B-club-detail.05",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/community/index.tsx:490",
+   "reuse": null,
+   "note": "W1-B2 Open / Past tabs; copy aligned to Reclub's in this lane."
+  },
+  {
+   "id": "B-club-detail.10",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/feed/index.tsx:110; app src/pages/feed/index.tsx:448",
+   "reuse": "REUSED native note hashtags (#question → note.tags)",
+   "note": "Chose Misskey's own hashtag to mark a question over a new post-type column: no migration, searchable, and the card shows the pill."
+  },
+  {
+   "id": "B-club-detail.11",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:265; app src/pages/community/index.tsx:507",
+   "reuse": "REUSED native notes/create with fileIds (a photo post, the Photos pane's own source)",
+   "note": null
+  },
+  {
+   "id": "B-club-detail.15",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:520",
+   "reuse": "REUSED clubs/invitations/list, clubs/requests, clubs/requests/decide",
+   "note": null
+  },
+  {
+   "id": "B-club-detail.19",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/components/ClubFollowers.tsx:21; app src/lib/club-tiers.ts:52",
+   "reuse": null,
+   "note": "CLUB-TIERS-V1 follower list with Remove."
+  },
+  {
+   "id": "B-club-detail.22",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-admin/index.tsx:251",
+   "reuse": "REUSED channel followersCount",
+   "note": null
+  },
+  {
+   "id": "B-club-detail.23",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/club-admin/index.tsx:254",
+   "reuse": null,
+   "note": "Rows open the player; Most stats / per-kudo-dimension / See all need clubs/insights to return them — engine."
+  },
+  {
+   "id": "B-club-detail.24",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-admin/index.tsx:253",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "B-club-menu.02",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/pages/community/index.tsx:218",
+   "reuse": null,
+   "note": "W1-B2 in-app invite (clubs/invitations/create) in the Members pane."
+  },
+  {
+   "id": "B-club-menu.05",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/feed/index.tsx:110",
+   "reuse": "REUSED native hashtags",
+   "note": "Duplicate of B-club-detail.10."
+  },
+  {
+   "id": "B-club-menu.12",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:258; app src/pages/chat/index.tsx:46",
+   "reuse": "REUSED the Inbox support account (lib/config SUPPORT_USERNAME) + pages/chat",
+   "note": null
+  },
+  {
+   "id": "B-group-user.02",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "no engine read of one member's meets in one club",
+   "reuse": null,
+   "note": "Needs meets/list by (channelId, userId) — engine."
+  },
+  {
+   "id": "B-insight-rankings.01",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/club-admin/index.tsx:257",
+   "reuse": null,
+   "note": "Tap → player built; the full list with load more needs clubs/insights paging — engine."
+  },
+  {
+   "id": "B-claim.01",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:421",
+   "reuse": "REUSED Help › Run a club",
+   "note": null
+  },
+  {
+   "id": "B-set-hub.02",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:241",
+   "reuse": "REUSED as B-club-menu.12",
+   "note": "The club kebab (where admins also find Settings) carries it."
+  },
+  {
+   "id": "B-set-profile.01",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-admin/index.tsx:22",
+   "reuse": "REUSED lib/club-levels",
+   "note": null
+  },
+  {
+   "id": "B-set-profile.03",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DESIGN_DIFF",
+   "evidence": "app src/pages/club-admin/index.tsx:150",
+   "reuse": null,
+   "note": "The six-character club code + the invite link already do what the vanity handle does (find / join); a slug would be a third identifier."
+  },
+  {
+   "id": "B-set-privacy.02",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "DEFERRED",
+   "evidence": "club_setting has no invite/approve permission column (modules/clubs/models/ClubSetting.ts)",
+   "reuse": null,
+   "note": "Member-gated invites/approvals: column + ClubService permission change + migration."
+  },
+  {
+   "id": "B-set-comms.03",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "no allowOutsideLinks in club_setting",
+   "reuse": null,
+   "note": "Column + a notes/chat create hook refusing other clubs' meet links + migration."
+  },
+  {
+   "id": "B-tag-manage.04",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/club-tags/index.tsx:44",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "B-select-club-members.01",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/components/HostPicker.tsx:22",
+   "reuse": null,
+   "note": "W1-B1 club-member picker (search, admins / members) for co-hosts and coaches."
+  },
+  {
+   "id": "B-invite-to-group.02",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/community/index.tsx:529",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "B-invite-friends.01",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "DEFERRED",
+   "evidence": "app src/pages/meet-create/index.tsx:202",
+   "reuse": null,
+   "note": "The meet form's invite sheet already merges network / following / club; the tabbed Friends / Saved / Recent / Club-tags picker for CLUB invites is a separate component build."
+  },
+  {
+   "id": "B-invite-friends.02",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/meet-create/index.tsx:61",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "B-select-group.01",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "",
+   "reuse": null,
+   "note": "Attaching a club card to a post needs a post-attachment renderer (with B-content-editor.08)."
+  },
+  {
+   "id": "B-content-editor.02",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "app src/pages/feed/index.tsx:155",
+   "reuse": null,
+   "note": "A title / rich text needs an MFM renderer in the feed card (text renders raw today); ship both together."
+  },
+  {
+   "id": "B-content-editor.03",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "",
+   "reuse": null,
+   "note": "As B-content-editor.02."
+  },
+  {
+   "id": "B-content-editor.06",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/feed/index.tsx:448",
+   "reuse": "REUSED native hashtags",
+   "note": "Announcement stays the club page's pinned-post flow (clubs/posts/announce)."
+  },
+  {
+   "id": "B-content-editor.07",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "",
+   "reuse": null,
+   "note": "Per-post audience (admins / members / public) must be enforced by the engine on channels/timeline."
+  },
+  {
+   "id": "B-content-editor.08",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "app src/components/ShareSheet.tsx:40",
+   "reuse": null,
+   "note": "A meet can now be shared into a chat as a card; attaching it to a POST needs the post-attachment renderer."
+  },
+  {
+   "id": "B-content-editor.09",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "DEFERRED",
+   "evidence": "",
+   "reuse": null,
+   "note": "Comes with allowOutsideLinks (B-set-comms.03)."
+  },
+  {
+   "id": "B-select-channel.02",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "DEFERRED",
+   "evidence": "",
+   "reuse": null,
+   "note": "Competition channels / My feed as post targets."
+  },
+  {
+   "id": "B-content-detail.03",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/feed/index.tsx:403",
+   "reuse": "REUSED native notes/reactions",
+   "note": null
+  },
+  {
+   "id": "B-content-detail.05",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "app src/pages/feed/index.tsx:476",
+   "reuse": null,
+   "note": null
+  },
+  {
+   "id": "B-create-poll.02",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW_PARTIAL",
+   "evidence": "app src/pages/feed/index.tsx:413",
+   "reuse": "REUSED native poll.multiple",
+   "note": "Multiple choice built; \"allow adding new options\" needs a native poll change."
+  },
+  {
+   "id": "B-create-poll.03",
+   "family": "clubs",
+   "triage_status": "PARTIAL",
+   "status": "DEFERRED",
+   "evidence": "",
+   "reuse": null,
+   "note": "Misskey votes are final by design; an unvote is a native PollService change."
+  },
+  {
+   "id": "B-poll-voter.01",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_NOW",
+   "evidence": "engine modules/clubs/endpoints/polls-voters.ts:13; app src/pages/feed/index.tsx:405; V1 PASS, V2 PASS, V3 PASS",
+   "reuse": "NEW door clubs/polls/voters over native poll_vote (searched: Misskey never lists voters)",
+   "note": "Voters are shown to the club's members only — a public Misskey poll stays private."
+  },
+  {
+   "id": "B-link-club.02",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DESIGN_DIFF",
+   "evidence": "",
+   "reuse": null,
+   "note": "As B-set-profile.03."
+  },
+  {
+   "id": "B-subscriber-popup.01",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "BUILT_ALREADY",
+   "evidence": "app src/components/ClubTier.tsx:61",
+   "reuse": null,
+   "note": "CLUB-TIERS-V1 explains follower vs member on the club page."
+  },
+  {
+   "id": "E-chat-room.21",
+   "family": "clubs",
+   "triage_status": "MISSING",
+   "status": "DEFERRED",
+   "evidence": "",
+   "reuse": null,
+   "note": "Comes with allowOutsideLinks (B-set-comms.03)."
+  }
+ ],
+ "families_closed": [
+  {
+   "name": "meet footer states (confirmed / hold / maybe / declined / coach / referee / blocked / freeze / profile gate / join the club)",
+   "found": 11,
+   "fixed": 11,
+   "fixed_in_part": 0,
+   "deferred": [],
+   "recheck": "UI U1d/U5, API P1-P3/B1-B4"
+  },
+  {
+   "name": "meet Details facts (club row, venue menu, contact hosts, notes, friends joining)",
+   "found": 6,
+   "fixed": 5,
+   "fixed_in_part": 0,
+   "deferred": [
+    "A-meet-notes.03"
+   ],
+   "recheck": "UI U1a-U1c"
+  },
+  {
+   "name": "roster + participant sheet",
+   "found": 11,
+   "fixed": 11,
+   "fixed_in_part": 2,
+   "deferred": [],
+   "recheck": "API C1-C2/F1-F2, UI U3a/U3b"
+  },
+  {
+   "name": "matches host tools",
+   "found": 9,
+   "fixed": 9,
+   "fixed_in_part": 0,
+   "deferred": [],
+   "recheck": "UI U4"
+  },
+  {
+   "name": "meet lifecycle doors (delete, chat refresh)",
+   "found": 2,
+   "fixed": 2,
+   "fixed_in_part": 0,
+   "deferred": [],
+   "recheck": "API D1-D7, R0-R3, UI U2"
+  },
+  {
+   "name": "share / promote / invite into a meet",
+   "found": 11,
+   "fixed": 8,
+   "fixed_in_part": 0,
+   "deferred": [
+    "A-promote-meet.04",
+    "A-short-links.01",
+    "A-meet-listings-popup.02"
+   ],
+   "recheck": "app ShareSheet / meet-promote / InviteToActivity"
+  },
+  {
+   "name": "meet form",
+   "found": 7,
+   "fixed": 7,
+   "fixed_in_part": 1,
+   "deferred": [],
+   "recheck": "UI U8"
+  },
+  {
+   "name": "club schedules",
+   "found": 12,
+   "fixed": 7,
+   "fixed_in_part": 2,
+   "deferred": [
+    "A-upsert-schedule.09",
+    "A-upsert-schedule.11",
+    "A-meet-becomes-past.01",
+    "A-schedule-detail.04",
+    "A-schedule-participants.01"
+   ],
+   "recheck": "app club-schedule"
+  },
+  {
+   "name": "my clubs · club page · manage club · onboarding",
+   "found": 36,
+   "fixed": 31,
+   "fixed_in_part": 4,
+   "deferred": [
+    "B-group-user.02",
+    "B-set-privacy.02",
+    "B-set-comms.03",
+    "B-invite-friends.01",
+    "E-chat-room.21"
+   ],
+   "recheck": "API I1-I3/N1-N4, UI U6/U7"
+  },
+  {
+   "name": "club posts",
+   "found": 15,
+   "fixed": 7,
+   "fixed_in_part": 1,
+   "deferred": [
+    "B-select-group.01",
+    "B-content-editor.02",
+    "B-content-editor.03",
+    "B-content-editor.07",
+    "B-content-editor.08",
+    "B-content-editor.09",
+    "B-select-channel.02",
+    "B-create-poll.03"
+   ],
+   "recheck": "API V1-V3"
+  }
+ ],
+ "evidence": [
+  "engine commits on origin/master: 49768e4292 T3-MEET-HOST-V1, 6a855e150e T3-CLUBS-V1 (no migration; tsc 9 = baseline)",
+  "engine running: social-engine-web-1 and social-engine-web-uat-1 both sha256:2f6cf31ab06f460f927639b0fd8565907a0b5c875a4ff4d311d9650ca64d6c31 (equal), marker \"clubs/polls/voters\" grepped in both built trees",
+  "app commits on master: 1a24d33 (code) + 2e1f0c8 (EN/繁/简 rows, 154 strings); deployed via tools/deploy-boyau.sh (lock) EXIT=0, bundles in /var/www/boyau-app and /var/www/boyau-uat-app carry meets/chat-refresh, clubs/polls/voters, clubs/invitations/mine",
+  "gates on the integrated tree: tsc 0, ui-guard OK, class-owner OK, inner-component OK, control-guard PASS, theme reach OK, i18n-coverage OK (2 missing, both other files), engine preflight OK",
+  "probes/t3-clubs-meets.api.json — 32/32 pass (UAT engine, personas host-ken / clubadmin-tom / clubowner-mei / player-amy)",
+  "probes/t3-clubs-meets.ui.json — 13/13 pass (headless Chrome 412 px, screenshots /root/walk/_t3cm-*.png)",
+  "G13: every fixture \"[probe] t3 …\"-named and removed (meets cancelled, rooms / notes deleted, clubs archived); probecount social = 0; se_sbx leftovers are other lanes' L6-S* fixtures"
+ ],
+ "reuse_record": {
+  "searched": [
+   "Misskey /root/social-engine/packages/backend/src (channels, notes/reactions, poll_vote, hashtags, chat rooms, blocking, meta.preservedUsernames)",
+   "hkpl /root/hkpl-server (venues/teams — none of these items needed league data)",
+   "app src (ShareSheet, InviteToActivity, HostPicker, ClubTier, meet-extras, chat-v2 sendMeetCard, club-tiers)"
+  ],
+  "new_pieces": [
+   "engine meets/delete + meets/chat-refresh (meet lifecycle is GripBat's module; built on MeetService + native ChatService)",
+   "engine clubs/invitations/mine + clubs/polls/voters (club concepts; read native poll_vote / club_invitation)",
+   "engine club-names.ts (Misskey reserves user names only)",
+   "app lib/meet-host-tools.ts (doors + printable scoresheet)",
+   "app lib/club-levels.ts (level chips + tutorial copy)"
+  ]
+ },
+ "g15_choices": [
+  {
+   "id": "A-meet-detail.07",
+   "choice": "Chose Reclub's rule (delete only an untouched meet; anything with a roster or matches is cancelled so people are told) — same as Meetup/Spond, where delete is for drafts and cancel notifies."
+  },
+  {
+   "id": "A-meet-detail.13",
+   "choice": "Chose a direct chat with the host (or the co-host the reader picks) over Reclub's host group room: no new room per question, and the host sees it in the inbox they already read."
+  },
+  {
+   "id": "A-meet-detail.25",
+   "choice": "Chose to save the missing fact to the profile once (every restricted meet reuses it) over Reclub's per-join prompt."
+  },
+  {
+   "id": "A-meet-detail.45",
+   "choice": "Show club tags built. Chose per-viewer Show settings over Reclub's host-wide persisted visibility: each player reads the columns they care about; nothing the host sets overrides a reader."
+  },
+  {
+   "id": "A-meet-listings-popup.01",
+   "choice": "Chose a Listing chip on the card + the explainer on the meet page over Reclub's interrupting popup."
+  },
+  {
+   "id": "B-tutorial.01",
+   "choice": "Chose six rows on the create card over swipeable panes: the same six lines, readable at a glance before the name field."
+  },
+  {
+   "id": "B-wiz-sport.02",
+   "choice": "Chose half-step levels (2.0 … 5.0+) over Reclub's quarter steps so a club reads in the same units as GripBat's meet bands and ratings."
+  },
+  {
+   "id": "B-club-home.13",
+   "choice": "Chose a \"Lock your club's venues in\" card in Manage club › Venues over a one-time overlay on the club page: it stays where the admin manages venues and cannot be missed by dismissing it."
+  },
+  {
+   "id": "B-club-detail.10",
+   "choice": "Chose Misskey's own hashtag to mark a question over a new post-type column: no migration, searchable, and the card shows the pill."
+  }
+ ],
+ "deferred": [
+  {
+   "id": "A-meet-notes.03",
+   "status": "DEFERRED",
+   "reason": "Needs a meet_match column + migration rehearsed on a pg_dump copy; not in this window."
+  },
+  {
+   "id": "A-meet-detail.45",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Show club tags built. Chose per-viewer Show settings over Reclub's host-wide persisted visibility: each player reads the columns they care about; nothing the host sets overrides a reader."
+  },
+  {
+   "id": "A-meet-detail.47",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Guest / Reserved chip built; the no-show count is on the player profile (player page \"No showed N times\"), Swap (replace me with a member) deferred — needs an engine swap door."
+  },
+  {
+   "id": "A-promote-meet.04",
+   "status": "DEFERRED",
+   "reason": "Level / gender / age filters need MeetExtras.promoteAudience to take them; the audience is already level-banded by the meet. Engine work for a later lane."
+  },
+  {
+   "id": "A-short-links.01",
+   "status": "DEFERRED",
+   "reason": "A /m/<code> short link is an nginx rewrite on BOTH public hosts (shared proxy, outside this lane); the join code is already shown on the meet and resolved by Discover search."
+  },
+  {
+   "id": "A-meet-listings-popup.02",
+   "status": "DEFERRED",
+   "reason": "Saving a listing to My activities needs an engine bookmark (or a spectator row allowed on listings)."
+  },
+  {
+   "id": "A-meet-form.06",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Hours to 1 day built; 2+ day meets need the engine durationMinutes cap (1440) raised — left for the engine owner."
+  },
+  {
+   "id": "A-upsert-schedule.06",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Level basis + level gate built; Meet feature (listing) and DUPR-account gate on a schedule need ClubSchedule columns (migration) — deferred."
+  },
+  {
+   "id": "A-upsert-schedule.09",
+   "status": "DEFERRED",
+   "reason": "Column + migration + copy onto each created meet (ClubScheduleService)."
+  },
+  {
+   "id": "A-upsert-schedule.11",
+   "status": "DEFERRED",
+   "reason": "A schedule participants table + the sweep copying roles onto each meet: engine M with migration."
+  },
+  {
+   "id": "A-meet-becomes-past.01",
+   "status": "DEFERRED",
+   "reason": "Needs the engine to return the meets it skipped because they would move into the past."
+  },
+  {
+   "id": "A-schedule-detail.02",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Host variant built; the coach variant needs schedule roles (A-upsert-schedule.11)."
+  },
+  {
+   "id": "A-schedule-detail.04",
+   "status": "DEFERRED",
+   "reason": "Needs an engine opt-out (tag-based invites have no exclusion list)."
+  },
+  {
+   "id": "A-schedule-participants.01",
+   "status": "DEFERRED",
+   "reason": "Same engine table."
+  },
+  {
+   "id": "B-my-clubs.05",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Upcoming-activities and new-requests counts built; my tags on the row not shown (needs a per-club members read per card)."
+  },
+  {
+   "id": "B-club-home.24",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "The in-app share sheet says \"· N activities\"; the server-rendered link preview (OG-SHARE) is unchanged — engine owner."
+  },
+  {
+   "id": "B-club-detail.23",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Rows open the player; Most stats / per-kudo-dimension / See all need clubs/insights to return them — engine."
+  },
+  {
+   "id": "B-group-user.02",
+   "status": "DEFERRED",
+   "reason": "Needs meets/list by (channelId, userId) — engine."
+  },
+  {
+   "id": "B-insight-rankings.01",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Tap → player built; the full list with load more needs clubs/insights paging — engine."
+  },
+  {
+   "id": "B-set-privacy.02",
+   "status": "DEFERRED",
+   "reason": "Member-gated invites/approvals: column + ClubService permission change + migration."
+  },
+  {
+   "id": "B-set-comms.03",
+   "status": "DEFERRED",
+   "reason": "Column + a notes/chat create hook refusing other clubs' meet links + migration."
+  },
+  {
+   "id": "B-invite-friends.01",
+   "status": "DEFERRED",
+   "reason": "The meet form's invite sheet already merges network / following / club; the tabbed Friends / Saved / Recent / Club-tags picker for CLUB invites is a separate component build."
+  },
+  {
+   "id": "B-select-group.01",
+   "status": "DEFERRED",
+   "reason": "Attaching a club card to a post needs a post-attachment renderer (with B-content-editor.08)."
+  },
+  {
+   "id": "B-content-editor.02",
+   "status": "DEFERRED",
+   "reason": "A title / rich text needs an MFM renderer in the feed card (text renders raw today); ship both together."
+  },
+  {
+   "id": "B-content-editor.03",
+   "status": "DEFERRED",
+   "reason": "As B-content-editor.02."
+  },
+  {
+   "id": "B-content-editor.07",
+   "status": "DEFERRED",
+   "reason": "Per-post audience (admins / members / public) must be enforced by the engine on channels/timeline."
+  },
+  {
+   "id": "B-content-editor.08",
+   "status": "DEFERRED",
+   "reason": "A meet can now be shared into a chat as a card; attaching it to a POST needs the post-attachment renderer."
+  },
+  {
+   "id": "B-content-editor.09",
+   "status": "DEFERRED",
+   "reason": "Comes with allowOutsideLinks (B-set-comms.03)."
+  },
+  {
+   "id": "B-select-channel.02",
+   "status": "DEFERRED",
+   "reason": "Competition channels / My feed as post targets."
+  },
+  {
+   "id": "B-create-poll.02",
+   "status": "BUILT_NOW_PARTIAL",
+   "reason": "Multiple choice built; \"allow adding new options\" needs a native poll change."
+  },
+  {
+   "id": "B-create-poll.03",
+   "status": "DEFERRED",
+   "reason": "Misskey votes are final by design; an unvote is a native PollService change."
+  },
+  {
+   "id": "E-chat-room.21",
+   "status": "DEFERRED",
+   "reason": "Comes with allowOutsideLinks (B-set-comms.03)."
+  }
+ ],
+ "app_head": "51cb1e5 COMP-T3-V1 (app): the competitions tail — hub, wizard, match and team pages on the engine's new doors"
+}
