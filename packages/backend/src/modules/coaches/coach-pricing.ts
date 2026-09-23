@@ -88,6 +88,32 @@ export function priceForGroup(blob: PriceTiers | null | undefined, count: number
 	return blob.tiers[blob.tiers.length - 1];
 }
 
+/*
+ * GROUP-PRICE-V1 (2026-09-23, operator decision on coaching-ui needs_operator #2): a student booking into a GROUP
+ * slot is never surprised. Before this, the first booker into an empty group slot was locked at the band for a group
+ * of ONE — the private rate — although they had booked a group lesson. Now:
+ *   • A GROUP slot is one whose capacity is > 1 and whose coach set a band for 2+ people inside that capacity.
+ *   • A booker in a group slot is priced at the band the booking LANDS in, floored at the smallest group band — the
+ *     group rate they chose — never the private band. The price is still LOCKED at booking (research #2).
+ *   • If the slot ends up running private, nothing here raises the price: the coach agrees the private rate with the
+ *     student first (the app says so on the confirm sheet and on the coach's roster). No automatic solo-band charge.
+ * A private-only slot (capacity 1, or no group band) prices exactly as before.
+ */
+export const GROUP_PRICE_V1_MARK = 'group-price-v1-b2c9';
+
+/** The smallest group size (>= 2) the coach priced inside this capacity, or null when this is not a group slot. */
+export function groupFloor(blob: PriceTiers | null | undefined, capacity: number): number | null {
+	if (!blob || !Array.isArray(blob.tiers) || capacity <= 1) return null;
+	const b = blob.tiers.find(t => t.minParticipants >= 2 && t.minParticipants <= capacity);
+	return b ? b.minParticipants : null;
+}
+
+/** The band a booking lands in when the lesson will hold `count` confirmed students (the booker included). */
+export function bookingBand(blob: PriceTiers | null | undefined, capacity: number, count: number): PriceBand | null {
+	const floor = groupFloor(blob, capacity);
+	return priceForGroup(blob, floor != null ? Math.max(count, floor) : count);
+}
+
 export function normaliseCancellation(input: unknown): CancellationPolicy {
 	const o = (input && typeof input === 'object') ? input as Partial<CancellationPolicy> : {};
 	let h = Number(o.windowHours);

@@ -18,7 +18,7 @@ import { IdService } from '@/core/IdService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { bindThis } from '@/decorators.js';
-import { COACHING_V1_MARK, normalisePriceTiers, normaliseCancellation, normaliseCurrency, priceForGroup, type PriceTiers, type CancellationPolicy, type PriceBand } from '@/modules/coaches/coach-pricing.js';
+import { COACHING_V1_MARK, GROUP_PRICE_V1_MARK, normalisePriceTiers, normaliseCancellation, normaliseCurrency, priceForGroup, bookingBand, groupFloor, type PriceTiers, type CancellationPolicy, type PriceBand } from '@/modules/coaches/coach-pricing.js';
 
 // venue-local time: the schedule's timezone fixes the wall clock; occurrences are stored/returned in UTC (research #5).
 const TZ_OFFSET_MIN: Record<string, number> = { 'Asia/Hong_Kong': 480, 'Asia/Shanghai': 480, 'Asia/Macau': 480, 'Asia/Taipei': 480, 'Asia/Singapore': 480, 'Asia/Bangkok': 420, 'Asia/Tokyo': 540, UTC: 0 };
@@ -212,7 +212,9 @@ export class CoachScheduleService {
 	// ------------------------------------------------------------------------------------ materialisation
 	/** Lesson meet settings from a schedule + a start time. hostPlays=false: the coach hosts, students take the seats. */
 	private lessonData(s: MiCoachSchedule, startAt: Date): Partial<MiMeet> & Pick<MiMeet, 'name' | 'startAt' | 'durationMinutes' | 'capacity'> {
-		const band1 = priceForGroup(s.priceTiers, 1);
+		// GROUP-PRICE-V1: the meet's fee is the ENTRY price a booker lands in (the group rate in a group slot), so the
+		// shared meet screen and the coaching screens show the same number.
+		const band1 = bookingBand(s.priceTiers, s.capacity, 1);
 		return {
 			name: s.name, startAt, durationMinutes: s.durationMinutes, capacity: s.capacity, channelId: s.channelId, sport: s.sport, timezone: s.timezone,
 			venueId: s.venueId, venueName: s.venueName, venueAddress: s.venueAddress, lat: s.lat, lng: s.lng, hostPlays: false,
@@ -278,7 +280,7 @@ export class CoachScheduleService {
 		let p: MiMeetParticipant;
 		try { p = await this.meetService.hostAdd(meet, { userId, status: 'confirmed' }); }
 		catch { p = await this.meetService.hostAdd(meet, { userId, status: 'waitlisted' }); }
-		const price = opts.agreedPrice ?? priceForGroup(meet.priceTiers ?? null, meet.confirmed + 1)?.pricePerPerson ?? null;
+		const price = opts.agreedPrice ?? bookingBand(meet.priceTiers ?? null, meet.capacity, meet.confirmed + 1)?.pricePerPerson ?? null;
 		const currency = normaliseCurrency(opts.agreedCurrency ?? priceForGroup(meet.priceTiers ?? null, 1)?.currency ?? 'HKD');
 		const tags = opts.prepaid ? [...new Set([...(p.tags ?? []), 'punch'])] : (p.tags ?? []);
 		await this.meetParticipantsRepository.update(p.id, { agreedPrice: price, agreedCurrency: currency, enrollmentId: opts.enrollmentId ?? null, tags });
@@ -303,14 +305,26 @@ export class CoachScheduleService {
 	// ------------------------------------------------------------------------------------------- booking
 	/** Single-lesson booking: the student joins through the NATIVE meet gate + claim, then the price is locked on. */
 	@bindThis
-	public async bookSingle(meet: MiMeet, user: MiUser, accessToken?: string | null): Promise<MiMeetParticipant> {
+	public async bookSingle(meet: MiMeet, user: MiUser, accessToken?: string | null, quotedPrice?: number | null): Promise<MiMeetParticipant> {
 		this.assertEnabled();
 		if (!meet.coachScheduleId) throw this.err('not_a_lesson', 'This meet is not a coaching lesson.');
+		// GROUP-PRICE-V1: what the student confirmed is what gets locked, or nothing happens. The app sends the price its
+		// confirm sheet showed; if the slot was re-priced (or filled into another band) since, refuse BEFORE the join.
+		const expect = bookingBand(meet.priceTiers ?? null, meet.capacity, Math.min(meet.confirmed + 1, Math.max(1, meet.capacity)));
+		if (quotedPrice != null && (expect?.pricePerPerson ?? null) !== quotedPrice) throw this.err('price_changed', 'The price of this lesson changed. Check it and book again.');
 		const p = await this.meetService.join(meet, user, { accessToken });
 		const fresh = await this.meetsRepository.findOneByOrFail({ id: meet.id });
-		const band = priceForGroup(fresh.priceTiers ?? null, fresh.confirmed);
-		await this.meetParticipantsRepository.update(p.id, { agreedPrice: band?.pricePerPerson ?? null, agreedCurrency: normaliseCurrency(band?.currency ?? 'HKD') });
+		const band = bookingBand(fresh.priceTiers ?? null, fresh.capacity, fresh.confirmed);
+		let price = band?.pricePerPerson ?? null;
+		if (quotedPrice != null && price != null && price > quotedPrice) price = quotedPrice;   // a race never charges more than was confirmed
+		await this.meetParticipantsRepository.update(p.id, { agreedPrice: price, agreedCurrency: normaliseCurrency(band?.currency ?? 'HKD') });
 		return await this.meetParticipantsRepository.findOneByOrFail({ id: p.id });
+	}
+
+	/** GROUP-PRICE-V1: the price a NEW series/pack enrolment on this slot would lock right now (per lesson). */
+	private async enrolBand(s: MiCoachSchedule): Promise<PriceBand | null> {
+		const activeCount = Number((await this.db.query(`SELECT count(*)::int AS n FROM "coach_enrollment" WHERE "scheduleId" = $1 AND "status" = 'active'`, [s.id]))[0].n);
+		return bookingBand(s.priceTiers, s.capacity, activeCount + 1);
 	}
 
 	private modeAllowed(s: MiCoachSchedule, mode: 'series' | 'pack'): boolean {
@@ -320,13 +334,15 @@ export class CoachScheduleService {
 
 	/** Series/pack enrolment: locks a per-person price now, and books every already-materialised future occurrence. */
 	@bindThis
-	public async enroll(s: MiCoachSchedule, user: MiUser, mode: 'series' | 'pack'): Promise<{ enrollment: EnrollmentRow; booked: string[] }> {
+	public async enroll(s: MiCoachSchedule, user: MiUser, mode: 'series' | 'pack', quotedPrice?: number | null): Promise<{ enrollment: EnrollmentRow; booked: string[] }> {
 		if (!this.modeAllowed(s, mode)) throw this.err('mode_not_allowed', 'This coach does not offer that on this slot.');
 		if (mode === 'pack' && (!s.packSize || s.packSize < 2)) throw this.err('invalid', 'This slot has no pack defined.');
 		const already = (await this.db.query(`SELECT * FROM "coach_enrollment" WHERE "scheduleId" = $1 AND "userId" = $2 AND "status" = 'active'`, [s.id, user.id]) as EnrollmentRow[])[0];
 		if (already) throw this.err('already_enrolled', 'You already have an active enrolment on this slot.');
-		const activeCount = Number((await this.db.query(`SELECT count(*)::int AS n FROM "coach_enrollment" WHERE "scheduleId" = $1 AND "status" = 'active'`, [s.id]))[0].n);
-		const band = priceForGroup(s.priceTiers, activeCount + 1);              // the price for the group they join; locked on this row
+		// GROUP-PRICE-V1: the band the enrolment lands in (the group rate in a group slot, never the private band); locked on
+		// this row. A quotedPrice that no longer matches refuses the enrolment rather than locking a price nobody confirmed.
+		const band = await this.enrolBand(s);
+		if (quotedPrice != null && (band?.pricePerPerson ?? null) !== quotedPrice) throw this.err('price_changed', 'The price of this lesson changed. Check it and book again.');
 		const id = this.idService.gen();
 		const packRemaining = mode === 'pack' ? (s.packSize ?? null) : null;
 		await this.db.query(
@@ -347,7 +363,7 @@ export class CoachScheduleService {
 				if (mode === 'pack') { credit--; await this.db.query(`UPDATE "coach_enrollment" SET "packRemaining" = GREATEST(COALESCE("packRemaining",0) - 1, 0) WHERE "id" = $1`, [row.id]); }
 			} catch { /* already on it */ }
 		}
-		this.notify(s.ownerUserId, 'New enrolment', `${user.name ?? user.username} enrolled in ${s.name} (${mode}).`, 'coach:' + s.ownerUserId);
+		this.notify(s.ownerUserId, 'New enrolment', `${user.name ?? 'A student'} enrolled in ${s.name} (${mode}).`, 'coach:' + s.ownerUserId);
 		return { enrollment: (await this.db.query(`SELECT * FROM "coach_enrollment" WHERE "id" = $1`, [row.id]) as EnrollmentRow[])[0], booked };
 	}
 
@@ -546,7 +562,7 @@ export class CoachScheduleService {
 		const owner = await this.usersRepository.findOneBy({ id: s.ownerUserId });
 		return {
 			id: s.id, ownerUserId: s.ownerUserId, channelId: s.channelId,
-			owner: owner ? { userId: owner.id, name: owner.name ?? owner.username ?? null, username: owner.username ?? null } : null,
+			owner: owner ? { userId: owner.id, name: owner.name ?? null, username: owner.username ?? null } : null,   // the app names a name-less owner (lib/person): a machine handle is not a name
 			name: s.name, sport: s.sport, weekday: s.weekday, startTime: s.startTime, durationMinutes: s.durationMinutes, timezone: s.timezone,
 			venueId: s.venueId, venueName: s.venueName, venueAddress: s.venueAddress, lat: s.lat, lng: s.lng,
 			capacity: s.capacity, bookingMode: s.bookingMode, packSize: s.packSize, priceTiers: s.priceTiers, cancellationPolicy: s.cancellationPolicy,
@@ -556,6 +572,22 @@ export class CoachScheduleService {
 			nextAt: nextAt.toISOString(), lastRunAt: s.lastRunAt ? s.lastRunAt.toISOString() : null,
 			createdAt: new Date(s.createdAt).toISOString(), updatedAt: new Date(s.updatedAt).toISOString(),
 			upcoming: await Promise.all(upcoming.map(m => this.meetEntityService.pack(m, me))),
+			// GROUP-PRICE-V1: what a new booker would lock, from the SAME function the booking uses (no client-side mirror to
+			// drift): per-lesson price of a new series/pack enrolment, per upcoming lesson the single-booking price, whether
+			// this is a group slot, and the private band the coach must agree with a student before it could apply.
+			pricing: await this.packPricing(s, upcoming),
+		};
+	}
+
+	private async packPricing(s: MiCoachSchedule, upcoming: MiMeet[]): Promise<Record<string, unknown>> {
+		const enrol = await this.enrolBand(s);
+		const floor = groupFloor(s.priceTiers, s.capacity);
+		const solo = priceForGroup(s.priceTiers, 1);
+		return {
+			rule: GROUP_PRICE_V1_MARK, groupSlot: floor != null, groupFloor: floor,
+			enrolPrice: enrol ? enrol.pricePerPerson : null, currency: normaliseCurrency(enrol?.currency ?? solo?.currency ?? 'HKD'),
+			privatePrice: floor != null && solo ? solo.pricePerPerson : null,
+			upcoming: upcoming.map(m => ({ meetId: m.id, price: bookingBand(s.priceTiers, s.capacity, Math.min(m.confirmed + 1, Math.max(1, m.capacity)))?.pricePerPerson ?? null })),
 		};
 	}
 }

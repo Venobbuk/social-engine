@@ -34,6 +34,8 @@ export const coachErrors = {
 	// COACHING-V1 flag OFF (default): the whole feature is invisible. 404 so it reads exactly as "no such endpoint".
 	notAvailable: { message: 'Coaching is not available yet.', code: 'COACH_NOT_AVAILABLE', id: 'c0ac0000-0000-4000-8000-00000000001b', httpStatusCode: 404 },
 	noSuchLessonMeet: { message: 'No such lesson.', code: 'COACH_NO_SUCH_LESSON_MEET', id: 'c0ac0000-0000-4000-8000-00000000001c' },
+	// GROUP-PRICE-V1: the price the student confirmed is no longer the price a booking would lock — nothing was booked.
+	priceChanged: { message: 'The price of this lesson changed. Check it and book again.', code: 'COACH_PRICE_CHANGED', id: 'c0ac0000-0000-4000-8000-00000000001d' },
 } as const;
 
 const map: Record<string, keyof typeof coachErrors> = {
@@ -52,6 +54,7 @@ const map: Record<string, keyof typeof coachErrors> = {
 	'coach:mode_not_allowed': 'modeNotAllowed',
 	'coach:already_enrolled': 'alreadyEnrolled',
 	'coach:not_available': 'notAvailable',
+	'coach:price_changed': 'priceChanged',
 	// the reused club-admin gate
 	'club:not_admin': 'notAdmin',
 	'club:no_such_club': 'noSuchClub',
