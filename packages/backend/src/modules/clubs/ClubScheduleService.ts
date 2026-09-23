@@ -26,7 +26,8 @@ import { bindThis } from '@/decorators.js';
  * and invites every active member (all, or the schedule's tags). Paused schedules create nothing. Time zone: the
  * schedule's (Asia/Hong_Kong — fixed +08:00, no DST; other zones fall back to the same offset table below).
  */
-export type SchedulePatch = Partial<Pick<MiClubSchedule, 'name' | 'weekday' | 'startTime' | 'durationMinutes' | 'venueId' | 'venueName' | 'venueAddress' | 'lat' | 'lng' | 'capacity' | 'hostPlays' | 'visibility' | 'autoApprove' | 'allowPlusOne' | 'feeType' | 'feeAmount' | 'feeCurrency' | 'paymentInfo' | 'gateType' | 'levelBasis' | 'minLevel' | 'maxLevel' | 'gender' | 'ageGroup' | 'submitMatches' | 'publishLeadHours' | 'status' | 'tagIds' | 'notes' | 'sendNotifications'>>;
+export type SchedulePatch = Partial<Pick<MiClubSchedule, 'name' | 'weekday' | 'startTime' | 'durationMinutes' | 'venueId' | 'venueName' | 'venueAddress' | 'lat' | 'lng' | 'capacity' | 'hostPlays' | 'visibility' | 'autoApprove' | 'allowPlusOne' | 'feeType' | 'feeAmount' | 'feeCurrency' | 'paymentInfo' | 'gateType' | 'levelBasis' | 'minLevel' | 'maxLevel' | 'gender' | 'ageGroup' | 'submitMatches' | 'publishLeadHours' | 'status' | 'tagIds' | 'notes' | 'sendNotifications' | 'type' | 'duprAccountGate' | 'cancellationFreezeHours' | 'participants'>>;
+export const SCHEDULE_ROLES = ['host', 'coach', 'player', 'paymentCollector'] as const;   // MEETS-FIXES-V1
 
 const TZ_OFFSET_MIN: Record<string, number> = { 'Asia/Hong_Kong': 480, 'Asia/Shanghai': 480, 'Asia/Macau': 480, 'Asia/Taipei': 480, 'Asia/Singapore': 480, 'Asia/Bangkok': 420, 'Asia/Tokyo': 540, UTC: 0 };
 
@@ -94,6 +95,7 @@ export class ClubScheduleService {
 			durationMinutes: 120, venueId: null, venueName: null, venueAddress: null, lat: null, lng: null, capacity: 8, hostPlays: true, visibility: 'public', autoApprove: true, allowPlusOne: true,
 			feeType: 'none', feeAmount: null, feeCurrency: 'HKD', paymentInfo: null, gateType: 'guidance', levelBasis: 'self', minLevel: null, maxLevel: null, gender: 'any', ageGroup: 'any', submitMatches: false,
 			publishLeadHours: 168, status: 'active', tagIds: [], notes: null, sendNotifications: true, lastRunAt: null, createdAt: now, updatedAt: now,
+			type: 'managed', duprAccountGate: 'guidance', cancellationFreezeHours: 0, participants: [], optOutUserIds: [],   // MEETS-FIXES-V1
 			...this.clean(data),
 		});
 	}
@@ -117,6 +119,26 @@ export class ClubScheduleService {
 		if (d.startTime != null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(d.startTime)) throw this.err('invalid', 'Start time must be HH:mm.');
 		if (d.publishLeadHours != null && (d.publishLeadHours < 1 || d.publishLeadHours > 24 * 28)) throw this.err('invalid', 'Publish lead time must be 1 hour to 4 weeks.');
 		if (d.capacity != null && (d.capacity < 1 || d.capacity > 500)) throw this.err('invalid', 'Capacity must be 1 to 500.');
+		// MEETS-FIXES-V1: participants are people with a role; at most 20, each once, roles from Reclub's popover
+		if (d.participants != null) {
+			if (!Array.isArray(d.participants) || d.participants.length > 20) throw this.err('invalid', 'At most 20 schedule participants.');
+			const seen = new Set<string>();
+			for (const p of d.participants) {
+				if (!p || typeof p.userId !== 'string' || !(SCHEDULE_ROLES as readonly string[]).includes(p.role) || seen.has(p.userId)) throw this.err('invalid', 'Each participant needs a user and a role (host, coach, player, payment collector).');
+				seen.add(p.userId);
+			}
+		}
+	}
+
+	/** SCHEDULE-LEAVE-V1 (meets-fixes): a member leaves (or rejoins) a schedule; the sweep then never invites them to its meets. */
+	@bindThis
+	public async setOptOut(s: MiClubSchedule, me: MiUser, leave: boolean): Promise<MiClubSchedule> {
+		const channel = await this.clubService.channel(s.channelId);
+		if (channel.userId !== me.id && !(await this.clubService.isMember(channel.id, me.id))) throw this.err('not_member', 'Only members can do that.');
+		const cur = new Set(s.optOutUserIds ?? []);
+		if (leave) cur.add(me.id); else cur.delete(me.id);
+		await this.clubSchedulesRepository.update(s.id, { optOutUserIds: Array.from(cur) });
+		return await this.clubSchedulesRepository.findOneByOrFail({ id: s.id });
 	}
 
 	private clean(d: SchedulePatch): SchedulePatch {
@@ -150,11 +172,25 @@ export class ClubScheduleService {
 				gateType: s.gateType as MiMeet['gateType'], levelBasis: s.levelBasis as MiMeet['levelBasis'], minLevel: s.minLevel, maxLevel: s.maxLevel,
 				gender: s.gender as MiMeet['gender'], ageGroup: s.ageGroup as MiMeet['ageGroup'], submitMatches: s.submitMatches, notes: s.notes,
 				sendNotifications: s.sendNotifications, seriesId: s.id,
+				// MEETS-FIXES-V1: Reclub's Meet feature, DUPR account gate and cancellation freeze ride the schedule too
+				type: (s.type === 'listing' ? 'listing' : 'managed') as MiMeet['type'], duprAccountGate: (s.duprAccountGate ?? 'guidance') as MiMeet['duprAccountGate'], cancellationFreezeHours: s.cancellationFreezeHours ?? 0,
 			});
 			created.push(meet);
-			// Reclub "Members of your club will automatically be invited and notified." — all, or the tagged ones; nobody on a break
-			for (const uid of await this.clubService.activeMemberIds(channel, s.tagIds)) {
+			// MEETS-FIXES-V1: a listing takes no roster (the engine refuses an RSVP on one) — its members are told, not invited
+			if (s.type === 'listing') { void this.clubService.notifyNewMeet(meet).catch(() => undefined); continue; }
+			// MEETS-FIXES-V1 (A-schedule-participants.01): the schedule's participants join each meet with their role —
+			// hosts / coaches / payment collectors as the roster flags, players invited like everyone else
+			const roles = new Map((s.participants ?? []).map(p => [p.userId, p.role] as const));
+			for (const [uid, role] of roles) {
 				if (uid === host.id) continue;
+				try { await this.meetService.hostAdd(meet, { userId: uid, status: 'invited' }); } catch { /* already on it */ }
+				if (role !== 'player') await this.meetsRepository.manager.query(`UPDATE "meet_participant" SET "isHost" = $3, "isCoach" = $4, "isPaymentCollector" = $5 WHERE "meetId" = $1 AND "userId" = $2`, [meet.id, uid, role === 'host', role === 'coach', role === 'paymentCollector']);
+			}
+			// Reclub "Members of your club will automatically be invited and notified." — all, or the tagged ones; nobody on a break;
+			// SCHEDULE-LEAVE-V1: nobody who left this schedule
+			const out = new Set(s.optOutUserIds ?? []);
+			for (const uid of await this.clubService.activeMemberIds(channel, s.tagIds)) {
+				if (uid === host.id || out.has(uid) || roles.has(uid)) continue;
 				try { await this.meetService.hostAdd(meet, { userId: uid, status: 'invited' }); } catch { /* already on it */ }
 			}
 			// CLUB-TIERS-V1: the members were invited above; a public occurrence is also announced to the followers
@@ -174,7 +210,7 @@ export class ClubScheduleService {
 	 */
 	@bindThis
 	public async applyToFutureMeets(s: MiClubSchedule, patch: SchedulePatch, now = new Date(), dryRun = false): Promise<{ updated: string[]; skipped: { id: string; reason: string; name?: string; startAt?: string; partial?: boolean }[]; meets?: { id: string; name: string; startAt: string; newStartAt: string | null }[] }> {
-		const FIELDS = ['name', 'durationMinutes', 'capacity', 'venueId', 'venueName', 'venueAddress', 'lat', 'lng', 'hostPlays', 'visibility', 'autoApprove', 'allowPlusOne', 'feeType', 'feeAmount', 'feeCurrency', 'paymentInfo', 'gateType', 'levelBasis', 'minLevel', 'maxLevel', 'gender', 'ageGroup', 'submitMatches', 'notes', 'sendNotifications'] as const;
+		const FIELDS = ['name', 'durationMinutes', 'capacity', 'venueId', 'venueName', 'venueAddress', 'lat', 'lng', 'hostPlays', 'visibility', 'autoApprove', 'allowPlusOne', 'feeType', 'feeAmount', 'feeCurrency', 'paymentInfo', 'gateType', 'levelBasis', 'minLevel', 'maxLevel', 'gender', 'ageGroup', 'submitMatches', 'notes', 'sendNotifications', 'duprAccountGate', 'cancellationFreezeHours'] as const;
 		const base: Record<string, unknown> = {};
 		for (const k of FIELDS) if ((patch as Record<string, unknown>)[k] !== undefined) base[k] = (patch as Record<string, unknown>)[k];
 		const meets = await this.meetsRepository.find({ where: { seriesId: s.id, status: 'active', startAt: MoreThanOrEqual(now) }, order: { startAt: 'ASC' } });
@@ -238,7 +274,7 @@ export class ClubScheduleService {
 	 * answers how many would be invited, without inviting. Someone already on the meet is left as they are.
 	 */
 	@bindThis
-	public async inviteMembersToMeet(meetId: string, by: MiUser, tagIds: string[], preview: boolean): Promise<{ eligible: number; invited: number }> {
+	public async inviteMembersToMeet(meetId: string, by: MiUser, tagIds: string[], preview: boolean, audience: 'members' | 'all' = 'members'): Promise<{ eligible: number; invited: number }> {
 		const meet = await this.meetsRepository.findOneBy({ id: meetId });
 		if (!meet) throw this.err('invalid', 'No such meet.');
 		if (!meet.channelId) throw this.err('invalid', 'This meet is not posted in a club.');
@@ -247,8 +283,16 @@ export class ClubScheduleService {
 		const channel = await this.clubService.channel(meet.channelId);
 		if (channel.userId !== by.id && !(await this.clubService.isMember(channel.id, by.id))) throw this.err('not_member', 'Only members can do that.');
 		const onMeet = new Set((await this.meetsRepository.manager.query(`SELECT "userId" FROM "meet_participant" WHERE "meetId" = $1 AND "userId" IS NOT NULL`, [meet.id]) as { userId: string }[]).map((r) => r.userId));
-		const ids = (await this.clubService.activeMemberIds(channel, tagIds)).filter((u) => u !== meet.hostId && !onMeet.has(u));
+		let pool = await this.clubService.activeMemberIds(channel, tagIds);
+		// MEETS-FIXES-V1 (A-club-activity-picker.02): Reclub's "All" chip reaches the club's followers as well as its members
+		if (audience === 'all' && !tagIds.length) {
+			const f = await this.meetsRepository.manager.query(`SELECT f."followerId" AS "userId" FROM "channel_following" f WHERE f."followeeId" = $1`, [channel.id]) as { userId: string }[];
+			pool = Array.from(new Set([...pool, ...f.map(r => r.userId)]));
+		}
+		const ids = pool.filter((u) => u !== meet.hostId && !onMeet.has(u));
 		if (preview) return { eligible: ids.length, invited: 0 };
+		// MEET-CLUB-INVITE-V2: the club is recorded as invited (the meet's Invited clubs section; Cancel undoes it)
+		await this.meetsRepository.manager.query(`INSERT INTO "meet_club_invite" ("meetId", "channelId", "invitedById", "audience") VALUES ($1, $2, $3, $4) ON CONFLICT ("meetId", "channelId") DO UPDATE SET "audience" = EXCLUDED."audience"`, [meet.id, channel.id, by.id, audience]);
 		let invited = 0;
 		for (const uid of ids) {
 			try { await this.meetService.hostAdd(meet, { userId: uid, status: 'invited' }); invited++; } catch { /* joined meanwhile */ }
@@ -275,6 +319,13 @@ export class ClubScheduleService {
 	}
 
 	// ------------------------------------------------------------------------------------- packing
+	private async packParticipants(list: { userId: string; role: string }[]): Promise<{ userId: string; role: string; name: string | null; username: string | null; avatarUrl: string | null }[]> {
+		if (!list.length) return [];
+		const us = await this.usersRepository.findBy({ id: In(list.map(p => p.userId)) });
+		const by = new Map(us.map(u => [u.id, u]));
+		return list.map(p => { const u = by.get(p.userId); return { userId: p.userId, role: p.role, name: u?.name ?? null, username: u?.username ?? null, avatarUrl: u?.avatarUrl ?? null }; });
+	}
+
 	@bindThis
 	public async pack(s: MiClubSchedule, me: MiUser | null): Promise<Record<string, unknown>> {
 		const { nextAt, meet } = await this.next(s);
@@ -285,6 +336,11 @@ export class ClubScheduleService {
 			autoApprove: s.autoApprove, allowPlusOne: s.allowPlusOne, feeType: s.feeType, feeAmount: s.feeAmount, feeCurrency: s.feeCurrency, paymentInfo: s.paymentInfo,
 			gateType: s.gateType, levelBasis: s.levelBasis, minLevel: s.minLevel, maxLevel: s.maxLevel, gender: s.gender, ageGroup: s.ageGroup, submitMatches: s.submitMatches,
 			publishLeadHours: s.publishLeadHours, status: s.status, tagIds: s.tagIds, notes: s.notes, sendNotifications: s.sendNotifications,
+			// MEETS-FIXES-V1: Meet feature, DUPR account gate, freeze, participants (with names), and the viewer's own place
+			type: s.type ?? 'managed', duprAccountGate: s.duprAccountGate ?? 'guidance', cancellationFreezeHours: s.cancellationFreezeHours ?? 0,
+			participants: await this.packParticipants(s.participants ?? []),
+			myRole: me ? (me.id === s.hostId ? 'host' : ((s.participants ?? []).find(p => p.userId === me.id)?.role ?? null)) : null,
+			optedOut: me ? (s.optOutUserIds ?? []).includes(me.id) : false,
 			lastRunAt: s.lastRunAt ? s.lastRunAt.toISOString() : null, createdAt: s.createdAt.toISOString(), updatedAt: s.updatedAt.toISOString(),
 			nextAt: nextAt.toISOString(),
 			nextMeet: meet ? await this.meetEntityService.pack(meet, me) : null,

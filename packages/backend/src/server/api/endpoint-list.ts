@@ -148,6 +148,9 @@ export * as 'meets/join' from '@/modules/meets/endpoints/join.js';
 export * as 'meets/leave' from '@/modules/meets/endpoints/leave.js';
 export * as 'meets/respond' from '@/modules/meets/endpoints/respond.js';
 export * as 'meets/level' from '@/modules/meets/endpoints/level.js';
+export * as 'meets/activity-visibility' from '@/modules/meets/endpoints/activity-visibility.js';   // ACTIVITY-SCOPE-V1 (meets-fixes)
+export * as 'meets/no-shows' from '@/modules/meets/endpoints/no-shows.js';   // NO-SHOW-HISTORY-V1 (meets-fixes)
+export * as 'meets/save' from '@/modules/meets/endpoints/save.js';   // MEET-SAVE-V1 (meets-fixes)
 export * as 'meets/levels' from '@/modules/meets/endpoints/levels.js';
 export * as 'meets/participants/update' from '@/modules/meets/endpoints/participants/update.js';
 export * as 'meets/participants/add' from '@/modules/meets/endpoints/participants/add.js';
@@ -259,6 +262,8 @@ export * as 'clubs/schedules/show' from '@/modules/clubs/endpoints/schedules-sho
 export * as 'clubs/schedules/create' from '@/modules/clubs/endpoints/schedules-create.js'; // CLUB-V3
 export * as 'clubs/schedules/update' from '@/modules/clubs/endpoints/schedules-update.js'; // CLUB-V3
 export * as 'clubs/meets/invite-members' from '@/modules/clubs/endpoints/meets-invite-members.js'; // MEET-CLUB-INVITE-V1 (W1 B1)
+export * as 'clubs/meets/invited-clubs' from '@/modules/clubs/endpoints/meets-invited-clubs.js'; // MEET-CLUB-INVITE-V2 (meets-fixes)
+export * as 'clubs/schedules/leave' from '@/modules/clubs/endpoints/schedules-leave.js'; // SCHEDULE-LEAVE-V1 (meets-fixes)
 export * as 'clubs/schedules/delete' from '@/modules/clubs/endpoints/schedules-delete.js'; // CLUB-V3
 export * as 'clubs/schedules/run' from '@/modules/clubs/endpoints/schedules-run.js'; // CLUB-V3
 export * as 'clubs/mine' from '@/modules/clubs/endpoints/mine.js'; // CLUB-V3

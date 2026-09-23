@@ -47,7 +47,7 @@ export const meta = {
 	errors: {
 		...meetErrors,
 		notPublic: { message: 'Only available for public meets.', code: 'MEET_PROMOTE_NOT_PUBLIC', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000030' },
-		tooEarly: { message: 'You can only promote to the community 36 hours before start.', code: 'MEET_PROMOTE_TOO_EARLY', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000031' },
+		tooEarly: { message: 'You can only promote to the community 36 hours before start.', code: 'MEET_PROMOTE_TOO_EARLY', id: '6b1d0a3e-8f41-4c0b-9b7e-1a00000000ca' /* ERR-ID-UNIQUE-V1 (meets-fixes): was …0031, shared with claim-payment notCharging */ },
 		alreadyPromoted: { message: 'Promoted.', code: 'MEET_ALREADY_PROMOTED', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000032' },
 		notClubMeet: { message: 'This meet is not posted in a club.', code: 'MEET_PROMOTE_NOT_CLUB', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000037' },
 		noReach: { message: 'There are no players matching your filters to promote to.', code: 'MEET_PROMOTE_NO_REACH', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000033' },

@@ -23,11 +23,11 @@ export const meta = {
 	limit: { duration: ms('1hour'), max: 30 },
 	res: { type: 'object', optional: false, nullable: false, ref: 'Meet' },
 	errors: {
-		noSuchChannel: { message: 'No such channel.', code: 'NO_SUCH_CHANNEL', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000010' },
+		noSuchChannel: { message: 'No such channel.', code: 'NO_SUCH_CHANNEL', id: '6b1d0a3e-8f41-4c0b-9b7e-1a00000000c5' /* ERR-ID-UNIQUE-V1 (meets-fixes): was …0010, shared with meetErrors.private */ },
 		// CLUB-TIERS-V1 (Reclub meets:no_club_note): a club meet needs an admin, or a member where members may create meets
 		notClubMember: { message: 'Only the club admins — or its members, when the club allows it — can create meets for this club.', code: 'CLUB_NOT_MEMBER', id: 'c1b00000-0000-4000-8000-000000000011' },
-		startInPast: { message: 'Meet date and time cannot be in the past.', code: 'MEET_START_IN_PAST', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000011' },
-		invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000013' },
+		startInPast: { message: 'Meet date and time cannot be in the past.', code: 'MEET_START_IN_PAST', id: '6b1d0a3e-8f41-4c0b-9b7e-1a00000000c6' /* ERR-ID-UNIQUE-V1: was …0011 (capacityBelowConfirmed) */ },
+		invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a00000000c7' /* ERR-ID-UNIQUE-V1: was …0013 (noSuchMatch) */ },
 		...meetErrors,
 	},
 } as const;

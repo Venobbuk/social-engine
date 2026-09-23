@@ -136,6 +136,16 @@ export class ClubService {
 		if (!(await this.isAdmin(channel, userId))) throw this.err('not_admin', 'Only the club owner or an admin can do that.');
 	}
 
+	/** MEETS-FIXES-V1 (B-set-privacy.02): Reclub gating — Admin Gated ("Only admins can invite and approve members") or Member
+	 *  Gated ("Admin and members can invite and approve members"). Invite, see the requests and decide them. */
+	@bindThis
+	public async assertGatekeeper(channel: MiChannel, userId: string): Promise<void> {
+		if (await this.isAdmin(channel, userId)) return;
+		const s = await this.settings(channel.id);
+		if (s.memberGated && await this.isMember(channel.id, userId)) return;
+		throw this.err('not_admin', 'Only the club owner or an admin can do that.');
+	}
+
 	/** CLUB-TIERS-V1: a member = a club_member row, or the club's owner. (Was: any follower.) */
 	@bindThis
 	public async isMember(channelId: string, userId: string): Promise<boolean> {
@@ -322,7 +332,7 @@ export class ClubService {
 
 	/** Owner / admins may change these; the channel's own name/description/banner go through channels/update. */
 	@bindThis
-	public async updateSettings(channel: MiChannel, by: MiUser, patch: Partial<Pick<MiClubSetting, 'visibility' | 'gateType' | 'createMeetPermission' | 'sport' | 'level' | 'venueIds' | 'paymentInfo' | 'enableForum' | 'enableChat' | 'awards'>>): Promise<MiClubSetting> {
+	public async updateSettings(channel: MiChannel, by: MiUser, patch: Partial<Pick<MiClubSetting, 'visibility' | 'gateType' | 'createMeetPermission' | 'sport' | 'level' | 'venueIds' | 'paymentInfo' | 'enableForum' | 'enableChat' | 'awards' | 'memberGated'>>): Promise<MiClubSetting> {
 		await this.assertAdmin(channel, by.id);
 		const s = await this.settings(channel.id);
 		await this.clubSettingsRepository.update(s.channelId, { ...patch, updatedAt: new Date() });
@@ -413,7 +423,7 @@ export class ClubService {
 
 	@bindThis
 	public async joinRequests(channel: MiChannel, viewer: MiUser, status: MiClubJoinRequest['status'] = 'pending') {
-		await this.assertAdmin(channel, viewer.id);
+		await this.assertGatekeeper(channel, viewer.id);   // MEETS-FIXES-V1: Member Gated
 		const rows = await this.clubJoinRequestsRepository.find({ where: { channelId: channel.id, status }, order: { createdAt: 'DESC' } });
 		const out = [];
 		for (const r of rows) out.push({ id: r.id, user: await this.userEntityService.pack(r.userId, viewer, { schema: 'UserLite' }).catch(() => null), userId: r.userId, message: r.message, status: r.status, createdAt: r.createdAt.toISOString() });
@@ -422,7 +432,7 @@ export class ClubService {
 
 	@bindThis
 	public async decide(channel: MiChannel, by: MiUser, requestId: string, approve: boolean): Promise<void> {
-		await this.assertAdmin(channel, by.id);
+		await this.assertGatekeeper(channel, by.id);   // MEETS-FIXES-V1: Member Gated
 		const r = await this.clubJoinRequestsRepository.findOneBy({ id: requestId, channelId: channel.id });
 		if (!r) throw this.err('no_such_request', 'No such request.');
 		await this.clubJoinRequestsRepository.update(r.id, { status: approve ? 'approved' : 'declined', decidedById: by.id, decidedAt: new Date() });
@@ -476,7 +486,7 @@ export class ClubService {
 	 *  A pending join request by the same player is kept — accepting the invitation closes it. */
 	@bindThis
 	public async invite(channel: MiChannel, by: MiUser, userId: string): Promise<{ status: 'invited' }> {
-		await this.assertAdmin(channel, by.id);
+		await this.assertGatekeeper(channel, by.id);   // MEETS-FIXES-V1: Member Gated
 		const target = await this.usersRepository.findOneBy({ id: userId });
 		if (!target || target.host != null) throw this.err('no_such_user', 'No such user.');
 		if (channel.userId === userId || await this.isMember(channel.id, userId)) throw this.err('already_member', 'This player is already a member of the club.');

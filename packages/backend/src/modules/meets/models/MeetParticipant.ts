@@ -96,6 +96,9 @@ export class MiMeetParticipant {
 	@Column('varchar', { length: 32, nullable: true })
 	public forcePosition: string | null;
 
+	@Column('varchar', { length: 8, nullable: true, comment: 'MEETS-FIXES-V1: Reclub bib / jersey number.' })
+	public bib?: string | null;
+
 	@Column('varchar', { length: 16, nullable: true, comment: 'MeetParticipantPaymentType (cash = 1)' })
 	public paymentType: string | null;
 

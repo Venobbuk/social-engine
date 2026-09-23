@@ -43,6 +43,7 @@ export const paramDef = {
 		positionId: { type: 'string', nullable: true, maxLength: 32 },
 		forceSkill: { type: 'number', nullable: true, minimum: 0, maximum: 10 },
 		forcePosition: { type: 'string', nullable: true, maxLength: 32 },
+		bib: { type: 'string', nullable: true, maxLength: 8 },   // MEETS-FIXES-V1 (A-generate-teams.04): Reclub bib / jersey number
 		paymentType: { type: 'string', nullable: true, enum: ['cash'] },
 	},
 	required: ['meetId', 'participantId'],
@@ -66,7 +67,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			try {
 				await this.meetService.assertHost(meet, me);
 				const patch: Record<string, unknown> = {};
-				for (const k of ['isHost', 'isCoach', 'isReferee', 'isPaymentCollector', 'tags', 'teamKey', 'courtIndex', 'displayName', 'declaredLevel', 'extGender', 'extAge', 'positionId', 'forceSkill', 'forcePosition', 'paymentType'] as const) {
+				for (const k of ['isHost', 'isCoach', 'isReferee', 'isPaymentCollector', 'tags', 'teamKey', 'courtIndex', 'displayName', 'declaredLevel', 'extGender', 'extAge', 'positionId', 'forceSkill', 'forcePosition', 'paymentType', 'bib'] as const) {
 					if (ps[k] !== undefined && ps[k] !== null) patch[k] = ps[k];
 				}
 				if (ps.teamKey === null) patch.teamKey = null;

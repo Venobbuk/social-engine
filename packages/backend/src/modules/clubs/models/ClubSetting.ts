@@ -37,6 +37,9 @@ export class MiClubSetting {
 	@Column('varchar', { length: 16, default: 'members' })
 	public createMeetPermission: typeof clubCreateMeetPermissions[number];
 
+	@Column('boolean', { default: false, comment: 'MEETS-FIXES-V1: Reclub Member Gated — members may invite and approve members too.' })
+	public memberGated?: boolean;
+
 	@Column('varchar', { length: 32, default: 'pickleball' })
 	public sport: string;
 

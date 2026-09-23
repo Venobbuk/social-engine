@@ -66,6 +66,9 @@ export class MiMeetMatch {
 	@Column('varchar', { length: 512, nullable: true })
 	public duprError: string | null;
 
+	@Column('varchar', { length: 512, nullable: true, comment: 'MEETS-FIXES-V1: Reclub match notes.' })
+	public notes?: string | null;
+
 	@Column('timestamp with time zone', { default: () => 'now()' })
 	public updatedAt: Date;
 }

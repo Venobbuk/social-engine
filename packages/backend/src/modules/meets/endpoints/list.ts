@@ -27,6 +27,8 @@ export const paramDef = {
 		scope: { type: 'string', enum: ['discover', 'mine', 'hosting', 'channel'], default: 'discover' },
 		seriesId: { type: 'string', format: 'misskey:id', nullable: true },   // SERIES-V1: one schedule's meets
 		channelId: { type: 'string', format: 'misskey:id', nullable: true },
+		// MEETS-FIXES-V1 (B-group-user.02): scope 'channel' + memberId = that member's activities in the club (Reclub member ACTIVITY tab)
+		memberId: { type: 'string', format: 'misskey:id' },
 		sport: { type: 'string', nullable: true, maxLength: 32 },
 		from: { type: 'string', nullable: true, maxLength: 40 },
 		to: { type: 'string', nullable: true, maxLength: 40 },
@@ -78,7 +80,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					if (me == null) return [];
 					// The parameter is NOT named :active — that name is already bound to the string 'active' by the status filter above, and
 					// the array bound here overwrote it, so meet.status = ARRAY matched nothing (found on live 09-16 by the Home tab).
-					q.andWhere('EXISTS (SELECT 1 FROM meet_participant mp WHERE mp."meetId" = meet.id AND mp."userId" = :meId AND mp.status IN (:...mineStates))', { meId: me.id, mineStates: ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe'] });
+					// MEET-SAVE-V1 (meets-fixes): a listing saved to My activities is mine too
+					q.andWhere('(EXISTS (SELECT 1 FROM meet_participant mp WHERE mp."meetId" = meet.id AND mp."userId" = :meId AND mp.status IN (:...mineStates)) OR EXISTS (SELECT 1 FROM meet_saved ms WHERE ms."meetId" = meet.id AND ms."userId" = :meId))', { meId: me.id, mineStates: ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe'] });
 					break;
 				}
 				case 'hosting': {
@@ -94,6 +97,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					// for a member / admin — membership is club_member, never the follow ('club' visibility no longer exists)
 					if (me != null) q.andWhere(`(meet.visibility = 'public' OR (meet.visibility = 'private' AND (${memberExistsSql(':channelId', ':clubViewer')} OR ${adminExistsSql(':channelId', ':clubViewer')})))`, { clubViewer: me.id });
 					else q.andWhere('meet.visibility = :pubOnly', { pubOnly: 'public' });
+					if (ps.memberId) q.andWhere('EXISTS (SELECT 1 FROM meet_participant gm WHERE gm."meetId" = meet.id AND gm."userId" = :memberId AND gm.status IN (:...memberStates))', { memberId: ps.memberId, memberStates: ['confirmed', 'waitlisted', 'hold'] });   // MEETS-FIXES-V1
 					break;
 				}
 				default: {
@@ -126,7 +130,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 			if (ps.friendsOnly) {
 				if (me == null) return [];
-				q.andWhere('(EXISTS (SELECT 1 FROM following f WHERE f."followerId" = :fMe AND f."followeeId" = meet."hostId") OR EXISTS (SELECT 1 FROM meet_participant fp JOIN following f2 ON f2."followeeId" = fp."userId" WHERE fp."meetId" = meet.id AND fp.status IN (\'confirmed\', \'hold\') AND f2."followerId" = :fMe))', { fMe: me.id });
+				// ACTIVITY-SCOPE-V1 (meets-fixes): a friend who switched "Show my activities" off for me does not surface a meet
+				q.andWhere('(EXISTS (SELECT 1 FROM following f WHERE f."followerId" = :fMe AND f."followeeId" = meet."hostId" AND NOT EXISTS (SELECT 1 FROM gb_activity_hide h WHERE h."userId" = meet."hostId" AND h."hiddenFromId" = :fMe)) OR EXISTS (SELECT 1 FROM meet_participant fp JOIN following f2 ON f2."followeeId" = fp."userId" WHERE fp."meetId" = meet.id AND fp.status IN (\'confirmed\', \'hold\') AND f2."followerId" = :fMe AND NOT EXISTS (SELECT 1 FROM gb_activity_hide h2 WHERE h2."userId" = fp."userId" AND h2."hiddenFromId" = :fMe)))', { fMe: me.id });
 			}
 			if (ps.hideEmpty) q.andWhere('EXISTS (SELECT 1 FROM meet_participant ep WHERE ep."meetId" = meet.id AND ep.status = \'confirmed\')');
 			if (ps.verifiedOnly) q.andWhere('meet."venueId" IS NOT NULL AND EXISTS (SELECT 1 FROM venue v WHERE v.id = meet."venueId" AND v.status = \'verified\')');

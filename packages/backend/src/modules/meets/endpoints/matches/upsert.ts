@@ -30,6 +30,7 @@ export const paramDef = {
 		matchId: { type: 'string', format: 'misskey:id', nullable: true },
 		round: { type: 'integer', nullable: true, minimum: 1, maximum: 999 },
 		courtIndex: { type: 'integer', nullable: true, minimum: 0, maximum: 64 },
+		notes: { type: 'string', nullable: true, maxLength: 512 },   // MEETS-FIXES-V1 (A-meet-notes.03): Reclub match notes
 		team1Ids: { type: 'array', nullable: true, maxItems: 8, items: { type: 'string', format: 'misskey:id' } },
 		team2Ids: { type: 'array', nullable: true, maxItems: 8, items: { type: 'string', format: 'misskey:id' } },
 		// score sets in order, each [team1, team2]; [] clears (isPending)
@@ -56,7 +57,12 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (ps.team1Ids != null) data.team1Ids = ps.team1Ids;
 				if (ps.team2Ids != null) data.team2Ids = ps.team2Ids;
 				if (ps.scores != null) data.scores = ps.scores;
-				const m = await this.meetMatchService.upsert(meet, me, data);
+				let m = await this.meetMatchService.upsert(meet, me, data);
+				// MEETS-FIXES-V1: the notes ride the same door; whoever may save the match (host, or a player allowed to score) may note it
+				if (ps.notes !== undefined) {
+					await this.meetsRepository.manager.query(`UPDATE "meet_match" SET "notes" = $2 WHERE "id" = $1`, [m.id, ps.notes && ps.notes.trim() ? ps.notes.trim() : null]);
+					m = { ...m, notes: ps.notes && ps.notes.trim() ? ps.notes.trim() : null };
+				}
 				return await this.meetEntityService.packMatch(m, meet, me, { eligibility: true });
 			} catch (e) {
 				return toApiError(e);

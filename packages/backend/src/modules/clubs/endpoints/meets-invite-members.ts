@@ -28,6 +28,7 @@ export const paramDef = {
 		meetId: { type: 'string', format: 'misskey:id' },
 		tagIds: { type: 'array', items: { type: 'string', maxLength: 64 }, maxItems: 20, default: [] },
 		preview: { type: 'boolean', default: false },
+		audience: { type: 'string', enum: ['members', 'all'], default: 'members' },   // MEETS-FIXES-V1: 'all' = members + followers
 	},
 	required: ['meetId'],
 } as const;
@@ -37,7 +38,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(private clubScheduleService: ClubScheduleService) {
 		super(meta, paramDef, async (ps, me) => {
 			try {
-				return await this.clubScheduleService.inviteMembersToMeet(ps.meetId, me, ps.tagIds ?? [], !!ps.preview);
+				return await this.clubScheduleService.inviteMembersToMeet(ps.meetId, me, ps.tagIds ?? [], !!ps.preview, ps.audience === 'all' ? 'all' : 'members');
 			} catch (e) {
 				return toApiError(e);
 			}

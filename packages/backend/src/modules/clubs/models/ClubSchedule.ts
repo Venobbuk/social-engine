@@ -124,6 +124,22 @@ export class MiClubSchedule {
 	@Column('boolean', { default: true, comment: 'Reclub "Send notifications when published".' })
 	public sendNotifications: boolean;
 
+	// MEETS-FIXES-V1 (migration 1789098100000): Reclub's schedule form carries these too; each is copied onto every meet
+	@Column('varchar', { length: 16, default: 'managed', comment: 'Reclub Meet feature: managed (full featured) | listing.' })
+	public type?: string;
+
+	@Column('varchar', { length: 16, default: 'guidance', comment: 'DUPR account gate: guidance | autoApprove | strict.' })
+	public duprAccountGate?: string;
+
+	@Column('integer', { default: 0, comment: 'Reclub Cancellation freeze (hours before start).' })
+	public cancellationFreezeHours?: number;
+
+	@Column('jsonb', { default: [], comment: 'Reclub schedule participants: [{ userId, role: host | coach | player | paymentCollector }].' })
+	public participants?: { userId: string; role: string }[];
+
+	@Column('varchar', { array: true, length: 32, default: '{}', comment: 'Members who left this schedule (Reclub Leave schedule): never auto-invited.' })
+	public optOutUserIds?: string[];
+
 	@Column('timestamp with time zone', { nullable: true })
 	public lastRunAt: Date | null;
 

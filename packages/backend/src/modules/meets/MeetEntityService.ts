@@ -65,6 +65,7 @@ export class MeetEntityService {
 			extGender: p.extGender ?? null,
 			extAge: p.extAge ?? null,
 			positionId: p.positionId ?? null,
+			bib: p.bib ?? null,   // MEETS-FIXES-V1
 			paymentType: p.paymentType ?? null,
 			isHost: p.isHost,
 			isCoach: p.isCoach,
@@ -248,6 +249,7 @@ export class MeetEntityService {
 			duprRef: m.duprRef,
 			duprError: m.duprError,
 			duprEligibility: opts.eligibility ? await this.meetMatchService.eligibility(meet, m).then(e => ({ isEligible: e.isEligible, errors: e.errors })) : undefined,
+			notes: m.notes ?? null,   // MEETS-FIXES-V1
 			updatedAt: m.updatedAt.toISOString(),
 		};
 	}

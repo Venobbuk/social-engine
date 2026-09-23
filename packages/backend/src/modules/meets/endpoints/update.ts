@@ -21,7 +21,7 @@ export const meta = {
 	prohibitMoved: true,
 	kind: 'write:meets',
 	res: { type: 'object', optional: false, nullable: false, ref: 'Meet' },
-	errors: { staleForm: { message: 'This meet changed since the form was opened. Reload the form and try again.', code: 'MEET_STALE_FORM', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000017', httpStatusCode: 409 }, invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014' }, notClubMember: { message: 'Only the club admins — or its members, when the club allows it — can put meets in this club.', code: 'CLUB_NOT_MEMBER', id: 'c1b00000-0000-4000-8000-000000000011' }, ...meetErrors },   // CLUB-TIERS-V1: notClubMember
+	errors: { staleForm: { message: 'This meet changed since the form was opened. Reload the form and try again.', code: 'MEET_STALE_FORM', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000017', httpStatusCode: 409 }, invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a00000000c9' /* ERR-ID-UNIQUE-V1: was …0014 (duprLocked) */ }, notClubMember: { message: 'Only the club admins — or its members, when the club allows it — can put meets in this club.', code: 'CLUB_NOT_MEMBER', id: 'c1b00000-0000-4000-8000-000000000011' }, ...meetErrors },   // CLUB-TIERS-V1: notClubMember
 } as const;
 
 export const paramDef = {

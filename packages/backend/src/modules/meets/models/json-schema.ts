@@ -19,6 +19,7 @@ export const packedMeetParticipantSchema = {
 		extGender: { type: 'string', optional: false, nullable: true },
 		extAge: { type: 'string', optional: false, nullable: true },
 		positionId: { type: 'string', optional: false, nullable: true },
+		bib: { type: 'string', optional: true, nullable: true },   // MEETS-FIXES-V1
 		paymentType: { type: 'string', optional: false, nullable: true },
 		isHost: { type: 'boolean', optional: false, nullable: false },
 		isCoach: { type: 'boolean', optional: false, nullable: false },
@@ -162,6 +163,7 @@ export const packedMeetMatchSchema = {
 		duprRef: { type: 'string', optional: false, nullable: true },
 		duprError: { type: 'string', optional: false, nullable: true },
 		duprEligibility: { type: 'object', optional: true, nullable: true },
+		notes: { type: 'string', optional: true, nullable: true },   // MEETS-FIXES-V1
 		updatedAt: { type: 'string', optional: false, nullable: false, format: 'date-time' },
 	},
 } as const;

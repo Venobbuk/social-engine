@@ -21,7 +21,7 @@ export const meta = {
 	kind: 'write:meets',
 	res: { type: 'object', optional: false, nullable: false, ref: 'Meet' },
 	errors: {
-		noSuchUser: { message: 'No such user.', code: 'NO_SUCH_USER', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000012' },
+		noSuchUser: { message: 'No such user.', code: 'NO_SUCH_USER', id: '6b1d0a3e-8f41-4c0b-9b7e-1a00000000c8' /* ERR-ID-UNIQUE-V1 (meets-fixes): was …0012, shared with meetErrors.hostNeedsSeat */ },
 		...meetErrors,
 	},
 } as const;
