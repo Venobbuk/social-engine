@@ -1,0 +1,158 @@
+{
+ "id": "uat-demo-data",
+ "at": "2026-09-23T07:55:16.283Z",
+ "label": "reset-copy-swept",
+ "engine": "http://127.0.0.1:3969",
+ "app": "https://uat.gripbat.com",
+ "phases": [
+  "doors"
+ ],
+ "termsVersion": "gb-1ul4r0r",
+ "condition_fired": true,
+ "verdict": "pass",
+ "counts": {
+  "checks": 23,
+  "pass": 23,
+  "fail": 0
+ },
+ "evidence": [
+  {
+   "phase": "doors",
+   "name": "signed-out lesson slots (meets/list discover, one row per slot) >= 3",
+   "pass": true,
+   "evidence": "4 slots: Private Lesson with Mei | Beginners' Group Clinic | Dinking & Third-Shot Workshop | Intermediate Drills (3.0–3.5)"
+  },
+  {
+   "phase": "doors",
+   "name": "lesson names are demo names, not [probe]",
+   "pass": true,
+   "evidence": "Private Lesson with Mei | Beginners' Group Clinic | Dinking & Third-Shot Workshop | Intermediate Drills (3.0–3.5)"
+  },
+  {
+   "phase": "doors",
+   "name": "signed-out Coaches (roles/users Coach role) >= 2",
+   "pass": true,
+   "evidence": "3: Rita 黃, Tom Ho, Mei Lam"
+  },
+  {
+   "phase": "doors",
+   "name": "no duplicate coach rows",
+   "pass": true,
+   "evidence": "aqxxu4smsfmc000d,arhdbyw30mvw0009,arhdbyjv0mvw0006"
+  },
+  {
+   "phase": "doors",
+   "name": "every coach row carries experience/rate (what the Coaches list shows)",
+   "pass": true,
+   "evidence": "3/3"
+  },
+  {
+   "phase": "doors",
+   "name": "Discover › People door (users state:alive) >= 10",
+   "pass": true,
+   "evidence": "21: Jason 張, Mandy 何, Amy 洪, Jimmy 唐, Kelvin 馮, Brian 徐, Hiro Tanaka, Carmen 吳, Derek 潘, Ben Cheung, Joyce 羅, Chloe 林, Elaine 許, Ethan 高"
+  },
+  {
+   "phase": "doors",
+   "name": "People carry levels (>= 10 rated)",
+   "pass": true,
+   "evidence": "21/21 rated"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+host-ken onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T07:51:56.201Z"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+clubowner-mei onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T07:51:56.267Z"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+clubadmin-tom onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T07:51:56.330Z"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+admin onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T07:51:56.385Z"
+  },
+  {
+   "phase": "doors",
+   "name": "boyau.tester1 onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T07:51:56.521Z"
+  },
+  {
+   "phase": "doors",
+   "name": "boyau.tester2 onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T07:51:56.577Z"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+player-amy terms (not onboarded: tester plan A1) gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=false terms=gb-1ul4r0r at 2026-09-23T07:51:56.452Z"
+  },
+  {
+   "phase": "doors",
+   "name": "mei schedules: no duplicate names",
+   "pass": true,
+   "evidence": "Private Lesson with Mei | Beginners' Group Clinic"
+  },
+  {
+   "phase": "doors",
+   "name": "mei · Private Lesson with Mei: lessons materialised, one per date, HKD",
+   "pass": true,
+   "evidence": "4 lessons 2026-09-23,2026-09-30,2026-10-07,2026-10-14 bands [{\"currency\":\"HKD\",\"pricePerPerson\":450,\"maxParticipants\":1,\"minParticipants\":1}]"
+  },
+  {
+   "phase": "doors",
+   "name": "mei · Beginners' Group Clinic: lessons materialised, one per date, HKD",
+   "pass": true,
+   "evidence": "4 lessons 2026-09-26,2026-10-03,2026-10-10,2026-10-17 bands [{\"currency\":\"HKD\",\"pricePerPerson\":450,\"maxParticipants\":1,\"minParticipants\":1},{\"currency\":\"HKD\",\"pricePerPerson\":280,\"maxParticipants\":3,\"minParticipants\":2},{\"currency\":\"HKD\",\"pricePerPerson\":180,\"maxParticipants\":6,\"minParticipants\":4}]"
+  },
+  {
+   "phase": "doors",
+   "name": "tom schedules: no duplicate names",
+   "pass": true,
+   "evidence": "Intermediate Drills (3.0–3.5)"
+  },
+  {
+   "phase": "doors",
+   "name": "tom · Intermediate Drills (3.0–3.5): lessons materialised, one per date, HKD",
+   "pass": true,
+   "evidence": "4 lessons 2026-09-29,2026-10-06,2026-10-13,2026-10-20 bands [{\"currency\":\"HKD\",\"pricePerPerson\":400,\"maxParticipants\":1,\"minParticipants\":1},{\"currency\":\"HKD\",\"pricePerPerson\":220,\"maxParticipants\":4,\"minParticipants\":2},{\"currency\":\"HKD\",\"pricePerPerson\":150,\"maxParticipants\":8,\"minParticipants\":5}]"
+  },
+  {
+   "phase": "doors",
+   "name": "rita schedules: no duplicate names",
+   "pass": true,
+   "evidence": "Dinking & Third-Shot Workshop"
+  },
+  {
+   "phase": "doors",
+   "name": "rita · Dinking & Third-Shot Workshop: lessons materialised, one per date, HKD",
+   "pass": true,
+   "evidence": "4 lessons 2026-09-27,2026-10-04,2026-10-11,2026-10-18 bands [{\"currency\":\"HKD\",\"pricePerPerson\":600,\"maxParticipants\":1,\"minParticipants\":1},{\"currency\":\"HKD\",\"pricePerPerson\":300,\"maxParticipants\":4,\"minParticipants\":2},{\"currency\":\"HKD\",\"pricePerPerson\":200,\"maxParticipants\":8,\"minParticipants\":5}]"
+  },
+  {
+   "phase": "doors",
+   "name": "group clinic: lived-in (>= 2 booked), open seats (>= 1), no double booking",
+   "pass": true,
+   "evidence": "confirmed 2/6 Gary 盧, Grace 韓"
+  },
+  {
+   "phase": "doors",
+   "name": "seeded notes: at most one per player in 72 h",
+   "pass": true,
+   "evidence": "none duplicated"
+  }
+ ]
+}

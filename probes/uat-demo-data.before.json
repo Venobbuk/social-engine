@@ -1,0 +1,190 @@
+{
+ "id": "uat-demo-data",
+ "at": "2026-09-23T07:38:46.618Z",
+ "label": "before",
+ "engine": "https://uat.social.silkvo.com",
+ "app": "https://uat.gripbat.com",
+ "phases": [
+  "doors",
+  "screens",
+  "consent"
+ ],
+ "termsVersion": "gb-1ul4r0r",
+ "condition_fired": true,
+ "verdict": "fail",
+ "counts": {
+  "checks": 28,
+  "pass": 11,
+  "fail": 17
+ },
+ "evidence": [
+  {
+   "phase": "doors",
+   "name": "signed-out lesson slots (meets/list discover, one row per slot) >= 3",
+   "pass": false,
+   "evidence": "0 slots: "
+  },
+  {
+   "phase": "doors",
+   "name": "lesson names are demo names, not [probe]",
+   "pass": false,
+   "evidence": ""
+  },
+  {
+   "phase": "doors",
+   "name": "signed-out Coaches (roles/users Coach role) >= 2",
+   "pass": false,
+   "evidence": "0: "
+  },
+  {
+   "phase": "doors",
+   "name": "no duplicate coach rows",
+   "pass": true,
+   "evidence": ""
+  },
+  {
+   "phase": "doors",
+   "name": "every coach row carries experience/rate (what the Coaches list shows)",
+   "pass": false,
+   "evidence": "0/0"
+  },
+  {
+   "phase": "doors",
+   "name": "Discover › People door (users state:alive) >= 10",
+   "pass": false,
+   "evidence": "4: Tom Ho, Mei Lam, 波友測試 1, 波友測試 2"
+  },
+  {
+   "phase": "doors",
+   "name": "People carry levels (>= 10 rated)",
+   "pass": false,
+   "evidence": "3/4 rated"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+host-ken onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T06:20:20.545Z"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+clubowner-mei onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T05:20:13.943Z"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+clubadmin-tom onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T05:20:03.862Z"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+admin onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T06:55:36.387Z"
+  },
+  {
+   "phase": "doors",
+   "name": "boyau.tester1 onboarded + terms gb-1ul4r0r",
+   "pass": false,
+   "evidence": "onboarded=false terms=gb-1ul4r0r at 2026-09-23T06:21:16.546Z"
+  },
+  {
+   "phase": "doors",
+   "name": "boyau.tester2 onboarded + terms gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=true terms=gb-1ul4r0r at 2026-09-23T06:21:07.560Z"
+  },
+  {
+   "phase": "doors",
+   "name": "uat+player-amy terms (not onboarded: tester plan A1) gb-1ul4r0r",
+   "pass": true,
+   "evidence": "onboarded=false terms=gb-1ul4r0r at 2026-09-23T05:19:49.568Z"
+  },
+  {
+   "phase": "doors",
+   "name": "mei schedules: no duplicate names",
+   "pass": false,
+   "evidence": "none"
+  },
+  {
+   "phase": "doors",
+   "name": "tom schedules: no duplicate names",
+   "pass": false,
+   "evidence": "none"
+  },
+  {
+   "phase": "doors",
+   "name": "rita schedules: no duplicate names",
+   "pass": false,
+   "evidence": "none"
+  },
+  {
+   "phase": "doors",
+   "name": "group clinic exists",
+   "pass": false,
+   "evidence": "no \"Beginners' Group Clinic\" schedule"
+  },
+  {
+   "phase": "doors",
+   "name": "seeded notes: at most one per player in 72 h",
+   "pass": true,
+   "evidence": "none duplicated"
+  },
+  {
+   "phase": "screens",
+   "name": "signed out /pages/lessons: \"Lessons you can book\" + >= 3 rows",
+   "pass": false,
+   "evidence": "section false · rows:  · /root/walk/uat-demo-data-before/anon-lessons.png"
+  },
+  {
+   "phase": "screens",
+   "name": "signed out Coaches list is not empty (>= 2 coaches)",
+   "pass": false,
+   "evidence": "coaches seen:  · /root/walk/uat-demo-data-before/anon-coaches.png"
+  },
+  {
+   "phase": "screens",
+   "name": "ken lands on Home (not onboarding), no consent gate",
+   "pass": true,
+   "evidence": "url /app/pages/home/index?lang=en · gate false · meets/level 200,200,200 · /root/walk/uat-demo-data-before/ken-home.png"
+  },
+  {
+   "phase": "screens",
+   "name": "Discover › People lists >= 10 players (with levels)",
+   "pass": false,
+   "evidence": "4: 波友測試 1 Unrated · 波友測試 2 3.39 · Tom Ho 3.7 · Mei Lam 2.82 · /root/walk/uat-demo-data-before/ken-people.png"
+  },
+  {
+   "phase": "screens",
+   "name": "mei lands on Home (not onboarding), no consent gate",
+   "pass": true,
+   "evidence": "url /app/pages/home/index?lang=en · gate false · meets/level 200,200,200 · /root/walk/uat-demo-data-before/mei-home.png"
+  },
+  {
+   "phase": "screens",
+   "name": "tester1 lands on Home (not onboarding), no consent gate",
+   "pass": false,
+   "evidence": "url /app/pages/onboard/index · gate false · meets/level 200,200 · /root/walk/uat-demo-data-before/tester1-home.png"
+  },
+  {
+   "phase": "consent",
+   "name": "fixture has NOT accepted today's terms (the gate must ask)",
+   "pass": true,
+   "evidence": "termsVersion null"
+  },
+  {
+   "phase": "consent",
+   "name": "a stray tap on Sign out the moment the gate appears does NOT sign out",
+   "pass": false,
+   "evidence": "tap at {\"x\":195,\"y\":580.515625} · /api/v1/auth/me 200 · gate still up false · /root/walk/uat-demo-data-before/consent-after-stray-tap.png"
+  },
+  {
+   "phase": "consent",
+   "name": "consent flow ran",
+   "pass": false,
+   "evidence": "Cannot read properties of null (reading 'contains') · /root/walk/uat-demo-data-before/consent-error.png"
+  }
+ ]
+}

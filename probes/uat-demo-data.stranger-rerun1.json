@@ -1,0 +1,50 @@
+{
+ "id": "uat-demo-data",
+ "at": "2026-09-23T08:42:36.083Z",
+ "label": "stranger-rerun1",
+ "engine": "https://uat.social.silkvo.com",
+ "app": "https://uat.gripbat.com",
+ "phases": [
+  "stranger"
+ ],
+ "termsVersion": "gb-1ul4r0r",
+ "condition_fired": true,
+ "verdict": "pass",
+ "counts": {
+  "checks": 5,
+  "pass": 5,
+  "fail": 0
+ },
+ "evidence": [
+  {
+   "phase": "stranger",
+   "name": "group clinic schedule found",
+   "pass": true,
+   "evidence": "arhdp6fp1zxb0034"
+  },
+  {
+   "phase": "stranger",
+   "name": "fresh .test sign-in (code read off the screen) returns to the lesson page, and it loads",
+   "pass": true,
+   "evidence": "probe-uatdemo-muduul6b@demo.test code 419874 -> /app/pages/lesson/index?id=arhdp6fp1zxb0034 · load error false · failed requests none · /root/walk/uat-demo-data-stranger-rerun1/stranger-lesson.png"
+  },
+  {
+   "phase": "stranger",
+   "name": "lesson page: Book opens the confirm sheet with the group price",
+   "pass": true,
+   "evidence": "tapped Book · quote HKD 280 · /root/walk/uat-demo-data-stranger-rerun1/stranger-sheet.png"
+  },
+  {
+   "phase": "stranger",
+   "name": "booking read back from the engine (student + coach roster), price locked at the group rate",
+   "pass": true,
+   "evidence": "POST coaches/lessons/book -> 200 · mine {\"meetId\":\"arhdp6gz1zxb0035\",\"status\":\"confirmed\",\"agreedPrice\":280,\"agreedCurrency\":\"HKD\"} · roster confirmed · /root/walk/uat-demo-data-stranger-rerun1/stranger-after.png"
+  },
+  {
+   "phase": "stranger",
+   "name": "cleanup: the stranger booking is gone",
+   "pass": true,
+   "evidence": "meets/leave -> 200 · on roster no"
+  }
+ ]
+}
