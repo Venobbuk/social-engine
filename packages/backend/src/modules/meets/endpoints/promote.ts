@@ -61,6 +61,12 @@ export const paramDef = {
 		preview: { type: 'boolean', default: false },
 		// PROMOTE-AUDIENCE-V1: Reclub "CHOOSE YOUR AUDIENCE" — club members / nearby; 'all' = followers + nearby (V1)
 		audience: { type: 'string', enum: ['all', 'club', 'proximity'], default: 'all' },
+		// PROMOTE-FILTERS-V1 (lane club-posts-links, A-promote-meet.04 — Reclub promote(meetId, {audience, sportLevelIds,
+		// genders, ageGroups})): narrow the audience to these skill levels / genders / age groups. Empty or absent = no filter
+		// (Reclub "Select All"). Read from the player's own level row (meet_player_level), the facts the meet gate reads.
+		levels: { type: 'array', maxItems: 7, uniqueItems: true, items: { type: 'string', enum: ['2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0+'] } },
+		genders: { type: 'array', maxItems: 2, uniqueItems: true, items: { type: 'string', enum: ['female', 'male'] } },
+		ageGroups: { type: 'array', maxItems: 3, uniqueItems: true, items: { type: 'string', enum: ['junior', 'adult', 'senior'] } },
 	},
 	required: ['meetId'],
 } as const;
@@ -82,9 +88,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			try { await this.meetService.assertHost(meet, me); } catch (e) { return toApiError(e); }
 			const gate = promoteGate(meet);
 			const kind = (ps.audience ?? 'all') as PromoteAudienceKind;
+			const filters = { levels: ps.levels ?? [], genders: ps.genders ?? [], ageGroups: ps.ageGroups ?? [] }; // PROMOTE-FILTERS-V1
 			const base = { audience: kind, gate, windowHours: PROMOTE_WINDOW_HOURS, radiusKm: PROMOTE_RADIUS_KM, promotedAt: meet.promotedAt ? new Date(meet.promotedAt).toISOString() : null };
 			if (ps.preview) {
-				const a = gate === 'ok' ? await promoteAudience(this.db, meet, kind) : { userIds: [], followers: 0, nearby: 0, club: 0 };
+				const a = gate === 'ok' ? await promoteAudience(this.db, meet, kind, filters) : { userIds: [], followers: 0, nearby: 0, club: 0 };
 				return { ...base, reach: a.userIds.length, followers: a.followers, nearby: a.nearby, club: a.club, sent: false };
 			}
 			if (gate === 'not_public') throw new ApiError(meta.errors.notPublic);
@@ -94,7 +101,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (gate === 'not_active') throw new ApiError(meta.errors.meetNotActive);
 
 			if (kind === 'club' && !meet.channelId) throw new ApiError(meta.errors.notClubMeet);
-			const audience = await promoteAudience(this.db, meet, kind);
+			const audience = await promoteAudience(this.db, meet, kind, filters);
 			// Reclub settings › "Promoted community meets": a 'promoted' notification mute leaves the player out (table may be another stream's, read defensively)
 			let muted = new Set<string>();
 			try {

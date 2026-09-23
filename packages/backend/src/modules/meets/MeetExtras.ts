@@ -192,7 +192,26 @@ export function promoteGate(meet: MiMeet, now = Date.now()): PromoteGate {
  * The level band, the host and the roster exclusions apply to every audience.
  */
 export type PromoteAudienceKind = 'all' | 'club' | 'proximity';
-export async function promoteAudience(db: DataSource, meet: MiMeet, audience: PromoteAudienceKind = 'all'): Promise<{ userIds: string[]; followers: number; nearby: number; club: number }> {
+/** PROMOTE-FILTERS-V1 (lane club-posts-links, A-promote-meet.04): Reclub's "Choose skill levels" chips — the app's level
+ *  bands (lib/club-levels): each band is [x, x + 0.5), "5.0+" is 5.0 and up. */
+export const PROMOTE_LEVELS = ['2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0+'] as const;
+export interface PromoteFilters { levels?: string[]; genders?: string[]; ageGroups?: string[] }
+/** The filters as SQL on the candidate u (whitelisted values only, inlined). Empty = no filter. */
+function promoteFilterSql(f: PromoteFilters | undefined, levelCol: string): string {
+	if (!f) return '';
+	const out: string[] = [];
+	const levels = (f.levels ?? []).filter((x) => (PROMOTE_LEVELS as readonly string[]).includes(x));
+	if (levels.length && levels.length < PROMOTE_LEVELS.length) {
+		const bands = levels.map((x) => { const lo = parseFloat(x); return x.endsWith('+') ? `(${levelCol} >= ${lo})` : `(${levelCol} >= ${lo} AND ${levelCol} < ${lo + 0.5})`; });
+		out.push(`AND EXISTS (SELECT 1 FROM "meet_player_level" fl WHERE fl."userId" = u."id" AND fl."sport" = $2 AND (${bands.join(' OR ')}))`);
+	}
+	const genders = (f.genders ?? []).filter((x) => x === 'female' || x === 'male');
+	if (genders.length === 1) out.push(`AND EXISTS (SELECT 1 FROM "meet_player_level" fg WHERE fg."userId" = u."id" AND fg."gender" = '${genders[0]}')`);
+	const ages = (f.ageGroups ?? []).filter((x) => x === 'junior' || x === 'adult' || x === 'senior');
+	if (ages.length && ages.length < 3) out.push(`AND EXISTS (SELECT 1 FROM "meet_player_level" fa WHERE fa."userId" = u."id" AND fa."ageGroup" IN (${ages.map((x) => `'${x}'`).join(', ')}))`);
+	return out.join(' ');
+}
+export async function promoteAudience(db: DataSource, meet: MiMeet, audience: PromoteAudienceKind = 'all', filters?: PromoteFilters): Promise<{ userIds: string[]; followers: number; nearby: number; club: number }> {
 	const level = meet.levelBasis === 'duprSingles' ? 'duprSingles' : meet.levelBasis === 'duprDoubles' ? 'duprDoubles' : 'selfLevel';
 	const band = meet.minLevel != null || meet.maxLevel != null;
 	const bandSql = band
@@ -200,7 +219,7 @@ export async function promoteAudience(db: DataSource, meet: MiMeet, audience: Pr
 		     ${meet.minLevel != null ? `AND COALESCE(l."${level}", l."selfLevel") >= ${Number(meet.minLevel)}` : ''} ${meet.maxLevel != null ? `AND COALESCE(l."${level}", l."selfLevel") <= ${Number(meet.maxLevel)}` : ''})`
 		: '';
 	const base = `FROM "user" u WHERE u."host" IS NULL AND u."isSuspended" = false AND u."isDeleted" = false AND u."id" <> $3 AND $2::varchar IS NOT NULL
-		AND NOT EXISTS (SELECT 1 FROM "meet_participant" p WHERE p."meetId" = $1 AND p."userId" = u."id") ${bandSql}`;
+		AND NOT EXISTS (SELECT 1 FROM "meet_participant" p WHERE p."meetId" = $1 AND p."userId" = u."id") ${bandSql} ${promoteFilterSql(filters, `COALESCE(fl."${level}", fl."selfLevel")`)}`;
 	if (audience === 'club') {
 		if (!meet.channelId) return { userIds: [], followers: 0, nearby: 0, club: 0 };
 		const club = await db.query(`SELECT u."id" ${base} AND ${memberExistsSql('$4', 'u."id"')}

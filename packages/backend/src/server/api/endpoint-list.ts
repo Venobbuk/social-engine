@@ -279,6 +279,7 @@ export * as 'clubs/mine' from '@/modules/clubs/endpoints/mine.js'; // CLUB-V3
 export * as 'clubs/of-user' from '@/modules/clubs/endpoints/of-user.js'; // PLAYER-CLUBS-V1 (W2-F)
 export * as 'clubs/me/update' from '@/modules/clubs/endpoints/me-update.js'; // CLUB-V3
 export * as 'clubs/by-code' from '@/modules/clubs/endpoints/by-code.js'; // CLUB-V3
+export * as 'clubs/handle-available' from '@/modules/clubs/endpoints/handle-available.js'; // CLUB-HANDLE-V1 (club-posts-links)
 export * as 'clubs/tags/list' from '@/modules/clubs/endpoints/tags-list.js'; // CLUB-V3
 export * as 'clubs/tags/upsert' from '@/modules/clubs/endpoints/tags-upsert.js'; // CLUB-V3
 export * as 'clubs/tags/delete' from '@/modules/clubs/endpoints/tags-delete.js'; // CLUB-V3
@@ -522,6 +523,8 @@ export * as 'notes/local-timeline' from './endpoints/notes/local-timeline.js';
 export * as 'notes/mentions' from './endpoints/notes/mentions.js';
 export * as 'notes/polls/recommendation' from './endpoints/notes/polls/recommendation.js';
 export * as 'notes/polls/vote' from './endpoints/notes/polls/vote.js';
+export * as 'notes/polls/unvote' from './endpoints/notes/polls/unvote.js'; // POLL-EXT-V1 (club-posts-links)
+export * as 'notes/polls/add-choice' from './endpoints/notes/polls/add-choice.js'; // POLL-EXT-V1 (club-posts-links)
 export * as 'notes/reactions' from './endpoints/notes/reactions.js';
 export * as 'notes/reactions/create' from './endpoints/notes/reactions/create.js';
 export * as 'notes/reactions/delete' from './endpoints/notes/reactions/delete.js';

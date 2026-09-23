@@ -12,6 +12,11 @@ import { bindThis } from '@/decorators.js';
 import { IdService } from '@/core/IdService.js';
 import type { SelectQueryBuilder } from 'typeorm';
 
+/** CLUB-POST-AUDIENCE-V1: the reader (:meId) is in a restricted club post's audience — 'followers' = the club's owner,
+ *  admins or members; 'specified' = its owner or admins. Same rule as ClubService.mayReadClubPost. */
+const CLUB_OWNER_OR_ADMIN_SQL = `(EXISTS (SELECT 1 FROM "channel" "cpa_c" WHERE "cpa_c"."id" = note.channelId AND "cpa_c"."userId" = :meId) OR EXISTS (SELECT 1 FROM "club_setting" "cpa_s" WHERE "cpa_s"."channelId" = note.channelId AND :meId = ANY("cpa_s"."adminIds")))`;
+const CLUB_AUDIENCE_SQL = `(note.channelId IS NOT NULL AND ((note.visibility = 'followers' AND (${CLUB_OWNER_OR_ADMIN_SQL} OR EXISTS (SELECT 1 FROM "club_member" "cpa_m" WHERE "cpa_m"."channelId" = note.channelId AND "cpa_m"."userId" = :meId))) OR (note.visibility = 'specified' AND ${CLUB_OWNER_OR_ADMIN_SQL})))`;
+
 @Injectable()
 export class QueryService {
 	constructor(
@@ -295,8 +300,14 @@ export class QueryService {
 								// または 自分の投稿へのリプライ
 									.orWhere('note.replyUserId = :meId');
 							}));
-					}));
+					}))
+				// CLUB-POST-AUDIENCE-V1: or a members- / admins-only club post I am in the audience of
+					.orWhere(CLUB_AUDIENCE_SQL);
 			}));
+			// CLUB-POST-AUDIENCE-V1 (lane club-posts-links): a club post's 'followers' / 'specified' means the club's members /
+			// admins (NoteEntityService.isVisibleForMe), never the author's followers or a mention — so a restricted club post
+			// passes only on the club rule (or as my own).
+			q.andWhere(`(note.channelId IS NULL OR note.visibility IN ('public', 'home') OR note.userId = :meId OR ${CLUB_AUDIENCE_SQL})`);
 
 			q.setParameters({ meId: me.id, meIdAsList: [me.id] });
 		}

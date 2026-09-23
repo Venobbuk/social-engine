@@ -69,6 +69,10 @@ export default abstract class Channel {
 		// This code must always be synchronized with the checks in QueryService.generateVisibilityQuery.
 		const meId = this.connection.user?.id ?? null;
 
+		// CLUB-POST-AUDIENCE-V1 (lane club-posts-links): a members- / admins-only club post is never streamed live (its audience
+		// is the club's, decided async by ClubService.mayReadClubPost) — the reader sees it on the next read of the feed.
+		if (note.channelId && (note.visibility === 'followers' || note.visibility === 'specified')) return meId != null && meId === note.userId;
+
 		// visibility が specified かつ自分が指定されていなかったら非表示
 		if (note.visibility === 'specified') {
 			if (meId == null) {

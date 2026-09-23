@@ -12,6 +12,9 @@ import { ApiError } from '@/server/api/error.js';
 import { ChatService } from '@/core/ChatService.js';
 import type { DriveFilesRepository, MeetsRepository, MiUser, UsersRepository } from '@/models/_.js';
 import { replyAttachment } from '@/core/ChatReply.js';
+import type { DataSource } from 'typeorm';
+import { ClubService } from '@/modules/clubs/ClubService.js';
+import { clubOfRoom, outsideLinkRefusal, outsideLinksError } from '@/modules/clubs/club-post-rules.js';
 
 export const meta = {
 	tags: ['chat'],
@@ -65,6 +68,9 @@ export const meta = {
 			id: 'c2a1d5e0-5c1b-4f7e-9a3c-7e1b2c3d4e50',
 		},
 
+		// CLUB-POSTS-LINKS-V1 (B-set-comms.03 / E-chat-room.21): the club chat refuses another club's meet or competition
+		outsideLinks: outsideLinksError,
+
 		contentRequired: {
 			message: 'Content required. You need to set text or fileId.',
 			code: 'CONTENT_REQUIRED',
@@ -101,6 +107,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 		private getterService: GetterService,
 		private chatService: ChatService,
+		private clubService: ClubService,
+		@Inject(DI.db) private db: DataSource,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			await this.chatService.checkChatAvailability(me.id, 'write');
@@ -142,6 +150,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (attachment == null) throw new ApiError(meta.errors.noSuchReply);
 				if (ps.text == null && file == null) throw new ApiError(meta.errors.contentRequired);
 			}
+
+			// CLUB-POSTS-LINKS-V1: a club's chat room with "Allow outside activity links" OFF — text links and meet cards
+			const roomClub = await clubOfRoom(this.db, room.id);
+			if (roomClub && await outsideLinkRefusal(this.db, this.clubService, roomClub, me.id, ps.text ?? null, ps.meetId ?? null)) throw new ApiError(meta.errors.outsideLinks);
 
 			// テキストが無いかつ添付ファイルも無かったらエラー
 			if (ps.text == null && file == null && attachment == null) {

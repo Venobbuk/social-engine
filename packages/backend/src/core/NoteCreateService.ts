@@ -385,7 +385,7 @@ export class NoteCreateService implements OnApplicationShutdown {
 				throw new IdentifiableError('f089e4e2-c0e7-4f60-8a23-e5a6bf786b36', 'Cannot reply to pure renote');
 			} else if (!(await this.noteEntityService.isVisibleForMe(reply, user.id))) {
 				throw new IdentifiableError('11cd37b3-a411-4f77-8633-c580ce6a8dce', 'No such reply target');
-			} else if (reply.visibility === 'specified' && data.visibility !== 'specified') {
+			} else if (reply.visibility === 'specified' && data.visibility !== 'specified' && reply.channelId == null) { // CLUB-POST-AUDIENCE-V1: a comment on an admins-only club post inherits it below
 				throw new IdentifiableError('ced780a1-2012-4caf-bc7e-a95a291294cb', 'Cannot reply to specified note with different visibility');
 			}
 
@@ -472,7 +472,12 @@ export class NoteCreateService implements OnApplicationShutdown {
 		if (data.createdAt == null) data.createdAt = new Date();
 		if (data.visibility == null) data.visibility = 'public';
 		if (data.localOnly == null) data.localOnly = false;
-		if (data.channel != null) data.visibility = 'public';
+		// CLUB-POST-AUDIENCE-V1 (lane club-posts-links, Reclub post visibility Admin / Subscribers / Public): a club post keeps
+		// Misskey's own visibility with the club's meaning — 'public' = whoever may read the club, 'followers' = the club's
+		// members (owner + admins + club_member), 'specified' = the club's admins (owner + adminIds, resolved at READ time, so
+		// visibleUserIds stays empty). Enforced where every note is read: NoteEntityService.shouldHideNote / isVisibleForMe,
+		// QueryService.generateVisibilityQuery, channels/timeline; streams skip restricted club posts. Anything else -> public.
+		if (data.channel != null && data.visibility !== 'followers' && data.visibility !== 'specified') data.visibility = 'public';
 		if (data.channel != null) data.visibleUsers = [];
 		if (data.channel != null) data.localOnly = true;
 
@@ -719,6 +724,8 @@ export class NoteCreateService implements OnApplicationShutdown {
 						choices: data.poll!.choices,
 						expiresAt: data.poll!.expiresAt,
 						multiple: data.poll!.multiple,
+						allowAddChoices: data.poll!.allowAddChoices ?? false, // POLL-EXT-V1
+						choiceAddedBy: new Array(data.poll!.choices.length).fill(''),
 						votes: new Array(data.poll!.choices.length).fill(0),
 						noteVisibility: insert.visibility,
 						userId: user.id,
@@ -800,7 +807,8 @@ export class NoteCreateService implements OnApplicationShutdown {
 				followeeId: user.id,
 				notify: 'normal',
 			}).then(async followings => {
-				if (note.visibility !== 'specified') {
+				// CLUB-POST-AUDIENCE-V1: a members-/admins-only club post never notifies the author's followers
+				if (note.visibility !== 'specified' && !(note.channelId && note.visibility === 'followers')) {
 					const isPureRenote = this.isRenote(data) && !this.isQuote(data) ? true : false;
 					for (const following of followings) {
 						// TODO: ワードミュート考慮

@@ -39,6 +39,14 @@ export class MiPoll {
 	})
 	public votes: number[];
 
+	// POLL-EXT-V1 (lane club-posts-links, Reclub community:addition_allowance "Allow adding new options"): voters may append
+	// a choice (notes/polls/add-choice); choiceAddedBy[i] = who added choice i ('' = the author's own choice at create).
+	@Column('boolean', { default: false })
+	public allowAddChoices: boolean;
+
+	@Column('varchar', { length: 32, array: true, default: '{}' })
+	public choiceAddedBy: string[];
+
 	//#region Denormalized fields
 	@Column('enum', {
 		enum: noteVisibilities,
@@ -83,4 +91,5 @@ export type IPoll = {
 	votes?: number[];
 	multiple: boolean;
 	expiresAt: Date | null;
+	allowAddChoices?: boolean; // POLL-EXT-V1
 };

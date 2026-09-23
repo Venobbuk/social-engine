@@ -128,6 +128,10 @@ export const packedNoteSchema = {
 					type: 'boolean',
 					optional: false, nullable: false,
 				},
+				allowAddChoices: { // POLL-EXT-V1
+					type: 'boolean',
+					optional: true, nullable: false,
+				},
 				choices: {
 					type: 'array',
 					optional: false, nullable: false,
@@ -146,6 +150,10 @@ export const packedNoteSchema = {
 							votes: {
 								type: 'number',
 								optional: false, nullable: false,
+							},
+							addedBy: { // POLL-EXT-V1: who added a voter-added choice
+								type: 'string',
+								optional: true, nullable: true,
 							},
 						},
 					},

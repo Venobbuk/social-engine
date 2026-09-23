@@ -98,6 +98,47 @@ export class ClubService {
 		return (await this.myInvitation(channelId, userId)) === 'pending'; // CLUB-INVITE-V1: an invited player reads the club to decide
 	}
 
+	/** CLUB-POST-AUDIENCE-V1 (lane club-posts-links): who I am in a club — its owner/admins (admin) and its members (member;
+	 *  an admin counts as a member). One query; the note packer asks it only for a restricted club post. */
+	@bindThis
+	public async clubRole(channelId: string, userId: string | null | undefined): Promise<{ admin: boolean; member: boolean }> {
+		if (!userId) return { admin: false, member: false };
+		const r = await this.db.query(`SELECT
+			EXISTS (SELECT 1 FROM "channel" c WHERE c."id" = $1 AND c."userId" = $2) OR EXISTS (SELECT 1 FROM "club_setting" s WHERE s."channelId" = $1 AND $2 = ANY(s."adminIds")) AS "admin",
+			EXISTS (SELECT 1 FROM "club_member" m WHERE m."channelId" = $1 AND m."userId" = $2) AS "member"`, [channelId, userId]) as { admin: boolean; member: boolean }[];
+		const admin = !!(r[0] && r[0].admin);
+		return { admin, member: admin || !!(r[0] && r[0].member) };
+	}
+
+	/** CLUB-POST-AUDIENCE-V1: may this reader see this club post? THE rule for Misskey's visibility on a club note (channel
+	 *  notes keep 'public' | 'followers' | 'specified', NoteCreateService): public -> the club's read gate (mayReadClub);
+	 *  followers -> the club's members; specified -> the club's admins. The author always. Callers run mayReadClub first. */
+	@bindThis
+	public async mayReadClubPost(note: { channelId: string | null; userId: string; visibility: string }, meId: string | null | undefined): Promise<boolean> {
+		if (!note.channelId || (note.visibility !== 'followers' && note.visibility !== 'specified')) return true;
+		if (meId && meId === note.userId) return true;
+		const role = await this.clubRole(note.channelId, meId);
+		return note.visibility === 'specified' ? role.admin : role.member;
+	}
+
+	/** CLUB-HANDLE-V1: which club holds a handle (archived clubs too — the handle stays theirs), or null. */
+	@bindThis
+	public async handleOwner(handle: string): Promise<string | null> {
+		const s = await this.clubSettingsRepository.findOne({ where: { handle }, select: { channelId: true } });
+		return s ? s.channelId : null;
+	}
+
+	/** CLUB-HANDLE-V1 (Reclub /clubs/@handle): the club behind a handle, or null. */
+	@bindThis
+	public async byHandle(handle: string): Promise<{ channel: MiChannel; settings: MiClubSetting } | null> {
+		const h = String(handle || '').trim().replace(/^@/, '').toLowerCase();
+		if (!h) return null;
+		const s = await this.clubSettingsRepository.findOneBy({ handle: h });
+		if (!s) return null;
+		const c = await this.channelsRepository.findOneBy({ id: s.channelId });
+		return c && !c.isArchived ? { channel: c, settings: s } : null;
+	}
+
 	/** INVITE-ACCESS-V1 (2026-09-21): does THIS invite-link token open THIS club? The token half of mayReadClub, asked
 	 *  on its own, so a door that has already let a token holder in can tell the PACKER "this caller proved access"
 	 *  instead of the packer re-deriving it or the door re-deriving counts. It never widens mayReadClub: a public club
@@ -332,7 +373,7 @@ export class ClubService {
 
 	/** Owner / admins may change these; the channel's own name/description/banner go through channels/update. */
 	@bindThis
-	public async updateSettings(channel: MiChannel, by: MiUser, patch: Partial<Pick<MiClubSetting, 'visibility' | 'gateType' | 'createMeetPermission' | 'sport' | 'level' | 'venueIds' | 'paymentInfo' | 'enableForum' | 'enableChat' | 'awards' | 'memberGated'>>): Promise<MiClubSetting> {
+	public async updateSettings(channel: MiChannel, by: MiUser, patch: Partial<Pick<MiClubSetting, 'visibility' | 'gateType' | 'createMeetPermission' | 'sport' | 'level' | 'venueIds' | 'paymentInfo' | 'enableForum' | 'enableChat' | 'awards' | 'memberGated' | 'allowOutsideLinks' | 'handle'>>): Promise<MiClubSetting> {
 		await this.assertAdmin(channel, by.id);
 		const s = await this.settings(channel.id);
 		await this.clubSettingsRepository.update(s.channelId, { ...patch, updatedAt: new Date() });

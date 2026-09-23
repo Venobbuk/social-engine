@@ -40,6 +40,13 @@ export class MiClubSetting {
 	@Column('boolean', { default: false, comment: 'MEETS-FIXES-V1: Reclub Member Gated — members may invite and approve members too.' })
 	public memberGated?: boolean;
 
+	// ---- CLUB-POSTS-LINKS-V1 (lane club-posts-links, 2026-09-23) ----
+	@Column('boolean', { default: true, comment: 'Reclub "Allow outside activity links": false = members may not post / chat a meet or competition of another club (non_club_links_not_allowed)' })
+	public allowOutsideLinks: boolean;
+
+	@Column('varchar', { length: 30, nullable: true, comment: 'Reclub club handle (reclub.co/clubs/@handle): lower-case, unique, the /clubs/@handle short link' })
+	public handle: string | null;
+
 	@Column('varchar', { length: 32, default: 'pickleball' })
 	public sport: string;
 

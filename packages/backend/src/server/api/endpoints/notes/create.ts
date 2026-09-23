@@ -15,6 +15,8 @@ import { DI } from '@/di-symbols.js';
 import type { NotesRepository } from '@/models/_.js';
 import { ClubService } from '@/modules/clubs/ClubService.js';
 import { clubErrors } from '@/modules/clubs/endpoints/_shared.js';
+import type { DataSource } from 'typeorm';
+import { outsideLinkRefusal, outsideLinksError } from '@/modules/clubs/club-post-rules.js';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -108,6 +110,7 @@ export const meta = {
 		},
 
 		clubPrivate: clubErrors.clubPrivate, // CLUB-PRIVATE-V1 (W1)
+		outsideLinks: outsideLinksError, // CLUB-POSTS-LINKS-V1: the club refuses other clubs' activities (B-set-comms.03)
 
 		youHaveBeenBlocked: {
 			message: 'You have been blocked by this user.',
@@ -192,6 +195,7 @@ export const paramDef = {
 					items: { type: 'string', minLength: 1, maxLength: 50 },
 				},
 				multiple: { type: 'boolean' },
+				allowAddChoices: { type: 'boolean' }, // POLL-EXT-V1 (Reclub "Allow adding new options")
 				expiresAt: { type: 'integer', nullable: true },
 				expiredAfter: { type: 'integer', nullable: true, minimum: 1 },
 			},
@@ -236,6 +240,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private noteEntityService: NoteEntityService,
 		private noteCreateService: NoteCreateService,
 		private clubService: ClubService,
+		@Inject(DI.db)
+		private db: DataSource,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			// CLUB-PRIVATE-V1 (W1; batch-1 review fix): posting into a PRIVATE club, or commenting on one of its posts, is for its
@@ -248,6 +254,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 			const renoteClub = ps.renoteId ? (await this.notesRepository.findOne({ where: { id: ps.renoteId }, select: { id: true, channelId: true } }))?.channelId ?? null : null;
 			if (renoteClub && !(await this.clubService.mayReadClub(renoteClub, me.id))) throw new ApiError(meta.errors.clubPrivate);
+			// CLUB-POSTS-LINKS-V1 (B-set-comms.03): the club the note lands in (a comment lands in its post's club) — outside links
+			for (const clubId of new Set([ps.channelId, replyClub].filter((x): x is string => !!x))) {
+				if (await outsideLinkRefusal(this.db, this.clubService, clubId, me.id, [ps.cw, ps.text].filter(Boolean).join(' '))) throw new ApiError(meta.errors.outsideLinks);
+			}
 
 			try {
 				const note = await this.noteCreateService.fetchAndCreate(me, {
@@ -256,6 +266,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					poll: ps.poll ? {
 						choices: ps.poll.choices,
 						multiple: ps.poll.multiple ?? false,
+						allowAddChoices: ps.poll.allowAddChoices ?? false, // POLL-EXT-V1
 						expiresAt: ps.poll.expiredAfter ? new Date(Date.now() + ps.poll.expiredAfter) : ps.poll.expiresAt ? new Date(ps.poll.expiresAt) : null,
 					} : null,
 					text: ps.text ?? null,

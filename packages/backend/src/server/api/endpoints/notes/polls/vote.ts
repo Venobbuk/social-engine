@@ -15,6 +15,7 @@ import { ApRendererService } from '@/core/activitypub/ApRendererService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { DI } from '@/di-symbols.js';
 import { UserBlockingService } from '@/core/UserBlockingService.js';
+import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { ApiError } from '../../../error.js';
 
 export const meta = {
@@ -70,6 +71,9 @@ export const paramDef = {
 	properties: {
 		noteId: { type: 'string', format: 'misskey:id' },
 		choice: { type: 'integer' },
+		// POLL-EXT-V1 (lane club-posts-links, Reclub "vote / change vote"): my earlier vote(s) on this poll are replaced by this
+		// choice instead of the native ALREADY_VOTED refusal. Default false keeps Misskey's behaviour.
+		replace: { type: 'boolean', default: false },
 	},
 	required: ['noteId', 'choice'],
 } as const;
@@ -95,6 +99,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private apRendererService: ApRendererService,
 		private globalEventService: GlobalEventService,
 		private userBlockingService: UserBlockingService,
+		private noteEntityService: NoteEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const createdAt = new Date();
@@ -104,6 +109,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (err.id === '9725d0ce-ba28-4dde-95a7-2cbb2c15de24') throw new ApiError(meta.errors.noSuchNote);
 				throw err;
 			});
+
+			// POLL-EXT-V1: a poll the voter may not read (a private club, a members- / admins-only club post) is no such note
+			if (!(await this.noteEntityService.isVisibleForMe(note, me.id))) throw new ApiError(meta.errors.noSuchNote);
 
 			if (!note.hasPoll) {
 				throw new ApiError(meta.errors.noPoll);
@@ -133,7 +141,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				userId: me.id,
 			});
 
-			if (exist.length) {
+			if (exist.length && ps.replace) {
+				// POLL-EXT-V1: change my vote — already exactly this choice is a no-op; else take my votes back, then vote below
+				if (exist.length === 1 && exist[0].choice === ps.choice) return;
+				for (const v of exist) {
+					await this.pollVotesRepository.delete({ id: v.id });
+					const i = Number(v.choice) + 1;
+					await this.pollsRepository.query(`UPDATE poll SET votes[${i}] = GREATEST(votes[${i}] - 1, 0) WHERE "noteId" = $1`, [poll.noteId]);
+				}
+			} else if (exist.length) {
 				if (poll.multiple) {
 					if (exist.some(x => x.choice === ps.choice)) {
 						throw new ApiError(meta.errors.alreadyVoted);

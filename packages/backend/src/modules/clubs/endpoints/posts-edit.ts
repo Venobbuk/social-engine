@@ -11,12 +11,16 @@ import { NoteEntityService } from '@/core/entities/NoteEntityService.js';
 import { SearchService } from '@/core/SearchService.js';
 import { ApiError } from '@/server/api/error.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
+import type { DataSource } from 'typeorm';
+import { ClubService } from '@/modules/clubs/ClubService.js';
+import { outsideLinkRefusal, outsideLinksError } from '@/modules/clubs/club-post-rules.js';
 
 // CLUB-ADMIN-V1 — see modules/clubs/ClubService.ts
 const clubErrors = {
 	noSuchClub: { message: 'No such club.', code: 'NO_SUCH_CLUB', id: 'c1b00000-0000-4000-8000-000000000001' },
 	notAdmin: { message: 'Only the club owner or an admin can do that.', code: 'CLUB_NOT_ADMIN', id: 'c1b00000-0000-4000-8000-000000000002' },
 	clubError: { message: 'Club error.', code: 'CLUB_ERROR', id: 'c1b00000-0000-4000-8000-000000000003' },
+	outsideLinks: outsideLinksError, // CLUB-POSTS-LINKS-V1 (B-set-comms.03): an edit may not add another club's activity either
 } as const;
 function toApiError(e: unknown): never {
 	if (e instanceof IdentifiableError) {
@@ -40,7 +44,9 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { noteId: { type: 'string', format: 'misskey:id' }, text: { type: 'string', minLength: 1, maxLength: 3000 } },
+	properties: { noteId: { type: 'string', format: 'misskey:id' }, text: { type: 'string', minLength: 1, maxLength: 3000 },
+		// CLUB-POSTS-LINKS-V1 (B-content-editor.02): the post's optional title is Misskey's own cw; null clears it
+		cw: { type: 'string', nullable: true, maxLength: 100 } },
 	required: ['noteId', 'text'],
 } as const;
 
@@ -52,6 +58,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.notesRepository) private notesRepository: NotesRepository,
 		private noteEntityService: NoteEntityService,
 		private searchService: SearchService,
+		private clubService: ClubService,
+		@Inject(DI.db) private db: DataSource,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			try {
@@ -59,13 +67,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (!note) throw err('no_such_note', 'No such post.');
 				if (note.userId !== me.id) throw err('not_author', 'Only the author can edit this post.');
 				let clubPost = !!note.channelId;
+				let clubId = note.channelId;
 				if (!clubPost && note.replyId) {
 					const parent = await this.notesRepository.findOne({ where: { id: note.replyId }, select: { id: true, channelId: true } });
 					clubPost = !!(parent && parent.channelId);
+					clubId = parent ? parent.channelId : null;
 				}
 				if (!clubPost) throw err('not_club_post', 'Only club posts can be edited here.');
 				// MiNote has no updatedAt column in this fork — only the text is written.
-				await this.notesRepository.update({ id: note.id, userId: me.id }, { text: ps.text });
+				if (await outsideLinkRefusal(this.db, this.clubService, clubId, me.id, [ps.cw, ps.text].filter(Boolean).join(' '))) throw new ApiError(clubErrors.outsideLinks);
+				await this.notesRepository.update({ id: note.id, userId: me.id }, ps.cw !== undefined ? { text: ps.text, cw: ps.cw && ps.cw.trim() ? ps.cw.trim() : null } : { text: ps.text });
 				const fresh = await this.notesRepository.findOneByOrFail({ id: note.id });
 				// Keep full-text search current the way NoteCreateService does (Meilisearch addDocuments upserts by id;
 				// a no-op for the sqlLike provider, which reads note.text directly).

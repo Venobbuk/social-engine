@@ -141,6 +141,11 @@ export class NoteEntityService implements OnModuleInit {
 		if (packedNote.channelId && !(readableChannelIds && readableChannelIds.includes(packedNote.channelId)) && !(await this.clubService.mayReadClub(packedNote.channelId, meId))) {
 			return true;
 		}
+		// CLUB-POST-AUDIENCE-V1 (lane club-posts-links): a club post's own audience (members / admins) is the CLUB's rule, not
+		// Misskey's follower / specified-user rule — decided here and returned, so the native checks below never run for it.
+		if (packedNote.channelId && (packedNote.visibility === 'followers' || packedNote.visibility === 'specified')) {
+			return !(await this.clubService.mayReadClubPost({ channelId: packedNote.channelId, userId: packedNote.userId, visibility: packedNote.visibility }, meId));
+		}
 		// TODO: isVisibleForMe を使うようにしても良さそう(型違うけど)
 
 		if (packedNote.user.requireSigninToViewContents && meId == null) {
@@ -203,10 +208,12 @@ export class NoteEntityService implements OnModuleInit {
 	@bindThis
 	private async populatePoll(note: MiNote, meId: MiUser['id'] | null) {
 		const poll = await this.pollsRepository.findOneByOrFail({ noteId: note.id });
-		const choices = poll.choices.map(c => ({
+		// POLL-EXT-V1: by index (a text could repeat), and who added a voter-added choice
+		const choices = poll.choices.map((c, i) => ({
 			text: c,
-			votes: poll.votes[poll.choices.indexOf(c)],
+			votes: poll.votes[i] ?? 0,
 			isVoted: false,
+			addedBy: (poll.choiceAddedBy ?? [])[i] || null,
 		}));
 
 		if (meId) {
@@ -235,6 +242,7 @@ export class NoteEntityService implements OnModuleInit {
 		return {
 			multiple: poll.multiple,
 			expiresAt: poll.expiresAt?.toISOString() ?? null,
+			allowAddChoices: poll.allowAddChoices ?? false, // POLL-EXT-V1
 			choices,
 		};
 	}
@@ -286,6 +294,8 @@ export class NoteEntityService implements OnModuleInit {
 		// always); same rule as shouldHideNote, for the doors that ask isVisibleForMe instead of packing (translate, reactions,
 		// polls, reply / renote targets)
 		if (note.channelId && meId !== note.userId && !(await this.clubService.mayReadClub(note.channelId, meId))) return false;
+		// CLUB-POST-AUDIENCE-V1: a members- / admins-only club post — the club's rule (same as shouldHideNote)
+		if (note.channelId && (note.visibility === 'followers' || note.visibility === 'specified')) return await this.clubService.mayReadClubPost(note, meId);
 		// This code must always be synchronized with the checks in QueryService.generateVisibilityQuery.
 		// visibility が specified かつ自分が指定されていなかったら非表示
 		if (note.visibility === 'specified') {

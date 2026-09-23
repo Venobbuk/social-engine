@@ -95,11 +95,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// requireCredential:false with no check, so a private club's posts were readable signed-out.
 			if (!(await this.clubService.mayReadClub(channel.id, me?.id ?? null, ps.accessToken ?? null))) throw new ApiError(meta.errors.clubPrivate);
 			const packOpts = { readableChannelIds: [channel.id] };
+			// CLUB-POST-AUDIENCE-V1 (lane club-posts-links): a members- / admins-only post is left OUT of the club's feed for a
+			// reader outside its audience (the packer would only blank it) — the reader's club role, asked once per page.
+			const role = await this.clubService.clubRole(channel.id, me?.id ?? null);
+			const inAudience = (n: { userId: string; visibility: string }) => (n.visibility !== 'followers' && n.visibility !== 'specified') || (me != null && n.userId === me.id) || (n.visibility === 'specified' ? role.admin : role.member);
 
 			if (me) this.activeUsersChart.read(me);
 
 			if (!this.serverSettings.enableFanoutTimeline) {
-				return await this.noteEntityService.packMany(await this.getFromDb({ untilId, sinceId, limit: ps.limit, channelId: channel.id }, me), me, packOpts);
+				return await this.noteEntityService.packMany((await this.getFromDb({ untilId, sinceId, limit: ps.limit, channelId: channel.id }, me)).filter(inAudience), me, packOpts);
 			}
 
 			return await this.noteEntityService.packMany(await this.fanoutTimelineEndpointService.getMiNotes({
@@ -112,8 +116,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				redisTimelines: [`channelTimeline:${channel.id}`],
 				excludePureRenotes: false,
 				ignoreAuthorChannelFromMute: true,
+				noteFilter: inAudience,
 				dbFallback: async (untilId, sinceId, limit) => {
-					return await this.getFromDb({ untilId, sinceId, limit, channelId: channel.id }, me);
+					return (await this.getFromDb({ untilId, sinceId, limit, channelId: channel.id }, me)).filter(inAudience);
 				},
 			}), me, packOpts);
 		});
