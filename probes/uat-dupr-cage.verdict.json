@@ -1,0 +1,202 @@
+{
+ "id": "uat-dupr-cage",
+ "at": "2026-09-23T05:56:56.034Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "fails": 0,
+ "total": 26,
+ "fixtures": {
+  "compId": "arh98vbguhln004n",
+  "meetId": "arh98viuuhln005f",
+  "m1": "arh98vhiuhln0055",
+  "m2": "arh98vi2uhln005a",
+  "ma": "arh98vpbuhln0066",
+  "mb": "arh98vpwuhln0067"
+ },
+ "checks": [
+  {
+   "item": "scrape.before",
+   "what": "hkpl: boyau partner-only, richard canWrite false (G15.1, BEFORE)",
+   "pass": true,
+   "evidence": "{\"consumer_tenant\":\"boyau\",\"is_sandbox_tenant\":false,\"sandbox_env\":\"uat,uat-test,boyau-uat\",\"partner_only_tenants\":[\"boyau\",\"boyau-uat\"],\"consumer_is_partner_only\":true,\"richard_can_write\":false,\"partner_write_tenants\":\"uat,hkpl,boyau\"}"
+  },
+  {
+   "item": "S.gate",
+   "what": "web-uat runs the cage code (marker from CODE in its built tree) AND carries DUPR_SUBMIT_SANDBOX=1",
+   "pass": true,
+   "evidence": "{\"env\":true,\"markerFiles\":1}"
+  },
+  {
+   "item": "A.plant",
+   "what": "FAULT PLANTED: env unset on a prod host -> the service DOES call the (local) hkpl door: 2 submits + 1 status read reach the listener; body carries tenant=boyau",
+   "pass": true,
+   "evidence": "{\"mode\":\"live\",\"submitHits\":2,\"allHits\":3,\"tenant\":\"boyau\"}"
+  },
+  {
+   "item": "A.cage",
+   "what": "cage on (DUPR_SUBMIT_SANDBOX=1, UAT host): ZERO requests reach the listener (submit, re-submit, status); row = submitted / sandbox:<id> / sandbox_not_sent",
+   "pass": true,
+   "evidence": "{\"mode\":\"sandbox\",\"hits\":0,\"patch\":{\"duprStatus\":\"submitted\",\"duprRef\":\"sandbox:probeM1\",\"duprError\":\"sandbox_not_sent\"}}"
+  },
+  {
+   "item": "A.failclosed",
+   "what": "env MISSING on a UAT engine (by host, and by tenant): ZERO requests; failed / uat_cage_env_missing",
+   "pass": true,
+   "evidence": "{\"host\":{\"mode\":\"refuse\",\"hits\":0,\"patch\":{\"duprStatus\":\"failed\",\"duprError\":\"uat_cage_env_missing\"}},\"tenant\":{\"mode\":\"refuse\",\"hits\":0}}"
+  },
+  {
+   "item": "A.hkpl_sandbox_answer",
+   "what": "hkpl's own {sandbox:true} answer maps to the same honest state (no endless queued/ref-less retry)",
+   "pass": true,
+   "evidence": "{\"duprStatus\":\"submitted\",\"duprRef\":\"sandbox:probeM1\",\"duprError\":\"sandbox_not_sent\"}"
+  },
+  {
+   "item": "B.fixture_comp",
+   "what": "G16.5 fixture is real: [probe] competition, two finalized scored matches, preview says willSubmit (all 4 linked + confirmed) — preview sends nothing",
+   "pass": true,
+   "evidence": "{\"compId\":\"arh98vbguhln004n\",\"m1\":\"arh98vhiuhln0055\",\"m2\":\"arh98vi2uhln005a\",\"status\":\"completed\",\"willSubmit\":true,\"errors\":[]}"
+  },
+  {
+   "item": "B.fixture_meet",
+   "what": "G16.5 fixture is real: [probe] meet, 4 confirmed players, two scored matches, NOT auto-submitted (submitMatches false)",
+   "pass": true,
+   "evidence": "{\"meetId\":\"arh98viuuhln005f\",\"players\":4,\"ma\":\"arh98vpbuhln0066\",\"mb\":\"arh98vpwuhln0067\",\"maDupr\":null}"
+  },
+  {
+   "item": "B.comp_submit",
+   "what": "tournament submit-dupr confirm:true on UAT -> 200, submitted / sandbox:<id> / sandbox_not_sent (response AND stored row)",
+   "pass": true,
+   "evidence": "{\"status\":200,\"match\":{\"duprStatus\":\"submitted\",\"duprRef\":\"sandbox:arh98vhiuhln0055\",\"duprError\":\"sandbox_not_sent\"},\"row\":\"submitted|sandbox:arh98vhiuhln0055|sandbox_not_sent\"}"
+  },
+  {
+   "item": "C.comp_unsent_edits",
+   "what": "a NOT-sent tournament match still re-scores (200)",
+   "pass": true,
+   "evidence": "{\"status\":200,\"code\":null}"
+  },
+  {
+   "item": "C.comp_sent_409",
+   "what": "a SUBMITTED tournament match: re-score, reopen, remove, forfeit -> 409 COMPETITION_DUPR_LOCKED; stored scores + status unchanged",
+   "pass": true,
+   "evidence": "{\"edit\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"reopen\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"remove\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"forfeit\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"unchanged\":true}"
+  },
+  {
+   "item": "C.comp_sent_schedule_ok",
+   "what": "scheduling a sent match (court, notes) is still allowed (200) — only the RESULT is locked",
+   "pass": true,
+   "evidence": "{\"status\":200,\"code\":null}"
+  },
+  {
+   "item": "B.comp_submit_all",
+   "what": "tournament submit-dupr-all confirm:true -> m2 caged too (row), m1 skipped; results carry the test reason the app reads",
+   "pass": true,
+   "evidence": "{\"status\":200,\"counts\":{\"submitted\":1,\"skipped\":1,\"failed\":0},\"m2\":\"submitted|sandbox:arh98vi2uhln005a|sandbox_not_sent\"}"
+  },
+  {
+   "item": "C.comp_queued_409",
+   "what": "a QUEUED tournament match: re-score and reopen -> 409 COMPETITION_DUPR_LOCKED",
+   "pass": true,
+   "evidence": "{\"edit\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"reopen\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"}}"
+  },
+  {
+   "item": "B.meet_submit",
+   "what": "meet submit-dupr on UAT -> submitted / sandbox:<id> / sandbox_not_sent (stored row)",
+   "pass": true,
+   "evidence": "{\"status\":200,\"row\":\"submitted|sandbox:arh98vpbuhln0066|sandbox_not_sent\",\"err\":{\"status\":200,\"code\":null}}"
+  },
+  {
+   "item": "C.meet_sent_409",
+   "what": "a SUBMITTED meet match: re-score and forfeit -> 409 MEET_DUPR_LOCKED (was 400 before this lane)",
+   "pass": true,
+   "evidence": "{\"edit\":{\"status\":409,\"code\":\"MEET_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.  Please note that manual subm\"},\"forfeit\":{\"status\":409,\"code\":\"MEET_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"}}"
+  },
+  {
+   "item": "C.meet_unsent_edits",
+   "what": "a NOT-sent meet match still re-scores (200)",
+   "pass": true,
+   "evidence": "{\"status\":200,\"code\":null}"
+  },
+  {
+   "item": "C.meet_queued_409",
+   "what": "a QUEUED meet match: re-score and forfeit -> 409 MEET_DUPR_LOCKED; moving its court is still allowed",
+   "pass": true,
+   "evidence": "{\"edit\":{\"status\":409,\"code\":\"MEET_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"forfeit\":{\"status\":409,\"code\":\"MEET_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"court\":200}"
+  },
+  {
+   "item": "B.meet_retry",
+   "what": "the lazy RETRY (ref-less queued > 60 s, re-submitted by meets/matches/list) goes through the cage -> sandbox:<id>",
+   "pass": true,
+   "evidence": "{\"status\":200,\"row\":\"submitted|sandbox:arh98vpwuhln0067|sandbox_not_sent\"}"
+  },
+  {
+   "item": "B.control_visible",
+   "what": "POSITIVE CONTROL: the request sent from inside web-uat to hkpl.silkvo.com/api/v1/social/dupr/status IS in the nginx access log (the reader is not blind)",
+   "pass": true,
+   "evidence": "{\"ctl\":\"CTL 401\",\"ctlLines\":[\"47.243.226.46 - - [23/Sep/2026:13:57:00 +0800] \\\"GET /api/v1/social/dupr/status?match_id=boyau:probectlmudoxmp3 HTTP/2.0\\\" 401 35 \\\"-\\\" \\\"node\\\" \\\"-\\\" chain=\\\"hkpl.silkv\"],\"rotated\":false}"
+  },
+  {
+   "item": "B.dest_nginx",
+   "what": "DESTINATION nginx: 0 hits on /api/v1/social/dupr/submit in the window, and no door hit other than the control",
+   "pass": true,
+   "evidence": "{\"windowBytes\":21227,\"submitHits\":0,\"doorLines\":1}"
+  },
+  {
+   "item": "B.dest_queue",
+   "what": "DESTINATION hkpl DB: DuprWriteQueue and PartnerCallLog gained 0 rows (boyau and total)",
+   "pass": true,
+   "evidence": "{\"before\":{\"queueBoyau\":0,\"queueTotal\":5,\"partnerLogBoyau\":0,\"partnerLogTotal\":19315},\"after\":{\"queueBoyau\":0,\"queueTotal\":5,\"partnerLogBoyau\":0,\"partnerLogTotal\":19315}}"
+  },
+  {
+   "item": "B.dest_hkpl_log",
+   "what": "DESTINATION hkpl container log (stdout+stderr): no social-dupr / dupr SANDBOX / dupr-queue line in the window (supporting; nginx is the proof)",
+   "pass": true,
+   "evidence": "{\"since\":\"2026-09-23T05:57:00.327Z\",\"lines\":[],\"logBytes\":0,\"logLines\":0}"
+  },
+  {
+   "item": "G13.cleanup",
+   "what": "fixtures cancelled and DUPR links restored",
+   "pass": true,
+   "evidence": "{\"left\":\"0|0\",\"restored\":4}"
+  },
+  {
+   "item": "D.prod_untouched",
+   "what": "prod web: same container id / start / image / env hash as at the start; no DUPR_SUBMIT_SANDBOX; not running the cage code",
+   "pass": true,
+   "evidence": "{\"before\":{\"id\":\"0b056960e6ef\",\"startedAt\":\"2026-09-23T05:33:24.079515515Z\",\"image\":\"20cf31f624ab\",\"envHash\":\"db79412ef34b3e16\",\"duprSandboxEnv\":false,\"cageMarkerFiles\":0},\"after\":{\"id\":\"0b056960e6ef\",\"startedAt\":\"2026-09-23T05:33:24.079515515Z\",\"image\":\"20cf31f624ab\",\"envHash\":\"db79412ef34b3e16\",\"duprSandboxEnv\":false,\"cageMarkerFiles\":0}}"
+  },
+  {
+   "item": "scrape.after",
+   "what": "hkpl: boyau STILL partner-only, richard STILL cannot write (AFTER)",
+   "pass": true,
+   "evidence": "{\"consumer_tenant\":\"boyau\",\"is_sandbox_tenant\":false,\"sandbox_env\":\"uat,uat-test,boyau-uat\",\"partner_only_tenants\":[\"boyau\",\"boyau-uat\"],\"consumer_is_partner_only\":true,\"richard_can_write\":false,\"partner_write_tenants\":\"uat,hkpl,boyau\"}"
+  }
+ ],
+ "evidence": [
+  "pass scrape.before: {\"consumer_tenant\":\"boyau\",\"is_sandbox_tenant\":false,\"sandbox_env\":\"uat,uat-test,boyau-uat\",\"partner_only_tenants\":[\"boyau\",\"boyau-uat\"],\"consumer_is_partner_only\":true,\"richard_can_write\":false,\"partner_write_tenants\":\"uat,hkpl,boyau\"}",
+  "pass S.gate: {\"env\":true,\"markerFiles\":1}",
+  "pass A.plant: {\"mode\":\"live\",\"submitHits\":2,\"allHits\":3,\"tenant\":\"boyau\"}",
+  "pass A.cage: {\"mode\":\"sandbox\",\"hits\":0,\"patch\":{\"duprStatus\":\"submitted\",\"duprRef\":\"sandbox:probeM1\",\"duprError\":\"sandbox_not_sent\"}}",
+  "pass A.failclosed: {\"host\":{\"mode\":\"refuse\",\"hits\":0,\"patch\":{\"duprStatus\":\"failed\",\"duprError\":\"uat_cage_env_missing\"}},\"tenant\":{\"mode\":\"refuse\",\"hits\":0}}",
+  "pass A.hkpl_sandbox_answer: {\"duprStatus\":\"submitted\",\"duprRef\":\"sandbox:probeM1\",\"duprError\":\"sandbox_not_sent\"}",
+  "pass B.fixture_comp: {\"compId\":\"arh98vbguhln004n\",\"m1\":\"arh98vhiuhln0055\",\"m2\":\"arh98vi2uhln005a\",\"status\":\"completed\",\"willSubmit\":true,\"errors\":[]}",
+  "pass B.fixture_meet: {\"meetId\":\"arh98viuuhln005f\",\"players\":4,\"ma\":\"arh98vpbuhln0066\",\"mb\":\"arh98vpwuhln0067\",\"maDupr\":null}",
+  "pass B.comp_submit: {\"status\":200,\"match\":{\"duprStatus\":\"submitted\",\"duprRef\":\"sandbox:arh98vhiuhln0055\",\"duprError\":\"sandbox_not_sent\"},\"row\":\"submitted|sandbox:arh98vhiuhln0055|sandbox_not_sent\"}",
+  "pass C.comp_unsent_edits: {\"status\":200,\"code\":null}",
+  "pass C.comp_sent_409: {\"edit\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"reopen\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"remove\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"forfeit\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"unchanged\":true}",
+  "pass C.comp_sent_schedule_ok: {\"status\":200,\"code\":null}",
+  "pass B.comp_submit_all: {\"status\":200,\"counts\":{\"submitted\":1,\"skipped\":1,\"failed\":0},\"m2\":\"submitted|sandbox:arh98vi2uhln005a|sandbox_not_sent\"}",
+  "pass C.comp_queued_409: {\"edit\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"reopen\":{\"status\":409,\"code\":\"COMPETITION_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"}}",
+  "pass B.meet_submit: {\"status\":200,\"row\":\"submitted|sandbox:arh98vpbuhln0066|sandbox_not_sent\",\"err\":{\"status\":200,\"code\":null}}",
+  "pass C.meet_sent_409: {\"edit\":{\"status\":409,\"code\":\"MEET_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.  Please note that manual subm\"},\"forfeit\":{\"status\":409,\"code\":\"MEET_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"}}",
+  "pass C.meet_unsent_edits: {\"status\":200,\"code\":null}",
+  "pass C.meet_queued_409: {\"edit\":{\"status\":409,\"code\":\"MEET_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"forfeit\":{\"status\":409,\"code\":\"MEET_DUPR_LOCKED\",\"msg\":\"These matches have already been submitted to DUPR.\"},\"court\":200}",
+  "pass B.meet_retry: {\"status\":200,\"row\":\"submitted|sandbox:arh98vpwuhln0067|sandbox_not_sent\"}",
+  "pass B.control_visible: {\"ctl\":\"CTL 401\",\"ctlLines\":[\"47.243.226.46 - - [23/Sep/2026:13:57:00 +0800] \\\"GET /api/v1/social/dupr/status?match_id=boyau:probectlmudoxmp3 HTTP/2.0\\\" 401 35 \\\"-\\\" \\\"node\\\" \\\"-\\\" chain=\\\"hkpl.silkv\"],\"rotated\":false}",
+  "pass B.dest_nginx: {\"windowBytes\":21227,\"submitHits\":0,\"doorLines\":1}",
+  "pass B.dest_queue: {\"before\":{\"queueBoyau\":0,\"queueTotal\":5,\"partnerLogBoyau\":0,\"partnerLogTotal\":19315},\"after\":{\"queueBoyau\":0,\"queueTotal\":5,\"partnerLogBoyau\":0,\"partnerLogTotal\":19315}}",
+  "pass B.dest_hkpl_log: {\"since\":\"2026-09-23T05:57:00.327Z\",\"lines\":[],\"logBytes\":0,\"logLines\":0}",
+  "pass G13.cleanup: {\"left\":\"0|0\",\"restored\":4}",
+  "pass D.prod_untouched: {\"before\":{\"id\":\"0b056960e6ef\",\"startedAt\":\"2026-09-23T05:33:24.079515515Z\",\"image\":\"20cf31f624ab\",\"envHash\":\"db79412ef34b3e16\",\"duprSandboxEnv\":false,\"cageMarkerFiles\":0},\"after\":{\"id\":\"0b056960e6ef\",\"startedAt\":\"2026-09-23T05:33:24.079515515Z\",\"image\":\"20cf31f624ab\",\"envHash\":\"db79412ef34b3e16\",\"duprSandboxEnv\":false,\"cageMarkerFiles\":0}}",
+  "pass scrape.after: {\"consumer_tenant\":\"boyau\",\"is_sandbox_tenant\":false,\"sandbox_env\":\"uat,uat-test,boyau-uat\",\"partner_only_tenants\":[\"boyau\",\"boyau-uat\"],\"consumer_is_partner_only\":true,\"richard_can_write\":false,\"partner_write_tenants\":\"uat,hkpl,boyau\"}"
+ ]
+}

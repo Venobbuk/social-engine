@@ -1,0 +1,26 @@
+{
+ "id": "hkpl-dupr-tenant",
+ "at": "2026-09-23T05:49:31.796Z",
+ "mode": "dry",
+ "condition_fired": true,
+ "verdict": "pass",
+ "outcome": "dry_run_ready",
+ "evidence": [
+  "preflight ok: deploy lock /root/gen/hkpl-deploy.lock is free",
+  "preflight ok: no other deploy.sh is running",
+  "preflight ok: worktree /root/hkpl-wt-dupr-tenant is on dupr-tenant",
+  "preflight ok: worktree clean",
+  "preflight ok: prod HEAD == origin/main (1acfc052 vs 1acfc052) — the deploy ships only this batch",
+  "branch: 1 commit(s) ahead of origin/main, 0 behind: 06c545a6 UAT-DUPR-TENANT-V1: the social DUPR door stamps the CALLER's ;",
+  "preflight ok: branch has the batch commits",
+  "check ok: scripts/social-dupr-tenant.test.cjs (social-dupr-tenant: all pass)",
+  "preflight ok: prod tree /root/hkpl-server is on main",
+  "preflight ok: prod tree local edits (CLAUDE.md scripts/smoke.sh) do not collide with the batch",
+  "preflight ok: live compose is valid (docker compose config)",
+  "preflight ok: live compose carries oom_score_adj -500 on hkpl-app",
+  "preflight ok: running image id known",
+  "running now: commit 1acfc052, image fa23d4a2fa7e, restarts 0, up since 2026-09-23T05:29:53.304513844Z",
+  "calm state: 8023 MB available, 0 earlyoom kills in 10 min",
+  "health baseline: hkpl.com.hk / 200, /api/health 200, push route answers: {\"error\":\"social_s2s_unauthorized\"} (after the batch: social_s2s_unauthorized)"
+ ]
+}
