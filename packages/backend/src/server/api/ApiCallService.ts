@@ -32,6 +32,13 @@ const accessDenied = {
 	id: '56f35758-7dd5-468b-8439-5d6fb8ec9b8e',
 };
 
+/** COMP-T3-V1 (family fix): a header value is Latin-1 only; an ApiError message with an em dash, an ellipsis or CJK text
+ * made Node throw ERR_INVALID_CHAR while sending the refusal, so the client got a 500 instead of the 400 (measured: 16
+ * engine throw sites carry such a message). The body keeps the real message; the header gets a printable-ASCII copy. */
+function headerSafe(message: string): string {
+	return String(message).replace(/[^\x20-\x7E]/g, '?').replace(/"/g, "'");
+}
+
 @Injectable()
 export class ApiCallService implements OnApplicationShutdown {
 	private logger: Logger;
@@ -77,12 +84,12 @@ export class ApiCallService implements OnApplicationShutdown {
 				this.logger.warn(`rate limit information has unexpected type ${typeof(err.info?.reset)}`);
 			}
 		} else if (err.kind === 'client') {
-			reply.header('WWW-Authenticate', `Bearer realm="Misskey", error="invalid_request", error_description="${err.message}"`);
+			reply.header('WWW-Authenticate', `Bearer realm="Misskey", error="invalid_request", error_description="${headerSafe(err.message)}"`);
 			statusCode = statusCode ?? 400;
 		} else if (err.kind === 'permission') {
 			// (ROLE_PERMISSION_DENIEDは関係ない)
 			if (err.code === 'PERMISSION_DENIED') {
-				reply.header('WWW-Authenticate', `Bearer realm="Misskey", error="insufficient_scope", error_description="${err.message}"`);
+				reply.header('WWW-Authenticate', `Bearer realm="Misskey", error="insufficient_scope", error_description="${headerSafe(err.message)}"`);
 			}
 			statusCode = statusCode ?? 403;
 		} else if (!statusCode) {
