@@ -247,6 +247,8 @@ export * as 'coaches/profile/update' from '@/modules/coaches/endpoints/profile-u
 export * as 'clubs/invitations/create' from '@/modules/clubs/endpoints/invitations-create.js'; // CLUB-INVITE-V1
 export * as 'clubs/invitations/respond' from '@/modules/clubs/endpoints/invitations-respond.js'; // CLUB-INVITE-V1
 export * as 'clubs/invitations/list' from '@/modules/clubs/endpoints/invitations-list.js'; // CLUB-INVITE-V1
+export * as 'clubs/invitations/mine' from '@/modules/clubs/endpoints/invitations-mine.js'; // T3-CLUBS-V1
+export * as 'clubs/polls/voters' from '@/modules/clubs/endpoints/polls-voters.js'; // T3-CLUBS-V1
 export * as 'clubs/invitations/cancel' from '@/modules/clubs/endpoints/invitations-cancel.js'; // CLUB-INVITE-V1
 export * as 'clubs/invitations/for-user' from '@/modules/clubs/endpoints/invitations-for-user.js'; // CLUB-INVITE-V1
 export * as 'clubs/posts/announce' from '@/modules/clubs/endpoints/posts-announce.js'; // CLUB-V3
