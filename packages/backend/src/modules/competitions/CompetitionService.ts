@@ -508,6 +508,16 @@ export class CompetitionService {
 	public async draw(c: MiCompetition, host: MiUser, opts: { stage: 'auto' | 'regular' | 'playoff'; reset: boolean; skipStatusCheck?: boolean; seedOrder?: string[] | null; resetPlayoff?: boolean }): Promise<{ stage: 'regular' | 'playoff'; matches: MiCompetitionMatch[] }> {
 		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
 		if (!opts.skipStatusCheck && !['open', 'closed', 'inProgress'].includes(c.status)) throw this.err('invalid_transition', `Cannot draw a competition that is ${c.status}.`);
+		// COMP-T3-V1: a manual seed order is checked BEFORE anything is reset, so a refused order never costs the bracket
+		let manualOrder: string[] | null = null;
+		if (opts.seedOrder && opts.seedOrder.length) {
+			const ok = new Set((await this.confirmedEntries(c)).map((e) => e.id));
+			const order = Array.from(new Set(opts.seedOrder));
+			if (order.length !== opts.seedOrder.length || order.some((x) => !ok.has(x))) throw this.err('no_such_entry', 'Every seeded entry must be a confirmed entry, once.');
+			if (order.length < 2) throw this.err('not_enough_entries', 'At least 2 entries advance to the playoffs.');
+			if (c.format === 'poolPlayKnockout' && (opts.reset || !(await this.standings(c)).stageComplete)) throw this.err('stage_incomplete', 'Every pool match must be completed before the playoffs.');
+			manualOrder = order;
+		}
 		if (opts.reset) {
 			await this.matchesRepository.delete({ competitionId: c.id });
 			await this.competitionsRepository.update(c.id, { bracketData: null });
@@ -568,15 +578,10 @@ export class CompetitionService {
 
 		// playoff: who is in, in seed order
 		let seeded: string[];
-		if (opts.seedOrder && opts.seedOrder.length) {
+		if (manualOrder) {
 			// COMP-T3-V1 (Reclub Manage seeds: manual seeding, up / down, Disqualify / Qualify): the host's order of the
-			// entries that play the bracket — any confirmed entry, each once, at least two
-			const ok = new Set(confirmed.map((e) => e.id));
-			const order = Array.from(new Set(opts.seedOrder));
-			if (order.length !== opts.seedOrder.length || order.some((x) => !ok.has(x))) throw this.err('no_such_entry', 'Every seeded entry must be a confirmed entry, once.');
-			if (order.length < 2) throw this.err('not_enough_entries', 'At least 2 entries advance to the playoffs.');
-			if (c.format === 'poolPlayKnockout' && !(await this.standings(c)).stageComplete) throw this.err('stage_incomplete', 'Every pool match must be completed before the playoffs.');
-			seeded = order;
+			// entries that play the bracket — any confirmed entry, each once, at least two (checked at the top)
+			seeded = manualOrder;
 			await this.competitionsRepository.update(c.id, { manualSeeding: true });
 		} else if (this.isKnockout(c.format)) {
 			seeded = confirmed.map((e) => e.id);
