@@ -353,8 +353,8 @@ export class CompetitionService {
 		await this.assertNoBlocks(team);
 		const name = (data.name ?? '').trim() || (user.name ?? user.username);
 		const status = c.autoApprove ? 'confirmed' : 'pending';
-		// a free agent who enters a team of their own is no longer looking for one
-		await this.entriesRepository.update({ competitionId: c.id, status: 'freeAgent', captainId: user.id }, { status: 'withdrawn', statusChangedAt: new Date() });
+		// a free agent who enters a team of their own is no longer looking for one (COMP-T3-V1: nor spectating — a player)
+		await this.entriesRepository.update({ competitionId: c.id, status: In(['freeAgent', 'spectator']), captainId: user.id }, { status: 'withdrawn', statusChangedAt: new Date() });
 		const entry = await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name, captainId: user.id, userIds: [user.id], invitedUserIds: partners, requestedUserIds: [], seed: null, pool: null, status, isPaid: false, notes: null, createdById: user.id, createdAt: new Date(), statusChangedAt: new Date() });
 		if (status === 'confirmed') await this.joinChat(c, [user.id]);
 		await this.closeAsksElsewhere(c, user.id, entry.id); // batch-1 review fix: the entrant no longer holds a place on another team
@@ -655,6 +655,9 @@ export class CompetitionService {
 			if (!found) throw this.err('no_such_match', 'No such match.');
 			m = found;
 			if (!(await this.canScore(c, m, user.id))) throw this.err('forbidden', 'Only the host or a player of this match can score it.');
+			// COMP-T3-V1: managing the match (its referees, removing / restoring it) is the host's; a player asking is refused,
+			// not silently ignored
+			if ((data.refereeIds !== undefined || data.remove || data.restore) && !this.isHost(c, user.id)) throw this.err('not_host', 'Only the host can do this.');
 		} else {
 			if (!this.isHost(c, user.id)) throw this.err('not_host', 'Only the host can add a match.');
 			if (!data.entry1Id || !data.entry2Id || data.entry1Id === data.entry2Id) throw this.err('no_such_entry', 'Two different entries are needed.');
@@ -695,7 +698,9 @@ export class CompetitionService {
 				for (const e of es) for (const uid of e.userIds) if (uid !== user.id) this.notify(uid, c, 'Match scheduled', `Your match in ${c.name} has a new time or court.`);
 			}
 		}
-		if (data.reopen && (host || this.isReferee(c, user.id))) {
+		// COMP-T3-V1: this match's own referee is official for it, like a competition referee
+		const matchRef = (m.refereeIds ?? []).includes(user.id);
+		if (data.reopen && (host || this.isReferee(c, user.id) || matchRef)) {
 			if (m.status === 'completed' && m.bracketId != null && c.bracketData) {
 				let db: BracketDb;
 				try { db = await resetBracketMatch(c.bracketData, m.bracketId); } catch { throw this.err('bracket_locked', 'A later match already has a result — reopen that one first.'); }
@@ -709,7 +714,7 @@ export class CompetitionService {
 			if (!m.entry1Id || !m.entry2Id) throw this.err('needs_winner', 'Both sides must be known before a score.');
 			if (m.entry1Status === 'bye' || m.entry2Status === 'bye') throw this.err('needs_winner', 'A bye has no score.');
 			const wasCompleted = m.status === 'completed';
-			const official = host || this.isReferee(c, user.id);   // COMP-W1B4: a referee's result is final like the host's
+			const official = host || this.isReferee(c, user.id) || matchRef;   // COMP-W1B4: a referee's result is final like the host's (COMP-T3-V1: + the match's own)
 			await this.applyResult(await this.get(c.id), m, { scores: data.scores ?? m.scores, forfeit: data.forfeit ?? null, finalize: official ? (data.finalize !== false) : false });
 			const after = await this.matchesRepository.findOneBy({ id: m.id });
 			// BACKEND-DELIVERY-V1: a finalized result (or a corrected one) reaches every player of the match but its scorer
