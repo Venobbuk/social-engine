@@ -1,0 +1,14 @@
+{
+  "id": "sweep-age",
+  "at": "2026-09-23T05:40:00Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": [
+    "Method: /root/gen/sweep_test.sh copies se_sbx into a throwaway db sweep_test, plants 3 meets via /root/gen/sweep_plant.sql, runs a sweeper version against the copy, reads each row back from the db, drops the copy. Live se_sbx is never touched by the test.",
+    "Plants: F = [probe] meet + participant with aidx ids 5 min old (another lane's fixture in flight); O = [probe] meet + participant 3 h old (abandoned litter); T = 'Evening casual' casual meet, 1 real player, 3 h old (a tester waiting for an opponent).",
+    "FAULT PLANTED - original sweeper (/root/gen/backups/_sweep.cjs.bak-age): F cancelled, participant rows 0; O cancelled, 0; T cancelled, 1. All three faults visible.",
+    "V2 sweeper (probes/_sweep.cjs, SWEEP-AGE-V2 + SWEEP-AGE-V2-EXIT): F active, participant rows 1; O cancelled, 0; T active, 1; abandoned (older than 45 min) = 0, so exit 0.",
+    "Live incident behind it: comp-dupr-app run 3 lost its competition mid-run; at 13:13 HKT a V1 test sweep of se_sbx deleted 6 participants + 4 chat rooms of coaching-polish's fresh '[probe] CP-dnbqtl Group drills' meets (lane notified).",
+    "Scope: every destructive step now carries the age predicate `id collate \"C\" < cutoff` (meets, clubs, competitions, notes, probe-meet ratings, chat rooms, probe chat lines, unlink of probe meets, probe guests, venue feedback); casual_left only touches meets a probe guest was just removed from. --count stays strict."
+  ]
+}
