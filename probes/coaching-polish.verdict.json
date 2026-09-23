@@ -1,0 +1,144 @@
+{
+ "id": "coaching-polish",
+ "at": "2026-09-23T06:10:00Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "summary": "All three coaching-ui needs_operator items are decided, built and shown working (L6) on UAT in a headless-Chrome walk of the deployed app, with DB and API read-back. (1) PERSON-NAME-V2: a machine handle (hkpl_<hex>) is no longer treated as a name in either field. lib/person is now the one owner of that rule and the coaching-only personLabel workaround is gone. The response step every engine answer goes through cleans handles the engine packed into name fields or wrote into text. Walking as the coach, a name-less account showed 3 handles on screen before and 0 after. (2) GROUP-PRICE-V1: someone booking into a group slot pays the group band, and the confirm sheet says so in plain words. The engine locks exactly the quoted price or books nothing. A private rate only applies after the coach agrees it with the student, never automatically. The first booker into an empty group slot was locked at the private HKD 200 before and the group HKD 120 after (DB). (3) Signed-out visitors can browse a lesson slot, the Lessons hub and a coach profile. Tapping Book asks them to sign in and sends them back to the slot.",
+ "proof_levels": {
+  "personname": "L6 (UAT browser walk as the coach, 6 surfaces, DOM text + aria-label/title/alt; 3 -> 0)",
+  "pricing": "L6 (UAT: confirm sheet text EN + 繁, DB meet_participant.agreedPrice 200 -> 120, planted wrong quote refused with 0 rows booked, coach hint on screen)",
+  "signed_out": "L6 (UAT anonymous context: lesson page, hub, coach profile, Book -> 'Sign in to book' -> /pages/signin/index?next=/pages/lesson/index?id=<slot>)",
+  "engine_running": "L4 on BOTH engines: markers group-price-v1-b2c9 + coach-gate-v1-7d1e grepped in social-engine-web-uat-1 AND social-engine-web-1 built trees",
+  "app_running": "L4: built /var/www/boyau-app/js contains COACH_PRICE_CHANGED + coaches/schedules/of-user; published to uat.gripbat.com/app and gripbat.com/app (one build)",
+  "not_proven": "the of-user 404 COACH_NOT_AVAILABLE path with the flag OFF on an engine that HAS the module is L2 only: UAT's flag was not flipped because other lanes share it. The no-module path (native /api/endpoint 204) was L6 on prod before PROD-PARITY-V1."
+ },
+ "personname": {
+  "found": 17,
+  "fixed": 17,
+  "handles_before": 3,
+  "handles_after": 0,
+  "rule": "realName(v) = '' for an empty value or a machine handle (/^@?hkpl_[0-9a-f]{6,}(@host)?$/). personName = realName(name) || realName(username) || 'A player'. personHandle = '@' + realName(username) or ''. scrubHandles(text) replaces a handle inside engine-written text with 'A player'.",
+  "sites": [
+   "1 lib/person.ts personName: the name field was not guarded (feeds every personName call site)",
+   "2 lib/coaching.ts personLabel: a duplicate owner, REMOVED",
+   "3-7 5 personLabel callers -> personName (pages/lesson:250, pages/lessons:146,183,238,239)",
+   "8 lib/social.ts myNetwork (was :377): name = u.name || p.displayName || u.username -> personName",
+   "9 lib/social.ts response step (stripIdenticons, EXTENDED): a handle in `name` on a user-shaped object -> null; a handle inside name/displayName/header/body/description/title on any other object -> 'A player'. This covers meet roster displayName (engine MeetEntityService:61), app notification bodies (26 engine text sites), chat system-line names, the coaching roster and owner, summary and competition entry names",
+   "10 lib/stats.ts:63 its own personName did not guard the name field -> realName",
+   "11 lib/chat-v2.ts systemLine: the engine stores name ?? username in the system line -> realName",
+   "12 components/ChatThread.tsx:256 'Replying to' name || username -> personName",
+   "13 pages/feed:321 block dialog name || handle -> personName",
+   "14 pages/meet-create:200 invitee name || username -> personName",
+   "15 pages/meet-create:82 a stray ' · ' appeared when the handle was hidden -> checked on personHandle()",
+   "16-17 pages/club-admin:236,239 insights avatar initial came from the raw name -> personName"
+  ],
+  "excluded_with_reason": [
+   "pages/meet-create:209 hostName: the hkpl account (fullname), not an engine user",
+   "pages/dupr-player:22: DUPR partner data",
+   "pages/profile: the hkpl player, named by hkpl"
+  ],
+  "engine_side": "2 of the 28 engine `name ?? username` collapse sites are in the coaching module and were fixed there: the enrolment notice and packSchedule.owner. The other 26 are in the meets/clubs/competitions modules, which other lanes own. They are untouched and covered by the app response step. Recommended follow-up: one engine helper for these sites.",
+  "surfaces_after": {
+   "coaching-roster": 0,
+   "meet-roster": "0 ('A player')",
+   "meet-chat": "0 ('A player has joined the conversation.', message author 'A player')",
+   "profile": "0 ('A player')",
+   "notifications": "0 ('A player joined … Group drills.')",
+   "lesson-owner": 0
+  },
+  "surfaces_before": {
+   "meet-roster": "hkpl_11d99b298908",
+   "meet-chat": "hkpl_11d99b298908 has joined the conversation.",
+   "notifications": "hkpl_11d99b298908 joined [probe] CP-dm9ezg Group drills."
+  },
+  "engine_raw_still_carries_handle": "the engine's own API still answers name = 'hkpl_11d99b298908' for the roster row and the notification body (read in the same run). The fix is at the app's response step and in lib/person, by design.",
+  "remeasure": [
+   "runtime: cd /root/social-engine/probes && PHASE=after bash /root/gen/browser-slot.sh bash run.sh coaching-polish.probe.cjs  (-> personname.handles_on_screen in coaching-polish-after.out.json)",
+   "static: cd /root/hkpl-taro-branch && git grep -nE \"(\\.name|\\bname) \\|\\| [A-Za-z.()]*username|\\.name \\|\\| \\(personHandle|senderOf\\([a-zA-Z]+\\)\\.name|x\\.user && x\\.user\\.name|personLabel\\(|u\\.name \\|\\| p\\.displayName|p\\.user\\.name \\|\\| \\(p\\.user\\.username\" -- src ':!src/lib/person.ts' ':!src/lib/i18n-supplement.ts'  (HEAD before: 13 engine-person lines + 1 excluded hkpl line; now: 1 excluded hkpl line + social.ts myNetwork, which now goes through personName)"
+  ]
+ },
+ "pricing": {
+  "decision": "A student booking into a GROUP slot pays the band the booking lands in, and never less than the smallest group band. They pay the group rate they chose, never the private rate. The price is locked at booking. If the slot ends up private, nothing raises it: the coach agrees the private rate with the student first. There is no automatic solo-band charge.",
+  "chose_because": "G15.0: Reclub's floor is a flat per-player meet fee that nobody is re-charged. Our research (D:\\Downloads\\GRIPBAT_COACHING_RESEARCH.md §3, drawn from CourtReserve, Playtomic Academy and Mindbody-style tables) says the per-person price is fixed at the tier the student books into and never re-priced live, because live re-pricing confuses students and breaks manual payment reconciliation. The coaching-v1 rule (first booker pays the solo band) was the one case where a student could be surprised. This choice is the clearest for the student (the price shown is the price paid) and the least work for the coach: no difference to refund when the group fills, and a private rate is a conversation the app points them to.",
+  "confirm_sheet_line_en": "You pay HKD 120 now. If this runs as a private lesson the coach will confirm the private rate with you first.",
+  "confirm_sheet_line_zh_Hant": "你現在支付 HKD 120。如果這堂課變成私人課，教練會先與你確認私人課價錢。",
+  "first_booker_locked_price_before": 200,
+  "first_booker_locked_price_after": 120,
+  "bands": { "private_1": 200, "group_2_4": 120, "currency": "HKD" },
+  "engine_quote_on_slot": { "rule": "group-price-v1-b2c9", "groupSlot": true, "groupFloor": 2, "enrolPrice": 120, "privatePrice": 200, "upcoming_price": 120 },
+  "meet_fee_shown_on_shared_meet_screen": { "before": 200, "after": 120 },
+  "planted_wrong_quote": { "quotedPrice": 999, "status": 400, "code": "COACH_PRICE_CHANGED", "participant_rows": 0 },
+  "coach_private_hint": "Only 1 booked — if this runs as a private lesson, agree the private rate (HKD 200) with your student first. They booked at the group rate.  [+ 'Message Amy Chan' → /pages/chat/index?user=<id>]",
+  "never_auto_charges_solo": "No code path raises agreedPrice after booking. bookSingle also caps a race at the quoted price (price > quotedPrice -> quotedPrice).",
+  "also_fixed": "coaches/lessons/book sent its coach:* refusals through the meet error mapper, which doesn't know them, so they came back as 500s. They now use the coach error catalogue (COACH_PRICE_CHANGED shows as a 400)."
+ },
+ "signed_out": {
+  "decision": "YES, signed-out visitors can browse (operator). A lesson slot, the Lessons hub ('Lessons you can book', one row per slot from the public Discover list) and a coach profile all show without sign-in. Every booking action (Book, Subscribe weekly, Buy a pack) opens 'Sign in to book' and returns to the slot after sign-in.",
+  "chose_because": "G15.0: Playtomic, Mindbody and Calendly all show the schedule and price publicly and ask for an account at booking. Reclub supports anonymous sessions (labels.txt:1426 'Called logOut but the current user is anonymous.'), which sets the floor. The demo promises 'no sign-in needed to look around'. A prompt with a way back beats a silent redirect because the visitor does not lose the slot they picked.",
+  "gate": "coachingEnabled() works signed out. It first asks Misskey's native POST /api/endpoint {endpoint:'coaches/schedules/of-user'}: 204 = no coaching module, so dark. It then asks the public coaches/schedules/of-user anonymously: 200 = on, 404 COACH_NOT_AVAILABLE = off (engine COACH-GATE-V1). It fails closed. No console error on any host: measured 0 on UAT hub + More, and 0 on prod More and hub after this change. The earlier schedules/show probe answered 400 and the plain of-user probe answered 404 on prod; both logged errors and both were replaced.",
+  "lesson_page_before": "off (dark for signed-out)",
+  "lesson_page_after": "browsable (name, price bands, group note, Book buttons)",
+  "book_prompts_sign_in": true,
+  "after_sign_in_tap_url": "https://uat.social.silkvo.com/app/pages/signin/index?next=%2Fpages%2Flesson%2Findex%3Fid%3D<slot>",
+  "hub_lists_bookable_lessons": true,
+  "coach_profile_lists_lessons": true,
+  "more_page_lessons_entry": "shown signed-out (screenshot 35). The probe's text field read it too early; the screenshot is the evidence.",
+  "prod": "SUPERSEDED during this lane. The brief said to keep coaching dark on prod, and it was dark: native /api/endpoint answered 204 and the Lessons row was absent on gripbat.com/app/pages/more, L6 at ~13:30 HKT. At 13:33 HKT the orchestrator applied PROD-PARITY-V1 (operator): prod web was restarted on UAT's image with COACHING_V1=true (compose.prod.yml, uncommitted line). Coaching is therefore LIVE on prod now, and the app follows the engine as designed. Prod also runs GROUP-PRICE-V1 and COACH-GATE-V1: both markers are in social-engine-web-1."
+ },
+ "double_header_family": {
+  "finding": "orchestrator: /app/pages/lessons/index showed two 'Lessons' headers and lit Discover",
+  "cause": "components/Shell APP_PAGES (the pages that draw their own AppHeader) was missing 'lessons' and 'lesson'. Shell therefore treated both as league pages, added a second header and lit Discover. It was not navigationStyle: #taro-navigation-bar is already hidden in base.h5.scss:79.",
+  "found": 2,
+  "fixed": 2,
+  "remeasure": "cd /root/hkpl-taro-branch/src && node -e \"const fs=require('fs');const m=fs.readFileSync('components/Shell.tsx','utf8').match(/const APP_PAGES = new Set\\(\\[([^\\]]*)\\]\\)/);const app=new Set([...m[1].matchAll(/'([a-z0-9-]+)'/g)].map(x=>x[1]));console.log(fs.readdirSync('pages').filter(d=>{const f='pages/'+d+'/index.tsx';if(!fs.existsSync(f))return false;const s=fs.readFileSync(f,'utf8');return /<AppHeader\\b/.test(s)&&/<Shell\\b/.test(s)&&!app.has(d)}))\"  -> []",
+  "after": "one header and See more lit (prod-lessons-hub-signed-out-en.png and all after/ screenshots)"
+ },
+ "reuse": {
+  "REUSED": [
+   "Misskey frontend packages/frontend/src/filters/user.ts:13 userName(): the name-then-username order that personName keeps",
+   "hkpl-server lib/display-name.js:82 _realName (DUPR-PLACEHOLDER-NOT-A-NAME-V1): 'a placeholder is not a name, skipped wherever a name is chosen' is the rule realName() applies to the machine handle",
+   "Misskey native POST /api/endpoint (the same door tools/engine-preflight.cjs:30 uses): the no-error module check",
+   "engine public doors coaches/schedules/show, coaches/schedules/of-user, coaches/profile/show (requireCredential false) for signed-out browsing; meets/list scope=discover (public) for the hub browse list",
+   "components/Ask ask.modal for the sign-in prompt; the signin ?next= return pattern (pages/venue-feedback:62, pages/team:91); the chat route /pages/chat/index?user= (pages/coach:106); the Sheet/Btn/Row/SectionHead/BoyauEmpty kit, with existing classes only (le-confnote, le-lock, pg-note ls-hint)"
+  ],
+  "EXTENDED": [
+   "app lib/person (realName, handle in either field, scrubHandles)",
+   "app lib/social stripIdenticons response step, now also cleaning machine handles",
+   "engine coach-pricing priceForGroup -> groupFloor + bookingBand",
+   "engine CoachScheduleService bookSingle/enroll/bookParticipant/lessonData/packSchedule",
+   "engine coach error catalogue (+COACH_PRICE_CHANGED)",
+   "engine coaches/schedules/of-user (404 when off)",
+   "components/Shell APP_PAGES"
+  ],
+  "NEW": [
+   "quotedPrice on coaches/lessons/book and coaches/lessons/enroll. Searched first: Misskey has no price concept; hkpl has no lesson pricing; the meet fee flow (meets/join, claim-payment) has no quote-lock. Price-lock is a GripBat coaching concept (research §3), so this is NEW.",
+   "packSchedule.pricing, the engine's own quote. Searched: no existing packer exposes a per-booker price; this avoids a second copy of the rule in the client.",
+   "lib/coaching publicLessonSlots, a 10-line filter over the existing meets/list door (no new engine endpoint)",
+   "the coach's private-rate hint on the roster (UI copy built from kit parts)"
+  ]
+ },
+ "commits": {
+  "app (/root/hkpl-taro-branch)": ["65bbc93 COACHING-POLISH: person-name family, group-slot price sheet, signed-out browse", "c041ab3 COACH-GATE-V1 (app): gate via of-user", "9d8a60c COACH-GATE-V1 (app): native /api/endpoint first", "aee554b lesson pages are app pages (one header)", "f50e27f zh confirm-sheet spacing"],
+  "engine (/root/social-engine, pushed to origin/master)": ["fbe6e6418b GROUP-PRICE-V1", "52c3b2df7c COACH-GATE-V1"]
+ },
+ "deploys": [
+  "engine -> web-uat only via /root/gen/compdupr-ship-uat.sh (MARK=group-price-v1-b2c9, then coach-gate-v1-7d1e); prod web unchanged by this lane (container e524a08e… start 2026-09-21 before and after each of my ships). Prod was later restarted by the orchestrator (PROD-PARITY-V1) on an image carrying both commits.",
+  "app x5 via tools/deploy-boyau.sh (lock; all gates green: ui-guard, class-owner, inner-component, control-guard, legal, preset-drift, theme reach, i18n-coverage, tsc 0, engine preflight)",
+  "each deploy logged in /root/gen/DEPLOY-LOG.md"
+ ],
+ "evidence": [
+  "probe: /root/social-engine/probes/coaching-polish.probe.cjs (PHASE=before|after, via run.sh + browser-slot.sh); raw output coaching-polish-before.out.json / coaching-polish-after.out.json; per-phase reports coaching-polish-before.verdict.json / coaching-polish-after.verdict.json (after: 15/15 PASS on the final build f50e27f)",
+  "BEFORE (old app + old engine, same instrument): handles on screen 3 (meet-roster, meet-chat, notifications); first booker agreedPrice 200; signed-out lesson page 'Coaching lessons are not available yet.'; meet.feeAmount 200",
+  "AFTER: handles 0 on 6 surfaces; agreedPrice 120; wrong quote -> 400 COACH_PRICE_CHANGED with 0 rows; confirm sheet EN + 繁 lines as above; coach private-rate hint; signed-out browse + sign-in prompt + next=; hub list; coach profile; 0 console errors from the gate",
+  "prod check (read-only, /root/gen/prod-dark.cjs): before PROD-PARITY 'more' had no Lessons row, /api/endpoint 204; after PROD-PARITY the prod hub shows one header and See more lit",
+  "screenshots: D:\\tmp\\coaching-polish-shots\\after\\ (17: 01-04 pricing EN/繁, 10-15 name-less account across coach surfaces, 20 coach hint, 30-35 signed-out) + D:\\tmp\\coaching-polish-shots\\prod-lessons-hub-signed-out-en.png. The BEFORE screenshots were discarded: the personas had not accepted terms, so the consent gate covered the page. BEFORE is the DOM measurement in coaching-polish-before.out.json.",
+  "hygiene: fixtures '[probe] CP-<stamp>' cleaned in finally (schedule deleted, meets cancelled, club archived, host rows + meet chat rooms deleted, Ken's name restored to 'Ken Wong'); probecount.sh 0 on social + se_sbx; probe-litter 0 reachable",
+  "side effect, disclosed: the walk accepted the current Terms on UAT test personas clubowner-mei, player-amy and clubadmin-tom by tapping 'I agree' in the consent gate, the way a user would"
+ ],
+ "needs_operator": [],
+ "notes_for_orchestrator": [
+  "PROD-PARITY-V1 flipped prod coaching ON mid-lane (compose.prod.yml line is uncommitted). The brief's 'dark on prod' no longer holds. That is the orchestrator/operator's call and was not undone here.",
+  "26 engine `name ?? username` collapse sites remain in meets, clubs and competitions (other lanes' modules). The app step covers them. One engine helper would remove the cause.",
+  "i18n-coverage.json is left modified in the app working tree by the deploy tool (not committed by this lane)."
+ ]
+}

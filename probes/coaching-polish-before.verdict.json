@@ -1,0 +1,28 @@
+{
+ "id": "coaching-polish-before",
+ "at": "2026-09-23T04:42:53.719Z",
+ "base": "https://uat.social.silkvo.com",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "INFO identities — {\"mei\":\"argp1io2j7so0006\",\"amy\":\"argp1hagj7so0001\",\"ken\":\"argp1hy8j7so0003\",\"kenUsername\":\"hkpl_11d99b298908\",\"kenName\":\"Ken Wong\"}",
+  "PASS fixture: group slot materialised >= 3 lessons — {\"n\":4,\"sid\":\"arh6kpaxw1mb001g\"}",
+  "INFO engine quote on the slot (packSchedule.pricing) — \"absent (old engine)\"",
+  "INFO meet.feeAmount the shared meet screen shows — 200",
+  "PASS fixture: Ken is name-less in the engine (name NULL, username hkpl_<hex>) — {\"username\":\"hkpl_11d99b298908\",\"name\":null}",
+  "INFO engine roster row for Ken (raw API) — {\"name\":\"hkpl_11d99b298908\",\"username\":\"hkpl_11d99b298908\"}",
+  "INFO engine notification body with the handle (raw API) — \"hkpl_11d99b298908 joined [probe] CP-dm9ezg Group drills.\"",
+  "INFO first booker into the empty group slot: agreedPrice locked in DB — {\"phase\":\"before\",\"agreedPrice\":200}",
+  "INFO surface coaching-roster — {\"handles\":0,\"sample\":null,\"label\":null}",
+  "INFO surface meet-roster — {\"handles\":1,\"sample\":{\"where\":\"text\",\"m\":\"hkpl_11d99b298908\",\"ctx\":\"hkpl_11d99b298908\"},\"label\":null}",
+  "INFO surface meet-chat — {\"handles\":1,\"sample\":{\"where\":\"text\",\"m\":\"hkpl_11d99b298908\",\"ctx\":\"hkpl_11d99b298908 has joined the conversation.\"},\"label\":\"A player\"}",
+  "INFO surface profile — {\"handles\":0,\"sample\":null,\"label\":\"A player\"}",
+  "INFO surface notifications — {\"handles\":1,\"sample\":{\"where\":\"text\",\"m\":\"hkpl_11d99b298908\",\"ctx\":\"hkpl_11d99b298908 joined [probe] CP-dm9ezg Group drills. · 23 Sept, 12:42 pm\"},\"label\":null}",
+  "INFO surface lesson-owner — {\"handles\":0,\"sample\":null,\"label\":null}",
+  "INFO PERSON-NAME BEFORE: machine handles on screen — {\"total\":3}",
+  "INFO SIGNED-OUT BEFORE: lesson page state — \"off (dark for signed-out)\"",
+  "INFO cleanup: Ken name restored — {\"status\":200,\"name\":\"Ken Wong\"}",
+  "INFO cleanup: schedule deleted — {\"status\":200}",
+  "INFO cleanup: live fixtures left (meets,clubs,schedules) — \"0,0,0\""
+ ]
+}

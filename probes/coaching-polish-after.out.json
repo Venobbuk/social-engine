@@ -1,0 +1,118 @@
+{
+ "phase": "after",
+ "personname": {
+  "surfaces": {
+   "coaching-roster": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": null
+   },
+   "meet-roster": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": "A player"
+   },
+   "meet-chat": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": "A player has joined the conversation."
+   },
+   "profile": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": "A player"
+   },
+   "notifications": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": "A player joined [probe] CP-doy65d Group drills. "
+   },
+   "lesson-owner": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": null
+   }
+  },
+  "engine_roster_name": "hkpl_11d99b298908",
+  "handles_on_screen": 0
+ },
+ "pricing": {
+  "planted_wrong_quote": {
+   "status": 400,
+   "code": "COACH_PRICE_CHANGED",
+   "participant_rows": 0
+  },
+  "lesson_page_group_note": true,
+  "confirm_sheet_line": "You pay HKD 120 now. If this runs as a private lesson the coach will confirm the private rate with you first.",
+  "confirm_sheet_line_zh_Hant": "你現在支付 HKD 120。如果這堂課變成私人課，教練會先與你確認私人課價錢。",
+  "first_booker_locked_price": 120,
+  "bands": {
+   "private": 200,
+   "group": 120
+  },
+  "coach_private_hint": "Only 1 booked — if this runs as a private lesson, agree the private rate (HKD 200) with your student first. They booked at the group rate."
+ },
+ "signed_out": {
+  "hub_browse_lists_slot": true,
+  "more_has_lessons_entry": false,
+  "console_errors_on_hub_and_more": [],
+  "lesson_page_renders_slot": true,
+  "lesson_page_state": "browsable",
+  "book_prompts_sign_in": true,
+  "after_sign_in_tap_url": "https://uat.social.silkvo.com/app/pages/signin/index?next=%2Fpages%2Flesson%2Findex%3Fid%3Darh99fvguhln006u",
+  "coach_profile_lists_slot": true
+ },
+ "shots": [
+  "/root/walk/coaching-polish/after/01-lesson-page-group-slot-amy-en.png",
+  "/root/walk/coaching-polish/after/02-confirm-sheet-group-price-amy-en.png",
+  "/root/walk/coaching-polish/after/03-after-confirm-amy-en.png",
+  "/root/walk/coaching-polish/after/04-confirm-sheet-group-price-tom-zh_Hant.png",
+  "/root/walk/coaching-polish/after/10-coaching-roster-coach-en.png",
+  "/root/walk/coaching-polish/after/11-meet-roster-coach-en.png",
+  "/root/walk/coaching-polish/after/12-meet-chat-coach-en.png",
+  "/root/walk/coaching-polish/after/13-profile-coach-en.png",
+  "/root/walk/coaching-polish/after/14-notifications-coach-en.png",
+  "/root/walk/coaching-polish/after/15-lesson-owner-coach-en.png",
+  "/root/walk/coaching-polish/after/20-coach-private-rate-hint-en.png",
+  "/root/walk/coaching-polish/after/33-signed-out-lessons-hub-en.png",
+  "/root/walk/coaching-polish/after/35-signed-out-more-lessons-entry-en.png",
+  "/root/walk/coaching-polish/after/30-signed-out-lesson-page-en.png",
+  "/root/walk/coaching-polish/after/31-signed-out-book-prompts-sign-in-en.png",
+  "/root/walk/coaching-polish/after/32-signed-out-sign-in-page-en.png",
+  "/root/walk/coaching-polish/after/34-signed-out-coach-profile-en.png"
+ ],
+ "fixture": {
+  "scheduleId": "arh99fvguhln006u",
+  "club": "arh99fu6uhln006t",
+  "L1": "arh99fweuhln006v",
+  "L2": "arh99fwxuhln006y",
+  "L3": "arh99fxcuhln0071",
+  "feeAmountOnMeet": 120,
+  "pricingFromEngine": {
+   "rule": "group-price-v1-b2c9",
+   "groupSlot": true,
+   "groupFloor": 2,
+   "enrolPrice": 120,
+   "currency": "HKD",
+   "privatePrice": 200,
+   "upcoming": [
+    {
+     "meetId": "arh99fweuhln006v",
+     "price": 120
+    },
+    {
+     "meetId": "arh99fwxuhln006y",
+     "price": 120
+    },
+    {
+     "meetId": "arh99fxcuhln0071",
+     "price": 120
+    },
+    {
+     "meetId": "arh99fxxuhln0074",
+     "price": 120
+    }
+   ]
+  }
+ }
+}

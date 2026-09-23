@@ -1,0 +1,86 @@
+{
+ "phase": "before",
+ "personname": {
+  "surfaces": {
+   "coaching-roster": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": null
+   },
+   "meet-roster": {
+    "handles": 1,
+    "samples": [
+     {
+      "where": "text",
+      "m": "hkpl_11d99b298908",
+      "ctx": "hkpl_11d99b298908"
+     }
+    ],
+    "label_seen": null
+   },
+   "meet-chat": {
+    "handles": 1,
+    "samples": [
+     {
+      "where": "text",
+      "m": "hkpl_11d99b298908",
+      "ctx": "hkpl_11d99b298908 has joined the conversation."
+     }
+    ],
+    "label_seen": "A player"
+   },
+   "profile": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": "A player"
+   },
+   "notifications": {
+    "handles": 1,
+    "samples": [
+     {
+      "where": "text",
+      "m": "hkpl_11d99b298908",
+      "ctx": "hkpl_11d99b298908 joined [probe] CP-dm9ezg Group drills. · 23 Sept, 12:42 pm"
+     }
+    ],
+    "label_seen": null
+   },
+   "lesson-owner": {
+    "handles": 0,
+    "samples": [],
+    "label_seen": null
+   }
+  },
+  "engine_roster_name": "hkpl_11d99b298908",
+  "handles_on_screen": 3
+ },
+ "pricing": {
+  "first_booker_locked_price": 200,
+  "bands": {
+   "private": 200,
+   "group": 120
+  }
+ },
+ "signed_out": {
+  "lesson_page_renders_slot": false,
+  "lesson_page_state": "off (dark for signed-out)"
+ },
+ "shots": [
+  "/root/walk/coaching-polish/before/10-coaching-roster-coach-en.png",
+  "/root/walk/coaching-polish/before/11-meet-roster-coach-en.png",
+  "/root/walk/coaching-polish/before/12-meet-chat-coach-en.png",
+  "/root/walk/coaching-polish/before/13-profile-coach-en.png",
+  "/root/walk/coaching-polish/before/14-notifications-coach-en.png",
+  "/root/walk/coaching-polish/before/15-lesson-owner-coach-en.png",
+  "/root/walk/coaching-polish/before/30-signed-out-lesson-page-en.png"
+ ],
+ "fixture": {
+  "scheduleId": "arh6kpaxw1mb001g",
+  "club": "arh6kp76w1mb001f",
+  "L1": "arh6kpchw1mb001h",
+  "L2": "arh6kpe2w1mb001k",
+  "L3": "arh6kpehw1mb001n",
+  "feeAmountOnMeet": 200,
+  "pricingFromEngine": null
+ }
+}
