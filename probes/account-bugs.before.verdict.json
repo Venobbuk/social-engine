@@ -1,0 +1,475 @@
+{
+ "id": "account-bugs",
+ "mode": "before",
+ "at": "2026-09-23T07:41:28.351Z",
+ "checks": [
+  {
+   "bug": "B1",
+   "id": "engine usernames not email-derived (se_sbx)",
+   "pass": true,
+   "detail": {
+    "localUsers": 58,
+    "nonHandleNonSeed": 0
+   }
+  },
+  {
+   "bug": "B1",
+   "id": "engine usernames not email-derived (social)",
+   "pass": true,
+   "detail": {
+    "localUsers": 52,
+    "nonHandleNonSeed": 0
+   }
+  },
+  {
+   "bug": "B1",
+   "id": "tester2 username is the machine handle",
+   "pass": true,
+   "detail": {
+    "username": "hkpl_dfe38f7c41be"
+   }
+  },
+  {
+   "bug": "probe",
+   "id": "B1:crashed",
+   "pass": false,
+   "detail": "login 502 (rate-limited? wait 15 min)"
+  },
+  {
+   "bug": "B2",
+   "id": "control: with New followers ON a follow notification arrives",
+   "pass": true,
+   "detail": {
+    "rows": 1
+   }
+  },
+  {
+   "bug": "B2",
+   "id": "control: with Meet updates ON an invite notification arrives",
+   "pass": true,
+   "detail": {
+    "add": 200,
+    "rows": 1
+   }
+  },
+  {
+   "bug": "B2",
+   "id": "all five switches were ON before the clicks (fixture state)",
+   "pass": true,
+   "detail": {
+    "New followers": "true",
+    "Reactions to my posts": "true",
+    "Replies": "true",
+    "Mentions": "true",
+    "Meet updates (confirmed, invited, cancelled)": "true"
+   }
+  },
+  {
+   "bug": "B2",
+   "id": "after reload all five switches read OFF on the page",
+   "pass": false,
+   "detail": {
+    "New followers": "true",
+    "Reactions to my posts": "true",
+    "Replies": "true",
+    "Mentions": "true",
+    "Meet updates (confirmed, invited, cancelled)": "true"
+   }
+  },
+  {
+   "bug": "B2",
+   "id": "engine stored all five as off (native notificationRecieveConfig ×4 + prefs.meets)",
+   "pass": false,
+   "detail": {
+    "follow": "all"
+   }
+  },
+  {
+   "bug": "B2",
+   "id": "New followers OFF: a new follow does not reach tester2",
+   "pass": false,
+   "detail": {
+    "rows": 1
+   }
+  },
+  {
+   "bug": "B2",
+   "id": "Meet updates OFF: an invite does not reach tester2",
+   "pass": false,
+   "detail": {
+    "add": 200,
+    "rows": 1
+   }
+  },
+  {
+   "bug": "B3",
+   "id": "API: an empty name is refused and nothing is stored",
+   "pass": true,
+   "detail": {
+    "status": 429,
+    "code": "RATE_LIMIT_EXCEEDED",
+    "stored": "波友測試 2"
+   }
+  },
+  {
+   "bug": "B3",
+   "id": "API: a name containing GripBat is refused",
+   "pass": true,
+   "detail": {
+    "status": 429,
+    "code": "RATE_LIMIT_EXCEEDED",
+    "stored": "波友測試 2"
+   }
+  },
+  {
+   "bug": "B3",
+   "id": "API: lower-case gripbat is refused too",
+   "pass": true,
+   "detail": {
+    "status": 429
+   }
+  },
+  {
+   "bug": "B3",
+   "id": "UI: Save with an empty name says so and stores nothing",
+   "pass": false,
+   "detail": {
+    "toast": "Rate limit exceeded. Please try again later.",
+    "stored": "波友測試 2"
+   }
+  },
+  {
+   "bug": "B3",
+   "id": "UI: Save with \"GripBat\" in the name is refused in words",
+   "pass": false,
+   "detail": {
+    "toast": "Rate limit exceeded. Please try again later.",
+    "stored": "波友測試 2"
+   }
+  },
+  {
+   "bug": "B3",
+   "id": "UI: a real edit saves",
+   "pass": false,
+   "detail": {
+    "toast": "Rate limit exceeded. Please try again later.",
+    "stored": "波友測試 2"
+   }
+  },
+  {
+   "bug": "B3",
+   "id": "the edited name survives the next sign-in exchange (engine API + DB)",
+   "pass": false,
+   "detail": {
+    "api": "波友測試 2",
+    "db": "波友測試 2",
+    "hkplName": "波友測試 2"
+   }
+  },
+  {
+   "bug": "B3",
+   "id": "profile page shows the edited name after the exchange",
+   "pass": false,
+   "detail": {
+    "shown": false
+   }
+  },
+  {
+   "bug": "B5",
+   "id": "fixture: cancelled competitions with completed matches exist on UAT",
+   "pass": true,
+   "detail": {
+    "cancelledComps": 7
+   }
+  },
+  {
+   "bug": "B5",
+   "id": "stats/matches (My history, player match lists, pair H2H list) carries no cancelled meet/competition",
+   "pass": false,
+   "detail": {
+    "argp1hagj7so0001": {
+     "rows": 8,
+     "cancelledRows": 8
+    },
+    "ar7jww4yjhqz003s": {
+     "rows": 12,
+     "cancelledRows": 8
+    },
+    "argp1io2j7so0006": {
+     "rows": 8,
+     "cancelledRows": 8
+    },
+    "argp1j9lj7so0009": {
+     "rows": 8,
+     "cancelledRows": 8
+    }
+   }
+  },
+  {
+   "bug": "B5",
+   "id": "stats/match-summary refuses a match of a cancelled competition",
+   "pass": false,
+   "detail": {
+    "matchId": "arh5wszzj7so008i",
+    "status": 200,
+    "body": "{\"source\":\"competition\",\"matchId\":\"arh5wszzj7so008i\",\"context\":{\"kind\":\"competit"
+   }
+  },
+  {
+   "bug": "B5",
+   "id": "gb-edge counts only matches that are still history",
+   "pass": false,
+   "detail": {
+    "argp1hagj7so0001": {
+     "edge": 17,
+     "dbAll": 17,
+     "dbLive": 0,
+     "gbPlayerRating": 17
+    },
+    "ar7jww4yjhqz003s": {
+     "edge": 11,
+     "dbAll": 11,
+     "dbLive": 4,
+     "gbPlayerRating": 11
+    },
+    "argp1io2j7so0006": {
+     "edge": 15,
+     "dbAll": 15,
+     "dbLive": 0,
+     "gbPlayerRating": 15
+    },
+    "argp1j9lj7so0009": {
+     "edge": 15,
+     "dbAll": 15,
+     "dbLive": 0,
+     "gbPlayerRating": 15
+    }
+   }
+  },
+  {
+   "bug": "B5",
+   "id": "no rating-log row of a cancelled competition remains (take-back on cancel)",
+   "pass": false,
+   "detail": {}
+  },
+  {
+   "bug": "B5",
+   "id": "pair record = match list for every partner of tester2",
+   "pass": false,
+   "detail": {
+    "aqxxu4p6sfmc000c": {
+     "pair": 1,
+     "list": 1
+    },
+    "aqxxu57esfmc000i": {
+     "pair": 1,
+     "list": 1
+    },
+    "aqxxu5a0sfmc000j": {
+     "pair": 2,
+     "list": 2
+    },
+    "argp1j9lj7so0009": {
+     "pair": 0,
+     "list": 7
+    }
+   }
+  },
+  {
+   "bug": "B5",
+   "id": "My history › Matches shows no cancelled competition",
+   "pass": false,
+   "detail": {
+    "shown": [
+     "[probe] COMP-DUPR-APP 0431",
+     "[probe] COMP-DUPR-APP 0423",
+     "[probe] COMP-DUPR-APP 0451",
+     "[probe] COMP-DUPR-APP 0456",
+     "[probe] UAT-DUPR-CAGE 0554",
+     "[probe] UAT-DUPR-CAGE 0556"
+    ]
+   }
+  }
+ ],
+ "notes": {
+  "orig": {
+   "name": "波友測試 2",
+   "recv": {},
+   "prefs": {
+    "club": true,
+    "chat": true,
+    "promoted": true,
+    "updates": true,
+    "mutedRoomIds": [],
+    "mutedUserIds": []
+   },
+   "t1FollowsT2": false
+  },
+  "t1": "ar89kz29mnr7001o",
+  "t2": "ar7jww4yjhqz003s",
+  "b2Requests": [
+   "POST /api/adapter/sso {\"jwt\":\"…\"}",
+   "POST /api/chat/notification-prefs/show {\"i\":\"…\"}",
+   "POST /api/i/update {\"mutingNotificationTypes\":[\"follow\"],\"i\":\"…\"}",
+   "POST /api/i/update {\"mutingNotificationTypes\":[\"reaction\"],\"i\":\"…\"}",
+   "POST /api/i/update {\"mutingNotificationTypes\":[\"reply\"],\"i\":\"…\"}",
+   "POST /api/i/update {\"mutingNotificationTypes\":[\"mention\"],\"i\":\"…\"}",
+   "POST /api/i/update {\"mutingNotificationTypes\":[\"app\"],\"i\":\"…\"}"
+  ],
+  "b4": {
+   "appSource": "hkpl GET /api/v1/players (lib/discover.ts duprRankings, DUPR-HKPL-V1)",
+   "hkplUatTotal": 0,
+   "hkplUatStatus": 200,
+   "engineUatTotal": 47,
+   "engineProdTotal": 0
+  },
+  "b5Players": 4
+ },
+ "cleanup": {
+  "delete arhczfmbgpqz001n": 400,
+  "cancel arhczfmbgpqz001n": 200,
+  "delete arhd022tgpqz001w": 400,
+  "cancel arhd022tgpqz001w": 200,
+  "liveProbeMeets": "0",
+  "followRestored": false,
+  "streamKeyLen": 13,
+  "notificationsRemoved": 6,
+  "name": 429,
+  "recv": 429,
+  "meetsPref": 400,
+  "restored": false,
+  "probecount": "=== social ===\nclubs_live 0\nmeets_live 0\nnotes 0\nusers_live 0\n=== se_sbx ===\nclubs_live 0\nmeets_live 0\nnotes 0\nusers_live 0"
+ },
+ "errors": [
+  "B1: Error: login 502 (rate-limited? wait 15 min)\n    at getSession (/root/social-engine/probes/_session.cjs:11:31)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async page (/root/social-engine/probes/account-bugs.probe.cjs:84:13)\n    at async /root/social-engine/probes/account-bugs.probe.cjs:175:19\n    at async step (/root/social-engine/probes/account-bugs.probe.cjs:71:39)\n    at async /root/social-engine/probes/account-bugs.probe.cjs:165:5"
+ ],
+ "summary": {
+  "checks": 26,
+  "pass": 10,
+  "fail": 16,
+  "failed": [
+   "probe B1:crashed",
+   "B2 after reload all five switches read OFF on the page",
+   "B2 engine stored all five as off (native notificationRecieveConfig ×4 + prefs.meets)",
+   "B2 New followers OFF: a new follow does not reach tester2",
+   "B2 Meet updates OFF: an invite does not reach tester2",
+   "B3 UI: Save with an empty name says so and stores nothing",
+   "B3 UI: Save with \"GripBat\" in the name is refused in words",
+   "B3 UI: a real edit saves",
+   "B3 the edited name survives the next sign-in exchange (engine API + DB)",
+   "B3 profile page shows the edited name after the exchange",
+   "B5 stats/matches (My history, player match lists, pair H2H list) carries no cancelled meet/competition",
+   "B5 stats/match-summary refuses a match of a cancelled competition",
+   "B5 gb-edge counts only matches that are still history",
+   "B5 no rating-log row of a cancelled competition remains (take-back on cancel)",
+   "B5 pair record = match list for every partner of tester2",
+   "B5 My history › Matches shows no cancelled competition"
+  ]
+ },
+ "verdict": "fail",
+ "condition_fired": true,
+ "evidence": [
+  {
+   "summary": {
+    "checks": 26,
+    "pass": 10,
+    "fail": 16,
+    "failed": [
+     "probe B1:crashed",
+     "B2 after reload all five switches read OFF on the page",
+     "B2 engine stored all five as off (native notificationRecieveConfig ×4 + prefs.meets)",
+     "B2 New followers OFF: a new follow does not reach tester2",
+     "B2 Meet updates OFF: an invite does not reach tester2",
+     "B3 UI: Save with an empty name says so and stores nothing",
+     "B3 UI: Save with \"GripBat\" in the name is refused in words",
+     "B3 UI: a real edit saves",
+     "B3 the edited name survives the next sign-in exchange (engine API + DB)",
+     "B3 profile page shows the edited name after the exchange",
+     "B5 stats/matches (My history, player match lists, pair H2H list) carries no cancelled meet/competition",
+     "B5 stats/match-summary refuses a match of a cancelled competition",
+     "B5 gb-edge counts only matches that are still history",
+     "B5 no rating-log row of a cancelled competition remains (take-back on cancel)",
+     "B5 pair record = match list for every partner of tester2",
+     "B5 My history › Matches shows no cancelled competition"
+    ]
+   }
+  },
+  {
+   "before": {
+    "checks": 22,
+    "pass": 10,
+    "fail": 12,
+    "failed": [
+     "B1 no email-derived text on /pages/profile/index (own)",
+     "B1 no email-derived text on profile (desktop chrome)",
+     "B2 after reload all five switches read OFF on the page",
+     "B2 engine stored all five as off (native notificationRecieveConfig ×4 + prefs.meets)",
+     "B2 New followers OFF: a new follow does not reach tester2",
+     "B2 Meet updates OFF: an invite does not reach tester2",
+     "B3 API: an empty name is refused and nothing is stored",
+     "B3 API: a name containing GripBat is refused",
+     "B3 API: lower-case gripbat is refused too",
+     "B3 UI: Save with an empty name says so and stores nothing",
+     "probe B3:crashed",
+     "probe B5:crashed"
+    ]
+   }
+  },
+  {
+   "notes": {
+    "orig": {
+     "name": "波友測試 2",
+     "recv": {},
+     "prefs": {
+      "club": true,
+      "chat": true,
+      "promoted": true,
+      "updates": true,
+      "mutedRoomIds": [],
+      "mutedUserIds": []
+     },
+     "t1FollowsT2": false
+    },
+    "t1": "ar89kz29mnr7001o",
+    "t2": "ar7jww4yjhqz003s",
+    "b2Requests": [
+     "POST /api/adapter/sso {\"jwt\":\"…\"}",
+     "POST /api/chat/notification-prefs/show {\"i\":\"…\"}",
+     "POST /api/i/update {\"mutingNotificationTypes\":[\"follow\"],\"i\":\"…\"}",
+     "POST /api/i/update {\"mutingNotificationTypes\":[\"reaction\"],\"i\":\"…\"}",
+     "POST /api/i/update {\"mutingNotificationTypes\":[\"reply\"],\"i\":\"…\"}",
+     "POST /api/i/update {\"mutingNotificationTypes\":[\"mention\"],\"i\":\"…\"}",
+     "POST /api/i/update {\"mutingNotificationTypes\":[\"app\"],\"i\":\"…\"}"
+    ],
+    "b4": {
+     "appSource": "hkpl GET /api/v1/players (lib/discover.ts duprRankings, DUPR-HKPL-V1)",
+     "hkplUatTotal": 0,
+     "hkplUatStatus": 200,
+     "engineUatTotal": 47,
+     "engineProdTotal": 0
+    },
+    "b5Players": 4
+   }
+  },
+  {
+   "cleanup": {
+    "delete arhczfmbgpqz001n": 400,
+    "cancel arhczfmbgpqz001n": 200,
+    "delete arhd022tgpqz001w": 400,
+    "cancel arhd022tgpqz001w": 200,
+    "liveProbeMeets": "0",
+    "followRestored": false,
+    "streamKeyLen": 13,
+    "notificationsRemoved": 6,
+    "name": 429,
+    "recv": 429,
+    "meetsPref": 400,
+    "restored": false,
+    "probecount": "=== social ===\nclubs_live 0\nmeets_live 0\nnotes 0\nusers_live 0\n=== se_sbx ===\nclubs_live 0\nmeets_live 0\nnotes 0\nusers_live 0"
+   }
+  },
+  {
+   "shots": "/root/gen/account-bugs/shots-before"
+  }
+ ]
+}
