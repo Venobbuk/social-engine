@@ -6,7 +6,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import ms from 'ms';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { ChannelsRepository } from '@/models/_.js';
+import type { ChannelsRepository, VenuesRepository } from '@/models/_.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import { DI } from '@/di-symbols.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
@@ -47,6 +47,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		@Inject(DI.channelsRepository)
 		private channelsRepository: ChannelsRepository,
+		@Inject(DI.venuesRepository)
+		private venuesRepository: VenuesRepository,
 		private meetService: MeetService,
 		private meetEntityService: MeetEntityService,
 		private clubService: ClubService,
@@ -62,6 +64,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 			try {
 				const fields = pickMeetFields(ps as Record<string, unknown>) as Partial<MiMeet>;
+				// T3-MEET-FORM: a venue id is kept only when that venue exists (the display name/address stay as sent)
+				if (fields.venueId && !(await this.venuesRepository.exists({ where: { id: fields.venueId } }))) fields.venueId = null;
 				const data = { ...fields, name: ps.name, durationMinutes: ps.durationMinutes, capacity: ps.capacity, startAt };
 				if (ps.repeat) {
 					const series = await this.meetService.createSeries(me, data, { every: ps.repeat.every, count: ps.repeat.count });

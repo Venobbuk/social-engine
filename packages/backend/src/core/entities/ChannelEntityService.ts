@@ -58,6 +58,7 @@ export class ChannelEntityService {
 			pinnedNotes?: Map<MiNote['id'], MiNote>;
 			memberCounts?: Map<MiChannel['id'], { members: number; followers: number; notes: number }>;
 			memberships?: Set<MiChannel['id']>;
+			visibilities?: Map<MiChannel['id'], 'public' | 'private'>;   // T3-CLUBS-V1
 			/** INVITE-ACCESS-V1: the DOOR has already proved this caller holds the club's invite-link token or its
 			 *  ref code (channels/show, clubs/by-code). Membership is not the only way in, and a join preview that
 			 *  reads "0 members" is worse than no number. Never set from user input — only from a checked token. */
@@ -138,6 +139,9 @@ export class ChannelEntityService {
 			// tier only (members are not counted twice) — Reclub's 'Members · Followers'.
 			usersCount: countsHidden ? 0 : tierCounts ? tierCounts.members : channel.usersCount,
 			membersCount: countsHidden ? 0 : tierCounts ? tierCounts.members : 0,
+			// T3-CLUBS-V1 (L6 S3 bug 4): the club's own visibility (club_setting; no row = public) so a card never says "Public" of a
+			// private club. Anyone this pack reaches may already read the club (the doors gate who gets a private one packed).
+			visibility: (opts?.visibilities ?? await this.visibilities([channel])).get(channel.id) ?? 'public',
 			followersCount: countsHidden ? 0 : tierCounts ? tierCounts.followers : 0,
 			// GB-NOTESCOUNT-LIVE-V1: the stored column is Misskey's running total (never decremented on delete); the packed
 			// value is the club's live note rows, from the same clubCounts query usersCount reads.
@@ -219,8 +223,10 @@ export class ChannelEntityService {
 
 		const memberCounts = await this.memberCounts(channels);
 		const memberships = me ? await this.membershipsOf(me.id, channels) : new Set<MiChannel['id']>();
+		const visibilities = await this.visibilities(channels);   // T3-CLUBS-V1
 
 		return Promise.all(channels.map(it => this.pack(it, me, detailed, {
+			visibilities,
 			memberCounts,
 			memberships,
 			bannerFiles,
@@ -229,6 +235,17 @@ export class ChannelEntityService {
 			muting,
 			pinnedNotes,
 		})));
+	}
+
+	/** T3-CLUBS-V1: each club's visibility — club_setting.visibility, 'public' when there is no setting row. One query for any number. */
+	@bindThis
+	public async visibilities(channels: MiChannel[]): Promise<Map<MiChannel['id'], 'public' | 'private'>> {
+		const out = new Map<MiChannel['id'], 'public' | 'private'>();
+		if (channels.length === 0) return out;
+		for (const c of channels) out.set(c.id, 'public');
+		const rows = await this.channelFollowingsRepository.query(`SELECT "channelId" AS id, visibility FROM "club_setting" WHERE "channelId" = ANY($1)`, [channels.map(c => c.id)]) as { id: string; visibility: string | null }[];
+		for (const r of rows) out.set(r.id, r.visibility === 'private' ? 'private' : 'public');
+		return out;
 	}
 
 	/** BACKEND-DELIVERY-V1 → CLUB-TIERS-V1: members (club_member + the owner) and followers (the follower tier only) per

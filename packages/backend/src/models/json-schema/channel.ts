@@ -94,6 +94,11 @@ export const packedChannelSchema = {
 			type: 'number',
 			nullable: false, optional: false,
 		},
+		// T3-CLUBS-V1: club_setting.visibility ('public' without a setting row)
+		visibility: {
+			type: 'string',
+			optional: true, nullable: false,   // 'public' | 'private' (a plain string: channels/search already overrides it with club_setting's value)
+		},
 		isFavorited: {
 			type: 'boolean',
 			optional: true, nullable: false,

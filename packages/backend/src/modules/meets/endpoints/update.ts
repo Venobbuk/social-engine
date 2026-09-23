@@ -5,7 +5,7 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { MeetsRepository } from '@/models/_.js';
+import type { MeetsRepository, VenuesRepository } from '@/models/_.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
 import { DI } from '@/di-symbols.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
@@ -38,6 +38,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor(
 		@Inject(DI.meetsRepository)
 		private meetsRepository: MeetsRepository,
+		@Inject(DI.venuesRepository)
+		private venuesRepository: VenuesRepository,
 		private meetService: MeetService,
 		private meetEntityService: MeetEntityService,
 		private clubService: ClubService,
@@ -54,6 +56,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (start && (meet.flags ?? []).includes('casual')) throw new IdentifiableError('meet:invalid_transition', 'The date of a logged casual game cannot be changed.');
 				const fields = pickMeetFields(ps as Record<string, unknown>) as Partial<MiMeet>;
 				delete (fields as Record<string, unknown>).startAt;
+				if (fields.venueId && !(await this.venuesRepository.exists({ where: { id: fields.venueId } }))) fields.venueId = null;   // T3-MEET-FORM
 				// CLUB-TIERS-V1: moving a meet into a club needs the same right as creating one there
 				if (fields.channelId && fields.channelId !== meet.channelId && !(await this.clubService.canCreateMeet(await this.clubService.channel(fields.channelId), me.id))) throw new ApiError(meta.errors.notClubMember);
 				const updated = await this.meetService.update(meet, { ...fields, ...(start ? { startAt: start } : {}) });

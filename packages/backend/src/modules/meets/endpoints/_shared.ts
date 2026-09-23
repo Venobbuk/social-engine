@@ -88,6 +88,9 @@ export const meetParamProps = {
 	lat: { type: 'number', nullable: true, minimum: -90, maximum: 90 },
 	lng: { type: 'number', nullable: true, minimum: -180, maximum: 180 },
 	venueRef: { type: 'string', nullable: true, maxLength: 64 },
+	// T3-MEET-FORM (L6 S3 bug 2): the venue the form picked. It was in the model (meet.venueId) and sent by the app, but not
+	// in this list, so pickMeetFields dropped it on create AND update: 0 of 165 UAT meets carried one. Checked to exist below.
+	venueId: { type: 'string', nullable: true, maxLength: 32 },
 	capacity: { type: 'integer', minimum: 1, maximum: 500 },
 	hostPlays: { type: 'boolean' },
 	visibility: { type: 'string', enum: ['public', 'private'] }, // MEET-V4: binary, as Reclub; a club meet = private + groups
