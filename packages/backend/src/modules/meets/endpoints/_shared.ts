@@ -81,7 +81,7 @@ export const meetParamProps = {
 	sport: { type: 'string', minLength: 1, maxLength: 32 },
 	format: { type: 'string', nullable: true, maxLength: 32 },
 	startAt: { type: 'string', minLength: 10, maxLength: 40 }, // ISO 8601; parsed and validated in code (ajv here has no date-time format)
-	durationMinutes: { type: 'integer', minimum: 15, maximum: 1440 },
+	durationMinutes: { type: 'integer', minimum: 15, maximum: 10080 },   // MEET-MULTIDAY-V1 (meets-fixes): Reclub's duration runs to days — up to 7
 	timezone: { type: 'string', maxLength: 64 },
 	venueName: { type: 'string', nullable: true, maxLength: 256 },
 	venueAddress: { type: 'string', nullable: true, maxLength: 512 },

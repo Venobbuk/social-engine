@@ -39,8 +39,10 @@ export const paramDef = {
 	properties: {
 		sport: { type: 'string', minLength: 1, maxLength: 32, default: 'pickleball' },
 		selfLevel: { type: 'number', nullable: true, minimum: 0, maximum: 10 },
-		gender: { type: 'string', nullable: true, enum: ['male', 'female', 'nonbinary'] },
-		ageGroup: { type: 'string', nullable: true, enum: ['junior', 'adult', 'senior'] },
+		// LEVEL-CLEAR-V1 (meets-fixes, 2026-09-23): a nullable + enum param REJECTS null (ajv — AGENT_RULES Misskey traps), so
+		// gender / age group could never be cleared once set. 'none' is the clear sentinel: it stores null.
+		gender: { type: 'string', nullable: true, enum: ['male', 'female', 'nonbinary', 'none'] },
+		ageGroup: { type: 'string', nullable: true, enum: ['junior', 'adult', 'senior', 'none'] },
 		// ONBOARDED-V1: true stamps onboardedAt (once; later trues keep the first stamp). false/absent leaves it alone.
 		onboarded: { type: 'boolean' },
 		// GB-CONSENT-V1: the member accepts this version of the GripBat terms + privacy policy. The server stamps the time and
@@ -63,8 +65,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			const patch: Record<string, unknown> = {};
 			if (ps.selfLevel !== undefined) patch.selfLevel = ps.selfLevel;
-			if (ps.gender !== undefined) patch.gender = ps.gender;
-			if (ps.ageGroup !== undefined) patch.ageGroup = ps.ageGroup;
+			if (ps.gender !== undefined) patch.gender = ps.gender === 'none' ? null : ps.gender;         // LEVEL-CLEAR-V1
+			if (ps.ageGroup !== undefined) patch.ageGroup = ps.ageGroup === 'none' ? null : ps.ageGroup; // LEVEL-CLEAR-V1
 			if (ps.unlinkDupr === true) patch.duprId = null;
 			if (ps.onboarded === true) {
 				const current = await this.meetLevelService.getLevel(me.id, ps.sport);

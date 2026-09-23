@@ -173,35 +173,61 @@ export class ClubScheduleService {
 	 * on. A meet that refuses a field (capacity below its confirmed players) keeps that one field and is reported.
 	 */
 	@bindThis
-	public async applyToFutureMeets(s: MiClubSchedule, patch: SchedulePatch, now = new Date()): Promise<{ updated: string[]; skipped: { id: string; reason: string }[] }> {
+	public async applyToFutureMeets(s: MiClubSchedule, patch: SchedulePatch, now = new Date(), dryRun = false): Promise<{ updated: string[]; skipped: { id: string; reason: string; name?: string; startAt?: string; partial?: boolean }[]; meets?: { id: string; name: string; startAt: string; newStartAt: string | null }[] }> {
 		const FIELDS = ['name', 'durationMinutes', 'capacity', 'venueId', 'venueName', 'venueAddress', 'lat', 'lng', 'hostPlays', 'visibility', 'autoApprove', 'allowPlusOne', 'feeType', 'feeAmount', 'feeCurrency', 'paymentInfo', 'gateType', 'levelBasis', 'minLevel', 'maxLevel', 'gender', 'ageGroup', 'submitMatches', 'notes', 'sendNotifications'] as const;
 		const base: Record<string, unknown> = {};
 		for (const k of FIELDS) if ((patch as Record<string, unknown>)[k] !== undefined) base[k] = (patch as Record<string, unknown>)[k];
 		const meets = await this.meetsRepository.find({ where: { seriesId: s.id, status: 'active', startAt: MoreThanOrEqual(now) }, order: { startAt: 'ASC' } });
-		const updated: string[] = []; const skipped: { id: string; reason: string }[] = [];
+		/* SCHEDULE-UPDATE-COUNT-V1 (meets-fixes, 2026-09-23, matrix A-meet-becomes-past.01): Reclub "Schedule and created meets
+		 * are updated, except…" — a meet the new start time would put in the past is left UNCHANGED (none of the new
+		 * settings) and listed; it used to take the other fields and be counted as updated as well as skipped. `partial`
+		 * marks a meet that was updated except one refused field (capacity). dryRun = the review list, nothing written. */
+		const updated: string[] = []; const skipped: { id: string; reason: string; name?: string; startAt?: string; partial?: boolean }[] = [];
+		const list: { id: string; name: string; startAt: string; newStartAt: string | null }[] = [];
 		const off = (TZ_OFFSET_MIN[s.timezone] ?? 480) * 60_000;
+		const tag = (m: MiMeet) => ({ name: m.name, startAt: new Date(m.startAt).toISOString() });
 		for (const m of meets) {
 			const mp: Record<string, unknown> = { ...base };
 			if (patch.startTime) {
 				const [hh, mm] = patch.startTime.split(':').map(Number);
 				const local = new Date(new Date(m.startAt).getTime() + off);
 				const at = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate()) + (hh * 60 + mm) * 60_000 - off);
-				if (at.getTime() > now.getTime()) mp.startAt = at; else skipped.push({ id: m.id, reason: 'time_in_past' });
+				if (at.getTime() <= now.getTime()) { skipped.push({ id: m.id, reason: 'time_in_past', ...tag(m) }); continue; }
+				mp.startAt = at;
 			}
 			if (!Object.keys(mp).length) continue;
+			if (dryRun) {
+				if (mp.capacity !== undefined && (mp.capacity as number) < m.confirmed) skipped.push({ id: m.id, reason: 'capacity_below_confirmed', partial: true, ...tag(m) });
+				updated.push(m.id); list.push({ id: m.id, ...tag(m), newStartAt: mp.startAt ? (mp.startAt as Date).toISOString() : null });
+				continue;
+			}
 			try {
 				await this.meetService.update(m, mp as Partial<MiMeet>);
 				updated.push(m.id);
 			} catch (e) {
-				if (mp.capacity === undefined) { skipped.push({ id: m.id, reason: e instanceof Error ? e.message : String(e) }); continue; }
+				if (mp.capacity === undefined) { skipped.push({ id: m.id, reason: e instanceof Error ? e.message : String(e), ...tag(m) }); continue; }
 				delete mp.capacity;
 				try {
 					if (Object.keys(mp).length) await this.meetService.update(m, mp as Partial<MiMeet>);
-					updated.push(m.id); skipped.push({ id: m.id, reason: 'capacity_below_confirmed' });
-				} catch (e2) { skipped.push({ id: m.id, reason: e2 instanceof Error ? e2.message : String(e2) }); }
+					updated.push(m.id); skipped.push({ id: m.id, reason: 'capacity_below_confirmed', partial: true, ...tag(m) });
+				} catch (e2) { skipped.push({ id: m.id, reason: e2 instanceof Error ? e2.message : String(e2), ...tag(m) }); }
 			}
 		}
-		return { updated, skipped };
+		return dryRun ? { updated, skipped, meets: list } : { updated, skipped };
+	}
+
+	/** SCHEDULE-REVIEW-V1 (meets-fixes, matrix A-confirm-schedule-meets.01): Reclub's CONFIRM SCHEDULE on an UPDATE — the
+	 *  meets the changed schedule would publish now (inside its lead window, not yet created), in start order. Nothing is
+	 *  written; `s` is the schedule WITH the patch applied in memory. */
+	@bindThis
+	public async dueToPublish(s: MiClubSchedule, now = new Date()): Promise<string[]> {
+		if (s.status !== 'active') return [];
+		const window = s.publishLeadHours * 3_600_000;
+		const due = this.occurrences(s, now, 4).filter(d => d.getTime() - now.getTime() <= window);
+		if (!due.length) return [];
+		const existing = await this.meetsRepository.find({ where: { seriesId: s.id, startAt: In(due) }, select: { startAt: true } });
+		const have = new Set(existing.map(m => new Date(m.startAt).getTime()));
+		return due.filter(d => !have.has(d.getTime())).map(d => d.toISOString());
 	}
 
 	/**

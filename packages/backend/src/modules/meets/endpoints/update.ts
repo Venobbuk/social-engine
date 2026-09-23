@@ -21,7 +21,7 @@ export const meta = {
 	prohibitMoved: true,
 	kind: 'write:meets',
 	res: { type: 'object', optional: false, nullable: false, ref: 'Meet' },
-	errors: { invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014' }, notClubMember: { message: 'Only the club admins — or its members, when the club allows it — can put meets in this club.', code: 'CLUB_NOT_MEMBER', id: 'c1b00000-0000-4000-8000-000000000011' }, ...meetErrors },   // CLUB-TIERS-V1: notClubMember
+	errors: { staleForm: { message: 'This meet changed since the form was opened. Reload the form and try again.', code: 'MEET_STALE_FORM', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000017', httpStatusCode: 409 }, invalidDate: { message: 'Invalid date.', code: 'MEET_INVALID_DATE', id: '6b1d0a3e-8f41-4c0b-9b7e-1a0000000014' }, notClubMember: { message: 'Only the club admins — or its members, when the club allows it — can put meets in this club.', code: 'CLUB_NOT_MEMBER', id: 'c1b00000-0000-4000-8000-000000000011' }, ...meetErrors },   // CLUB-TIERS-V1: notClubMember
 } as const;
 
 export const paramDef = {
@@ -29,6 +29,12 @@ export const paramDef = {
 	properties: {
 		meetId: { type: 'string', format: 'misskey:id' },
 		...meetParamProps,
+		// MEET-UPDATE-GUARD-V1 (meets-fixes, 2026-09-23): the edit form sends the visibility / type it LOADED. When the meet no
+		// longer has them, the form is stale or never loaded (measured: a cold-open Edit meet showed the create defaults) and
+		// the update is refused whole (409 MEET_STALE_FORM) — a private meet can never be flipped public by a form that
+		// did not read it. Optional, so every other caller (host tools, scripts) is unchanged.
+		expectVisibility: { type: 'string', enum: ['public', 'private'] },
+		expectType: { type: 'string', enum: ['listing', 'managed'] },
 	},
 	required: ['meetId'],
 } as const;
@@ -49,6 +55,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
 			try {
 				await this.meetService.assertHost(meet, me);
+				// MEET-UPDATE-GUARD-V1: a stale / unloaded form is refused before anything is written
+				if ((ps.expectVisibility !== undefined && ps.expectVisibility !== meet.visibility) || (ps.expectType !== undefined && ps.expectType !== meet.type)) throw new ApiError(meta.errors.staleForm);
 				const start = ps.startAt !== undefined ? parseIsoDate(ps.startAt) : undefined;
 				if (ps.startAt !== undefined && start == null) throw new ApiError(meta.errors.invalidDate);
 				// SEC-CASUAL-CONSENT-V1: a logged casual game keeps the date it was played — moving it (into the future,

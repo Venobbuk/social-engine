@@ -55,6 +55,21 @@ export const meta = {
 			id: '4362f8dc-731f-4ad8-a694-be5a88922a24',
 			httpStatusCode: 404,
 		},
+
+		// USER-GONE-V1 (GripBat meets-fixes, matrix E-player.02): Reclub tells "banned from our community" from "no longer
+		// available"; the stock door answered NO_SUCH_USER for both. EXTENDED: same 404, a distinct code per case.
+		userSuspended: {
+			message: 'This player has been banned from our community.',
+			code: 'USER_SUSPENDED',
+			id: '9b3f5a1e-6c2d-4e8f-a1b0-5d7c0e0a0001',
+			httpStatusCode: 404,
+		},
+		userDeleted: {
+			message: 'This player is no longer available.',
+			code: 'USER_DELETED',
+			id: '9b3f5a1e-6c2d-4e8f-a1b0-5d7c0e0a0002',
+			httpStatusCode: 404,
+		},
 	},
 } as const;
 
@@ -170,9 +185,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					user = await this.usersRepository.findOneBy(q);
 				}
 
-				if (user == null || (!isModerator && user.isSuspended)) {
+				if (user == null) {
 					throw new ApiError(meta.errors.noSuchUser);
 				}
+				if (!isModerator && user.isSuspended) throw new ApiError(meta.errors.userSuspended);   // USER-GONE-V1
+				if (!isModerator && user.isDeleted) throw new ApiError(meta.errors.userDeleted);       // USER-GONE-V1
 
 				if (this.serverSettings.ugcVisibilityForVisitor === 'local' && user.host != null && me == null) {
 					throw new ApiError(meta.errors.noSuchUser);
