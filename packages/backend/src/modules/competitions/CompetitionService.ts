@@ -172,6 +172,7 @@ export class CompetitionService {
 	public async create(host: MiUser, data: Partial<MiCompetition> & Pick<MiCompetition, 'name' | 'startAt'>): Promise<MiCompetition> {
 		this.assertTimeline(data);   // COMP-T3-V1
 		if (data.courtLabels) data.courtLabels = this.cleanLabels(data.courtLabels);
+		if (data.coverFileIds) data.coverFileIds = await this.checkCovers(host, data.coverFileIds, []);   // COMP-FIXES-A
 		const id = this.idService.gen();
 		let referenceCode = secureRndstr(8, { chars: L_CHARS });
 		while (await this.competitionsRepository.existsBy({ referenceCode })) referenceCode = secureRndstr(8, { chars: L_CHARS });
@@ -198,6 +199,7 @@ export class CompetitionService {
 		if (drawn && structural.length) throw this.err('draw_exists', 'The draw is generated — reset the competition before changing its format.');
 		// COMP-T3-V1: the timeline is checked when a date of it changes (a row saved before the rule still edits its notes)
 		if ((['registrationOpenAt', 'earlyBirdAt', 'registrationCloseAt', 'startAt'] as const).some((k) => data[k] !== undefined)) this.assertTimeline({ ...c, ...data });
+		if (data.coverFileIds) data.coverFileIds = await this.checkCovers(host, data.coverFileIds, c.coverFileIds ?? []);   // COMP-FIXES-A
 		if (data.courtLabels) data.courtLabels = this.cleanLabels(data.courtLabels);
 		const type = (data.participantType ?? c.participantType) as MiCompetition['participantType'];
 		const sizes = this.teamSizes(type, data.teamMinSize ?? c.teamMinSize, data.teamMaxSize ?? c.teamMaxSize);
@@ -280,7 +282,7 @@ export class CompetitionService {
 		const body = `${c.name} has been cancelled by the host.` + (msg ? ` ${msg.length > 140 ? msg.slice(0, 139) + '…' : msg}` : '');
 		const told = new Set<string>();
 		for (const e of await this.entries(c)) {
-			if (!['pending', 'confirmed', 'forfeit', 'freeAgent', 'spectator'].includes(e.status)) continue;
+			if (!['pending', 'confirmed', 'forfeit', 'freeAgent', 'spectator', 'invited', 'spectatorPending'].includes(e.status)) continue;   // COMP-FIXES-A: + invitees, requests
 			for (const uid of [...e.userIds, ...(e.invitedUserIds ?? [])]) if (uid !== host.id && !told.has(uid)) { told.add(uid); this.notify(uid, c, 'Competition cancelled', body); }
 		}
 		for (const uid of [...(c.adminIds ?? []), ...(c.refereeIds ?? [])]) if (uid !== host.id && !told.has(uid)) { told.add(uid); this.notify(uid, c, 'Competition cancelled', body); }
@@ -345,7 +347,8 @@ export class CompetitionService {
 	@bindThis
 	public async enter(c: MiCompetition, user: MiUser, data: { name?: string | null; partnerIds?: string[] | null; accessToken?: string | null }): Promise<MiCompetitionEntry> {
 		await this.assertVisible(c, user, data.accessToken);
-		if (!this.registrationOpen(c)) throw this.err('registration_closed', 'Registration is closed.');
+		const hostInvite = await this.hostInvitationOf(c, user.id);   // COMP-FIXES-A
+		if (!this.registrationOpen(c) && !(hostInvite && (c.status === 'open' || c.status === 'closed'))) throw this.err('registration_closed', 'Registration is closed.');
 		if ((await this.activeCount(c)) >= c.maxEntries) throw this.err('full', 'No spot left.');
 		const partners = Array.from(new Set((data.partnerIds ?? []).filter((x) => x !== user.id)));
 		const team = [user.id, ...partners];
@@ -353,9 +356,9 @@ export class CompetitionService {
 		await this.assertTeam(c, team);
 		await this.assertNoBlocks(team);
 		const name = (data.name ?? '').trim() || (user.name ?? user.username);
-		const status = c.autoApprove ? 'confirmed' : 'pending';
+		const status = c.autoApprove || hostInvite ? 'confirmed' : 'pending';
 		// a free agent who enters a team of their own is no longer looking for one (COMP-T3-V1: nor spectating — a player)
-		await this.entriesRepository.update({ competitionId: c.id, status: In(['freeAgent', 'spectator']), captainId: user.id }, { status: 'withdrawn', statusChangedAt: new Date() });
+		await this.entriesRepository.update({ competitionId: c.id, status: In(['freeAgent', 'spectator', 'invited', 'spectatorPending']), captainId: user.id }, { status: 'withdrawn', statusChangedAt: new Date() });
 		const entry = await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name, captainId: user.id, userIds: [user.id], invitedUserIds: partners, requestedUserIds: [], seed: null, pool: null, status, isPaid: false, notes: null, createdById: user.id, createdAt: new Date(), statusChangedAt: new Date() });
 		if (status === 'confirmed') await this.joinChat(c, [user.id]);
 		await this.closeAsksElsewhere(c, user.id, entry.id); // batch-1 review fix: the entrant no longer holds a place on another team
@@ -377,6 +380,7 @@ export class CompetitionService {
 		if (e.captainId && e.captainId !== user.id && e.userIds.length > 1) {
 			await this.entriesRepository.update(e.id, { userIds: e.userIds.filter((x) => x !== user.id) });
 			if (c.chatRoomId) await this.chatService.leaveRoom(user.id, c.chatRoomId).catch(() => undefined);
+			if (e.chatRoomId) await this.chatService.leaveRoom(user.id, e.chatRoomId).catch(() => undefined);   // COMP-FIXES-A
 			this.notify(e.captainId, c, 'Player left your team', `${user.name ?? user.username} left your team in ${c.name}; your team has a place open again.`);
 			return (await this.entriesRepository.findOneBy({ id: e.id }))!;
 		}
@@ -897,8 +901,8 @@ export class CompetitionService {
 	private async hasPendingRole(c: MiCompetition, userId: string): Promise<boolean> {
 		return await this.entriesRepository.createQueryBuilder('e')
 			.where('e."competitionId" = :cid', { cid: c.id })
-			.andWhere('(:uid = ANY(e."invitedUserIds") OR :uid = ANY(e."requestedUserIds") OR (e.status IN (\'freeAgent\', \'spectator\') AND :uid = ANY(e."userIds")))', { uid: userId })
-			.andWhere('e.status IN (:...st)', { st: ['pending', 'confirmed', 'freeAgent', 'spectator'] })   // COMP-T3-V1: a spectator
+			.andWhere('(:uid = ANY(e."invitedUserIds") OR :uid = ANY(e."requestedUserIds") OR (e.status IN (\'freeAgent\', \'spectator\', \'invited\', \'spectatorPending\') AND :uid = ANY(e."userIds")))', { uid: userId })
+			.andWhere('e.status IN (:...st)', { st: ['pending', 'confirmed', 'freeAgent', 'spectator', 'invited', 'spectatorPending'] })   // COMP-T3-V1: a spectator
 			.getExists();
 	}
 
@@ -991,6 +995,7 @@ export class CompetitionService {
 	@bindThis
 	public async respondInvitation(c: MiCompetition, me: MiUser, entryId: string, accept: boolean): Promise<MiCompetitionEntry> {
 		const e = await this.entriesRepository.findOneBy({ id: entryId, competitionId: c.id });
+		if (e && e.status === 'invited' && e.captainId === me.id) return await this.answerHostInvitation(c, me, e, accept);   // COMP-FIXES-A
 		if (!e || !(e.invitedUserIds ?? []).includes(me.id) || !['pending', 'confirmed'].includes(e.status)) throw this.err('no_such_invitation', 'No such invitation.');
 		if (!accept) {
 			await this.entriesRepository.update(e.id, { invitedUserIds: e.invitedUserIds.filter((x) => x !== me.id) });
@@ -1191,15 +1196,19 @@ export class CompetitionService {
 	@bindThis
 	public async spectate(c: MiCompetition, me: MiUser, data: { leave?: boolean | null; accessToken?: string | null }): Promise<MiCompetitionEntry | null> {
 		const mine = await this.mySpectator(c, me.id);
-		if (data.leave) { if (mine) await this.entriesRepository.update(mine.id, { status: 'withdrawn', statusChangedAt: new Date() }); return null; }
+		if (data.leave) { const req = mine ?? await this.mySpectatorRequest(c, me.id); if (req) await this.entriesRepository.update(req.id, { status: 'withdrawn', statusChangedAt: new Date() }); return null; }   // COMP-FIXES-A: Cancel request
 		await this.assertVisible(c, me, data.accessToken);
 		if (c.status === 'done' || c.status === 'cancelled' || c.status === 'draft') throw this.err('invalid_transition', `Cannot spectate a competition that is ${c.status}.`);
 		await this.assertMayJoin(c, [me.id]);
 		if (await this.myEntry(c, me.id)) throw this.err('already_entered', 'You already play in this competition.');
 		if (mine) return mine;
+		const asked = await this.mySpectatorRequest(c, me.id);   // COMP-FIXES-A
+		if (asked) return asked;
+		const st = this.spectatorStatusFor(c, me.id);
+		if (st === 'spectatorPending') this.notify(c.hostId, c, 'Spectator request', `${me.name ?? me.username} asked to spectate ${c.name}.`);
 		const fa = await this.entriesRepository.findOneBy({ competitionId: c.id, status: 'freeAgent', captainId: me.id });
-		if (fa) { await this.entriesRepository.update(fa.id, { status: 'spectator', statusChangedAt: new Date() }); return (await this.entriesRepository.findOneBy({ id: fa.id }))!; }
-		return await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name: me.name ?? me.username, captainId: me.id, userIds: [me.id], invitedUserIds: [], requestedUserIds: [], seed: null, pool: null, status: 'spectator', isPaid: false, notes: null, eligibility: {}, avatarFileId: null, createdById: me.id, createdAt: new Date(), statusChangedAt: new Date() });
+		if (fa) { await this.entriesRepository.update(fa.id, { status: st, statusChangedAt: new Date() }); return (await this.entriesRepository.findOneBy({ id: fa.id }))!; }
+		return await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name: me.name ?? me.username, captainId: me.id, userIds: [me.id], invitedUserIds: [], requestedUserIds: [], seed: null, pool: null, status: st, isPaid: false, notes: null, eligibility: {}, avatarFileId: null, createdById: me.id, createdAt: new Date(), statusChangedAt: new Date() });
 	}
 
 	/** Reclub Create / edit team: the captain (or a manager) renames the team, writes its description, sets its avatar
@@ -1290,6 +1299,322 @@ export class CompetitionService {
 				: await this.db.query(`SELECT f."followerId" AS "id" FROM "following" f JOIN "user" u ON u."id" = f."followerId" WHERE f."followeeId" = $1 AND u."host" IS NULL AND u."isSuspended" = false AND u."isDeleted" = false LIMIT 500`, [host.id]) as { id: string }[];
 			for (const r of rows) if (r.id !== host.id) this.notify(r.id, c, 'New competition', `${host.name ?? host.username} published a competition: ${c.name}.`);
 		} catch { /* a failed push never blocks the publish */ }
+	}
+
+	// ================================================================================ COMP-FIXES-A (2026-09-23)
+	// Registration, entries, teams, invitations, roles, chats — the PARTIAL / MISSING rows of the L6 scope sweep
+	// (gen/l6-scope/S1-competitions-a + S2-competitions-b). Reclub's function and anatomy are the floor (G15.0).
+
+	/** The host's invitation to this user (Reclub "You are invited to this competition."), or null. */
+	@bindThis
+	public async hostInvitationOf(c: MiCompetition, userId: string | null | undefined): Promise<MiCompetitionEntry | null> {
+		if (!userId) return null;
+		return await this.entriesRepository.findOneBy({ competitionId: c.id, status: 'invited', captainId: userId });
+	}
+
+	/** Reclub Invite box "Add club member / Add outsider": the host invites players to the COMPETITION (not to a team).
+	 *  One row per invitee holding no seat (the spectator row shape); the player answers Join as a player / Decline. The
+	 *  host may invite anyone (as the host adds anyone); an invitee who blocks the host, or already plays, is refused. */
+	@bindThis
+	public async hostInvite(c: MiCompetition, host: MiUser, userIds: string[]): Promise<MiCompetitionEntry[]> {
+		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
+		if (!['draft', 'open', 'closed'].includes(c.status)) throw this.err('started', 'The competition has started.');
+		const ids = Array.from(new Set(userIds.filter((x) => x && x !== host.id))).slice(0, 20);
+		if (!ids.length) throw this.err('no_such_entry', 'Pick a player to invite.');
+		if ((await this.usersRepository.countBy({ id: In(ids) })) !== ids.length) throw this.err('bad_team', 'A player does not exist.');
+		const out: MiCompetitionEntry[] = [];
+		for (const uid of ids) {
+			if (await this.myEntry(c, uid)) throw this.err('already_entered', 'A player already plays in this competition.');
+			await this.assertNoBlocks([host.id, uid]);
+			const had = await this.hostInvitationOf(c, uid);
+			if (had) { out.push(had); continue; }
+			const u = await this.usersRepository.findOneBy({ id: uid });
+			const row = await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name: u ? (u.name ?? u.username) : 'Player', captainId: uid, userIds: [uid], invitedUserIds: [], requestedUserIds: [], seed: null, pool: null, status: 'invited', isPaid: false, notes: null, createdById: host.id, createdAt: new Date(), statusChangedAt: new Date() });
+			this.notify(uid, c, 'Competition invitation', `${host.name ?? host.username} invited you to ${c.name}.`);
+			out.push(row);
+		}
+		return out;
+	}
+
+	/** The invitee answers the host: Decline closes the row; Join as a player enters a singles competition at once (a
+	 *  host invitation admits the player while registration is locked, until the start); a doubles / team player picks
+	 *  partners through competitions/enter, which closes the invitation. */
+	private async answerHostInvitation(c: MiCompetition, me: MiUser, e: MiCompetitionEntry, accept: boolean): Promise<MiCompetitionEntry> {
+		if (!accept) {
+			await this.entriesRepository.update(e.id, { status: 'withdrawn', statusChangedAt: new Date() });
+			if (e.createdById && e.createdById !== me.id) this.notify(e.createdById, c, 'Invitation declined', `${me.name ?? me.username} declined to play ${c.name}.`);
+			return (await this.entriesRepository.findOneBy({ id: e.id }))!;
+		}
+		if (c.participantType !== 'singles') throw this.err('bad_team', 'Pick your partners to join this competition.');
+		return await this.enter(c, me, {});
+	}
+
+	/** A spectator's row status: the host's "Auto approve" switch decides (Reclub Spectators pane); a manager is approved. */
+	private spectatorStatusFor(c: MiCompetition, userId: string): 'spectator' | 'spectatorPending' {
+		return c.spectatorAutoApprove === false && !this.isHost(c, userId) ? 'spectatorPending' : 'spectator';
+	}
+
+	@bindThis
+	public async mySpectatorRequest(c: MiCompetition, userId: string | null | undefined): Promise<MiCompetitionEntry | null> {
+		if (!userId) return null;
+		return await this.entriesRepository.findOneBy({ competitionId: c.id, status: 'spectatorPending', captainId: userId });
+	}
+
+	/** Reclub team detail "Create a new team will also remove you from {teamName}": the player leaves the entry they are
+	 *  in (a member leaves the team; a captain / single player withdraws it) and enters the new one. A refused entry puts
+	 *  the old row back exactly as it was. */
+	@bindThis
+	public async enterAsNewTeam(c: MiCompetition, user: MiUser, data: { name?: string | null; partnerIds?: string[] | null; accessToken?: string | null }): Promise<MiCompetitionEntry> {
+		const cur = await this.myEntry(c, user.id);
+		if (!cur) return await this.enter(c, user, data);
+		if (c.status === 'inProgress' || c.status === 'done') throw this.err('started', 'The competition has started.');
+		const before = { userIds: cur.userIds, captainId: cur.captainId, status: cur.status, invitedUserIds: cur.invitedUserIds, requestedUserIds: cur.requestedUserIds, statusChangedAt: cur.statusChangedAt };
+		const memberOnly = !!cur.captainId && cur.captainId !== user.id && cur.userIds.length > 1;
+		if (memberOnly) await this.entriesRepository.update(cur.id, { userIds: cur.userIds.filter((x) => x !== user.id) });
+		else await this.entriesRepository.update(cur.id, { status: 'withdrawn', invitedUserIds: [], requestedUserIds: [], statusChangedAt: new Date() });
+		let entry: MiCompetitionEntry;
+		try {
+			entry = await this.enter(c, user, data);
+		} catch (err) {
+			await this.entriesRepository.update(cur.id, before);
+			throw err;
+		}
+		if (memberOnly) { if (cur.captainId) this.notify(cur.captainId, c, 'Player left your team', `${user.name ?? user.username} left your team in ${c.name}; your team has a place open again.`); }
+		else {
+			this.notify(c.hostId, c, 'Entry withdrawn', `${cur.name} withdrew from ${c.name}.`);
+			for (const uid of cur.userIds) if (uid !== user.id) this.notify(uid, c, 'Team withdrawn', `${cur.name} was withdrawn from ${c.name} by its captain.`);
+		}
+		if (cur.chatRoomId) await this.chatService.leaveRoom(user.id, cur.chatRoomId).catch(() => undefined);
+		return entry;
+	}
+
+	/** Drive images of the actor (Misskey channel bannerId pattern: channels/update checks the file is the actor's). A
+	 *  file already on the competition stays (a co-admin may reorder the host's photos). Max 10; the first is primary. */
+	private async checkCovers(actor: MiUser, ids: string[], current: string[]): Promise<string[]> {
+		const list = Array.from(new Set(ids)).slice(0, 10);
+		for (const fid of list) {
+			if (current.includes(fid)) continue;
+			const f = await this.driveFilesRepository.findOneBy({ id: fid, userId: actor.id });
+			if (!f || !f.type.startsWith('image/')) throw this.err('no_such_file', 'No such image.');
+		}
+		return list;
+	}
+
+	/** The players' gender from the meets' own profile (meet_player_level) — the sort by gender and the reserved spot. */
+	@bindThis
+	public async gendersOf(c: MiCompetition, userIds: string[]): Promise<Map<string, string | null>> {
+		const ids = Array.from(new Set(userIds));
+		const rows = ids.length ? await this.meetPlayerLevelsRepository.find({ where: { userId: In(ids), sport: c.sport } }) : [];
+		return new Map(rows.map((l) => [l.userId, l.gender ?? null]));
+	}
+
+	/**
+	 * The host's participant sheet (Reclub module 5944 / 5942 / 5943) on competitions/entries/update:
+	 *   inviteUserIds (no entryId)  host → player invitation to the competition
+	 *   approveSpectator             Requested → Approved spectator
+	 *   reserved                     reserved spot gender / age group / skill level (Reclub Edit reserved info)
+	 *   positions                    { userId: position } (Reclub Assign positions; null clears one)
+	 *   captainUserId                role Captain (the member leads the team)
+	 *   moveUserId + moveTo          Move to Spectator / Move to Free Agent (before the start)
+	 *   assignCaptainId              Swap from community: a real player takes a TEAM reserved spot as its captain and
+	 *                                invites the rest (the spot is incomplete until they accept — withdrawn at the start
+	 *                                if still incomplete, as every team)
+	 * Returns the entry (or the first invitation).
+	 */
+	@bindThis
+	public async hostEntryA(c: MiCompetition, host: MiUser, entryId: string | null, a: { inviteUserIds?: string[] | null; approveSpectator?: boolean | null; reserved?: { gender?: string | null; ageGroup?: string | null; level?: number | null } | null; positions?: Record<string, string | null> | null; captainUserId?: string | null; moveUserId?: string | null; moveTo?: 'spectator' | 'freeAgent' | null; assignCaptainId?: string | null; name?: string | null }): Promise<MiCompetitionEntry | null> {
+		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
+		if (!entryId) {
+			const rows = await this.hostInvite(c, host, a.inviteUserIds ?? []);
+			return rows[0] ?? null;
+		}
+		const e = await this.entryOrFail(c, entryId);
+		const now = new Date();
+		if (a.approveSpectator) {
+			if (e.status !== 'spectatorPending') throw this.err('no_such_entry', 'No such spectator request.');
+			await this.entriesRepository.update(e.id, { status: 'spectator', statusChangedAt: now });
+			if (e.captainId) { await this.joinChat(c, [e.captainId]); this.notify(e.captainId, c, 'Spectator request approved', `You are a spectator of ${c.name}.`); }
+			return await this.entriesRepository.findOneBy({ id: e.id });
+		}
+		if (a.reserved !== undefined) {
+			if (e.captainId || e.userIds.length) throw this.err('no_such_entry', 'Only a reserved spot has reserved info.');
+			const r = a.reserved;
+			const clean = r == null ? null : {
+				gender: r.gender === 'male' || r.gender === 'female' ? r.gender : null,
+				ageGroup: r.ageGroup === 'junior' || r.ageGroup === 'adult' || r.ageGroup === 'senior' ? r.ageGroup : null,
+				level: typeof r.level === 'number' && r.level >= 0 && r.level <= 10 ? Math.round(r.level * 10) / 10 : null,
+			};
+			const upd: Partial<MiCompetitionEntry> = { reserved: clean };
+			if (a.name != null && a.name.trim()) upd.name = a.name.trim().slice(0, 128);
+			await this.entriesRepository.update(e.id, upd);
+			return await this.entriesRepository.findOneBy({ id: e.id });
+		}
+		if (a.positions) {
+			await this.setPositions(e, a.positions);
+			return await this.entriesRepository.findOneBy({ id: e.id });
+		}
+		if (a.captainUserId) {
+			await this.setCaptain(c, e, a.captainUserId, host);
+			return await this.entriesRepository.findOneBy({ id: e.id });
+		}
+		if (a.moveUserId && a.moveTo) {
+			if (!['draft', 'open', 'closed'].includes(c.status)) throw this.err('started', 'The competition has started.');
+			const uid = a.moveUserId;
+			if (!e.userIds.includes(uid) || !['pending', 'confirmed'].includes(e.status)) throw this.err('no_such_entry', 'That player is not in this entry.');
+			if (a.moveTo === 'freeAgent' && c.participantType === 'singles') throw this.err('bad_team', 'A singles competition has no free agents.');
+			if (await this.matchesRepository.existsBy({ competitionId: c.id })) throw this.err('draw_exists', 'The draw is generated — the roster is fixed.');
+			const u = await this.usersRepository.findOneBy({ id: uid });
+			const uname = u ? (u.name ?? u.username) : e.name;
+			if (e.userIds.length === 1) {
+				await this.entriesRepository.update(e.id, { status: a.moveTo, name: uname, invitedUserIds: [], requestedUserIds: [], seed: null, pool: null, statusChangedAt: now });
+			} else {
+				const rest = e.userIds.filter((x) => x !== uid);
+				await this.entriesRepository.update(e.id, { userIds: rest, captainId: e.captainId === uid ? rest[0] : e.captainId });
+				await this.entriesRepository.insertOne({ id: this.idService.gen(), competitionId: c.id, name: uname, captainId: uid, userIds: [uid], invitedUserIds: [], requestedUserIds: [], seed: null, pool: null, status: a.moveTo, isPaid: false, notes: null, createdById: host.id, createdAt: now, statusChangedAt: now });
+				if (e.chatRoomId) await this.chatService.leaveRoom(uid, e.chatRoomId).catch(() => undefined);
+			}
+			if (a.moveTo === 'freeAgent' && c.chatRoomId) await this.chatService.leaveRoom(uid, c.chatRoomId).catch(() => undefined);
+			if (uid !== host.id) this.notify(uid, c, a.moveTo === 'spectator' ? 'Moved to spectators' : 'Moved to free agents', a.moveTo === 'spectator' ? `The host moved you to the spectators of ${c.name}.` : `The host moved you to the free agents of ${c.name}; a captain or the host can place you in a team.`);
+			return await this.entriesRepository.findOneBy({ id: e.id });
+		}
+		if (a.assignCaptainId) {
+			const uid = a.assignCaptainId;
+			if (e.captainId || e.userIds.length || !['pending', 'confirmed'].includes(e.status)) throw this.err('no_such_entry', 'Only a reserved spot can be swapped.');
+			if (await this.matchesRepository.existsBy({ competitionId: c.id })) throw this.err('draw_exists', 'The draw is generated — the roster is fixed.');
+			if (!(await this.usersRepository.existsBy({ id: uid }))) throw this.err('bad_team', 'A player does not exist.');
+			if (await this.myEntry(c, uid)) throw this.err('already_entered', 'A player already plays in this competition.');
+			await this.assertNoBlocks([host.id, uid]);
+			const u = await this.usersRepository.findOneBy({ id: uid });
+			const name = e.name && e.name !== 'Reserved spot' ? e.name : (u ? (u.name ?? u.username) : e.name);
+			await this.entriesRepository.update(e.id, { captainId: uid, userIds: [uid], name, reserved: null });
+			// the invitation / free-agent / spectator rows of this player close (the seat() rule)
+			await this.entriesRepository.update({ competitionId: c.id, status: In(['freeAgent', 'spectator', 'spectatorPending', 'invited']), captainId: uid }, { status: 'withdrawn', statusChangedAt: now });
+			await this.closeAsksElsewhere(c, uid, e.id);
+			if (e.status === 'confirmed') await this.joinChat(c, [uid]);
+			if (uid !== host.id) this.notify(uid, c, 'You are entered', `${host.name ?? host.username} placed you in ${name} for ${c.name}.` + (c.teamMinSize > 1 ? ' Invite your partners to complete the team.' : ''));
+			return await this.entriesRepository.findOneBy({ id: e.id });
+		}
+		throw this.err('no_such_entry', 'Nothing to change.');
+	}
+
+	private async setPositions(e: MiCompetitionEntry, positions: Record<string, string | null>): Promise<void> {
+		const next = { ...(e.positions ?? {}) };
+		for (const [uid, p] of Object.entries(positions)) {
+			if (!e.userIds.includes(uid)) throw this.err('no_such_entry', 'That player is not in this entry.');
+			const v = (p ?? '').trim().slice(0, 24);
+			if (v) next[uid] = v; else delete next[uid];
+		}
+		await this.entriesRepository.update(e.id, { positions: next });
+	}
+
+	private async setCaptain(c: MiCompetition, e: MiCompetitionEntry, uid: string, actor: MiUser): Promise<void> {
+		if (!e.userIds.includes(uid)) throw this.err('no_such_entry', 'That player is not in this entry.');
+		if (e.captainId === uid) return;
+		await this.entriesRepository.update(e.id, { captainId: uid, userIds: [uid, ...e.userIds.filter((x) => x !== uid)] });
+		if (uid !== actor.id) this.notify(uid, c, 'You are the captain', `You are now the captain of ${e.name} in ${c.name}.`);
+	}
+
+	/**
+	 * The captain's own options (Reclub LeaveTeamOptions / team kebab) on competitions/entries/edit:
+	 *   reactivate    Reactivate team — a WITHDRAWN team comes back with its members (those who have not entered
+	 *                 elsewhere since), while registration is open (the host: until the start); autoApprove decides
+	 *   deleteTeam    Delete team and leave competition — the team is removed (before its first match); members,
+	 *                 invitees and players who asked to join are told
+	 *   captainUserId hand the captaincy to a member
+	 *   positions     Assign positions
+	 * The host may do each of them too. Returns the entry (null after a delete).
+	 */
+	@bindThis
+	public async captainAction(c: MiCompetition, actor: MiUser, entryId: string, a: { reactivate?: boolean | null; deleteTeam?: boolean | null; captainUserId?: string | null; positions?: Record<string, string | null> | null }): Promise<MiCompetitionEntry | null> {
+		const e = await this.entryOrFail(c, entryId);
+		const host = this.isHost(c, actor.id);
+		if (e.captainId !== actor.id && !host) throw this.err('forbidden', 'Only the captain can do this.');
+		const now = new Date();
+		if (a.reactivate) {
+			if (e.status !== 'withdrawn' || (!e.captainId && !e.userIds.length)) throw this.err('invalid_transition', 'Only a withdrawn team can be reactivated.');
+			if (host ? !['open', 'closed'].includes(c.status) : !this.registrationOpen(c)) throw this.err('registration_closed', 'Registration is closed.');
+			if ((await this.activeCount(c)) >= c.maxEntries) throw this.err('full', 'No spot left.');
+			const members: string[] = [];
+			for (const uid of e.userIds) if (!(await this.myEntry(c, uid))) members.push(uid);
+			if (!members.length || (e.captainId && !members.includes(e.captainId))) throw this.err('already_entered', 'The captain already plays in another team of this competition.');
+			await this.assertMayJoin(c, members);
+			await this.assertNoBlocks(members);
+			const status = host || c.autoApprove ? 'confirmed' : 'pending';
+			await this.entriesRepository.update(e.id, { status, userIds: members, invitedUserIds: [], requestedUserIds: [], statusChangedAt: now });
+			await this.entriesRepository.update({ competitionId: c.id, status: In(['freeAgent', 'spectator', 'spectatorPending', 'invited']), captainId: In(members) }, { status: 'withdrawn', statusChangedAt: now });
+			if (status === 'confirmed') await this.joinChat(c, members);
+			if (!host) this.notify(c.hostId, c, status === 'confirmed' ? 'New entry' : 'Entry request', status === 'confirmed' ? `${e.name} entered ${c.name}.` : `${e.name} requested to enter ${c.name}.`);
+			for (const uid of members) if (uid !== actor.id) this.notify(uid, c, 'Team reactivated', `${e.name} is back in ${c.name}.`);
+			return await this.entriesRepository.findOneBy({ id: e.id });
+		}
+		if (a.deleteTeam) {
+			if (c.status === 'inProgress' || c.status === 'done') throw this.err('started', 'The competition has started — ask the host to forfeit your team.');
+			const played = await this.matchesRepository.createQueryBuilder('m').where('m."competitionId" = :cid', { cid: c.id }).andWhere('(m."entry1Id" = :eid OR m."entry2Id" = :eid)', { eid: e.id }).getExists();
+			if (played) throw this.err('draw_exists', 'The draw is generated — the host must redraw first.');
+			await this.entriesRepository.delete(e.id);
+			for (const uid of [...e.userIds, ...(e.invitedUserIds ?? []), ...(e.requestedUserIds ?? [])]) if (uid !== actor.id) this.notify(uid, c, 'Team deleted', `${e.name} was deleted from ${c.name}.`);
+			if (!host) this.notify(c.hostId, c, 'Entry withdrawn', `${e.name} withdrew from ${c.name}.`);
+			if (e.chatRoomId) { const room = await this.chatService.findRoomById(e.chatRoomId).catch(() => null); if (room) await this.chatService.deleteRoom(room).catch(() => undefined); }
+			for (const uid of e.userIds) if (c.chatRoomId) await this.chatService.leaveRoom(uid, c.chatRoomId).catch(() => undefined);
+			return null;
+		}
+		if (a.captainUserId) { await this.setCaptain(c, e, a.captainUserId, actor); return await this.entriesRepository.findOneBy({ id: e.id }); }
+		if (a.positions) { await this.setPositions(e, a.positions); return await this.entriesRepository.findOneBy({ id: e.id }); }
+		throw this.err('no_such_entry', 'Nothing to change.');
+	}
+
+	/** Which rooms this user may open (Reclub Discussion: Forum + General / Team / Captain / Staff chats). */
+	@bindThis
+	public async chatKindsOf(c: MiCompetition, userId: string | null | undefined, myEntry?: MiCompetitionEntry | null): Promise<string[]> {
+		if (!userId) return [];
+		const host = this.isHost(c, userId), ref = this.isReferee(c, userId);
+		const entry = myEntry === undefined ? await this.myEntry(c, userId) : myEntry;
+		const out: string[] = [];
+		if (c.status !== 'draft' || host) out.push('forum');
+		if (host || ref || (entry && entry.status !== 'pending') || await this.mySpectator(c, userId)) out.push('general');
+		if (entry && entry.captainId && c.participantType !== 'singles') out.push('team');
+		if (host || (entry && entry.captainId === userId && c.participantType !== 'singles')) out.push('captain');
+		if (host || ref) out.push('staff');
+		return out;
+	}
+
+	/** A Misskey chat room per audience (the competitions/chat door, CompetitionService.chatRoom's pattern): minted on
+	 *  first open by its owner (the host), the opener joins; the door checks the audience every time. */
+	@bindThis
+	public async chatRoomOf(c: MiCompetition, user: MiUser, kind: 'general' | 'team' | 'captain' | 'staff' | 'forum', opts: { entryId?: string | null; accessToken?: string | null } = {}): Promise<{ roomId: string; kind: string }> {
+		if (kind === 'general') return { ...(await this.chatRoom(c, user)), kind };
+		const host = this.isHost(c, user.id);
+		const owner = await this.usersRepository.findOneByOrFail({ id: c.hostId });
+		if (kind === 'team') {
+			const e = opts.entryId ? await this.entryOrFail(c, opts.entryId) : await this.myEntry(c, user.id);
+			if (!e || !e.captainId || !(e.userIds.includes(user.id) || host) || !['pending', 'confirmed', 'forfeit'].includes(e.status)) throw this.err('forbidden', 'Only the team can open its chat.');
+			let room = e.chatRoomId ? await this.chatService.findRoomById(e.chatRoomId) : null;
+			if (!room) {
+				room = await this.chatService.createRoom(owner, { name: `${e.name} · ${c.name}`.slice(0, 256), description: 'Team chat' });
+				await this.entriesRepository.update(e.id, { chatRoomId: room.id });
+			}
+			await this.joinChat({ ...c, chatRoomId: room.id }, [user.id]);
+			return { roomId: room.id, kind };
+		}
+		if (kind === 'staff' && !host && !this.isReferee(c, user.id)) throw this.err('forbidden', 'Only the staff can open the staff chat.');
+		if (kind === 'captain' && !host) {
+			const e = await this.myEntry(c, user.id);
+			if (!e || e.captainId !== user.id) throw this.err('forbidden', 'Only the captains can open the captain chat.');
+		}
+		if (kind === 'forum') {
+			await this.assertVisible(c, user, opts.accessToken);
+			if (c.status === 'draft' && !host) throw this.err('forbidden', 'The competition is not published yet.');
+		}
+		const rooms = { ...(c.chatRooms ?? {}) } as Record<string, string | undefined>;
+		let room = rooms[kind] ? await this.chatService.findRoomById(rooms[kind]!) : null;
+		if (!room) {
+			const label = kind === 'staff' ? 'Staff chat' : kind === 'captain' ? 'Captain chat' : 'Forum';
+			room = await this.chatService.createRoom(owner, { name: `${c.name} · ${label}`.slice(0, 256), description: 'Competition ' + label.toLowerCase() });
+			const fresh = await this.get(c.id);
+			await this.competitionsRepository.update(c.id, { chatRooms: { ...(fresh.chatRooms ?? {}), [kind]: room.id } });
+		}
+		await this.joinChat({ ...c, chatRoomId: room.id }, [user.id]);
+		return { roomId: room.id, kind };
 	}
 
 	private notify(userId: string, c: MiCompetition, header: string, body: string): void {

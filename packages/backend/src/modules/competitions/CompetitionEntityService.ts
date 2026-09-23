@@ -65,6 +65,7 @@ export class CompetitionEntityService {
 			avatarUrl: await this.avatarUrlOf(e.avatarFileId),
 			ineligibleUserIds: el ? el.ineligibleUserIds : [], eligibilityReasons: el && why ? el.reasons : {}, eligibilityOverrides: why ? (e.eligibility ?? {}) : {},
 			spectator: e.status === 'spectator',
+			reserved: e.reserved ?? null, positions: e.positions ?? {},   // COMP-FIXES-A
 			id: e.id, competitionId: e.competitionId, name: e.name, captainId: e.captainId, userIds: e.userIds,
 			users: await this.usersLite(e.userIds, me),
 			invitedUserIds: invited, invitedUsers: await this.usersLite(invited, me),
@@ -82,7 +83,10 @@ export class CompetitionEntityService {
 	public async packEntries(es: MiCompetitionEntry[], me?: { id: MiUser['id'] } | null, comp?: MiCompetition | null): Promise<Record<string, unknown>[]> {
 		const c = comp ?? (es[0] ? await this.competitionService.get(es[0].competitionId).catch(() => null) : null);
 		const elig = c ? await this.competitionService.eligibilityOf(c, es) : new Map();   // COMP-T3-V1: one levels read for the list
-		return await Promise.all(es.map((e) => this.packEntry(e, me, c, elig.get(e.id) ?? { ineligibleUserIds: [], reasons: {} })));
+		// COMP-FIXES-A: invitations / spectator requests for the host, Hide roster, the gender mix
+		const vis = c ? this.visibleEntriesA(c, es, me) : es;
+		const packed = await Promise.all(vis.map((e) => this.packEntry(e, me, c, elig.get(e.id) ?? { ineligibleUserIds: [], reasons: {} })));
+		return c ? await this.postPackA(c, vis, packed, me) : packed;
 	}
 
 	@bindThis
@@ -168,12 +172,59 @@ export class CompetitionEntityService {
 			membersOnly: c.membersOnly ?? false, mayJoinMembersOnly: await this.competitionService.passesMembersOnly(c, me?.id),
 			stageNames: c.stageNames ?? {}, matchRules: c.matchRules ?? null,
 			spectatorsCount: n('spectator'), mySpectator: me ? await this.competitionService.mySpectator(c, me.id).then((s) => (s ? { id: s.id } : null)) : null,
+			...(await this.packFixesA(c, me, isHost, myEntry)),   // COMP-FIXES-A
 			drawVisible: isHost || c.revealDraw || c.status === 'inProgress' || c.status === 'done',
 			isPast: c.status === 'done' || c.status === 'cancelled',
 			startedAt: c.startedAt?.toISOString() ?? null, endedAt: c.endedAt?.toISOString() ?? null, cancelledAt: c.cancelledAt?.toISOString() ?? null,
 			createdAt: this.idService.parse(c.id).date.toISOString(), updatedAt: c.updatedAt?.toISOString() ?? null,
 		};
 		return base;
+	}
+
+	// ================================================================================ COMP-FIXES-A (2026-09-23)
+	/** Rows a reader may see in the entries list: a host invitation or a spectator request is the host's business (and
+	 *  the invitee's own). Everything else is listed as before. */
+	private visibleEntriesA(c: MiCompetition, es: MiCompetitionEntry[], me?: { id: MiUser['id'] } | null): MiCompetitionEntry[] {
+		const manager = !!me && this.competitionService.isHost(c, me.id);
+		return es.filter((e) => (e.status !== 'invited' && e.status !== 'spectatorPending') || manager || (!!me && e.captainId === me.id));
+	}
+
+	/** Reclub "Hide roster" (a saved setting): a player sees each team's name and size, not its members — the managers,
+	 *  the referees and the team's own members still see them. + the team's gender mix for the Reclub sort by gender. */
+	private async postPackA(c: MiCompetition, es: MiCompetitionEntry[], packed: Record<string, unknown>[], me?: { id: MiUser['id'] } | null): Promise<Record<string, unknown>[]> {
+		const insider = !!me && (this.competitionService.isHost(c, me.id) || this.competitionService.isReferee(c, me.id));
+		const genders = await this.competitionService.gendersOf(c, es.flatMap((e) => e.userIds));
+		return packed.map((p, i) => {
+			const e = es[i];
+			const gs = e.userIds.map((u) => genders.get(u) ?? null);
+			const genderMix = !gs.length || gs.some((g) => g == null) ? null : gs.every((g) => g === 'female') ? 'female' : gs.every((g) => g === 'male') ? 'male' : 'mixed';
+			const out: Record<string, unknown> = { ...p, genderMix, rosterCount: e.userIds.length };
+			if (c.hideRoster && !insider && !(me && e.userIds.includes(me.id)) && c.participantType !== 'singles') {
+				Object.assign(out, { users: [], userIds: [], invitedUsers: [], invitedUserIds: [], requestedUsers: [], requestedUserIds: [], positions: {}, rosterHidden: true, ineligibleUserIds: [] });
+			}
+			return out;
+		});
+	}
+
+	/** The competition's COMP-FIXES-A fields: covers, saved settings, the reader's rooms / invitation / spectator request. */
+	private async packFixesA(c: MiCompetition, me: MiUser | null | undefined, isHost: boolean, myEntry: MiCompetitionEntry | null): Promise<Record<string, unknown>> {
+		const ids = c.coverFileIds ?? [];
+		const files = ids.length ? await this.driveFilesRepository.findBy({ id: In(ids) }) : [];
+		const byId = new Map(files.map((f) => [f.id, f]));
+		const covers = ids.map((fid) => byId.get(fid)).filter((f): f is NonNullable<typeof f> => !!f).map((f) => ({ id: f.id, url: this.driveFileEntityService.getPublicUrl(f), thumbnailUrl: this.driveFileEntityService.getThumbnailUrl(f) }));
+		const invitation = me ? await this.competitionService.hostInvitationOf(c, me.id) : null;
+		const request = me ? await this.competitionService.mySpectatorRequest(c, me.id) : null;
+		const counts = isHost ? await this.entriesRepository.createQueryBuilder('e').select('e.status', 'status').addSelect('COUNT(*)', 'n').where('e."competitionId" = :cid', { cid: c.id }).andWhere('e.status IN (:...st)', { st: ['invited', 'spectatorPending'] }).groupBy('e.status').getRawMany<{ status: string; n: string }>() : [];
+		const n = (s: string) => Number(counts.find((r) => r.status === s)?.n ?? 0);
+		return {
+			fixesA: 1,
+			hideRoster: c.hideRoster ?? false, spectatorAutoApprove: c.spectatorAutoApprove ?? true,
+			covers, coverUrl: covers[0] ? covers[0].url : null,
+			chatKinds: me ? await this.competitionService.chatKindsOf(c, me.id, myEntry) : [],
+			myHostInvitation: invitation ? { id: invitation.id, invitedById: invitation.createdById, createdAt: invitation.createdAt.toISOString() } : null,
+			mySpectatorRequest: request ? { id: request.id } : null,
+			invitedCount: n('invited'), spectatorRequestsCount: n('spectatorPending'),
+		};
 	}
 
 	@bindThis

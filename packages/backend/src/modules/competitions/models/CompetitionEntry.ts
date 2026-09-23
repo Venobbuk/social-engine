@@ -17,7 +17,9 @@ import { MiCompetition } from './Competition.js';
 // COMP-T3-V1: 'spectator' = Reclub "Join as a spectator" — the meet's spectator (MeetParticipant.ts:12, a roster row holding
 // no seat) on the competition's own row shape: one user, never counted, never drawn, hears the announcements, reads the
 // general chat, sees a private competition. Free agents without a team become spectators at the start (Reclub copy).
-export const competitionEntryStatuses = ['pending', 'confirmed', 'withdrawn', 'forfeit', 'freeAgent', 'spectator'] as const;
+// COMP-FIXES-A: 'invited' = a host invitation to the competition (one user, no seat, answered Join as a player / Decline);
+// 'spectatorPending' = a spectator request waiting for the host (Spectators Auto approve off).
+export const competitionEntryStatuses = ['pending', 'confirmed', 'withdrawn', 'forfeit', 'freeAgent', 'spectator', 'invited', 'spectatorPending'] as const;
 
 @Entity('competition_entry')
 export class MiCompetitionEntry {
@@ -73,6 +75,16 @@ export class MiCompetitionEntry {
 
 	@Column({ ...id(), nullable: true, comment: 'Team avatar: a drive file of the captain / host (Reclub Add Team Avatar).' })
 	public avatarFileId: string | null;
+
+	// COMP-FIXES-A: reserved spot info (Reclub Edit reserved info), positions (Reclub Assign positions), the team chat
+	@Column('jsonb', { nullable: true, comment: 'Reserved spot { gender, ageGroup, level } (null = none).' })
+	public reserved: { gender?: string | null; ageGroup?: string | null; level?: number | null } | null;
+
+	@Column('jsonb', { default: {}, comment: 'Positions { userId: position }.' })
+	public positions: Record<string, string>;
+
+	@Column({ ...id(), nullable: true, comment: 'Team chat room (Reclub Team chat).' })
+	public chatRoomId: string | null;
 
 	@Column({ ...id(), nullable: true, comment: 'Who added the entry (self sign-up = the captain; host add = the host).' })
 	public createdById: MiUser['id'] | null;

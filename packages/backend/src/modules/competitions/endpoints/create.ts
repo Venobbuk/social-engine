@@ -21,6 +21,9 @@ export const meta = {
 	prohibitMoved: true,
 	kind: 'write:meets',
 	limit: { duration: ms('1hour'), max: 30 },
+	// COMP-FIXES-A (Reclub canCreateCompetition / meets:competition_create_restricted): the native role-policy gate, as
+	// channels/create has canCreateChannel. Default true (anyone creates); a moderator restricts an account with a role.
+	requiredRolePolicy: 'canCreateCompetition',
 	res: anyObject,
 	errors: { noSuchChannel: { message: 'No such channel.', code: 'NO_SUCH_CHANNEL', id: '7c0a0000-0000-4000-8000-000000000020' }, ...competitionErrors },
 } as const;

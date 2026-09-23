@@ -127,6 +127,10 @@ export const competitionParamProps = {
 	membersOnly: { type: 'boolean' },
 	stageNames: { type: 'object', properties: { regular: { type: 'string', maxLength: 32 }, playoff: { type: 'string', maxLength: 32 }, consolation: { type: 'string', maxLength: 32 } } },
 	matchRules: { type: 'string', nullable: true, maxLength: 2048 },
+	// COMP-FIXES-A: saved Registration settings + host cover photos (drive files; the first is primary)
+	hideRoster: { type: 'boolean' },
+	spectatorAutoApprove: { type: 'boolean' },
+	coverFileIds: { type: 'array', maxItems: 10, items: { type: 'string', format: 'misskey:id' } },
 } as const;
 
 const DATE_KEYS = ['registrationOpenAt', 'registrationCloseAt', 'earlyBirdAt', 'startAt'] as const;

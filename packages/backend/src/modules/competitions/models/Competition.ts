@@ -246,6 +246,19 @@ export class MiCompetition {
 	@Column('varchar', { length: 2048, nullable: true, comment: 'Reclub MATCH RULES free text, shown on every match.' })
 	public matchRules: string | null;
 
+	// COMP-FIXES-A (2026-09-23): saved Registration settings, host cover photos, the extra chat rooms
+	@Column('boolean', { default: false, comment: 'Reclub Hide roster: players see team names and sizes, not members.' })
+	public hideRoster: boolean;
+
+	@Column('boolean', { default: true, comment: 'Reclub Spectators Auto approve (off = Requested / Approved).' })
+	public spectatorAutoApprove: boolean;
+
+	@Column('varchar', { array: true, length: 32, default: '{}', comment: 'Cover photos: drive files, the first is primary (channel bannerId pattern).' })
+	public coverFileIds: string[];
+
+	@Column('jsonb', { default: {}, comment: 'Extra chat rooms { captain?, staff?, forum? } (team rooms live on the entry).' })
+	public chatRooms: { captain?: string; staff?: string; forum?: string };
+
 	@Column('jsonb', { nullable: true, comment: 'brackets-manager export (participant/stage/group/round/match) for the knockout stage(s).' })
 	public bracketData: BracketDb | null;
 

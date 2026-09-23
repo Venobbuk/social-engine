@@ -36,6 +36,16 @@ export const paramDef = {
 		// COMP-T3-V1 (Reclub participant settings "Eligible"): the host's call on one member; eligible null = the automatic rule
 		eligibleUserId: { type: 'string', format: 'misskey:id', nullable: true },
 		eligible: { type: 'boolean', nullable: true },
+		// COMP-FIXES-A: the participant sheet — host invitations, spectator approval, reserved info, positions, captain,
+		// move to spectator / free agent, swap a team reserved spot for its captain
+		inviteUserIds: { type: 'array', maxItems: 20, items: { type: 'string', format: 'misskey:id' } },
+		approveSpectator: { type: 'boolean' },
+		reserved: { type: 'object', nullable: true, properties: { gender: { type: 'string', nullable: true, maxLength: 8 }, ageGroup: { type: 'string', nullable: true, maxLength: 8 }, level: { type: 'number', nullable: true, minimum: 0, maximum: 10 } } },
+		positions: { type: 'object', additionalProperties: { type: 'string', nullable: true, maxLength: 24 } },
+		captainUserId: { type: 'string', format: 'misskey:id' },
+		moveUserId: { type: 'string', format: 'misskey:id' },
+		moveTo: { type: 'string', enum: ['spectator', 'freeAgent'] },
+		assignCaptainId: { type: 'string', format: 'misskey:id' },
 	},
 	required: ['competitionId'],
 } as const;
@@ -46,6 +56,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				const c = await this.competitionService.get(ps.competitionId);
+				if ((!ps.entryId && ps.inviteUserIds) || ps.approveSpectator || ps.reserved !== undefined || ps.positions || ps.captainUserId || (ps.moveUserId && ps.moveTo) || ps.assignCaptainId) {   // COMP-FIXES-A
+					const x = await this.competitionService.hostEntryA(c, me, ps.entryId ?? null, { inviteUserIds: ps.inviteUserIds, approveSpectator: ps.approveSpectator, reserved: ps.reserved as { gender?: string | null; ageGroup?: string | null; level?: number | null } | null | undefined, positions: ps.positions as Record<string, string | null> | undefined, captainUserId: ps.captainUserId, moveUserId: ps.moveUserId, moveTo: ps.moveTo, assignCaptainId: ps.assignCaptainId, name: ps.name });
+					return x ? await this.competitionEntityService.packEntry(x, me, c) : null;
+				}
 				if (!ps.entryId) {
 					const e = await this.competitionService.hostAddEntry(c, me, { name: ps.name, userIds: ps.userIds, seed: ps.seed });
 					return await this.competitionEntityService.packEntry(e, me);

@@ -27,6 +27,7 @@ export const paramDef = {
 		name: { type: 'string', nullable: true, maxLength: 128 },
 		partnerIds: { type: 'array', nullable: true, maxItems: 19, items: { type: 'string', format: 'misskey:id' } },
 		accessToken: { type: 'string', nullable: true, maxLength: 32 },
+		leaveCurrent: { type: 'boolean' },   // COMP-FIXES-A: Reclub "Create a new team will also remove you from {teamName}"
 	},
 	required: ['competitionId'],
 } as const;
@@ -37,7 +38,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				const c = await this.competitionService.get(ps.competitionId);
-				await this.competitionService.enter(c, me, { name: ps.name, partnerIds: ps.partnerIds, accessToken: ps.accessToken });
+				if (ps.leaveCurrent) await this.competitionService.enterAsNewTeam(c, me, { name: ps.name, partnerIds: ps.partnerIds, accessToken: ps.accessToken });
+				else await this.competitionService.enter(c, me, { name: ps.name, partnerIds: ps.partnerIds, accessToken: ps.accessToken });
 				return await this.competitionEntityService.pack(await this.competitionService.get(c.id), me, { detailed: true });
 			} catch (e) {
 				return toApiError(e);

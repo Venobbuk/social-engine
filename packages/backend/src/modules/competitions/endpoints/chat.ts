@@ -13,13 +13,19 @@ export const meta = {
 	tags: ['competitions'],
 	requireCredential: true,
 	kind: 'write:chat',
-	res: { type: 'object', optional: false, nullable: false, properties: { roomId: { type: 'string', optional: false, nullable: false } } },
+	res: { type: 'object', optional: false, nullable: false, properties: { roomId: { type: 'string', optional: false, nullable: false }, kind: { type: 'string', optional: true, nullable: false } } },
 	errors: { ...competitionErrors },
 } as const;
 
 export const paramDef = {
 	type: 'object',
-	properties: { competitionId: { type: 'string', format: 'misskey:id' } },
+	properties: {
+		competitionId: { type: 'string', format: 'misskey:id' },
+		// COMP-FIXES-A: Reclub Discussion — Forum + General / Team / Captain / Staff chats (absent = general)
+		kind: { type: 'string', enum: ['general', 'team', 'captain', 'staff', 'forum'] },
+		entryId: { type: 'string', format: 'misskey:id' },
+		accessToken: { type: 'string', nullable: true, maxLength: 32 },
+	},
 	required: ['competitionId'],
 } as const;
 
@@ -29,6 +35,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				const c = await this.competitionService.get(ps.competitionId);
+				if (ps.kind && ps.kind !== 'general') return await this.competitionService.chatRoomOf(c, me, ps.kind, { entryId: ps.entryId, accessToken: ps.accessToken });
 				return await this.competitionService.chatRoom(c, me);
 			} catch (e) {
 				return toApiError(e);
