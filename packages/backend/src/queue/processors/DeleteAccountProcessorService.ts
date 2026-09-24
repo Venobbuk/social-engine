@@ -8,6 +8,8 @@ import { MoreThan } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { DriveFilesRepository, NotesRepository, PagesRepository, UserProfilesRepository, UsersRepository } from '@/models/_.js';
 import type Logger from '@/logger.js';
+import type { DataSource } from 'typeorm';
+import { tombstoneUser } from '@/modules/account/tombstone.js';   // USER-TOMBSTONE-V1 (fix-S6, E-player.02)
 import { DriveService } from '@/core/DriveService.js';
 import type { MiDriveFile } from '@/models/DriveFile.js';
 import type { MiNote } from '@/models/Note.js';
@@ -38,6 +40,9 @@ export class DeleteAccountProcessorService {
 
 		@Inject(DI.pagesRepository)
 		private pagesRepository: PagesRepository,
+
+		@Inject(DI.db)
+		private db: DataSource,
 
 		private driveService: DriveService,
 		private pageService: PageService,
@@ -152,6 +157,8 @@ export class DeleteAccountProcessorService {
 		if (job.data.soft) {
 		// nop
 		} else {
+			// USER-TOMBSTONE-V1: a LOCAL account keeps one fact — "deleted" — so users/show says so after the row is gone
+			if (user.host == null) await tombstoneUser(this.db, { id: user.id, username: user.username });
 			await this.usersRepository.delete(job.data.user.id);
 		}
 

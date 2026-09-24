@@ -19,6 +19,7 @@ import type { FindOptionsWhere } from 'typeorm';
 import type { DataSource } from 'typeorm';
 import { deletionOf } from '@/modules/account/deletion.js';   // USER-GONE-V2 (mop-up, E-player.02)
 import { lastActiveIfAllowed } from '@/server/api/endpoints/i/gb-prefs.js';   // FIX-S8 LAST-ACTIVE-OPTIN-V1
+import { isTombstoned } from '@/modules/account/tombstone.js';   // USER-TOMBSTONE-V1 (fix-S6, E-player.02)
 
 export const meta = {
 	tags: ['users'],
@@ -192,6 +193,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 
 				if (user == null) {
+					// USER-TOMBSTONE-V1 (fix-S6): a LOCAL account Misskey hard-deleted (at once, or after its grace) is "no longer
+					// available", not "no such user" — modules/account/tombstone.ts keeps that one fact
+					if (typeof ps.host !== 'string' && await isTombstoned(this.db, 'userId' in ps ? { userId: ps.userId } : { username: ps.username })) throw new ApiError(meta.errors.userDeleted);
 					throw new ApiError(meta.errors.noSuchUser);
 				}
 				if (!isModerator && user.isSuspended) throw new ApiError(meta.errors.userSuspended);   // USER-GONE-V1
