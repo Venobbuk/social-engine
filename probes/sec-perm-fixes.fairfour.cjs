@@ -1,67 +1,63 @@
-// sec-perm-fixes.fairfour.cjs — choose the four players hole 5 is measured with, and PREDICT what each class must
-// read once the hole is closed. Written to the fixture file, so the before and after phases ask the same question.
+// sec-perm-fixes.fairfour.cjs — choose the four players hole 5 is measured with, and PREDICT what EACH caller class must
+// read. Written to the fixture file, so the before and after phases ask the same question.
 //
-// WHY. stats/gb-fair clamps teamAWinPct to [0.03, 0.97]. A first attempt used four players whose ratings were far
-// enough apart that every split clamped, so the anonymous caller and the pair member both read "3%" and the check
-// could not tell a closed hole from an open one. An inconclusive check that prints a number is worse than no check.
-// So the four are picked for a split that lands where a chemistry term of ±0.3 MOVES the number, and the three
-// readings are computed from the engine's own arithmetic (GbRating.ts: expectedOf, the ±chem/2 term, the clamp)
-// BEFORE any call is made:
+// WHY. stats/gb-fair clamps teamAWinPct to [0.03, 0.97]; a four whose readings clamp cannot tell a closed hole from an
+// open one. So the readings are computed from the engine's own arithmetic (GbRating.ts: expectedOf, the ±chem/2 term,
+// the clamp) BEFORE any call is made, and the script refuses when the rule under test cannot move the number.
 //
-//   negative-pair member  sees its own negative chemistry  -> the lowest reading
-//   outsider              has it zeroed, keeps the positive -> a DIFFERENT reading
-//   positive-pair member  is outside the negative pair too  -> the SAME reading as the outsider
-//
-// That last one is the control the whole rule turns on: hidden when negative and you are not in it, shown when it is
-// positive. If the three predictions do not separate, this script refuses rather than measure something meaningless.
+// SEC-CHEM-V3 / SEC-RATING-VIEW-V1 (2026-09-24, G15.3 addendum): a caller's reading now depends on WHO asks, twice over —
+//   (b) chemistry: the pair sees its true value; anyone else only CLEAR positive (>= 3 matches AND >= +5 pts), else 0;
+//   (c) ratings: each of the four is rated as the CALLER may know them (newest post of the rows the caller may see,
+//       else the level seed) — a private game never moves a stranger's number.
+// So there is one prediction per class: anonymous (= staff, who played none of the private games), negative-pair members
+// A and B, positive-pair member C. The two rules are re-stated in sec-chem-fixture.cjs (visSql / chemRule) independently
+// of the engine. Refusals: a prediction on the clamp; or the rule not mattering (anon with the negative chemistry NOT
+// zeroed, or with the true ratings, reads the same number) — then the check could not fail (G16.1).
 'use strict';
 require('/root/social-engine/probes/_guard.cjs');
 const fs = require('fs');
-const { execFileSync } = require('child_process');
 const FX = '/root/gen/secperm2-fixtures.json';
 const F = JSON.parse(fs.readFileSync(FX, 'utf8'));
-const sql = (t) => execFileSync('docker', ['exec', '-i', 'social-engine-db-1', 'psql', '-U', 'social', '-d', 'se_sbx', '-tAq', '-v', 'ON_ERROR_STOP=1', '-f', '-'], { input: t, encoding: 'utf8' }).trim();
-const one = (t) => { const s = sql(t); return s ? JSON.parse(s.split('\n')[0]) : null; };
+const X = require('/root/social-engine/probes/sec-chem-fixture.cjs');
+const sql = X.sqlOn('se_sbx');
 
-/** GbRating.currentRating: the stored rating, else the player's level row, else 3.0. */
-const effective = (id) => {
-	const r = one(`SELECT row_to_json(t) FROM (SELECT rating::float r FROM gb_player_rating WHERE "userId"='${id}' AND sport='pickleball') t;`);
-	if (r) return { id, rating: r.r, from: 'gb_player_rating' };
-	const l = one(`SELECT row_to_json(t) FROM (SELECT "duprDoubles"::float d, "selfLevel"::float s FROM meet_player_level WHERE "userId"='${id}' AND sport='pickleball') t;`);
-	if (l && l.d != null) return { id, rating: l.d, from: 'meet_player_level.duprDoubles' };
-	if (l && l.s != null) return { id, rating: l.s, from: 'meet_player_level.selfLevel' };
-	return { id, rating: 3.0, from: 'seed 3.0' };
-};
-/** GbRating.chem: (wins - expected) / n, counted only from two matches up. */
-// SEC-CHEM-V2: read through the DOORS' rule (live match, live meet, visible to an outsider) — the raw SELECT that stood
-// here counted rows the engine had stopped counting (source='probe'), so it "predicted" chemistry the doors never used.
-const { guardedPair, sqlOn } = require('/root/social-engine/probes/sec-chem-fixture.cjs');
-const chem = (a, b) => {
-	const r = guardedPair(sqlOn('se_sbx'), a, b, '');
-	return r && r.n >= 2 ? (r.w - r.e) / r.n : 0;
-};
 const expectedOf = (a, b) => 1 / (1 + Math.pow(10, -(a - b) * 1.2));
 const clamp = (x) => Math.max(0.03, Math.min(0.97, x));
 const pct = (x) => Math.round(clamp(x) * 100);
 
 const [nA, nB] = F.negPair, [pA, pB] = F.posPair;
 const FOUR = [nA, nB, pA, pB];
-const rs = FOUR.map(effective);
-console.log('INFO effective ratings — ' + JSON.stringify(rs));
-const cNeg = chem(nA, nB), cPos = chem(pA, pB);
-console.log('INFO chemistry — negative pair ' + cNeg.toFixed(3) + ', positive pair ' + cPos.toFixed(3));
-if (!(cNeg < 0)) throw new Error('the negative pair is not negative: ' + cNeg);
-if (!(cPos > 0)) throw new Error('the positive pair is not positive: ' + cPos);
-
-// the split that holds both pairs: teamA = the negative pair, teamB = the positive pair
-const base = expectedOf((rs[0].rating + rs[1].rating) / 2, (rs[2].rating + rs[3].rating) / 2);
-const inNeg = pct(base + (cNeg - cPos) / 2);   // a member of the negative pair keeps its own bad news
-const outsider = pct(base + (0 - cPos) / 2);   // anyone else has it zeroed; the positive term stays
-console.log('PREDICTION base=' + base.toFixed(3) + ' -> negative-pair member ' + inNeg + '%, everyone else ' + outsider + '%');
-if (inNeg === outsider) throw new Error('the two predictions are equal — this four cannot measure hole 5');
-for (const v of [inNeg, outsider]) if (v === 3 || v === 97) throw new Error('a prediction sits on the clamp (' + v + ') — this four cannot measure hole 5');
+const ratingFor = (id, viewer) => { const r = X.visibleRating(sql, id, viewer); return r ? r.rating : X.seedRating(sql, id); };
+const pairChem = (a, b, viewer, useRule) => {
+	const r = X.guardedPair(sql, a, b, viewer);
+	const c = r && r.n >= 2 ? (r.w - r.e) / r.n : 0;
+	return useRule ? X.chemRule(c, r ? r.n : 0, viewer, a, b) : c;
+};
+/** the reading of the split [negative pair] vs [positive pair] for a viewer ('' = anonymous) */
+const predict = (viewer, o = {}) => {
+	const rt = FOUR.map((id) => (o.trueRatings ? ratingFor(id, id) : ratingFor(id, viewer)));
+	const base = expectedOf((rt[0] + rt[1]) / 2, (rt[2] + rt[3]) / 2);
+	const cN = pairChem(nA, nB, viewer, !o.noRule), cP = pairChem(pA, pB, viewer, !o.noRule);
+	return { pct: pct(base + (cN - cP) / 2), base: Math.round(base * 1000) / 1000, cNeg: Math.round(cN * 1000) / 1000, cPos: Math.round(cP * 1000) / 1000, ratings: rt };
+};
+const P = { anon: predict(''), A: predict(nA), B: predict(nB), C: predict(pA) };
+const leakChem = predict('', { noRule: true });          // what anon would read if the negative pair were NOT neutralised
+const leakRatings = predict('', { trueRatings: true });  // … or if the four were rated on their true (private-fed) ratings
+console.log('PREDICTION ' + JSON.stringify({ anon: P.anon, A: P.A, B: P.B, C: P.C }));
+console.log('INFO rule-off readings — chemistry not neutralised: ' + leakChem.pct + '%, true ratings: ' + leakRatings.pct + '%');
+for (const [k, v] of Object.entries(P)) if (v.pct === 3 || v.pct === 97) throw new Error('prediction ' + k + ' sits on the clamp (' + v.pct + ') — this four cannot measure hole 5');
+if (!(P.anon.cNeg === 0 && P.A.cNeg < 0)) throw new Error('the negative pair is not negative for its member / neutral for anon: ' + JSON.stringify({ anon: P.anon.cNeg, A: P.A.cNeg }));
+if (!(P.anon.cPos > 0)) throw new Error('the CLEAR positive pair does not count for anon: ' + P.anon.cPos);
+if (leakChem.pct === P.anon.pct) throw new Error('neutralising the negative pair does not move anon\'s reading — the chemistry check could not fail');
+if (leakRatings.pct === P.anon.pct) console.log('WARN the private games do not move anon\'s gb-fair reading (the rating rule is proven on gb-edge / gb-ratings instead)');
 
 F.fairFour = FOUR;
-F.fairPredict = { base: Math.round(base * 1000) / 1000, chemNeg: Math.round(cNeg * 1000) / 1000, chemPos: Math.round(cPos * 1000) / 1000, negPairMemberPct: inNeg, outsiderPct: outsider, bareRatingPct: pct(base), ratings: rs };
+F.fairPredict = {
+	anon: P.anon.pct, negPairMemberA: P.A.pct, negPairMemberB: P.B.pct, posPairMemberC: P.C.pct,
+	ruleOff: { chemistry: leakChem.pct, ratings: leakRatings.pct },
+	detail: P,
+	// kept for older readers of the fixture file
+	outsiderPct: P.anon.pct, negPairMemberPct: P.A.pct, bareRatingPct: pct(expectedOf((P.anon.ratings[0] + P.anon.ratings[1]) / 2, (P.anon.ratings[2] + P.anon.ratings[3]) / 2)),
+};
 fs.writeFileSync(FX, JSON.stringify(F, null, 1));
 console.log('OK fairFour = ' + JSON.stringify(FOUR) + ' -> ' + FX);

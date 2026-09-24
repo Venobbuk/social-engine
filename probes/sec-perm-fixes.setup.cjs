@@ -58,7 +58,12 @@ async function main() {
 		const old = row(`SELECT row_to_json(t) FROM (SELECT id FROM channel WHERE "userId" = '${OWNER.id}' AND name LIKE '[probe] SPX-% ${kind} club' ORDER BY id DESC LIMIT 1) t;`);
 		if (old) {
 			const u = await L.se('channels/update', { channelId: old.id, name, isArchived: false }, OWNER.token);
-			if (u.status === 200) { log('INFO club REUSED ' + old.id + ' -> ' + name); return old.id; }
+			if (u.status === 200) {
+				// SEC-CHEM-V3: channels/update answered 200 yet left a club this lane's own cleanup had archived still archived
+				// (2026-09-24 attempt 2 of planted2) — the row is the fact, so it is re-opened here and re-checked below.
+				sql(`UPDATE channel SET "isArchived" = false WHERE id = '${old.id}' AND "isArchived" = true;`);
+				log('INFO club REUSED ' + old.id + ' -> ' + name); return old.id;
+			}
 			log('INFO could not reuse ' + old.id + ' (' + u.status + '), creating a new one');
 		}
 		const c = await L.se('channels/create', { name, description: 'sec-perm fixture' }, OWNER.token);
@@ -190,7 +195,7 @@ async function main() {
 		refCode: priv.refCode, accessToken: priv.accessToken, pubRefCode: pub.refCode,
 		negPair: [STRANGER.id, ADMIN.id], posPair: [MEMBER.id, OWNER.id],
 		sweepNegPair: sweepUsable ? SWEEP_NEG : null,
-		chem: CHEM ? { g: { g1: CHEM.g1, g2: CHEM.g2, g3: CHEM.g3, g4: CHEM.g4, g5: CHEM.g5 }, made: CHEM.made.map((m) => ({ meetId: m.meetId, host: m.host.slug })), privPair: CHEM.priv.pair, negAE: CHEM.negAE.pair, pubEndorsement: CHEM.pubEndorsement, edges: CHEM.edges, readBack: { neg: CHEM.neg, pos: CHEM.pos, priv: CHEM.priv, negAE: CHEM.negAE }, ratingsBefore: CHEM.ratingsBefore } : null,
+		chem: CHEM ? { g: { g1: CHEM.g1, g2: CHEM.g2, g3: CHEM.g3, g4: CHEM.g4, g5: CHEM.g5, g6: CHEM.g6 }, unclearPair: CHEM.unclear.pair, made: CHEM.made.map((m) => ({ meetId: m.meetId, host: m.host.slug })), privPair: CHEM.priv.pair, negAE: CHEM.negAE.pair, pubEndorsement: CHEM.pubEndorsement, edges: CHEM.edges, readBack: { neg: CHEM.neg, pos: CHEM.pos, priv: CHEM.priv, negAE: CHEM.negAE, unclear: CHEM.unclear, ratingA: CHEM.ratingA }, ratingsBefore: CHEM.ratingsBefore } : null,
 		preconditions: { priv, pub, members: mem, schedule: schd, tag: tg, meet: mt, warning: wr, endorsement: er, chem: { neg, pos, sweepNeg, sweepUsable } },
 	};
 	fs.writeFileSync(OUT, JSON.stringify(F, null, 1));
