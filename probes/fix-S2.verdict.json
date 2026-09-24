@@ -1,0 +1,305 @@
+{
+ "id": "fix-S2",
+ "at": "2026-09-24T21:32:07.559Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  {
+   "build": {
+    "s2": {
+     "app": "js/app.afd5e999.js",
+     "engine": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+     "at": "2026-09-24T21:11:17.003Z"
+    },
+    "s1": {
+     "app": "js/app.afd5e999.js",
+     "engine": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+     "at": "2026-09-24T21:24:30.477Z"
+    }
+   }
+  },
+  {
+   "rows": 31,
+   "pass": 31,
+   "fail": []
+  },
+  {
+   "plants": 13,
+   "caught": 13,
+   "missed": []
+  },
+  {
+   "before_unfixed_app": {
+    "at": "2026-09-24T11:12:28.198Z",
+    "app": "js/app.35eff02d.js",
+    "mustFail": 10,
+    "failed": 10
+   }
+  },
+  {
+   "webkit": {
+    "at": "2026-09-24T21:17:12.818Z",
+    "rows": [
+     {
+      "row": "D-comp-detail.67 (WebKit)",
+      "pass": true
+     },
+     {
+      "row": "D-comp-detail.66 (WebKit)",
+      "pass": true
+     },
+     {
+      "row": "D-comp-detail.55 (WebKit)",
+      "pass": true
+     },
+     {
+      "row": "D-comp-detail.61 (WebKit)",
+      "pass": true
+     }
+    ],
+    "errors": [],
+    "note": "WebKit (Playwright, iPhone 13) on the operator PC — a row that failed because the engine could not load pages is NO VERDICT, not a product fail"
+   }
+  },
+  {
+   "cleanup": {
+    "s2": {
+     "arjlcqopfril02p6": 200,
+     "arjln6cnfril02s6": 200,
+     "left": 0,
+     "rows": 0,
+     "linksLeft": 0
+    },
+    "s1": {
+     "arjltj3afril02wx": 200,
+     "arjlv6hxfril02xn": 200,
+     "arjlwdskfril02yn": 200,
+     "arjlwqcgfril02yr": 200,
+     "arjlwvs3fril02yt": 200,
+     "left": 0
+    }
+   }
+  },
+  {
+   "table": [
+    {
+     "row": "D-comp-detail.67",
+     "item": "4a",
+     "pass": true,
+     "vsReclub": "better — Reclub footer has Accept only; ours names who invited you and offers Decline, one set of buttons",
+     "shot": "probes/fix-S2-shots/hub-invited-mei-en.png"
+    },
+    {
+     "row": "D-comp-team-detail.04",
+     "item": "4b",
+     "pass": true,
+     "vsReclub": "equal — Reclub shows the manager the slot actions only; the contradictory stranger card is gone",
+     "shot": "probes/fix-S2-shots/team-B-host-en.png"
+    },
+    {
+     "row": "D-comp-team-detail.01",
+     "item": "3a",
+     "pass": true,
+     "vsReclub": "better — Reclub team matches show a status chip; ours adds the live score of a match in progress",
+     "shot": "probes/fix-S2-shots/team-A-amy-en.png"
+    },
+    {
+     "row": "D-comp-team-detail.07",
+     "item": "3a",
+     "pass": true,
+     "vsReclub": "equal",
+     "shot": "probes/fix-S2-shots/team-A-amy-en.png"
+    },
+    {
+     "row": "D-comp-match-detail.09",
+     "item": "3b",
+     "pass": true,
+     "vsReclub": "equal — Reclub shows \"no longer available\" with no actions; ours keeps the teams/time readable (read-only)",
+     "shot": "probes/fix-S2-shots/m3-removed-host-en.png"
+    },
+    {
+     "row": "D-comp-match-detail.09",
+     "item": "3b",
+     "pass": true,
+     "vsReclub": "better — Reclub shows only the match ref; ours shows who actually referees (the competition referee) consistently",
+     "shot": "probes/fix-S2-shots/m2-live-host-en.png"
+    },
+    {
+     "row": "D-comp-match-detail.05",
+     "item": "4c",
+     "pass": true,
+     "vsReclub": "equal — Reclub \"clear schedule\" is an action; the state word no longer sits beside a set time",
+     "shot": "probes/fix-S2-shots/m2-schedule-host-en.png"
+    },
+    {
+     "row": "D-comp-match-detail.04",
+     "item": "5",
+     "pass": true,
+     "vsReclub": "equal — Reclub lists the reserved participant in the match roster",
+     "shot": "probes/fix-S2-shots/m2-players-host-en.png"
+    },
+    {
+     "row": "D-match-format.08",
+     "item": "2",
+     "pass": true,
+     "vsReclub": "equal — Reclub localises round names",
+     "shot": "probes/fix-S2-shots/draw-host-zhHant.png"
+    },
+    {
+     "row": "D-dupr-activity-manager.07",
+     "item": "1",
+     "pass": true,
+     "vsReclub": "better — Reclub names the error; ours names the players who still need to link DUPR",
+     "shot": "probes/fix-S2-shots/dupr-manager-host-en.png"
+    },
+    {
+     "row": "D-comp-match-detail.06",
+     "item": "6",
+     "pass": true,
+     "vsReclub": "equal — Reclub badge \"Submitted by {name}\"; ours adds when, and says honestly on UAT that nothing reached DUPR",
+     "shot": "probes/fix-S2-shots/c2-submitted-host-en.png"
+    },
+    {
+     "row": "D-comp-detail.41",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse: \"day(s)\")",
+     "shot": "probes/fix-S2-shots/s1-footer-days-amy-en.png"
+    },
+    {
+     "row": "D-comp-detail.55",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse: names 0 px) — Reclub pins the name column the same way",
+     "shot": "probes/fix-S2-shots/s1-standings-amy-en.png"
+    },
+    {
+     "row": "D-comp-detail.61 5D",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal",
+     "shot": "probes/fix-S2-shots/s1-chat-seen-tom-en.png"
+    },
+    {
+     "row": "D-comp-detail.61",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse: no visible box to type)",
+     "shot": "probes/fix-S2-shots/s1-chat-competition-amy.png"
+    },
+    {
+     "row": "D-comp-detail.33",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse)",
+     "shot": "probes/fix-S2-shots/s1-entries-host-en.png"
+    },
+    {
+     "row": "D-comp-detail.27",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse: bubble over the strip)",
+     "shot": "probes/fix-S2-shots/s1-confirmed-host-en.png"
+    },
+    {
+     "row": "D-comp-detail.36",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse: Confirmed only, overlapping)",
+     "shot": "probes/fix-S2-shots/s1-pending-host-en.png"
+    },
+    {
+     "row": "D-comp-detail.38",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse: blank button)",
+     "shot": "probes/fix-S2-shots/s1-spectators-host-en.png"
+    },
+    {
+     "row": "D-comp-detail.28",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was: two identical buttons)",
+     "shot": "probes/fix-S2-shots/s1-invited-host-en.png"
+    },
+    {
+     "row": "D-comp-detail.39",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal",
+     "shot": "probes/fix-S2-shots/s1-invited-host-en.png"
+    },
+    {
+     "row": "D-comp-detail.66",
+     "item": null,
+     "pass": true,
+     "vsReclub": "better — Reclub stacks three buttons; ours keeps them above the bar in one panel, the confirm names both choices",
+     "shot": "probes/fix-S2-shots/s1-footer-spectator-ken-en.png"
+    },
+    {
+     "row": "D-comp-detail.65",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse: \"Only\" hidden)",
+     "shot": "probes/fix-S2-shots/s1-footer-stranger-amy-en.png"
+    },
+    {
+     "row": "D-comp-confirm-publish.04",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse)",
+     "shot": "probes/fix-S2-shots/s1-publish-review-host-en.png"
+    },
+    {
+     "row": "D-comp-detail.46",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse)",
+     "shot": "probes/fix-S2-shots/s1-matches-host-zhHans.png"
+    },
+    {
+     "row": "D-comp-detail.45",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse)",
+     "shot": "probes/fix-S2-shots/s1-draw-host-zhHant.png"
+    },
+    {
+     "row": "D-comp-award-podium.02",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse)",
+     "shot": "probes/fix-S2-shots/s1-awards-host-zhHant.png"
+    },
+    {
+     "row": "D-comp-award-custom.02",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal (was worse: second trip)",
+     "shot": "probes/fix-S2-shots/s1-award-add-filled-host-en.png"
+    },
+    {
+     "row": "D-comp-create.13",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal",
+     "shot": "probes/fix-S2-shots/s1-wizard-club-mei-en.png"
+    },
+    {
+     "row": "D-comp-add-match.01",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal",
+     "shot": "probes/fix-S2-shots/s1-create-match-sheet-host-en.png"
+    },
+    {
+     "row": "ENGINE comp-rooms-gone",
+     "item": null,
+     "pass": true,
+     "vsReclub": "equal — no orphan rooms in anyone's inbox",
+     "shot": null
+    }
+   ]
+  }
+ ]
+}

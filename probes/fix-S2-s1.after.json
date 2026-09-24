@@ -1,0 +1,741 @@
+{
+ "id": "fix-S2-s1",
+ "at": "2026-09-24T21:24:30.477Z",
+ "stamp": "1i9ak",
+ "rows": [
+  {
+   "row": "D-comp-detail.41",
+   "what": "entrant footer: \"This competition is starting in 3 days\" (a real plural, no \"day(s)\"); 简 本赛事将于 3 天后开始",
+   "pass": true,
+   "ev": {
+    "en": "You are in: Amy Chan · This competition is starting in 4 days",
+    "zhHans": "你已报名：Amy Chan · 本赛事将于 4 天后开始"
+   },
+   "shot": "probes/fix-S2-shots/s1-footer-days-amy-en.png",
+   "vsReclub": "equal (was worse: \"day(s)\")"
+  },
+  {
+   "row": "D-comp-detail.55",
+   "what": "standings at 390: every NAME is whole on screen (not clipped, right edge ≤ 390), header \"Name\" its own cell; the stat columns scroll sideways under a pinned name column; 繁 the same",
+   "pass": true,
+   "ev": {
+    "en": {
+     "names": [
+      {
+       "t": "Tom Ho",
+       "w": 47,
+       "l": 117,
+       "r": 164,
+       "clipped": false
+      },
+      {
+       "t": "Mei Lam",
+       "w": 52,
+       "l": 117,
+       "r": 169,
+       "clipped": false
+      },
+      {
+       "t": "Amy Chan",
+       "w": 64,
+       "l": 117,
+       "r": 181,
+       "clipped": false
+      }
+     ],
+     "head": 132
+    },
+    "afterScroll": [
+     {
+      "t": "Tom Ho",
+      "w": 47,
+      "l": 117,
+      "r": 164,
+      "clipped": false
+     },
+     {
+      "t": "Mei Lam",
+      "w": 52,
+      "l": 117,
+      "r": 169,
+      "clipped": false
+     },
+     {
+      "t": "Amy Chan",
+      "w": 64,
+      "l": 117,
+      "r": 181,
+      "clipped": false
+     }
+    ],
+    "zh": [
+     48,
+     53,
+     63
+    ]
+   },
+   "shot": "probes/fix-S2-shots/s1-standings-amy-en.png",
+   "vsReclub": "equal (was worse: names 0 px) — Reclub pins the name column the same way"
+  },
+  {
+   "row": "D-comp-detail.61 5D",
+   "what": "journey: amy taps the box, types, taps Send (real pointer + keyboard, 390 px); after a reload the message is there, and tom (another entrant) sees it",
+   "pass": true,
+   "ev": {
+    "persisted": true,
+    "otherParty": true
+   },
+   "shot": "probes/fix-S2-shots/s1-chat-seen-tom-en.png",
+   "vsReclub": "equal"
+  },
+  {
+   "row": "D-comp-detail.61",
+   "what": "the message box is on screen above the tab bar and clear of the report button WITHOUT scrolling on every chat surface: competition, meet, club, direct (found 2 under the bar on 2026-09-24: competition 802-844, meet 748-807; fixed at the one ChatThread)",
+   "pass": true,
+   "ev": [
+    {
+     "k": "competition-amy",
+     "input": [
+      682,
+      724
+     ],
+     "bar": 768,
+     "hit5B": {
+      "n": 4,
+      "bad": []
+     },
+     "ok": true
+    },
+    {
+     "k": "meet-ken",
+     "input": [
+      683,
+      725
+     ],
+     "bar": 768,
+     "hit5B": {
+      "n": 4,
+      "bad": []
+     },
+     "ok": true
+    },
+    {
+     "k": "club-mei",
+     "input": [
+      682,
+      724
+     ],
+     "bar": 768,
+     "hit5B": {
+      "n": 4,
+      "bad": []
+     },
+     "ok": true
+    },
+    {
+     "k": "direct-amy",
+     "input": [
+      683,
+      725
+     ],
+     "bar": 768,
+     "hit5B": {
+      "n": 4,
+      "bad": []
+     },
+     "ok": true
+    },
+    {
+     "k": "competition-amy-zhHant",
+     "input": [
+      682,
+      724
+     ],
+     "bar": 768,
+     "hit5B": {
+      "n": 4,
+      "bad": []
+     },
+     "ok": true
+    }
+   ],
+   "shot": "probes/fix-S2-shots/s1-chat-competition-amy.png",
+   "vsReclub": "equal (was worse: no visible box to type)"
+  },
+  {
+   "row": "D-comp-detail.33",
+   "what": "a 1-player team (min 2 / max 4) reads \"Need 1 more\" (to the minimum, not the maximum) and names its member \"Tom Ho\", never the handle @tom_clubadmin",
+   "pass": true,
+   "ev": {
+    "line": "[probe] fix-S2 s1 Team Tom | Tom Ho · Need 1 more | Amy Chan · Waiting for Mei Lam · Need 1 more"
+   },
+   "shot": "probes/fix-S2-shots/s1-entries-host-en.png",
+   "vsReclub": "equal (was worse)"
+  },
+  {
+   "row": "D-comp-detail.27",
+   "what": "sort strip Seeds / A–Z / Teams / Gender is uncovered (a tap on Teams and Gender lands on the chip); Hide roster is no longer a chip in that strip",
+   "pass": true,
+   "ev": {
+    "chipHide": false,
+    "covered": {
+     "Teams": "clear",
+     "Gender": "clear"
+    },
+    "hit5B": {
+     "n": 13,
+     "ok": true,
+     "bad": []
+    }
+   },
+   "shot": "probes/fix-S2-shots/s1-confirmed-host-en.png",
+   "vsReclub": "equal (was worse: bubble over the strip)"
+  },
+  {
+   "row": "D-comp-detail.36",
+   "what": "Hide roster is a labelled switch card on Confirmed AND on Pending (Reclub has it on Pending)",
+   "pass": true,
+   "ev": {
+    "confirmed": true,
+    "pending": true,
+    "pendingText": "Hide roster | Players see every team member."
+   },
+   "shot": "probes/fix-S2-shots/s1-pending-host-en.png",
+   "vsReclub": "equal (was worse: Confirmed only, overlapping)"
+  },
+  {
+   "row": "D-comp-detail.38",
+   "what": "spectator request: Approve / Decline are readable kit buttons (label colour ≠ button colour), the requester's name keeps one line; Approve pressed → engine status spectator",
+   "pass": true,
+   "ev": {
+    "hit5B": {
+     "n": 6,
+     "ok": true,
+     "bad": []
+    },
+    "colours": [
+     {
+      "label": "Approve",
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11, 25, 44)"
+     },
+     {
+      "label": "Decline",
+      "fg": "rgb(11, 25, 44)",
+      "bg": "rgb(255, 255, 255)"
+     }
+    ],
+    "nameLineHeight": 23,
+    "status": "spectator",
+    "requested": "REQUESTED TO BE SPECTATOR | Approve | Decline"
+   },
+   "shot": "probes/fix-S2-shots/s1-spectators-host-en.png",
+   "vsReclub": "equal (was worse: blank button)"
+  },
+  {
+   "row": "D-comp-detail.28",
+   "what": "Invited pane shows ONE \"Invite a player\" button (the pane's own Invite players card); the hub's Invite-or-reserve card steps aside there",
+   "pass": true,
+   "ev": {
+    "inviteButtons": 1,
+    "hit5B": {
+     "n": 2,
+     "ok": true,
+     "bad": []
+    }
+   },
+   "shot": "probes/fix-S2-shots/s1-invited-host-en.png",
+   "vsReclub": "equal (was: two identical buttons)"
+  },
+  {
+   "row": "D-comp-detail.39",
+   "what": "same pane, same rule (duplicate of .28)",
+   "pass": true,
+   "ev": {
+    "inviteButtons": 1
+   },
+   "shot": "probes/fix-S2-shots/s1-invited-host-en.png",
+   "vsReclub": "equal"
+  },
+  {
+   "row": "D-comp-detail.66",
+   "what": "three-action footer (spectator: Stop spectating · Join as a player · Go to forum) is one solid panel, every button above the tab bar, clear of the report button (EN + 繁); the cancel-request question answers \"Keep request / Cancel request\", Keep keeps it",
+   "pass": true,
+   "ev": {
+    "en": [
+     {
+      "t": "Stop spectating",
+      "top": 643,
+      "bottom": 679
+     },
+     {
+      "t": "Join as a player",
+      "top": 687,
+      "bottom": 723
+     },
+     {
+      "t": "Go to forum",
+      "top": 687,
+      "bottom": 723
+     }
+    ],
+    "zh": [
+     {
+      "t": "不再做觀眾",
+      "top": 643,
+      "bottom": 679
+     },
+     {
+      "t": "以球員身份參加",
+      "top": 687,
+      "bottom": 723
+     },
+     {
+      "t": "前往論壇",
+      "top": 687,
+      "bottom": 723
+     }
+    ],
+    "hit5B": [
+     {
+      "n": 9,
+      "ok": true,
+      "bad": []
+     },
+     {
+      "n": 9,
+      "ok": true,
+      "bad": []
+     },
+     {
+      "n": 6,
+      "ok": true,
+      "bad": []
+     }
+    ],
+    "bar": 768,
+    "bg": "rgb(255, 255, 255)",
+    "dialog": "Cancel your spectator request?\nCancel request\nKeep request",
+    "keptRequest": true
+   },
+   "shot": "probes/fix-S2-shots/s1-footer-spectator-ken-en.png",
+   "vsReclub": "better — Reclub stacks three buttons; ours keeps them above the bar in one panel, the confirm names both choices"
+  },
+  {
+   "row": "D-comp-detail.65",
+   "what": "the footer line is never under the docked report button (the first word is readable)",
+   "pass": true,
+   "ev": {
+    "lineVsFab": false,
+    "cta": {
+     "top": 606,
+     "bottom": 733,
+     "left": 12,
+     "right": 378,
+     "w": 366,
+     "h": 127
+    },
+    "fab": {
+     "top": 741,
+     "bottom": 785,
+     "left": 12,
+     "right": 56,
+     "w": 44,
+     "h": 44
+    },
+    "hit5B": {
+     "n": 6,
+     "ok": true,
+     "bad": []
+    }
+   },
+   "shot": "probes/fix-S2-shots/s1-footer-stranger-amy-en.png",
+   "vsReclub": "equal (was worse: \"Only\" hidden)"
+  },
+  {
+   "row": "D-comp-confirm-publish.04",
+   "what": "REVIEW COMPETITION lines wrap inside the sheet at 390 px (right edge ≤ 390, was 528) and the whole name reads",
+   "pass": true,
+   "ev": {
+    "right": 376,
+    "nameShown": true
+   },
+   "shot": "probes/fix-S2-shots/s1-publish-review-host-en.png",
+   "vsReclub": "equal (was worse)"
+  },
+  {
+   "row": "D-comp-detail.46",
+   "what": "Matches tab round headers in 简: 第 n 轮, no English \"Round n\"",
+   "pass": true,
+   "ev": {
+    "zhHans": "第 1 轮 | 第 2 轮 | 第 3 轮"
+   },
+   "shot": "probes/fix-S2-shots/s1-matches-host-zhHans.png",
+   "vsReclub": "equal (was worse)"
+  },
+  {
+   "row": "D-comp-detail.45",
+   "what": "Draw tab round headers in 繁: 第 n 輪, no English \"Round n\"",
+   "pass": true,
+   "ev": {
+    "zhHant": "輪 | 每輪場數 | 第 1 輪 | 第 2 輪 | 第 3 輪"
+   },
+   "shot": "probes/fix-S2-shots/s1-draw-host-zhHant.png",
+   "vsReclub": "equal (was worse)"
+  },
+  {
+   "row": "D-comp-award-podium.02",
+   "what": "繁 podium cards: 冠軍 / 亞軍 / 季軍 (the place, never 季軍戰 = the third-place match)",
+   "pass": true,
+   "ev": {
+    "cards": [
+     "冠軍",
+     "亞軍",
+     "季軍",
+     "殿軍"
+    ]
+   },
+   "shot": "probes/fix-S2-shots/s1-awards-host-zhHant.png",
+   "vsReclub": "equal (was worse)"
+  },
+  {
+   "row": "D-comp-award-custom.02",
+   "what": "Add an award takes the name AND the description in one card; pressed Add → the engine award carries both (no second trip through Edit award)",
+   "pass": true,
+   "ev": {
+    "hit5B": {
+     "n": 5,
+     "ok": true,
+     "bad": []
+    },
+    "card": {
+     "input": true,
+     "textarea": true
+    },
+    "award": {
+     "name": "[probe] fix-S2 MVP",
+     "description": "Voucher HK$200"
+    }
+   },
+   "shot": "probes/fix-S2-shots/s1-award-add-filled-host-en.png",
+   "vsReclub": "equal (was worse: second trip)"
+  },
+  {
+   "row": "D-comp-create.13",
+   "what": "club block: the no-club option reads \"No club\" (a state beside \"Not tied to a club\"), never the action \"Remove club\"",
+   "pass": true,
+   "ev": {
+    "en": "Creating a competition for your club? | Not tied to a club | No club | UAT Paddle Club",
+    "zh": "為你的球會舉辦賽事？ | 不屬於任何球會 | 不屬於球會"
+   },
+   "shot": "probes/fix-S2-shots/s1-wizard-club-mei-en.png",
+   "vsReclub": "equal"
+  },
+  {
+   "row": "D-comp-add-match.01",
+   "what": "Create match: the Name field is a visible box (border ≥ 1 px, height ≥ 36 px, paper fill)",
+   "pass": true,
+   "ev": {
+    "h": 44,
+    "border": "1px",
+    "borderColor": "rgb(226, 232, 229)",
+    "bg": "rgb(255, 255, 255)"
+   },
+   "shot": "probes/fix-S2-shots/s1-create-match-sheet-host-en.png",
+   "vsReclub": "equal"
+  },
+  {
+   "row": "ENGINE comp-rooms-gone",
+   "what": "delete competition → its general, Forum and Staff rooms are gone (chat_room rows 3 → 0); was: the Forum room survived (arixiz58mpah00ul)",
+   "pass": true,
+   "ev": {
+    "ids": [
+     "arjlxw3dfril02zt",
+     "arjlxw4wfril02zu",
+     "arjlxw5dfril02zv"
+    ],
+    "before": 3,
+    "delete": 200,
+    "after": 0,
+    "engineRev": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20"
+   },
+   "shot": null,
+   "vsReclub": "equal — no orphan rooms in anyone's inbox"
+  }
+ ],
+ "plants": [
+  {
+   "name": "55",
+   "what": "names squeezed to 0 px (the pre-fix layout) — the check must fail",
+   "caught": true,
+   "ev": [
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "61",
+   "what": "a thread taller than the room left (the pre-fix class of fault) — the composer must read as under the bar",
+   "caught": true,
+   "ev": {
+    "pinp": {
+     "top": 995,
+     "bottom": 1037,
+     "left": 74,
+     "right": 316,
+     "w": 242,
+     "h": 42
+    },
+    "pbar": {
+     "top": 768,
+     "bottom": 832,
+     "left": 12,
+     "right": 378,
+     "w": 366,
+     "h": 64
+    }
+   }
+  },
+  {
+   "name": "61-5B",
+   "what": "a transparent layer over Send — the finger hit-test must fail",
+   "caught": true,
+   "ev": {
+    "caught": true,
+    "rows": 1
+   }
+  },
+  {
+   "name": "38",
+   "what": "white label on a white button (the measured fault) — the check must fail",
+   "caught": true,
+   "ev": [
+    {
+     "label": "Approve",
+     "fg": "rgb(255, 255, 255)",
+     "bg": "rgb(255, 255, 255)"
+    },
+    {
+     "label": "Decline",
+     "fg": "rgb(255, 255, 255)",
+     "bg": "rgb(255, 255, 255)"
+    }
+   ]
+  },
+  {
+   "name": "66",
+   "what": "the pre-fix footer (transparent, 74px, stacked) — the check must fail",
+   "caught": true,
+   "ev": {
+    "btns": [
+     {
+      "t": "Stop spectating",
+      "top": 646,
+      "bottom": 682
+     },
+     {
+      "t": "Join as a player",
+      "top": 690,
+      "bottom": 726
+     },
+     {
+      "t": "Go to forum",
+      "top": 734,
+      "bottom": 770
+     }
+    ],
+    "bar": 768
+   }
+  }
+ ],
+ "errors": [],
+ "cleanup": {
+  "arjltj3afril02wx": 200,
+  "arjlv6hxfril02xn": 200,
+  "arjlwdskfril02yn": 200,
+  "arjlwqcgfril02yr": 200,
+  "arjlwvs3fril02yt": 200,
+  "left": 0
+ },
+ "fx": {
+  "appBundle": "js/app.afd5e999.js",
+  "engineRev": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+  "chatSurfaces": [
+   {
+    "key": "competition-amy",
+    "inp": {
+     "top": 682,
+     "bottom": 724,
+     "left": 74,
+     "right": 316,
+     "w": 242,
+     "h": 42
+    },
+    "bar": {
+     "top": 768,
+     "bottom": 832,
+     "left": 12,
+     "right": 378,
+     "w": 366,
+     "h": 64
+    },
+    "fab": {
+     "top": 741,
+     "bottom": 785,
+     "left": 12,
+     "right": 56,
+     "w": 44,
+     "h": 44
+    },
+    "h": {
+     "n": 4,
+     "ok": true,
+     "bad": []
+    },
+    "ok": true
+   },
+   {
+    "key": "meet-ken",
+    "inp": {
+     "top": 683,
+     "bottom": 725,
+     "left": 74,
+     "right": 316,
+     "w": 242,
+     "h": 42
+    },
+    "bar": {
+     "top": 768,
+     "bottom": 832,
+     "left": 12,
+     "right": 378,
+     "w": 366,
+     "h": 64
+    },
+    "fab": {
+     "top": 741,
+     "bottom": 785,
+     "left": 12,
+     "right": 56,
+     "w": 44,
+     "h": 44
+    },
+    "h": {
+     "n": 4,
+     "ok": true,
+     "bad": []
+    },
+    "ok": true
+   },
+   {
+    "key": "club-mei",
+    "inp": {
+     "top": 682,
+     "bottom": 724,
+     "left": 62,
+     "right": 328,
+     "w": 266,
+     "h": 42
+    },
+    "bar": {
+     "top": 768,
+     "bottom": 832,
+     "left": 12,
+     "right": 378,
+     "w": 366,
+     "h": 64
+    },
+    "fab": {
+     "top": 741,
+     "bottom": 785,
+     "left": 12,
+     "right": 56,
+     "w": 44,
+     "h": 44
+    },
+    "h": {
+     "n": 4,
+     "ok": true,
+     "bad": []
+    },
+    "ok": true
+   },
+   {
+    "key": "direct-amy",
+    "inp": {
+     "top": 683,
+     "bottom": 725,
+     "left": 62,
+     "right": 328,
+     "w": 266,
+     "h": 42
+    },
+    "bar": {
+     "top": 768,
+     "bottom": 832,
+     "left": 12,
+     "right": 378,
+     "w": 366,
+     "h": 64
+    },
+    "fab": {
+     "top": 741,
+     "bottom": 785,
+     "left": 12,
+     "right": 56,
+     "w": 44,
+     "h": 44
+    },
+    "h": {
+     "n": 4,
+     "ok": true,
+     "bad": []
+    },
+    "ok": true
+   },
+   {
+    "key": "competition-amy-zhHant",
+    "inp": {
+     "top": 682,
+     "bottom": 724,
+     "left": 74,
+     "right": 316,
+     "w": 242,
+     "h": 42
+    },
+    "bar": {
+     "top": 768,
+     "bottom": 832,
+     "left": 12,
+     "right": 378,
+     "w": 366,
+     "h": 64
+    },
+    "fab": {
+     "top": 741,
+     "bottom": 785,
+     "left": 12,
+     "right": 56,
+     "w": 44,
+     "h": 44
+    },
+    "h": {
+     "n": 4,
+     "ok": true,
+     "bad": []
+    },
+    "ok": true
+   }
+  ],
+  "spectateKen": 200
+ },
+ "summary": {
+  "rows": 20,
+  "pass": 20,
+  "fail": 0,
+  "plants": 5,
+  "plantsMissed": 0,
+  "errors": 0
+ }
+}

@@ -1,0 +1,104 @@
+{
+ "id": "fix-S2-webkit",
+ "engine": "webkit",
+ "device": "iPhone 13",
+ "at": "2026-09-24T21:17:12.818Z",
+ "run": "18vle",
+ "rows": [
+  {
+   "row": "D-comp-detail.67 (WebKit)",
+   "what": "one Accept invitation; footer buttons pass the finger hit-test; a real tap on Accept puts mei in the team (engine)",
+   "pass": true,
+   "ev": {
+    "acceptButtons": 1,
+    "hit5B": {
+     "n": 6,
+     "ok": true,
+     "bad": []
+    },
+    "meiIn": true
+   }
+  },
+  {
+   "row": "D-comp-detail.66 (WebKit)",
+   "what": "spectator footer: every button above the tab bar and passes the finger hit-test",
+   "pass": true,
+   "ev": {
+    "btns": [
+     {
+      "t": "Stop spectating",
+      "bottom": 499
+     },
+     {
+      "t": "Join as a player",
+      "bottom": 543
+     },
+     {
+      "t": "Go to forum",
+      "bottom": 543
+     }
+    ],
+    "bar": 588,
+    "hit5B": {
+     "n": 9,
+     "ok": true,
+     "bad": []
+    }
+   }
+  },
+  {
+   "row": "D-comp-detail.55 (WebKit)",
+   "what": "standings names whole on screen at 390 px",
+   "pass": true,
+   "ev": [
+    {
+     "t": "Tom Ho",
+     "r": 164,
+     "w": 47,
+     "clipped": false
+    },
+    {
+     "t": "Mei Lam",
+     "r": 169,
+     "w": 52,
+     "clipped": false
+    },
+    {
+     "t": "Amy Chan",
+     "r": 181,
+     "w": 64,
+     "clipped": false
+    }
+   ]
+  },
+  {
+   "row": "D-comp-detail.61 (WebKit)",
+   "what": "competition chat: the box is above the tab bar at rest, passes the finger hit-test; tap, type, tap Send → persists after reload, tom sees it",
+   "pass": true,
+   "ev": {
+    "input": [
+     503,
+     545
+    ],
+    "bar": 588,
+    "hit5B": {
+     "n": 4,
+     "ok": true,
+     "bad": []
+    },
+    "persisted": true,
+    "otherParty": true
+   }
+  }
+ ],
+ "cleanup": {
+  "arjll9uvfril02rq": 200,
+  "arjlo7yofril02t1": 200
+ },
+ "errors": [],
+ "summary": {
+  "rows": 4,
+  "pass": 4,
+  "errors": 0
+ }
+}

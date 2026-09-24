@@ -1,0 +1,448 @@
+{
+ "id": "fix-S2",
+ "phase": "before",
+ "at": "2026-09-24T11:12:28.198Z",
+ "stamp": "fn679",
+ "rows": [
+  {
+   "row": "D-comp-detail.67",
+   "what": "invited player: exactly ONE \"Accept invitation\" (EN) / 接受邀請 (繁) on the hub, the line names who invited them + Decline; pressing it puts them in the team (engine)",
+   "pass": false,
+   "ev": {
+    "acceptButtonsEn": 2,
+    "acceptButtonsZh": 2,
+    "hasWho": true,
+    "hasDecline": true,
+    "pressed": true,
+    "meiIn": true,
+    "footer": "Amy Chan invited you to play in the team [probe] fix-S2 Team A. | Accept invitation | Decline | You are invited to play in [probe] fix-S2 Team A. | Accept invitation"
+   },
+   "shot": "probes/fix-S2-shots/hub-invited-mei-en.png",
+   "item": "4a",
+   "vsReclub": "better — Reclub footer has Accept only; ours names who invited you and offers Decline, one set of buttons"
+  },
+  {
+   "row": "D-comp-team-detail.04",
+   "what": "host (not on the team) on an open team page: host actions (Invite a partner / Assign player / Reserve a spot) and NO stranger card \"This team has a free place. · Ask to join\"",
+   "pass": false,
+   "ev": {
+    "host": "Invite a partner | Invite a partner | Assign player | Reserve a spot | This team has a free place. | Ask to join"
+   },
+   "shot": "probes/fix-S2-shots/team-B-host-en.png",
+   "item": "4b",
+   "vsReclub": "equal — Reclub shows the manager the slot actions only; the contradictory stranger card is gone"
+  },
+  {
+   "row": "D-comp-team-detail.01",
+   "what": "team page Matches: the removed match reads \"Removed\", the in-progress match \"Match in progress\" + its running score 11–5, the finished one W 1–0 (EN); 繁: 已移除 / 比賽進行中",
+   "pass": false,
+   "ev": {
+    "rows": [
+     "vs [probe] fix-S2 Team B Round 1 L 0–1",
+     "vs [probe] fix-S2 Team B Round 1 · Fri, 25 Sept, 07:12 pm",
+     "vs [probe] fix-S2 Team B Round 1"
+    ],
+    "zh": "第 1 輪 | 第 1 輪 · 9月25日週五 19:12 | 第 1 輪"
+   },
+   "shot": "probes/fix-S2-shots/team-A-amy-en.png",
+   "item": "3a",
+   "vsReclub": "better — Reclub team matches show a status chip; ours adds the live score of a match in progress"
+  },
+  {
+   "row": "D-comp-team-detail.07",
+   "what": "same list, same rule (duplicate of .01): no removed match looks like a live one",
+   "pass": false,
+   "ev": {},
+   "shot": "probes/fix-S2-shots/team-A-amy-en.png",
+   "item": "3a",
+   "vsReclub": "equal"
+  },
+  {
+   "row": "D-comp-match-detail.09",
+   "what": "removed match (host): \"This match is no longer available.\", NO Swap sides, NO Referees row (nobody referees a removed match), no Input score",
+   "pass": false,
+   "ev": {
+    "swap3": 1,
+    "ref3": "Referees Ken Wong",
+    "head": "⇅ Swap sides | This match is no longer available. | Referees"
+   },
+   "shot": "probes/fix-S2-shots/m3-removed-host-en.png",
+   "item": "3b",
+   "vsReclub": "equal — Reclub shows \"no longer available\" with no actions; ours keeps the teams/time readable (read-only)"
+  },
+  {
+   "row": "D-comp-match-detail.09",
+   "what": "ONE referee rule: the live match reads the SAME referee for the host and a player — the competition referee Ken Wong (no match referee set) — never \"No referee\" for one and a name for the other",
+   "pass": false,
+   "ev": {
+    "refHost": "Referees No referee",
+    "refAmy": "Referees Ken Wong"
+   },
+   "shot": "probes/fix-S2-shots/m2-live-host-en.png",
+   "item": "3b",
+   "vsReclub": "better — Reclub shows only the match ref; ours shows who actually referees (the competition referee) consistently"
+  },
+  {
+   "row": "D-comp-match-detail.05",
+   "what": "host schedule card with a set time: the clear action reads \"Clear time\" (繁 清除時間), no \"Unscheduled\" word beside the time; pressed → engine startAt null and the Time row then reads Unscheduled",
+   "pass": false,
+   "ev": {
+    "card": "Schedule match | Save time | Unscheduled | Assign court",
+    "pressed": false,
+    "startAtAfter": "2026-09-25T11:12:29.124Z",
+    "after": "Time | Unscheduled"
+   },
+   "shot": "probes/fix-S2-shots/m2-schedule-host-en.png",
+   "item": "4c",
+   "vsReclub": "equal — Reclub \"clear schedule\" is an action; the state word no longer sits beside a set time"
+  },
+  {
+   "row": "D-comp-match-detail.04",
+   "what": "match Players pane lists Team B's reserved place \"[probe] fix-S2 guest\" · Team B · Reserved (繁 預留) beside the seated players",
+   "pass": false,
+   "ev": {
+    "players": "Amy Chan / Mei Lam | Amy Chan | Mei Lam | Tom Ho"
+   },
+   "shot": "probes/fix-S2-shots/m2-players-host-en.png",
+   "item": "5",
+   "vsReclub": "equal — Reclub lists the reserved participant in the match roster"
+  },
+  {
+   "row": "D-match-format.08",
+   "what": "Draw tab round labels translated: 繁 \"第 1 輪\", 简 \"第 1 轮\", no English \"Round n\" left on either",
+   "pass": false,
+   "ev": {
+    "zhHant": "輪 | 每輪場數 | Round 1",
+    "zhHans": "轮 | 每轮场数 | Round 1"
+   },
+   "shot": "probes/fix-S2-shots/draw-host-zhHant.png",
+   "item": "2",
+   "vsReclub": "equal — Reclub localises round names"
+  },
+  {
+   "row": "D-dupr-activity-manager.07",
+   "what": "DUPR Manager reason line = sentences only: \"The two sides have a different number of players. · No linked DUPR ID: <names>\" — no raw code, no \".,\"; 繁 the same in Chinese; nothing submitted",
+   "pass": false,
+   "ev": {
+    "reason": "The two sides have a different number of players., not_connected",
+    "reasonZh": "球員名單",
+    "submitRequests": 0
+   },
+   "shot": "probes/fix-S2-shots/dupr-manager-host-en.png",
+   "item": "1",
+   "vsReclub": "better — Reclub names the error; ours names the players who still need to link DUPR"
+  },
+  {
+   "row": "D-comp-match-detail.06",
+   "what": "match page DUPR row after a real (caged) engine submit: \"Test only\" + \"Submitted by UAT Admin · <when>\" + \"Test environment — not sent to DUPR\" — for the host and a player; 繁 renders the line",
+   "pass": true,
+   "ev": {
+    "dupr": "DUPR Submitted by UAT Admin · Thu, 24 Sept, 07:14 pm · Test environment — not sent to DUPR Test only",
+    "duprAmy": "DUPR Submitted by UAT Admin · Thu, 24 Sept, 07:14 pm · Test environment — not sent to DUPR Test only",
+    "zh": "DUPR | 由 UAT Admin 提交 · 9月24日週四 19:14 · 測試環境 — 未提交至 DUPR"
+   },
+   "shot": "probes/fix-S2-shots/c2-submitted-host-en.png",
+   "item": "6",
+   "vsReclub": "equal — Reclub badge \"Submitted by {name}\"; ours adds when, and says honestly on UAT that nothing reached DUPR"
+  }
+ ],
+ "controls": [
+  {
+   "name": "fixture.C1",
+   "what": "Team A has mei INVITED (not in); Team B has tom + one reserved place and an open place (read back)",
+   "pass": true,
+   "ev": {
+    "openSlots": 1,
+    "reserved": 1,
+    "invitedA": 1
+   }
+  },
+  {
+   "name": "4b.stranger",
+   "what": "POSITIVE CONTROL: a stranger (ken, no entry) DOES see \"This team has a free place.\" + Ask to join on the same page — the check can see the card",
+   "pass": true,
+   "ev": {
+    "line": "This team has a free place. | Ask to join"
+   }
+  },
+  {
+   "name": "fixture.matches",
+   "what": "M1 completed, M2 inProgress with a score and a time, M3 cancelled (removed), ken is a staff referee (read back)",
+   "pass": true,
+   "ev": {
+    "M1": [
+     "arizzbh6mpah01gg",
+     "completed"
+    ],
+    "M2": [
+     "arizzbktmpah01gn",
+     "inProgress",
+     1,
+     "2026-09-25T11:12:29.124Z"
+    ],
+    "M3": [
+     "arizzbo3mpah01gr",
+     "cancelled"
+    ],
+    "refs": 0
+   }
+  },
+  {
+   "name": "3b.swap-live",
+   "what": "CONTROL: a live match still offers Swap sides (the removed-match check is not blind to the control)",
+   "pass": true,
+   "ev": {
+    "swap2": 1
+   }
+  },
+  {
+   "name": "2.en",
+   "what": "CONTROL: the EN draw tab shows \"Round 1\" (the label exists, so the zh check reads a real label)",
+   "pass": true,
+   "ev": {
+    "en": "Round 1"
+   }
+  },
+  {
+   "name": "6.neg",
+   "what": "CONTROL: before the caged submit the match page shows no \"Submitted by\" (the check can tell)",
+   "pass": true,
+   "ev": {
+    "dupr": "Submit to DUPR"
+   }
+  },
+  {
+   "name": "6.gate",
+   "what": "SAFETY GATE: web-uat carries DUPR_SUBMIT_SANDBOX=1 and runs the cage code (marker in the built tree)",
+   "pass": true,
+   "ev": {
+    "env": "1",
+    "mark": 1
+   }
+  },
+  {
+   "name": "6.receipt",
+   "what": "the caged engine path wrote the receipt: submitted | sandbox:<id> | sandbox_not_sent | submitted by the host; 0 hits on hkpl /api/v1/social/dupr/submit in the window",
+   "pass": true,
+   "ev": {
+    "row": "submitted|sandbox:arj019bimpah01h2|sandbox_not_sent|ari4hdzd3hac000c",
+    "hits": 0,
+    "match": {
+     "duprStatus": "submitted",
+     "duprRef": "sandbox:arj019bimpah01h2",
+     "duprError": "sandbox_not_sent"
+    }
+   }
+  }
+ ],
+ "errors": [],
+ "cleanup": {
+  "arizyikmmpah01fy": 200,
+  "arj0195smpah01gs": 200,
+  "left": 0,
+  "rows": 0,
+  "linksLeft": 0
+ },
+ "fx": {
+  "engineRev": "9638891f61ccca6aef444f50cb2b2b9436f24690",
+  "appBundle": "js/app.35eff02d.js",
+  "C1": "arizyikmmpah01fy",
+  "TB": {
+   "openSlots": 1,
+   "reserved": 1,
+   "invitedA": 1
+  },
+  "screen:hub-invited-mei-en": {
+   "chars": 699,
+   "overflow": 2,
+   "failed": [],
+   "errors": []
+  },
+  "screen:hub-invited-mei-zhHant": {
+   "chars": 336,
+   "overflow": 2,
+   "failed": [],
+   "errors": []
+  },
+  "screen:hub-accepted-mei-en": {
+   "chars": 619,
+   "overflow": 2,
+   "failed": [],
+   "errors": []
+  },
+  "screen:team-B-host-en": {
+   "chars": 463,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:team-B-stranger-ken-en": {
+   "chars": 341,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:team-B-host-zhHant": {
+   "chars": 249,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "staffRef": 200,
+  "M": {
+   "M1": [
+    "arizzbh6mpah01gg",
+    "completed"
+   ],
+   "M2": [
+    "arizzbktmpah01gn",
+    "inProgress",
+    1,
+    "2026-09-25T11:12:29.124Z"
+   ],
+   "M3": [
+    "arizzbo3mpah01gr",
+    "cancelled"
+   ],
+   "refs": 0
+  },
+  "screen:team-A-amy-en": {
+   "chars": 384,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:team-A-amy-zhHant": {
+   "chars": 292,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m3-removed-host-en": {
+   "chars": 306,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m3-removed-host-zhHant": {
+   "chars": 202,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m2-live-host-en": {
+   "chars": 587,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m2-live-amy-en": {
+   "chars": 532,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m2-schedule-host-en": {
+   "chars": 587,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m2-schedule-host-zhHant": {
+   "chars": 387,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m2-cleared-host-en": {
+   "chars": 587,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m2-players-host-en": {
+   "chars": 587,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:m2-players-host-zhHant": {
+   "chars": 387,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:draw-host-en": {
+   "chars": 907,
+   "overflow": 2,
+   "failed": [],
+   "errors": []
+  },
+  "screen:draw-host-zhHant": {
+   "chars": 467,
+   "overflow": 2,
+   "failed": [],
+   "errors": []
+  },
+  "screen:draw-host-zhHans": {
+   "chars": 467,
+   "overflow": 2,
+   "failed": [],
+   "errors": []
+  },
+  "screen:dupr-manager-host-en": {
+   "chars": 1115,
+   "overflow": 2,
+   "failed": [],
+   "errors": []
+  },
+  "screen:dupr-manager-host-zhHant": {
+   "chars": 539,
+   "overflow": 2,
+   "failed": [],
+   "errors": []
+  },
+  "C2": "arj0195smpah01gs",
+  "screen:c2-before-submit-host-en": {
+   "chars": 454,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "receipt": {
+   "row": "submitted|sandbox:arj019bimpah01h2|sandbox_not_sent|ari4hdzd3hac000c",
+   "hits": 0,
+   "match": {
+    "duprStatus": "submitted",
+    "duprRef": "sandbox:arj019bimpah01h2",
+    "duprError": "sandbox_not_sent"
+   }
+  },
+  "screen:c2-submitted-host-en": {
+   "chars": 518,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:c2-submitted-amy-en": {
+   "chars": 355,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  },
+  "screen:c2-submitted-host-zhHant": {
+   "chars": 281,
+   "overflow": 0,
+   "failed": [],
+   "errors": []
+  }
+ },
+ "summary": {
+  "rows": 11,
+  "pass": 1,
+  "fail": 10,
+  "controls": 8,
+  "controlFails": 0,
+  "errors": 0
+ }
+}
