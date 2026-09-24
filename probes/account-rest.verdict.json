@@ -1,0 +1,513 @@
+{
+ "id": "account-rest",
+ "at": "2026-09-24T05:58:29.908Z",
+ "mode": "live",
+ "plant": false,
+ "condition_fired": true,
+ "verdict": "no_verdict",
+ "rows": [
+  {
+   "id": "E-sport-levels.01",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "onboarding shows 13 level steps",
+     "detail": [
+      "2.0 · New",
+      "2.25 · New",
+      "2.5 · Beginner",
+      "2.75 · Beginner",
+      "3.0 · Improver",
+      "3.25 · Improver",
+      "3.5 · Intermediate",
+      "3.75 · Intermediate",
+      "4.0 · Advanced",
+      "4.25 · Advanced",
+      "4.5 · Strong",
+      "4.75 · Strong",
+      "5.0+ · Open"
+     ]
+    },
+    {
+     "pass": true,
+     "text": "profile level picker shows 13 level steps",
+     "detail": [
+      "2.0 · New",
+      "2.25 · New",
+      "2.5 · Beginner",
+      "2.75 · Beginner",
+      "3.0 · Improver",
+      "3.25 · Improver",
+      "3.5 · Intermediate",
+      "3.75 · Intermediate",
+      "4.0 · Advanced",
+      "4.25 · Advanced",
+      "4.5 · Strong",
+      "4.75 · Strong",
+      "5.0+ · Open"
+     ]
+    },
+    {
+     "pass": true,
+     "text": "the two screens show the SAME list (value · word)",
+     "detail": {
+      "onboarding": [
+       "2.0 · New",
+       "2.25 · New",
+       "2.5 · Beginner",
+       "2.75 · Beginner"
+      ],
+      "profile": [
+       "2.0 · New",
+       "2.25 · New",
+       "2.5 · Beginner",
+       "2.75 · Beginner"
+      ]
+     }
+    },
+    {
+     "pass": true,
+     "text": "tapping \"3.25 · Improver\" stores selfLevel 3.25 (engine read-back)",
+     "detail": {
+      "selfLevel": 3.25,
+      "api": [
+       "POST /api/meets/level -> 200 {\"selfLevel\":3.25,\"i\":\"…\"}"
+      ]
+     }
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "A-manage-meet-tutorial.03",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "fixture is a real listing (se_sbx read-back)",
+     "detail": "listing|private"
+    },
+    {
+     "pass": true,
+     "text": "the host of a live listing sees \"Convert to a full meet\"",
+     "detail": "Back\nSUN, 27 SEPT, 01:58 PM\n[probe] account-rest listing\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nVENUE\nTo be determined\nWHEN\nSunday, 27 Sept · 01:58 pm – 02:58 pm\n1 h\nAdd to calendar\nGAME\nPickleb"
+    },
+    {
+     "pass": true,
+     "text": "Convert → the meet row is now managed (se_sbx read-back)",
+     "detail": {
+      "type": "managed",
+      "api": [
+       "POST /api/meets/update -> 200 {\"meetId\":\"arioqzrxb3nb002a\",\"type\":\"managed\",\"expectType\":\"listing\",\"i\":\"…\"}"
+      ]
+     }
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-activity-manager.02",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "fixture: submitMatches on, one scored match never sent (duprStatus null)",
+     "detail": {}
+    },
+    {
+     "pass": true,
+     "text": "DUPR Manager shows the Pending / Submitted / Ineligible boxes",
+     "detail": "Back\nSUN, 27 SEPT, 01:58 PM\n[probe] account-rest DUPR manager\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nDUPR\nManager\nPayments\nAuto-approve\nORGANIZERS • 1\n波2\n波友測試 2\n3.39\nCONFIRMED • 2/8\nOptions\nSort: Last confirmed ▾\nShow: Tags, Level, Courts ▾\n波2\n波友測試 2\n3.39\n[A\n[probe] account-rest guest\nReserved"
+    },
+    {
+     "pass": true,
+     "text": "no DUPR submit door was called",
+     "detail": null
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-activity-manager.03",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "tapping a scored row opens the match recap",
+     "detail": "https://uat.gripbat.com/app/pages/match/index?source=meet&id=arior7k0b3nb002o"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-activity-manager.04",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "Recalculate eligibility re-reads meets/dupr-manager",
+     "detail": [
+      "POST /api/meets/dupr-manager -> 200 {\"meetId\":\"arior7bgb3nb002j\",\"i\":\"…\"}"
+     ]
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-submit-notice.01",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "Join first shows \"This activity will be submitted to DUPR\"",
+     "detail": "Back\nSUN, 27 SEPT, 01:59 PM\n[probe] account-rest DUPR notice\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nVENUE\nTo be determined\nWHEN\nSunday, 27 Sept · 01:59 pm – 03:29 pm\n1.5 h\nAdd to calendar\nGAME\nP"
+    },
+    {
+     "pass": true,
+     "text": "nothing is joined before the player answers the notice",
+     "detail": [
+      "GET /api/v1/dupr/connection -> 200"
+     ]
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-support.03",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "prod hkpl answers resync_available_at (the /dupr/resync route is live on hkpl)",
+     "detail": {
+      "connected": true,
+      "id": "UAT7db3c0377f59",
+      "hasResyncField": true
+     }
+    },
+    {
+     "pass": true,
+     "text": "Connect DUPR shows \"Is your DUPR rating not syncing correctly?\" + Resync ratings",
+     "detail": "Back\nConnect DUPR\nConnected\nLinked to DUPR UAT7db3c0377f59\nSee my DUPR\nIs your DUPR rating not syncing correctly?\nResync ratings\nDisconnect DUPR\nFind my DUPR by name\nWe search DUPR for the name on your profile — 波友測試 2\nFind my DUPR\nAuthorize on DUPR\nEnter your DUPR ID (6 characters), then authorize "
+    },
+    {
+     "pass": true,
+     "text": "the press reaches hkpl POST /api/v1/dupr/resync and is answered without a DUPR call (409 no_short_id / 429 cooldown)",
+     "detail": "POST /api/v1/dupr/resync -> 409 {}"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "E-own-profile.03",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "the photo sheet offers \"Remove profile picture\"",
+     "detail": null
+    },
+    {
+     "pass": true,
+     "text": "the engine avatar is cleared (i/update {avatarId:null}, read back)",
+     "detail": {
+      "avatarId": null,
+      "api": [
+       "POST /api/i/update -> 200 {\"avatarId\":null,\"i\":\"…\"}"
+      ]
+     }
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "E-settings-hub.12",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "Settings foot reads the build of the bundle this browser loaded",
+     "detail": {
+      "line": "GripBat · Version 1.0 · build db866344",
+      "bundle": "db866344"
+     }
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "E-delete-account.02",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "Delete account reveals the typed-confirmation field",
+     "detail": null
+    },
+    {
+     "pass": true,
+     "text": "\"Yes, delete\" is disabled until DELETE is typed (NOT pressed)",
+     "detail": {
+      "disabledBefore": true,
+      "disabledAfter": false
+     }
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "E-notif-settings.09",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "switching Meet updates off asks first",
+     "detail": "gn in before then to restore it.\nDelete account\nGripBat · Version 1.0 · build db866344\nHome\nDiscover\nCommunity\nInbox\nSee more\nTurn off all essential notifications?\nYou will not hear when you move from the waitlist to confirmed, when you are invited, or when a meet is cancelled.\nKeep them on\nTurn off"
+    },
+    {
+     "pass": true,
+     "text": "\"Keep them on\" writes nothing (engine read-back unchanged)",
+     "detail": {
+      "before": true,
+      "after": true
+     }
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-stats-filter-gender.01",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "Rankings (GripBat): the Non-binary chip filters (gender:nonbinary sent)",
+     "detail": [
+      "POST /api/stats/gb-rankings -> 200 {\"type\":\"doubles\",\"gender\":\"nonbinary\",\"limit\":20,\"offset\":0,\"i\":\"…\"}"
+     ]
+    },
+    {
+     "pass": true,
+     "text": "DUPR Rankings shows the same Coed / Male / Female / Non-binary chips",
+     "detail": "Back\nUPDATED DAILY\nStatistics\nStreet Cred\nRankings\nMatchups\nDUPR Rankings\nLeaderboards\nRising\nDUPR Rankings · HK\n?\nCoed\nMale\nFemale\nNon-binary\nDoubles ▼\nSingles ▼\nCurrent Rank\nNot ranked yet\nThere are"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "E-onb-terms.02",
+   "level": "L6",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "text": "fixture: a brand-new account with no accepted terms (se_sbx)",
+     "detail": null
+    },
+    {
+     "pass": true,
+     "text": "a signed-in account without accepted terms gets the consent gate",
+     "detail": "[\nHi, [probe]\nEN\nLanguage\nNotifications\nInbox\nTHIS WEEK\n34 meets near you this week\nFind a game\nPLAY NOW\nFind a meet\nJoin a game near you\nOpen play\nDrop in, get rotated\nTournaments\nBrackets and pools\n"
+    },
+    {
+     "pass": true,
+     "text": "Sign out from the gate signs out (hkpl sign-out called) and the gate closes",
+     "detail": {
+      "signouts": 1,
+      "gateGone": true,
+      "url": "https://uat.gripbat.com/app/pages/home/index"
+     }
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "E-auth-login.05",
+   "level": "L5",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "needs the ACCOUNT-GRACE-V1 sweep to clean a suspended throwaway; measured once on 2026-09-24 (preview-run2.verdict.json): adapter/sso 200 + every call 403 YOUR_ACCOUNT_SUSPENDED, the app shows Home signed in with no message"
+  },
+  {
+   "id": "E-delete-account.03",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "E-marked-deletion.01",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "E-maintenance.01",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "E-notif-settings.04",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "E-notif-settings.06",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "D-statistics.06",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "D-match-summary.02",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "RATINGS-LIVE-V1 (ratingsOf vs liveLog)",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "D-dupr-confirm-submit.01",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  },
+  {
+   "id": "D-dupr-confirm-submit.02",
+   "level": "L6",
+   "verdict": "not_run",
+   "checks": [],
+   "note": "engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+  }
+ ],
+ "fixtures": {
+  "listing": "arioqzrxb3nb002a",
+  "duprMeet": "arior7bgb3nb002j",
+  "guestAdd": "200 {\"id\":\"arior7bgb3nb002j\",\"createdAt\":\"2026-09-24T05:58:55.180Z\",\"referenceCode\":\"p4bscc3i\",\"hostId\":\"ar7jww4yjhqz003s\",\"",
+  "match": "200 arior7k0b3nb002o",
+  "submitOn": "200 {\"id\":\"arior7bgb3nb002j\",\"createdAt\":\"2026-09-24T05:58:55.180Z\",\"referenceCode\":",
+  "noticeMeet": "ariorllhb3nb005s",
+  "noticeCta": "\nType it in Discover to open this meet\nCopy\nFEE\nNo fee set\nDUPR\nMatches will be submitted to DUPR\nGoing · 1/8\nSee all\n波2\n波友測試 2\nPhotos\nNo photos have been added yet. Share your best moments.\nBringing anyone?\nA +1 takes a seat of its own · max 1\n−\nJust me\n+\nJoin\nHome\nDiscover\nCommunity\nInbox\nSee more",
+  "t2Dupr": {
+   "connected": true,
+   "id": "UAT7db3c0377f59",
+   "hasResyncField": true
+  },
+  "avatarSet": 200,
+  "photoSheet": {
+   "avatarBefore": "arinv5c17ay200gz",
+   "text": "ripBat\nactive\nSettings\nNotifications, privacy, blocked players, language, delete account\n›\nPhoto credits\nWikimedia Commons · CC0 / CC BY / CC BY-SA\n›\nSign out\nHome\nDiscover\nCommunity\nInbox\nSee more\nChange photo\nRemove profile picture\nCancel"
+  },
+  "statsText": "Back\nUPDATED DAILY\nStatistics\nStreet Cred\nRankings\nMatchups\nDUPR Rankings\nLeaderboards\nRising\nRankings · GripBat\n?\nDoubles\nSingles\nCoed\nMale\nFemale\nNon-binary\nYour Rankings\n#22 / 41 · 3.52\n1\nUAT Admin\n2 Wins · 5 matches · 4 opponents · Provisional\n4.51\n2\nPriya Sharma\n5 Wins · 6 matches · 7 opponents",
+  "promptOverGate": true,
+  "termsAfterSignout": [
+   "boyau_social_token=11"
+  ]
+ },
+ "restores": {
+  "level0": 3.5,
+  "levelBack": "200 3.5",
+  "avatar0": null,
+  "avatarBack": {
+   "status": 200,
+   "avatarId": null,
+   "want": null
+  },
+  "levelFinal": 3.5
+ },
+ "cleanup": {
+  "throwaway ariosuxue04o004q": "200 {\"deleted\":true}",
+  "notice leave": 400,
+  "noticeMeet ariorllhb3nb005s": 200,
+  "duprMeet arior7bgb3nb002j": 400,
+  "duprMeet cancel": 200,
+  "listing arioqzrxb3nb002a": 200,
+  "liveProbeMeets": "0"
+ },
+ "errors": [],
+ "evidence": [
+  "PASS E-sport-levels.01 [L6] OK onboarding shows 13 level steps | OK profile level picker shows 13 level steps | OK the two screens show the SAME list (value · word) | OK tapping \"3.25 · Improver\" stores selfLevel 3.25 (engine read-back)",
+  "PASS A-manage-meet-tutorial.03 [L6] OK fixture is a real listing (se_sbx read-back) | OK the host of a live listing sees \"Convert to a full meet\" | OK Convert → the meet row is now managed (se_sbx read-back)",
+  "PASS D-dupr-activity-manager.02 [L6] OK fixture: submitMatches on, one scored match never sent (duprStatus null) | OK DUPR Manager shows the Pending / Submitted / Ineligible boxes | OK no DUPR submit door was called",
+  "PASS D-dupr-activity-manager.03 [L6] OK tapping a scored row opens the match recap",
+  "PASS D-dupr-activity-manager.04 [L6] OK Recalculate eligibility re-reads meets/dupr-manager",
+  "PASS D-dupr-submit-notice.01 [L6] OK Join first shows \"This activity will be submitted to DUPR\" | OK nothing is joined before the player answers the notice",
+  "PASS D-dupr-support.03 [L6] OK prod hkpl answers resync_available_at (the /dupr/resync route is live on hkpl) | OK Connect DUPR shows \"Is your DUPR rating not syncing correctly?\" + Resync ratings | OK the press reaches hkpl POST /api/v1/dupr/resync and is answered without a DUPR call (409 no_short_id / 429 cooldown)",
+  "PASS E-own-profile.03 [L6] OK the photo sheet offers \"Remove profile picture\" | OK the engine avatar is cleared (i/update {avatarId:null}, read back)",
+  "PASS E-settings-hub.12 [L6] OK Settings foot reads the build of the bundle this browser loaded",
+  "PASS E-delete-account.02 [L6] OK Delete account reveals the typed-confirmation field | OK \"Yes, delete\" is disabled until DELETE is typed (NOT pressed)",
+  "PASS E-notif-settings.09 [L6] OK switching Meet updates off asks first | OK \"Keep them on\" writes nothing (engine read-back unchanged)",
+  "PASS D-stats-filter-gender.01 [L6] OK Rankings (GripBat): the Non-binary chip filters (gender:nonbinary sent) | OK DUPR Rankings shows the same Coed / Male / Female / Non-binary chips",
+  "PASS E-onb-terms.02 [L6] OK fixture: a brand-new account with no accepted terms (se_sbx) | OK a signed-in account without accepted terms gets the consent gate | OK Sign out from the gate signs out (hkpl sign-out called) and the gate closes",
+  "NOT_RUN E-auth-login.05 [L5]  — needs the ACCOUNT-GRACE-V1 sweep to clean a suspended throwaway; measured once on 2026-09-24 (preview-run2.verdict.json): adapter/sso 200 + every call 403 YOUR_ACCOUNT_SUSPENDED, the app shows Home signed in with no message",
+  "NOT_RUN E-delete-account.03 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN E-marked-deletion.01 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN E-maintenance.01 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN E-notif-settings.04 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN E-notif-settings.06 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN D-statistics.06 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN D-match-summary.02 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN RATINGS-LIVE-V1 (ratingsOf vs liveLog) [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN D-dupr-confirm-submit.01 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent",
+  "NOT_RUN D-dupr-confirm-submit.02 [L6]  — engine ACCOUNT-REST not running on UAT (rev b862cec7908332f5f11da63306784d49cb91c684): its doors adapter/account/deletion + gb/status are absent"
+ ],
+ "personas": {
+  "t1": "ar89kz29mnr7001o",
+  "t2": "ar7jww4yjhqz003s"
+ },
+ "engine": {
+  "rev": "b862cec7908332f5f11da63306784d49cb91c684",
+  "accountRest": false
+ },
+ "probecount": "=== se_sbx ===\nclubs_live 0\nmeets_live 12\nnotes 0\nusers_live 0\n",
+ "summary": {
+  "rows": 24,
+  "pass": 13,
+  "fail": [],
+  "not_run": [
+   "E-auth-login.05",
+   "E-delete-account.03",
+   "E-marked-deletion.01",
+   "E-maintenance.01",
+   "E-notif-settings.04",
+   "E-notif-settings.06",
+   "D-statistics.06",
+   "D-match-summary.02",
+   "RATINGS-LIVE-V1 (ratingsOf vs liveLog)",
+   "D-dupr-confirm-submit.01",
+   "D-dupr-confirm-submit.02"
+  ]
+ }
+}

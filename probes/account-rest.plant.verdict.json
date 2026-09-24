@@ -1,0 +1,241 @@
+{
+ "id": "account-rest",
+ "at": "2026-09-24T05:14:13.347Z",
+ "mode": "live",
+ "plant": true,
+ "condition_fired": true,
+ "verdict": "pass",
+ "rows": [
+  {
+   "id": "E-sport-levels.01",
+   "level": "L6",
+   "verdict": "fail",
+   "checks": [
+    {
+     "pass": true,
+     "text": "onboarding shows 13 level steps",
+     "detail": [
+      "2 · New",
+      "2.25",
+      "2.5 · Beginner",
+      "2.75",
+      "3 · Improver",
+      "3.25",
+      "3.5 · Intermediate",
+      "3.75",
+      "4 · Advanced",
+      "4.25",
+      "4.5 · Strong",
+      "4.75",
+      "5.0+ · Open"
+     ]
+    },
+    {
+     "pass": true,
+     "text": "profile level picker shows 13 level steps",
+     "detail": [
+      "2.0 · Beginner",
+      "2.25 · Beginner",
+      "2.5 · Beginner",
+      "2.75 · Beginner",
+      "3.0 · Intermediate",
+      "3.25 · Intermediate",
+      "3.5 · Intermediate",
+      "3.75 · Intermediate",
+      "4.0 · Advanced",
+      "4.25 · Advanced",
+      "4.5 · Advanced",
+      "4.75 · Advanced",
+      "5.0+ · Pro"
+     ]
+    },
+    {
+     "pass": false,
+     "text": "the two screens show the SAME list (value · word)",
+     "detail": {
+      "onboarding": [
+       "2 · New",
+       "2.25",
+       "2.5 · Beginner",
+       "2.75"
+      ],
+      "profile": [
+       "2.0 · Beginner",
+       "2.25 · Beginner",
+       "2.5 · Beginner",
+       "2.75 · Beginner"
+      ]
+     }
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "A-manage-meet-tutorial.03",
+   "level": "L6",
+   "verdict": "fail",
+   "checks": [
+    {
+     "pass": true,
+     "text": "fixture is a real listing (se_sbx read-back)",
+     "detail": "listing|private"
+    },
+    {
+     "pass": false,
+     "text": "the host of a live listing sees \"Convert to a full meet\"",
+     "detail": "Back\nSUN, 27 SEPT, 01:14 PM\n[probe] account-rest listing\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nVENUE\nTo be determined\nWHEN\nSunday, 27 Sept · 01:14 pm – 02:14 pm\n1 h\nAdd to calendar\nGAME\nPickleb"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-activity-manager.02",
+   "level": "L6",
+   "verdict": "fail",
+   "checks": [
+    {
+     "pass": true,
+     "text": "fixture: submitMatches on, one scored match never sent (duprStatus null)",
+     "detail": {}
+    },
+    {
+     "pass": false,
+     "text": "DUPR Manager shows the Pending / Submitted / Ineligible boxes",
+     "detail": "Back\nSUN, 27 SEPT, 01:14 PM\n[probe] account-rest DUPR manager\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nDUPR\nManager\nPayments\nAuto-approve\nORGANIZERS • 1\n波2\n波友測試 2\n3.39\nCONFIRMED • 2/8\nOptions\nSort: Last confirmed ▾\nShow: Tags, Level, Courts ▾\n波2\n波友測試 2\n3.39\n[A\n[probe] account-rest guest\nReserved"
+    },
+    {
+     "pass": true,
+     "text": "no DUPR submit door was called",
+     "detail": null
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-activity-manager.03",
+   "level": "L6",
+   "verdict": "fail",
+   "checks": [
+    {
+     "pass": false,
+     "text": "tapping a scored row opens the match recap",
+     "detail": "https://uat.gripbat.com/app/pages/meet/index?id=arin64s1dfd5000y&lang=en"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-activity-manager.04",
+   "level": "L6",
+   "verdict": "fail",
+   "checks": [
+    {
+     "pass": false,
+     "text": "\"Recalculate eligibility\" button present",
+     "detail": "Back\nSUN, 27 SEPT, 01:14 PM\n[probe] account-rest DUPR manager\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nDUPR\nManager\nPayments\nAuto-approve\nORGANIZERS • 1\n波2\n波友測試 2\n3.39\nCONFIRMED • 2/8\nOptions\nSort"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-submit-notice.01",
+   "level": "L6",
+   "verdict": "fail",
+   "checks": [
+    {
+     "pass": false,
+     "text": "Join first shows \"This activity will be submitted to DUPR\"",
+     "detail": "Back\nSUN, 27 SEPT, 01:14 PM\n[probe] account-rest DUPR notice\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nVENUE\nTo be determined\nWHEN\nSunday, 27 Sept · 01:14 pm – 02:44 pm\n1.5 h\nAdd to calendar\nGAME\nP"
+    },
+    {
+     "pass": false,
+     "text": "nothing is joined before the player answers the notice",
+     "detail": [
+      "POST /api/meets/join -> 200 {\"meetId\":\"arin6h0ydfd50015\",\"plusOnes\":0,\"i\":\"…\"}",
+      "POST /api/meets/levels -> 200 {\"userIds\":[\"ar7jww4yjhqz003s\",\"ar89kz29mnr7001o\"],\"sport\":\"pickleball\",\"i\":\"…\"}"
+     ]
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "D-dupr-support.03",
+   "level": "L6",
+   "verdict": "fail",
+   "checks": [
+    {
+     "pass": true,
+     "text": "prod hkpl answers resync_available_at (the /dupr/resync route is live on hkpl)",
+     "detail": {
+      "connected": true,
+      "id": "UAT7db3c0377f59",
+      "hasResyncField": true
+     }
+    },
+    {
+     "pass": false,
+     "text": "Connect DUPR shows \"Is your DUPR rating not syncing correctly?\" + Resync ratings",
+     "detail": "Back\nConnect DUPR\nConnected\nLinked to DUPR UAT7db3c0377f59\nSee my DUPR\nDisconnect DUPR\nFind my DUPR by name\nWe search DUPR for the name on your profile — 波友測試 2\nFind my DUPR\nAuthorize on DUPR\nEnter your DUPR ID (6 characters), then authorize GripBat in DUPR's own window.\nRe-authorize on DUPR\nConnect"
+    }
+   ],
+   "note": "press skipped (short DUPR id → would read the partner API, or PLANT)"
+  }
+ ],
+ "fixtures": {
+  "listing": "arin60x5dfd5000u",
+  "duprMeet": "arin64s1dfd5000y",
+  "guestAdd": "200 {\"id\":\"arin64s1dfd5000y\",\"createdAt\":\"2026-09-24T05:14:32.497Z\",\"referenceCode\":\"wt15vzqv\",\"hostId\":\"ar7jww4yjhqz003s\",\"",
+  "match": "200 arin64x3dfd50012",
+  "submitOn": "200 {\"id\":\"arin64s1dfd5000y\",\"createdAt\":\"2026-09-24T05:14:32.497Z\",\"referenceCode\":",
+  "noticeMeet": "arin6h0ydfd50015",
+  "t2Dupr": {
+   "connected": true,
+   "id": "UAT7db3c0377f59",
+   "hasResyncField": true
+  }
+ },
+ "restores": {
+  "level0": 3.5
+ },
+ "cleanup": {
+  "notice leave": 200,
+  "noticeMeet arin6h0ydfd50015": 200,
+  "duprMeet arin64s1dfd5000y": 400,
+  "duprMeet cancel": 200,
+  "listing arin60x5dfd5000u": 200,
+  "liveProbeMeets": "0"
+ },
+ "errors": [],
+ "evidence": [
+  "FAIL E-sport-levels.01 [L6] OK onboarding shows 13 level steps | OK profile level picker shows 13 level steps | NO the two screens show the SAME list (value · word)",
+  "FAIL A-manage-meet-tutorial.03 [L6] OK fixture is a real listing (se_sbx read-back) | NO the host of a live listing sees \"Convert to a full meet\"",
+  "FAIL D-dupr-activity-manager.02 [L6] OK fixture: submitMatches on, one scored match never sent (duprStatus null) | NO DUPR Manager shows the Pending / Submitted / Ineligible boxes | OK no DUPR submit door was called",
+  "FAIL D-dupr-activity-manager.03 [L6] NO tapping a scored row opens the match recap",
+  "FAIL D-dupr-activity-manager.04 [L6] NO \"Recalculate eligibility\" button present",
+  "FAIL D-dupr-submit-notice.01 [L6] NO Join first shows \"This activity will be submitted to DUPR\" | NO nothing is joined before the player answers the notice",
+  "FAIL D-dupr-support.03 [L6] OK prod hkpl answers resync_available_at (the /dupr/resync route is live on hkpl) | NO Connect DUPR shows \"Is your DUPR rating not syncing correctly?\" + Resync ratings — press skipped (short DUPR id → would read the partner API, or PLANT)"
+ ],
+ "personas": {
+  "t1": "ar89kz29mnr7001o",
+  "t2": "ar7jww4yjhqz003s"
+ },
+ "engine": {
+  "rev": "1e34481d4a9433d8fd0b1ca36c2f58564f65bda7",
+  "accountRest": false
+ },
+ "probecount": "=== se_sbx ===\nclubs_live 0\nmeets_live 0\nnotes 0\nusers_live 0\n",
+ "summary": {
+  "rows": 7,
+  "pass": 0,
+  "fail": [
+   "E-sport-levels.01",
+   "A-manage-meet-tutorial.03",
+   "D-dupr-activity-manager.02",
+   "D-dupr-activity-manager.03",
+   "D-dupr-activity-manager.04",
+   "D-dupr-submit-notice.01",
+   "D-dupr-support.03"
+  ],
+  "not_run": []
+ }
+}
