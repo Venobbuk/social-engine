@@ -45,6 +45,7 @@ import { CheckExpiredMutingsProcessorService } from './processors/CheckExpiredMu
 import { MeetSweepProcessorService } from '@/modules/meets/MeetSweepProcessorService.js';
 import { ClubScheduleSweepProcessorService } from '@/modules/clubs/ClubScheduleSweepProcessorService.js'; // CLUB-V3
 import { CoachScheduleSweepProcessorService } from '@/modules/coaches/CoachScheduleSweepProcessorService.js'; // COACHING-V1
+import { GbDuprRefreshProcessorService } from '@/modules/meets/GbDuprRefreshProcessorService.js'; // GB-DUPR-REFRESH-V1
 import { BakeBufferedReactionsProcessorService } from './processors/BakeBufferedReactionsProcessorService.js';
 import { CleanProcessorService } from './processors/CleanProcessorService.js';
 import { AggregateRetentionProcessorService } from './processors/AggregateRetentionProcessorService.js';
@@ -132,6 +133,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 		private meetSweepProcessorService: MeetSweepProcessorService,
 		private clubScheduleSweepProcessorService: ClubScheduleSweepProcessorService, // CLUB-V3
 		private coachScheduleSweepProcessorService: CoachScheduleSweepProcessorService, // COACHING-V1
+		private gbDuprRefreshProcessorService: GbDuprRefreshProcessorService, // GB-DUPR-REFRESH-V1
 		private bakeBufferedReactionsProcessorService: BakeBufferedReactionsProcessorService,
 		private checkModeratorsActivityProcessorService: CheckModeratorsActivityProcessorService,
 		private cleanProcessorService: CleanProcessorService,
@@ -178,6 +180,7 @@ export class QueueProcessorService implements OnApplicationShutdown {
 					case 'meetSweep': return this.meetSweepProcessorService.process();
 					case 'clubScheduleSweep': return this.clubScheduleSweepProcessorService.process(); // CLUB-V3
 					case 'coachScheduleSweep': return this.coachScheduleSweepProcessorService.process(); // COACHING-V1
+					case 'gbDuprRefresh': return this.gbDuprRefreshProcessorService.process(); // GB-DUPR-REFRESH-V1
 					case 'bakeBufferedReactions': return this.bakeBufferedReactionsProcessorService.process();
 					case 'checkModeratorsActivity': return this.checkModeratorsActivityProcessorService.process();
 					case 'clean': return this.cleanProcessorService.process();

@@ -82,6 +82,9 @@ const REPEATABLE_SYSTEM_JOB_DEF = [{
 	name: 'coachScheduleSweep', // COACHING-V1
 	pattern: '*/5 * * * *',
 }, {
+	name: 'gbDuprRefresh', // GB-DUPR-REFRESH-V1: linked members' DUPR ratings from hkpl's partner API, every 6 hours
+	pattern: '17 */6 * * *',
+}, {
 	name: 'bakeBufferedReactions',
 	pattern: '0 0 * * *',
 }, {
