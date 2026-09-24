@@ -216,6 +216,13 @@ user-friendly, or closer to what the user needs." So when a product choice comes
 3. **Negative partner chemistry is private to the two players.** Positive chemistry may be shown. Every door that
    exposes or derives chemistry applies this (gb-edge, gb-pairs, gb-fair, friend suggestions) — dropped *before*
    ranking so it can't leak through sort order.
+   **G15.3 addendum (2026-09-24, orchestrator decision under G15.0; found by lane sec-chemistry):** the private part must
+   not be derivable either. (a) Per-match rating before/after and rating deltas are shown only to the player
+   themselves — from public results plus per-match ratings anyone could compute a pair's chemistry (Reclub's match
+   summary shows no per-match ratings). (b) To anyone other than the pair, positive chemistry is shown only when it is
+   clear — at least 3 matches together AND at least +5 percentage points above expected; anything else reads neutral,
+   so "not shown as positive" never implies "negative". (c) Private-meet matches never feed any figure a stranger sees
+   (`MatchHistory.logVisible`), including Edge rating / form / clutch / upsets. One rule: `GbRating.chemFor`.
 4. **A warning's author is anonymous to the person warned.** Endorsements and feedback stay attributed.
 5. **Private means private.** A private club/meet — its existence, name, members, counts, schedule, location — is
    readable only by owner, admins, members, and invite-token holders (`ClubService.mayReadClub`). Every sibling door
