@@ -1,0 +1,598 @@
+{
+ "id": "venues-discover-rest",
+ "at": "2026-09-24T08:32:26.045Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  {
+   "summary": {
+    "unmeasured": [],
+    "closed": [
+     "C-venue.04 L6",
+     "C-venue-media.01 L6",
+     "C-venue-media.02 L6",
+     "C-venue.12 L6",
+     "C-venue.13 L6",
+     "C-discover.23 L6",
+     "C-filter-dates.01 L6",
+     "C-home.08 L6",
+     "C-community-detail.01 L6",
+     "D-coach-detail.05 L6",
+     "D-coach-profile.03 L6",
+     "D-coach-profile.04 L6",
+     "C-root-layout.04 L6",
+     "C-root-layout.02 L6",
+     "C-feed.04 L6",
+     "C-qrcode.03 L6",
+     "E-onb-location.02 L6",
+     "E-onb-location-existing.01 L6",
+     "C-home.13 L6",
+     "E-locations.05 L6",
+     "C-home.12 L6"
+    ],
+    "open": [],
+    "plants": [
+     "fired non-owner venues/update refused 403 NOT_VENUE_MANAGER",
+     "fired anonymous venues/media/add refused 401",
+     "fired non-author non-owner venues/media/delete refused 403 NOT_MEDIA_DELETER",
+     "fired player venues/staff-update (Manage owners) refused 403 NOT_GRIPBAT_STAFF",
+     "fired creator who is not the owner: venues/delete refused 403"
+    ]
+   }
+  },
+  {
+   "rows": {
+    "C-venue.04": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "menu": [
+       "Pin to home",
+       "Send feedback",
+       "You own this venue",
+       "Add a venue",
+       "Edit Venue",
+       "View venue's media",
+       "Delete Venue"
+      ],
+      "pinReq": {
+       "status": 200,
+       "body": {
+        "venueId": "ariu8nxpohyd00a6",
+        "pinned": true,
+        "i": "<tok>"
+       }
+      },
+      "dbPinRow": "1",
+      "homeCrest": true,
+      "longPressSheet": [
+       "Open venue",
+       "Unpin from home"
+      ],
+      "unpinReq": {
+       "venueId": "ariu8nxpohyd00a6",
+       "pinned": false,
+       "i": "<tok>"
+      },
+      "dbAfterUnpin": "0"
+     }
+    },
+    "C-venue-media.01": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "cells": 2,
+      "monthHeader": true,
+      "empty": "No Photos Yet (unit: shown when list is empty, see t1 check below)"
+     }
+    },
+    "C-venue-media.02": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "cellMenu": [
+       "View photo",
+       "Unpin from carousel",
+       "Download media",
+       "Delete media"
+      ],
+      "pickerItems": [
+       "Take photo",
+       "Choose from library",
+       "Paste from clipboard"
+      ],
+      "chooser": {
+       "multiple": true
+      },
+      "addReq": {
+       "status": 200
+      },
+      "dbAfterAdd": "3",
+      "cellsAfterAdd": 3,
+      "selectBar": true,
+      "delReq": {
+       "status": 200,
+       "body": {
+        "mediaIds": [
+         "ariu8ob8ohyd00a8"
+        ],
+        "i": "<tok>"
+       }
+      },
+      "dbAfterDelete": "2"
+     }
+    },
+    "C-venue.12": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "carouselImgs": 4,
+      "seeAll": true,
+      "ownerPhotoMenu": [
+       "View photo",
+       "Unpin from carousel",
+       "Download media",
+       "Delete media"
+      ],
+      "pinnedFirstApi": true
+     }
+    },
+    "C-venue.13": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "owner": {
+       "upd": {
+        "status": 200,
+        "body": {
+         "venueId": "ariu8nxpohyd00a6",
+         "name": "[probe] venues-discover-rest court",
+         "address": "[probe] venues-discover-rest 1 Probe Road, Kowloon",
+         "courtCount": 3,
+         "notes": null,
+         "i": "<tok>"
+        }
+       },
+       "dbCourts": "3",
+       "ownersSectionForOwner": false,
+       "deleteButton": true
+      },
+      "staffMenu": [
+       "Pin to home",
+       "Send feedback",
+       "Claim this venue",
+       "Add a venue",
+       "Edit Venue",
+       "View venue's media",
+       "Manage Owners",
+       "Delete Venue"
+      ],
+      "staffOwnersSection": true,
+      "mainOwnerListed": true,
+      "deleteFromUi": {
+       "status": 200,
+       "dbVenue": "0",
+       "dbMedia": "0"
+      }
+     }
+    },
+    "C-discover.23": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "card": {
+       "text": "[probe] venues-discover-rest court [probe] venues-discover-rest 1 Probe Road, Kowloon 3 courts 1.0 km Add photo",
+       "photos": 5
+      },
+      "note": "N clubs was closed by 432d552 (seen on the Aberdeen / Hammer Hill cards: \"· 1 club\")"
+     }
+    },
+    "C-filter-dates.01": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "hasDates": true,
+      "pickerOpened": 2,
+      "dragged": true,
+      "harness": "transitionend dispatched on the wheel (headless Chrome does not fire it)",
+      "request": {
+       "from": "2026-09-23T16:00:00.000Z",
+       "to": "2026-09-26T16:00:00.000Z",
+       "days": 3
+      },
+      "stripChip": "24 Sept – 26 Sept ×"
+     }
+    },
+    "C-home.08": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "crests": [
+       "[probe] venues-discover-rest invite club Invited",
+       "[probe] venues-discover-rest request club Requested",
+       "Join a club"
+      ],
+      "longPressSheet": [
+       "Open club"
+      ],
+      "pinnedVenue": "see C-venue.04 (📍 crest + long-press Unpin)"
+     }
+    },
+    "S4-finding-home-by-friends": {
+     "status": "settled: it switches",
+     "level": "L6",
+     "evidence": {
+      "tabOnAfterClick": [
+       "By friends"
+      ],
+      "listChanged": true,
+      "requestsDuringSwitch": [],
+      "note": "By friends is computed client-side at load (myNetwork + discover), so no request is expected on the switch"
+     }
+    },
+    "C-community-detail.01": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "metricsPage": {
+       "activities": 80,
+       "clubs": 6,
+       "players": 40,
+       "sports": 1
+      },
+      "metricsApi": {
+       "activities": 80,
+       "clubs": 6,
+       "players": 40,
+       "sports": 1
+      },
+      "dbActivities": "80",
+      "dbPublicClubs": "6",
+      "privateClubsNotCounted": "6",
+      "onScreen": [
+       80,
+       6,
+       40,
+       1
+      ],
+      "clubRows": 10,
+      "decision": "community = the whole GripBat server (G15.15 + one-community OOS + Reclub retired community borders); Near <Discover place> narrows it"
+     }
+    },
+    "D-coach-detail.05": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "chooser": {
+       "multiple": true
+      },
+      "save": 200,
+      "fieldReadBack": "https://media.social.silkvo.com/files/63623643-f576-4add-acbf-1ebcc181dde1.png",
+      "gridImgs": 2
+     }
+    },
+    "D-coach-profile.03": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "slides": 1,
+      "coach": "Mei Lam (clubowner-mei, Coach role)"
+     }
+    },
+    "D-coach-profile.04": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "clubChips": [
+       "UAT Paddle Club"
+      ],
+      "decision": "GripBat has one community, so the coach card shows the coach's clubs (clubs/of-user) where Reclub shows communities"
+     }
+    },
+    "C-root-layout.04": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "bannerText": "[probe] venues-discover-rest technical difficulties\n[probe] venues-discover-rest banner text\nHide",
+      "hideWorks": true,
+      "source": "native announcements (display banner), set in the engine admin"
+     }
+    },
+    "C-root-layout.02": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "sheet": [
+       "Take photo",
+       "Choose from library",
+       "Paste from clipboard"
+      ],
+      "chooser": {
+       "multiple": true
+      },
+      "uploadChoose": 200,
+      "clipboardWrite": "ok",
+      "uploadPaste": 200,
+      "thumbs": 0,
+      "cap": "lib/photo-picker PHOTO_CAP 4 (count = 4 - attached)"
+     }
+    },
+    "C-feed.04": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "otherPostSheet": [
+       "Share post",
+       "Report",
+       "Block user",
+       "Mute user"
+      ],
+      "shareUrl": "[probe] venues-discover-rest post to share https://uat.gripbat.com/app/pages/feed/index?note=ariub0gcohyd00an"
+     }
+    },
+    "C-qrcode.03": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "qr": {
+       "files": [
+        "Tai-Po-Sports-Ground-qr.png"
+       ],
+       "pngOk": true,
+       "toast": false
+      }
+     }
+    },
+    "E-onb-location.02": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "hits": [
+       "Tai Po Market Nga Wan Road, Wan Tau Tong, Tai Po District, Hong Kong",
+       "Tai Po Market Nga Wan Road, Wan Tau Tong, Tai Po District, Hong Kong",
+       "Tai Po Market Nga Wan Road, Wan Tau Kok, Tai Po District, Hong Kong"
+      ],
+      "exactLine": "Home · Tai Po Market (22.4447, 114.1706)",
+      "mapPicker": 1,
+      "saveReq": {
+       "status": 200,
+       "body": {
+        "kind": "home",
+        "label": "Home",
+        "address": "Tai Po Market, Nga Wan Road, Wan Tau Tong, Tai Po District, Hong Kong",
+        "lat": 22.444651,
+        "lng": 114.170635,
+        "radiusKm": 10,
+        "i": "<tok>"
+       }
+      },
+      "addedPlace": [
+       [
+        "Home",
+        22.444651,
+        114.170635
+       ]
+      ],
+      "levelKept": true
+     }
+    },
+    "E-onb-location-existing.01": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "savedPlaces": 0,
+      "prompt": true
+     }
+    },
+    "C-home.13": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "account": "uat+admin (no meets, no network)",
+      "emptyState": true
+     }
+    },
+    "E-locations.05": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "placesBefore": 1,
+      "deleteReq": {
+       "status": 400,
+       "code": "LAST_LOCATION"
+      },
+      "toast": true,
+      "placesAfter": 1
+     }
+    },
+    "C-home.12": {
+     "status": "closed",
+     "level": "L6",
+     "evidence": {
+      "meet": "ariudqurohyd00az",
+      "sectionFirst": true,
+      "listed": true
+     }
+    }
+   }
+  },
+  {
+   "plants": [
+    {
+     "name": "non-owner venues/update refused 403 NOT_VENUE_MANAGER",
+     "fired": true,
+     "detail": {
+      "status": 403,
+      "code": "NOT_VENUE_MANAGER"
+     }
+    },
+    {
+     "name": "anonymous venues/media/add refused 401",
+     "fired": true,
+     "detail": {
+      "status": 401
+     }
+    },
+    {
+     "name": "non-author non-owner venues/media/delete refused 403 NOT_MEDIA_DELETER",
+     "fired": true,
+     "detail": {
+      "status": 403,
+      "code": "NOT_MEDIA_DELETER"
+     }
+    },
+    {
+     "name": "player venues/staff-update (Manage owners) refused 403 NOT_GRIPBAT_STAFF",
+     "fired": true,
+     "detail": {
+      "status": 403,
+      "code": "NOT_GRIPBAT_STAFF"
+     }
+    },
+    {
+     "name": "creator who is not the owner: venues/delete refused 403",
+     "fired": true,
+     "detail": {
+      "status": 403,
+      "code": "NOT_VENUE_DELETER"
+     }
+    }
+   ]
+  },
+  {
+   "leftovers": {
+    "venues": "0",
+    "media": "0",
+    "places": "0",
+    "announcements": "0",
+    "liveClubs": "0",
+    "liveMeets": "0",
+    "driveFiles": "0",
+    "notes": "0",
+    "coachPhotosFields": "0"
+   },
+   "cleanup": [
+    "media added from the UI ariu94ztohyd00ad",
+    "host-ken ageGroup restored to null",
+    "tokens: ok",
+    "venues: 0",
+    "clubs: 15",
+    "notes: 1",
+    "announcements: 2",
+    "places: 2",
+    "t2 onboarding places: 1",
+    "live meets: 1",
+    "mei coaching photos field: restored 200 (3 fields)",
+    "drive files: 2"
+   ]
+  },
+  {
+   "recheck_432d552_rows": {
+    "C-meet-filters.04": true,
+    "C-discover.06": [
+     "Intermediate Ladder 3.0–3.5 LADIES PICKLEBALL HK · Kowloon Park Round Robin 3/8 16 km"
+    ],
+    "C-discover.11": true,
+    "C-discover.17": true,
+    "C-discover.18": true,
+    "C-discover.21": true,
+    "C-discover.20+C-venue-beta-info.01": true,
+    "C-discover.25": true,
+    "C-home-menu.02": true,
+    "C-home.11": true,
+    "C-root-layout.03": true,
+    "C-venue.08": true,
+    "C-venue.09": true,
+    "C-venue.01": true,
+    "C-venue-listings-info.01+C-venue.02": true,
+    "C-venue.11": true,
+    "C-select-venue.02": true,
+    "C-select-venue.03": true,
+    "C-select-venue.04": true
+   }
+  },
+  {
+   "errors": []
+  },
+  {
+   "accounts": {
+    "t1": "ari4hdzd3hac000c",
+    "t2": "ari4hbuh3hac0003",
+    "mei": "ari4hcj63hac0006",
+    "admin": "ari4hdzd3hac000c"
+   }
+  },
+  {
+   "fixtureVenue": "ariu8nxpohyd00a6",
+   "row": "[probe] venues-discover-rest court|under_review|-"
+  },
+  {
+   "api": {
+    "staffUpdate": 200,
+    "owners": "ari4hbuh3hac0003||verified",
+    "t2show": {
+     "canManage": true,
+     "canDelete": true,
+     "canManageOwners": false,
+     "mediaCount": 1
+    },
+    "anonShow": {
+     "canManage": false
+    },
+    "add2": 200,
+    "pin": {
+     "isPinned": true
+    },
+    "listAnon": [
+     [
+      true,
+      false,
+      false
+     ],
+     [
+      false,
+      false,
+      false
+     ]
+    ],
+    "db": "2|1",
+    "searchPhotos": 2
+   }
+  },
+  {
+   "homeFixtures": {
+    "invite": 200,
+    "join": {
+     "status": "requested"
+    },
+    "clubs": [
+     "ariua4ghohyd00ae",
+     "ariua4h1ohyd00af",
+     "ariub0ftohyd00am"
+    ]
+   }
+  },
+  {
+   "feedFixture": {
+    "club": "ariub0ftohyd00am",
+    "note": "ariub0gcohyd00an"
+   }
+  },
+  {
+   "onboardingMapPin": "Home · Pinned on the map (22.3193, 114.1694)"
+  },
+  {
+   "deleteVenueUi": {
+    "req": {
+     "status": 200,
+     "json": {
+      "deleted": true,
+      "meetsDetached": 0
+     }
+    },
+    "dbVenue": "0",
+    "dbMedia": "0"
+   }
+  }
+ ]
+}
