@@ -68,6 +68,7 @@ WITH h AS (
 	JOIN meet_match mm ON mm."meetId" = p."meetId" AND (p.id = ANY(mm."team1Ids") OR p.id = ANY(mm."team2Ids"))
 	JOIN meet m ON m.id = mm."meetId"
 	WHERE p."userId" = $1 AND m.sport = $2 AND m.status <> 'cancelled' AND jsonb_array_length(mm.scores) > 0
+	  AND m."startAt" < now()   -- FIX-S7 PLAYED-ONE-RULE-V1: the rating log's rule (GbRating.pendingMatches) — History and the pair record agree
 	  AND ($3 = $1 OR ${meetVisible('m', '$3')})
 	  AND ($6::varchar IS NULL OR m.id = $6)
 	UNION ALL
@@ -205,7 +206,7 @@ export function userIdsOf(rows: { partners: PlayerRef[]; opponents: PlayerRef[] 
 // ---- match recap (Reclub Match summary) ---------------------------------------------------------------------------
 export interface Summary {
 	source: Source; matchId: string;
-	context: { kind: 'meet' | 'competition' | 'openplay'; id: string | null; name: string | null; startAt: string | null; venueName: string | null; visibility: string | null };
+	context: { kind: 'meet' | 'competition' | 'openplay'; id: string | null; name: string | null; startAt: string | null; venueName: string | null; visibility: string | null; cancelled: boolean };
 	playedAt: string | null; round: number | null; courtIndex: number | null; stage: string | null; pool: number | null;
 	teams: { side: 1 | 2; players: (PlayerRef & { ratingPre: number | null; ratingPost: number | null })[]; winner: boolean; forfeited: boolean }[];
 	games: [number, number][];   // team 1 first
@@ -222,9 +223,9 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 	if (source === 'meet') {
 		const r = (await db.query(
 			`SELECT mm.id, mm.round, mm."courtIndex", mm."team1Ids", mm."team2Ids", mm.scores, mm."forfeitTeam", mm."duprStatus", mm."duprSubmittedById", mm."duprSubmittedAt", mm."duprRef", mm."duprError",
-			        m.id AS "meetId", m.name, m."startAt", m."venueName", m.visibility, m."hostId"
+			        m.id AS "meetId", m.name, m."startAt", m."venueName", m.visibility, m."hostId", m.status AS "ctxStatus"
 			 FROM meet_match mm JOIN meet m ON m.id = mm."meetId"
-			 WHERE mm.id = $1 AND m.status <> 'cancelled' AND ${meetVisible('m', '$2')}`, [matchId, viewer]))[0];
+			 WHERE mm.id = $1 AND (m.status <> 'cancelled' OR mm."duprStatus" = 'submitted') AND ${meetVisible('m', '$2')}`, [matchId, viewer]))[0];   // FIX-S7 DUPR-RECAP-KEEP-V1
 		if (!r) return null;
 		const ids = [...(r.team1Ids ?? []), ...(r.team2Ids ?? [])];
 		const pmap = new Map<string, PlayerRef>();
@@ -235,7 +236,7 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 		const w = ff ? (ff === 1 ? 2 : 1) : winnerOf(games);
 		const team = (side: 1 | 2, list: string[]) => ({ side, players: (list ?? []).map((id) => withRating(pmap.get(id) ?? { userId: null, name: null })), winner: w === side, forfeited: ff === side });
 		return {
-			source, matchId, context: { kind: 'meet', id: r.meetId, name: r.name, startAt: new Date(r.startAt).toISOString(), venueName: r.venueName, visibility: r.visibility },
+			source, matchId, context: { kind: 'meet', id: r.meetId, name: r.name, startAt: new Date(r.startAt).toISOString(), venueName: r.venueName, visibility: r.visibility, cancelled: r.ctxStatus === 'cancelled' },
 			playedAt: new Date(r.startAt).toISOString(), round: r.round, courtIndex: r.courtIndex, stage: null, pool: null,
 			teams: [team(1, r.team1Ids), team(2, r.team2Ids)], games,
 			dupr: { status: r.duprStatus ?? null, submittedById: r.duprSubmittedById ?? null, submittedAt: r.duprSubmittedAt ? new Date(r.duprSubmittedAt).toISOString() : null, ref: r.duprRef ?? null, error: viewer && viewer === r.hostId ? r.duprError ?? null : null },   // the error text is for the host
@@ -245,10 +246,10 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 		const r = (await db.query(
 			`SELECT cm.id, cm.round, cm."courtIndex", cm.stage, cm.pool, cm.scores, cm.result, cm."entry1Status", cm."entry2Status", COALESCE(cm."startAt", cm."updatedAt") AS "playedAt",
 			        cm."duprStatus", cm."duprSubmittedById", cm."duprSubmittedAt", cm."duprRef", cm."duprError", c."hostId",   -- DUPR-COMP-RECAP-V1
-			        c.id AS "compId", c.name, c."startAt", c."venueName", c.visibility, e1."userIds" AS u1, e2."userIds" AS u2, e1.name AS n1, e2.name AS n2
+			        c.id AS "compId", c.name, c."startAt", c."venueName", c.visibility, c.status AS "ctxStatus", e1."userIds" AS u1, e2."userIds" AS u2, e1.name AS n1, e2.name AS n2
 			 FROM competition_match cm JOIN competition c ON c.id = cm."competitionId"
 			 LEFT JOIN competition_entry e1 ON e1.id = cm."entry1Id" LEFT JOIN competition_entry e2 ON e2.id = cm."entry2Id"
-			 WHERE cm.id = $1 AND c.status <> 'cancelled' AND ${compVisible('c', '$2')}`, [matchId, viewer]))[0];
+			 WHERE cm.id = $1 AND (c.status <> 'cancelled' OR cm."duprStatus" = 'submitted') AND ${compVisible('c', '$2')}`, [matchId, viewer]))[0];   // FIX-S7 DUPR-RECAP-KEEP-V1
 		if (!r) return null;
 		await loadLogs();
 		const games = compGames(r.scores);
@@ -256,7 +257,7 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 		const w = r.result === 'entry1' ? 1 : r.result === 'entry2' ? 2 : f1 !== f2 ? (f1 ? 2 : 1) : winnerOf(games);
 		const team = (side: 1 | 2, list: string[] | null, ff: boolean) => ({ side, players: (list ?? []).map((u) => withRating({ userId: u, name: null })), winner: w === side, forfeited: ff });
 		return {
-			source, matchId, context: { kind: 'competition', id: r.compId, name: r.name, startAt: r.startAt ? new Date(r.startAt).toISOString() : null, venueName: r.venueName, visibility: r.visibility },
+			source, matchId, context: { kind: 'competition', id: r.compId, name: r.name, startAt: r.startAt ? new Date(r.startAt).toISOString() : null, venueName: r.venueName, visibility: r.visibility, cancelled: r.ctxStatus === 'cancelled' },
 			playedAt: r.playedAt ? new Date(r.playedAt).toISOString() : null, round: r.round, courtIndex: r.courtIndex, stage: r.stage, pool: r.pool,
 			teams: [team(1, r.u1, f1), team(2, r.u2, f2)], games,
 			// DUPR-COMP-RECAP-V1 (lane account-rest, S7 D-match-summary.02): was `dupr: null` — the same receipt as a meet match
@@ -271,7 +272,7 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 	const games = s1.length ? meetGames(s1[0].games) : s2.length ? meetGames(s2[0].games).map(([a, b]) => [b, a] as [number, number]) : [];
 	const w1 = s1.length ? s1[0].won : s2.length ? !s2[0].won : false;
 	return {
-		source, matchId, context: { kind: 'openplay', id: null, name: null, startAt: null, venueName: null, visibility: 'public' },
+		source, matchId, context: { kind: 'openplay', id: null, name: null, startAt: null, venueName: null, visibility: 'public', cancelled: false },
 		playedAt: rows[0] ? new Date(rows[0].playedAt).toISOString() : null, round: null, courtIndex: null, stage: null, pool: null,
 		teams: [{ side: 1, players: s1.map((x) => withRating({ userId: x.userId, name: null })), winner: !!w1, forfeited: false }, { side: 2, players: s2.map((x) => withRating({ userId: x.userId, name: null })), winner: !w1, forfeited: false }],
 		games, dupr: null,

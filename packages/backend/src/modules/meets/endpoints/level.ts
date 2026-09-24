@@ -67,7 +67,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (ps.selfLevel !== undefined) patch.selfLevel = ps.selfLevel;
 			if (ps.gender !== undefined) patch.gender = ps.gender === 'none' ? null : ps.gender;         // LEVEL-CLEAR-V1
 			if (ps.ageGroup !== undefined) patch.ageGroup = ps.ageGroup === 'none' ? null : ps.ageGroup; // LEVEL-CLEAR-V1
-			if (ps.unlinkDupr === true) patch.duprId = null;
+			/* FIX-S7 DUPR-UNLINK-CLEAN-V1 (S7 D-dupr-support.02): Disconnect cleared only the id, so the DUPR ratings stayed on
+			 * meet_player_level and the player page still showed "DUPR 3.5" for an unlinked account (pages/player reads
+			 * duprDoubles). The link, its ratings and a dupr-* source go together; a self-rated level stays. */
+			if (ps.unlinkDupr === true) {
+				patch.duprId = null; patch.duprDoubles = null; patch.duprSingles = null;
+				const cur = await this.meetLevelService.getLevel(me.id, ps.sport);
+				if (cur?.source && /^dupr/.test(cur.source)) patch.source = null;
+			}
 			if (ps.onboarded === true) {
 				const current = await this.meetLevelService.getLevel(me.id, ps.sport);
 				if (current?.onboardedAt == null) patch.onboardedAt = new Date();
