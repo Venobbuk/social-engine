@@ -1,0 +1,519 @@
+{
+ "id": "club-posts-links",
+ "at": "2026-09-24T04:51:04.828Z",
+ "base": "https://uat.social.silkvo.com",
+ "condition_fired": true,
+ "verdict": "fail",
+ "pass": 14,
+ "fail": 36,
+ "evidence": [
+  {
+   "id": "E0",
+   "name": "engine carries the CLUB-POSTS-LINKS-V1 doors (notes/polls/add-choice registered)",
+   "pass": false,
+   "detail": {
+    "status": 204
+   }
+  },
+  {
+   "id": "A0",
+   "name": "the three posts are stored with their audience (public / followers / specified)",
+   "pass": false,
+   "detail": {
+    "pub": "public",
+    "mem": "public",
+    "adm": "public",
+    "err": null
+   }
+  },
+  {
+   "id": "A1",
+   "name": "owner/admin reads all three in the club feed",
+   "pass": true,
+   "detail": {
+    "n": 3
+   }
+  },
+  {
+   "id": "A2",
+   "name": "member reads Public + Members, NOT Admins",
+   "pass": false,
+   "detail": {
+    "pub": true,
+    "mem": true,
+    "adm": true
+   }
+  },
+  {
+   "id": "A3",
+   "name": "NON-member (signed in) reads Public only",
+   "pass": false,
+   "detail": {
+    "pub": true,
+    "mem": true,
+    "adm": true
+   }
+  },
+  {
+   "id": "A4",
+   "name": "anonymous reads Public only",
+   "pass": false,
+   "detail": {
+    "pub": true,
+    "mem": true,
+    "adm": true
+   }
+  },
+  {
+   "id": "A5",
+   "name": "NON-member opening the members post by id gets no text (hidden)",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "text": "[probe] club-posts-links muf1zzf7 members post"
+   }
+  },
+  {
+   "id": "A6",
+   "name": "member opening the admins post by id gets no text (hidden)",
+   "pass": false,
+   "detail": {
+    "status": 200
+   }
+  },
+  {
+   "id": "A7",
+   "name": "a comment on the members post inherits its audience (followers)",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "vis": "public",
+    "err": null
+   }
+  },
+  {
+   "id": "A8",
+   "name": "the comment is listed for the owner and NOT for the non-member (notes/children)",
+   "pass": false,
+   "detail": {
+    "mei": true,
+    "tom": true
+   }
+  },
+  {
+   "id": "A9",
+   "name": "a non-member cannot comment on a members post",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "code": "CLUB_NOT_MEMBER"
+   }
+  },
+  {
+   "id": "T1",
+   "name": "title = native cw and the MFM text read back unchanged (public post, read by a non-member)",
+   "pass": true,
+   "detail": {
+    "cw": "Saturday ladder",
+    "text": "**Bring water** and <i>smile</i> [rules](https://example.com/rules)"
+   }
+  },
+  {
+   "id": "O0",
+   "name": "setting saved and read back: allowOutsideLinks false",
+   "pass": false,
+   "detail": {
+    "status": 200
+   }
+  },
+  {
+   "id": "O1",
+   "name": "member post with another activity's link → OUTSIDE_LINK_BLOCKED",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "code": null
+   }
+  },
+  {
+   "id": "O2",
+   "name": "the /m/<code> short link of it → OUTSIDE_LINK_BLOCKED",
+   "pass": false,
+   "detail": {
+    "code": "ojvsbjgd",
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "O3",
+   "name": "the club's OWN meet link passes",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "O4",
+   "name": "the owner/admin is exempt",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "O5",
+   "name": "a member COMMENT with it → OUTSIDE_LINK_BLOCKED",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "O6",
+   "name": "club chat: a meet CARD of another activity → OUTSIDE_LINK_BLOCKED",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "O7",
+   "name": "club chat: a text link to it → OUTSIDE_LINK_BLOCKED",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "O8",
+   "name": "club chat: the club's own meet card passes",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "O9",
+   "name": "read back: the refused message is NOT stored in the room",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "stored": true
+   }
+  },
+  {
+   "id": "O10",
+   "name": "PLANTED: setting back ON → the same member post passes (the refusal is the setting's)",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "H1",
+   "name": "a fresh handle is available",
+   "pass": false,
+   "detail": {
+    "status": 404,
+    "body": {
+     "message": "Route POST:/api/clubs/handle-available not found",
+     "error": "Not Found",
+     "statusCode": 404
+    }
+   }
+  },
+  {
+   "id": "H2",
+   "name": "saved and read back on the club (public club: readable)",
+   "pass": false,
+   "detail": {
+    "status": 200
+   }
+  },
+  {
+   "id": "H3",
+   "name": "clubs/by-code {handle} resolves the club (what /clubs/@handle opens)",
+   "pass": false,
+   "detail": {
+    "status": 400
+   }
+  },
+  {
+   "id": "H4",
+   "name": "the same handle for another club → taken",
+   "pass": false,
+   "detail": {
+    "body": {
+     "message": "Route POST:/api/clubs/handle-available not found",
+     "error": "Not Found",
+     "statusCode": 404
+    }
+   }
+  },
+  {
+   "id": "H5",
+   "name": "saving a taken handle is refused (CLUB_HANDLE_TAKEN)",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "H6",
+   "name": "a reserved handle is refused (CLUB_HANDLE_RESERVED)",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "H7",
+   "name": "G15.5: a PRIVATE club by its handle → NO_SUCH_CLUB for a non-member and anonymous; its owner resolves it",
+   "pass": false,
+   "detail": {
+    "amy": "INVALID_PARAM",
+    "anon": "INVALID_PARAM",
+    "owner": false
+   }
+  },
+  {
+   "id": "H8",
+   "name": "G15.5: a private club's settings show no handle to a non-member",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "P0",
+   "name": "poll stored with allowAddChoices",
+   "pass": false,
+   "detail": {
+    "poll": {
+     "multiple": false,
+     "expiresAt": null,
+     "choices": [
+      {
+       "text": "A",
+       "votes": 0,
+       "isVoted": false
+      },
+      {
+       "text": "B",
+       "votes": 0,
+       "isVoted": false
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "P1",
+   "name": "PLANTED: a native second vote is still refused (ALREADY_VOTED)",
+   "pass": true,
+   "detail": {
+    "status": 400,
+    "err": "ALREADY_VOTED"
+   }
+  },
+  {
+   "id": "P2",
+   "name": "change vote (replace): my vote moves A → B, counts read back",
+   "pass": false,
+   "detail": {
+    "status": 400,
+    "choices": [
+     {
+      "text": "A",
+      "votes": 1,
+      "isVoted": true
+     },
+     {
+      "text": "B",
+      "votes": 0,
+      "isVoted": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "P3",
+   "name": "take my vote back: counts back to 0 and nothing marked mine",
+   "pass": false,
+   "detail": {
+    "status": 404,
+    "body": {
+     "message": "Route POST:/api/notes/polls/unvote not found",
+     "error": "Not Found",
+     "statusCode": 404
+    },
+    "choices": [
+     {
+      "text": "A",
+      "votes": 1,
+      "isVoted": true
+     },
+     {
+      "text": "B",
+      "votes": 0,
+      "isVoted": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "P4",
+   "name": "a member adds an option; read back with addedBy = the member",
+   "pass": false,
+   "detail": {
+    "status": 404,
+    "choices": [
+     {
+      "text": "A",
+      "votes": 1,
+      "isVoted": false
+     },
+     {
+      "text": "B",
+      "votes": 0,
+      "isVoted": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "P5",
+   "name": "a duplicate option is refused",
+   "pass": false,
+   "detail": {
+    "status": 404
+   }
+  },
+  {
+   "id": "P6",
+   "name": "a NON-member cannot add an option",
+   "pass": false,
+   "detail": {
+    "status": 404
+   }
+  },
+  {
+   "id": "P7",
+   "name": "the added option takes votes",
+   "pass": false,
+   "detail": {
+    "status": 400
+   }
+  },
+  {
+   "id": "P8",
+   "name": "a poll without the switch refuses new options",
+   "pass": false,
+   "detail": {
+    "status": 404
+   }
+  },
+  {
+   "id": "P9",
+   "name": "G15.5: a non-member cannot vote on a members-only poll",
+   "pass": false,
+   "detail": {
+    "status": 204,
+    "err": null
+   }
+  },
+  {
+   "id": "F0",
+   "name": "preview answers (gate ok), sent:false, and the club audience is the 3 members (not a blind 0)",
+   "pass": true,
+   "detail": {
+    "status": 200,
+    "reach": 3,
+    "expected": 3,
+    "gate": "ok"
+   }
+  },
+  {
+   "id": "F1",
+   "name": "gender filter = the members whose own level row says female / male (independent SQL count)",
+   "pass": false,
+   "detail": {
+    "female": 3,
+    "expFemale": 0,
+    "male": 3,
+    "expMale": 0
+   }
+  },
+  {
+   "id": "F2",
+   "name": "age-group filter (adult) and level band (3.0 + 3.5) match the SQL count",
+   "pass": false,
+   "detail": {
+    "adult": 3,
+    "expAdult": 0,
+    "lv": 3,
+    "expLv": 2
+   }
+  },
+  {
+   "id": "F3",
+   "name": "Select All (every age group) = no filter",
+   "pass": true,
+   "detail": {
+    "all": 3,
+    "selectAll": 3
+   }
+  },
+  {
+   "id": "F4",
+   "name": "a level value outside the list is refused by the engine",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "err": null
+   }
+  },
+  {
+   "id": "F5",
+   "name": "nothing was sent: the meet is not marked promoted",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "S1",
+   "name": "meets/show {referenceCode} resolves the meet (the pages/link door)",
+   "pass": true,
+   "detail": {
+    "status": 200
+   }
+  },
+  {
+   "id": "S2",
+   "name": "https://uat.gripbat.com/m/<code> answers a 302 to /app/pages/link/index?m=<code> (nginx)",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "location": null
+   }
+  },
+  {
+   "id": "Z1",
+   "name": "cleanup: no [probe] club-posts-links note / live meet / live club left on UAT (read from the DB)",
+   "pass": true,
+   "detail": {
+    "left": 0
+   }
+  }
+ ]
+}
