@@ -760,7 +760,8 @@ export class ClientServerService {
 		};
 		fastify.get<{ Params: { kind: string; id: string; } }>('/share/:kind/:id', async (request, reply) => {
 			const { kind, id } = request.params;
-			if (!shareIdRe.test(id)) return shareNotFound(reply);
+			// CLUB-SHARE-V2 (fix-S3): 'clubh' = a club by its handle — the /clubs/@handle short link's preview
+			if (!(kind === 'clubh' ? /^[A-Za-z0-9_]{3,30}$/.test(id) : shareIdRe.test(id))) return shareNotFound(reply);
 			const base = this.config.url;
 			let card: ShareCard | null = null;
 
@@ -784,21 +785,48 @@ export class ClientServerService {
 					url: `${base}/app/pages/meet/index?id=${m.id}`,
 					card: 'summary_large_image',
 				};
-			} else if (kind === 'club') {
-				const channel = await this.channelsRepository.findOneBy({ id });
+			} else if (kind === 'club' || kind === 'clubh') {
+				let channelId = id;
+				if (kind === 'clubh') {
+					const h = await this.channelsRepository.query(`SELECT "channelId" FROM "club_setting" WHERE lower("handle") = lower($1) LIMIT 1`, [id]) as { channelId: string }[];
+					if (!h.length) return shareNotFound(reply);
+					channelId = h[0].channelId;
+				}
+				const channel = await this.channelsRepository.findOneBy({ id: channelId, isArchived: false });
 				if (channel == null) return shareNotFound(reply);
 				const c = await this.channelEntityService.pack(channel);
-				const parts = [
-					c.description ? truncate(c.description, 160) : null,
-					`${c.usersCount} members`,
-				];
-				card = {
-					title: c.name,
-					description: parts.filter((p): p is string => p != null).join(' · '),
-					image: c.bannerUrl ?? (base + clubArtPath(c.id)),
-					url: `${base}/app/pages/community/index?id=${c.id}`,
-					card: 'summary_large_image',
-				};
+				if (c.visibility === 'private') {
+					// CLUB-SHARE-V2 (G15.5): a private club's preview names nothing of it — not its name, description, size or
+					// organisers (the crawler holds no invite token). The invited person opens the link and sees the club.
+					card = {
+						title: 'A private club on GripBat',
+						description: 'You were sent an invitation link. Open it to see the club.',
+						image: base + clubArtPath(c.id),
+						url: `${base}/app/pages/community/index?id=${c.id}`,
+						card: 'summary_large_image',
+					};
+				} else {
+					// CLUB-SHARE-V2 (Reclub web share page "N members · N activities", "Organized By"): the owner and the admins
+					const admins = await this.channelsRepository.query(`SELECT cs."adminIds" AS ids FROM "club_setting" cs WHERE cs."channelId" = $1`, [c.id]) as { ids: string[] | null }[];
+					const orgIds = [...new Set([c.userId, ...((admins[0] && admins[0].ids) ?? [])].filter((x): x is string => !!x))].slice(0, 4);
+					const orgs = orgIds.length ? await this.channelsRepository.query(`SELECT "id", "name", "username" FROM "user" WHERE "id" = ANY($1) AND "isSuspended" = false`, [orgIds]) as { id: string; name: string | null; username: string }[] : [];
+					const orgNames = orgIds.map(oid => orgs.find(o => o.id === oid)).filter((o): o is { id: string; name: string | null; username: string } => !!o).map(o => o.name ?? o.username);
+					const upcoming = await this.channelsRepository.query(`SELECT count(*)::int AS n FROM "meet" WHERE "channelId" = $1 AND "status" <> 'cancelled' AND "startAt" >= now() AND "visibility" = 'public'`, [c.id]) as { n: number }[];
+					const n = Number(upcoming[0]?.n ?? 0);
+					const members = Number(c.membersCount ?? c.usersCount ?? 0);
+					const parts = [
+						c.description ? truncate(c.description, 140) : null,
+						`${members} ${members === 1 ? 'member' : 'members'} · ${n} ${n === 1 ? 'activity' : 'activities'}`,
+						orgNames.length ? `Organized by ${orgNames.join(', ')}` : null,
+					];
+					card = {
+						title: c.name,
+						description: parts.filter((p): p is string => p != null).join(' · '),
+						image: c.bannerUrl ?? (base + clubArtPath(c.id)),
+						url: `${base}/app/pages/community/index?id=${c.id}`,
+						card: 'summary_large_image',
+					};
+				}
 			} else if (kind === 'player') {
 				const user = await this.usersRepository.findOneBy({ id, host: IsNull(), isSuspended: false });
 				if (user == null) return shareNotFound(reply);

@@ -34,6 +34,8 @@ import { clubCounts } from '@/modules/clubs/club-tiers.js';
 export const CLAIM_COOLDOWN_DAYS = 7;
 
 export type ClubTimeframe = 'CURRENT_MONTH' | 'LAST_MONTH' | 'LAST_3_MONTHS' | 'YTD' | 'LAST_YEAR' | 'ALL_TIME';
+/** CLUB-RANKINGS-V1 (fix-S3): the Most {stat} rankings of a club's Insights (from its scored matches). */
+export const CLUB_RANK_STATS = ['matches_won', 'matches_played', 'points_won'] as const;
 
 @Injectable()
 export class ClubService {
@@ -518,7 +520,90 @@ export class ClubService {
 		const active = acts.length ? await this.db.query(`SELECT p."userId", count(*)::int AS n FROM "meet_participant" p WHERE p."meetId" = ANY($1) AND p."status" = 'confirmed' AND p."userId" IS NOT NULL GROUP BY p."userId" ORDER BY n DESC`, [acts.map(a => a.id)]) as { userId: string; n: number }[] : [];
 		const rewarded = acts.length ? await this.db.query(`SELECT r."targetUserId" AS "userId", count(*)::int AS n FROM "meet_review" r WHERE r."meetId" = ANY($1) AND r."type" = 'endorsement' AND r."archivedAt" IS NULL GROUP BY r."targetUserId" ORDER BY n DESC LIMIT 5`, [acts.map(a => a.id)]) as { userId: string; n: number }[] : [];
 		const pack = async (rows: { userId: string; n: number }[]) => { const out = []; for (const r of rows.slice(0, 5)) out.push({ user: await this.userEntityService.pack(r.userId, viewer, { schema: 'UserLite' }).catch(() => null), count: r.n }); return out; };
-		return { timeframe, totalMembers, totalFollowers, conversion, totalActivities, activeMembers: active.length, fillRate, mostActive: await pack(active), mostRewarded: await pack(rewarded) };
+		// CLUB-RANKINGS-V1 (fix-S3): Reclub's Most rewarded per kudo dimension and Most {stat} — the top 3 of each list; the
+		// full list (See all, Load more) is insightRanking() below. Reclub sells Most stats as Premium; GripBat gives it free.
+		const actIds = acts.map(a => a.id);
+		const byKudo = await this.kudoTallies(actIds);
+		const mostRewardedByKudo = [];
+		for (const [dimension, rows] of [...byKudo.entries()].sort((a, b) => b[1].reduce((n, r) => n + r.n, 0) - a[1].reduce((n, r) => n + r.n, 0))) mostRewardedByKudo.push({ dimension, total: rows.reduce((n, r) => n + r.n, 0), rows: await pack(rows.slice(0, 3)) });
+		const stats = await this.statTallies(actIds);
+		const mostStats = [];
+		for (const stat of CLUB_RANK_STATS) mostStats.push({ stat, rows: await pack((stats.get(stat) ?? []).slice(0, 3)) });
+		return { timeframe, totalMembers, totalFollowers, conversion, totalActivities, activeMembers: active.length, fillRate, mostActive: await pack(active), mostRewarded: await pack(rewarded), mostRewardedByKudo, mostStats };
+	}
+
+	/** CLUB-RANKINGS-V1: the window of a Reclub GroupStatisticsTimeframe (the same months as insights()). */
+	@bindThis
+	private clubWindow(timeframe: ClubTimeframe): [Date, Date] {
+		const now = new Date(); const y = now.getFullYear(), m = now.getMonth();
+		switch (timeframe) {
+			case 'CURRENT_MONTH': return [new Date(y, m, 1), new Date(y, m + 1, 1)];
+			case 'LAST_MONTH': return [new Date(y, m - 1, 1), new Date(y, m, 1)];
+			case 'LAST_3_MONTHS': return [new Date(y, m - 3, 1), new Date(y, m + 1, 1)];
+			case 'YTD': return [new Date(y, 0, 1), new Date(y + 1, 0, 1)];
+			case 'LAST_YEAR': return [new Date(y - 1, 0, 1), new Date(y, 0, 1)];
+			default: return [new Date(2000, 0, 1), new Date(2100, 0, 1)];
+		}
+	}
+
+	/** CLUB-RANKINGS-V1: kudos of the club's meets, per dimension (the endorsement body is a comma list), each list sorted. */
+	@bindThis
+	private async kudoTallies(meetIds: string[]): Promise<Map<string, { userId: string; n: number }[]>> {
+		const out = new Map<string, { userId: string; n: number }[]>();
+		if (!meetIds.length) return out;
+		const rows = await this.db.query(`SELECT r."targetUserId" AS "userId", r."body" FROM "meet_review" r WHERE r."meetId" = ANY($1) AND r."type" = 'endorsement' AND r."archivedAt" IS NULL`, [meetIds]) as { userId: string; body: string | null }[];
+		const tally = new Map<string, Map<string, number>>();
+		for (const r of rows) for (const d of new Set((r.body ?? '').split(',').map(x => x.trim()).filter(Boolean))) { const t = tally.get(d) ?? new Map<string, number>(); t.set(r.userId, (t.get(r.userId) ?? 0) + 1); tally.set(d, t); }
+		for (const [d, t] of tally) out.set(d, [...t.entries()].map(([userId, n]) => ({ userId, n })).sort((a, b) => b.n - a.n || a.userId.localeCompare(b.userId)));
+		return out;
+	}
+
+	/** CLUB-RANKINGS-V1: per player from the club's SCORED matches — matches won, matches played, points won. A casual game
+	 *  counts only once every account player on it confirmed (SEC-CASUAL-CONSENT-V1, modules/stats/_shared.ts). */
+	@bindThis
+	private async statTallies(meetIds: string[]): Promise<Map<string, { userId: string; n: number }[]>> {
+		const out = new Map<string, { userId: string; n: number }[]>();
+		if (!meetIds.length) return out;
+		const matches = await this.db.query(`SELECT mm."team1Ids", mm."team2Ids", mm."scores" FROM "meet_match" mm JOIN "meet" m ON m."id" = mm."meetId"
+			WHERE mm."meetId" = ANY($1) AND jsonb_array_length(mm."scores") > 0
+			  AND (NOT ('casual' = ANY(m."flags")) OR (m."startAt" < now() AND NOT EXISTS (
+			        SELECT 1 FROM "meet_participant" pu WHERE pu."meetId" = mm."meetId" AND (pu."id" = ANY(mm."team1Ids") OR pu."id" = ANY(mm."team2Ids"))
+			           AND pu."userId" IS NOT NULL AND pu."status" <> 'confirmed')))`, [meetIds]) as { team1Ids: string[] | null; team2Ids: string[] | null; scores: [number, number][] | null }[];
+		const pids = [...new Set(matches.flatMap(m => [...(m.team1Ids ?? []), ...(m.team2Ids ?? [])]))];
+		const who = new Map<string, string>();
+		if (pids.length) for (const r of await this.db.query(`SELECT "id", "userId" FROM "meet_participant" WHERE "id" = ANY($1) AND "userId" IS NOT NULL`, [pids]) as { id: string; userId: string }[]) who.set(r.id, r.userId);
+		const won = new Map<string, number>(), played = new Map<string, number>(), points = new Map<string, number>();
+		const add = (m: Map<string, number>, u: string, n: number) => m.set(u, (m.get(u) ?? 0) + n);
+		for (const mt of matches) {
+			const sc = mt.scores ?? []; let w1 = 0, w2 = 0, p1 = 0, p2 = 0;
+			for (const [a, b] of sc) { p1 += Number(a) || 0; p2 += Number(b) || 0; if (a > b) w1++; else if (b > a) w2++; }
+			const winner = !sc.length || w1 === w2 ? 0 : (w1 > w2 ? 1 : 2);
+			const side = (ids: string[] | null, s: 1 | 2) => { for (const u of new Set((ids ?? []).map(id => who.get(id)).filter((x): x is string => !!x))) { add(played, u, 1); add(points, u, s === 1 ? p1 : p2); if (winner === s) add(won, u, 1); } };
+			side(mt.team1Ids, 1); side(mt.team2Ids, 2);
+		}
+		const sorted = (m: Map<string, number>) => [...m.entries()].filter(([, n]) => n > 0).map(([userId, n]) => ({ userId, n })).sort((a, b) => b.n - a.n || a.userId.localeCompare(b.userId));
+		out.set('matches_won', sorted(won)); out.set('matches_played', sorted(played)); out.set('points_won', sorted(points));
+		return out;
+	}
+
+	/** CLUB-RANKINGS-V1 (Reclub group-insight-rankings/[groupId]/[dimension]/[timeframe]/[referenceId]): ONE full ranking —
+	 *  most_active, most_rewarded (all kudos, or one dimension as referenceId), most_stats (referenceId = the stat) — paged
+	 *  for Load more. Admins only, like the Insights pane. */
+	@bindThis
+	public async insightRanking(channel: MiChannel, viewer: MiUser, timeframe: ClubTimeframe, dimension: 'most_active' | 'most_rewarded' | 'most_stats', referenceId: string | null, offset: number, limit: number) {
+		await this.assertAdmin(channel, viewer.id);
+		const [from, to] = this.clubWindow(timeframe);
+		const acts = await this.db.query(`SELECT m."id" FROM "meet" m WHERE m."channelId" = $1 AND m."status" <> 'cancelled' AND m."startAt" >= $2 AND m."startAt" < $3`, [channel.id, from, to]) as { id: string }[];
+		const ids = acts.map(a => a.id);
+		let rows: { userId: string; n: number }[] = [];
+		if (dimension === 'most_active') rows = ids.length ? await this.db.query(`SELECT p."userId", count(*)::int AS n FROM "meet_participant" p WHERE p."meetId" = ANY($1) AND p."status" = 'confirmed' AND p."userId" IS NOT NULL GROUP BY p."userId" ORDER BY n DESC, p."userId"`, [ids]) as { userId: string; n: number }[] : [];
+		else if (dimension === 'most_rewarded' && referenceId) rows = (await this.kudoTallies(ids)).get(referenceId) ?? [];
+		else if (dimension === 'most_rewarded') rows = ids.length ? await this.db.query(`SELECT r."targetUserId" AS "userId", count(*)::int AS n FROM "meet_review" r WHERE r."meetId" = ANY($1) AND r."type" = 'endorsement' AND r."archivedAt" IS NULL GROUP BY r."targetUserId" ORDER BY n DESC, r."targetUserId"`, [ids]) as { userId: string; n: number }[] : [];
+		else rows = (await this.statTallies(ids)).get(referenceId ?? 'matches_won') ?? [];
+		const page = rows.slice(offset, offset + limit);
+		const out = [];
+		for (let i = 0; i < page.length; i++) out.push({ rank: offset + i + 1, userId: page[i].userId, user: await this.userEntityService.pack(page[i].userId, viewer, { schema: 'UserLite' }).catch(() => null), count: page[i].n });
+		return { timeframe, dimension, referenceId, total: rows.length, rows: out, hasMore: offset + limit < rows.length };
 	}
 
 	// ---- invitations (CLUB-INVITE-V1)
@@ -833,7 +918,7 @@ export class ClubService {
 	/** The clubs I am in, each with my state — the Home pinned row reads this. CLUB-TIERS-V1: memberships (club_member)
 	 *  by default; tier 'all' adds the clubs I only follow, with role 'follower'. */
 	@bindThis
-	public async mine(user: MiUser, tier: 'member' | 'all' = 'member'): Promise<{ channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' | 'follower' }[]> {
+	public async mine(user: MiUser, tier: 'member' | 'all' = 'member'): Promise<{ channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' | 'follower'; myTags: string[] }[]> {
 		const joined = await this.db.query(`SELECT "channelId" FROM "club_member" WHERE "userId" = $1 ORDER BY "id" DESC`, [user.id]) as { channelId: string }[];
 		const follows = tier === 'all' ? await this.channelFollowingsRepository.find({ where: { followerId: user.id }, order: { id: 'DESC' } }) : [];
 		const owned = await this.channelsRepository.find({ where: { userId: user.id, isArchived: false } });
@@ -845,12 +930,17 @@ export class ClubService {
 		const pinned = await this.pinnedChannelIds(user.id, ids); // NUKE-CLUB-PIN-V1: native channel_favorite
 		const settings = await this.clubSettingsRepository.find({ where: { channelId: In(ids) } });
 		const byId = new Map(channels.map(c => [c.id, c]));
-		const out: { channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' | 'follower' }[] = [];
+		const out: { channel: MiChannel; pinned: boolean; paused: boolean; role: 'owner' | 'admin' | 'member' | 'follower'; myTags: string[] }[] = [];
 		for (const id of ids) {
 			const c = byId.get(id); if (!c) continue;
 			const st = states.find(x => x.channelId === id); const s = settings.find(x => x.channelId === id);
 			// INT-BATCH2: pinned from the native channel favourite (NUKE-CLUB-PIN-V1), role from the tiers (CLUB-TIERS-V1)
-			out.push({ channel: c, pinned: pinned.has(id), paused: !!(st && st.pausedAt), role: c.userId === user.id ? 'owner' : s && s.adminIds.includes(user.id) ? 'admin' : memberIds.has(id) ? 'member' : 'follower' });
+			const role: 'owner' | 'admin' | 'member' | 'follower' = c.userId === user.id ? 'owner' : s && s.adminIds.includes(user.id) ? 'admin' : memberIds.has(id) ? 'member' : 'follower';
+			// CLUB-MYTAGS-V1 (fix-S3, Reclub club row "• tag +n"): the tags I carry in this club, unexpired, in the club's order;
+			// an admins-only tag is listed only to an owner / admin (the rule clubs/settings/show applies to the tag list)
+			const now = Date.now();
+			const myTags = role === 'follower' || !s ? [] : (s.tags ?? []).filter(t => (t.visibility === 'all' || role === 'owner' || role === 'admin') && Object.prototype.hasOwnProperty.call(t.members, user.id) && !(t.members[user.id] && new Date(t.members[user.id] as string).getTime() < now)).sort((a, b) => a.order - b.order).map(t => t.name);
+			out.push({ channel: c, pinned: pinned.has(id), paused: !!(st && st.pausedAt), role, myTags });
 		}
 		return out.sort((a, b) => Number(b.pinned) - Number(a.pinned));
 	}

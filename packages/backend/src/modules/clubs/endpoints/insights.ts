@@ -34,7 +34,15 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { channelId: { type: 'string', format: 'misskey:id' }, timeframe: { type: 'string', enum: ['CURRENT_MONTH', 'LAST_MONTH', 'LAST_3_MONTHS', 'YTD', 'LAST_YEAR', 'ALL_TIME'], default: 'LAST_3_MONTHS' } },
+	properties: {
+		channelId: { type: 'string', format: 'misskey:id' },
+		timeframe: { type: 'string', enum: ['CURRENT_MONTH', 'LAST_MONTH', 'LAST_3_MONTHS', 'YTD', 'LAST_YEAR', 'ALL_TIME'], default: 'LAST_3_MONTHS' },
+		// CLUB-RANKINGS-V1 (fix-S3): with a dimension the answer is that ONE full ranking, paged (See all / Load more)
+		dimension: { type: 'string', enum: ['most_active', 'most_rewarded', 'most_stats'] },
+		referenceId: { type: 'string', nullable: true, maxLength: 64 },
+		offset: { type: 'integer', minimum: 0, default: 0 },
+		limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+	},
 	required: ['channelId'],
 } as const;
 
@@ -44,6 +52,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			try {
 				const c = await this.clubService.channel(ps.channelId);
+			if (ps.dimension) return await this.clubService.insightRanking(c, me, ps.timeframe, ps.dimension, ps.referenceId ?? null, ps.offset, ps.limit);   // CLUB-RANKINGS-V1
 			return await this.clubService.insights(c, me, ps.timeframe);
 			} catch (e) {
 				return toApiError(e);
