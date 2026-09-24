@@ -106,7 +106,7 @@ export const meetParamProps = {
 	blindTeamsMinutes: { type: 'integer', nullable: true, minimum: 0, maximum: 10080 },
 	allowPlayerScoring: { type: 'boolean' },
 	sendNotifications: { type: 'boolean' },
-	rosterVisibility: { type: 'array', items: { type: 'string', enum: ['show_gender', 'show_age_group', 'show_self_rating', 'show_participant_tags', 'show_club_tags', 'show_dupr_ratings', 'show_courts', 'show_friends', 'show_position'] } },
+	rosterVisibility: { type: 'array', items: { type: 'string', enum: ['show_gender', 'show_age_group', 'show_self_rating', 'show_participant_tags', 'show_club_tags', 'show_dupr_ratings', 'show_courts', 'show_friends', 'show_position', 'show_level', 'show_none'] } },   // ROSTER-VIS-HOST-V1 (mop-up): + GripBat's level chip; show_none = the host switched everything off (empty = the default set)
 	cancellationFreezeHours: { type: 'integer', minimum: 0, maximum: 168 },
 	gateType: { type: 'string', enum: ['guidance', 'autoApprove', 'strict'] },
 	levelBasis: { type: 'string', enum: ['self', 'duprSingles', 'duprDoubles'] },

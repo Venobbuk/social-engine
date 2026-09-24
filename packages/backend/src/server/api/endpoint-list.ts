@@ -166,6 +166,7 @@ export * as 'meets/save' from '@/modules/meets/endpoints/save.js';   // MEET-SAV
 export * as 'meets/levels' from '@/modules/meets/endpoints/levels.js';
 export * as 'meets/participants/update' from '@/modules/meets/endpoints/participants/update.js';
 export * as 'meets/participants/add' from '@/modules/meets/endpoints/participants/add.js';
+export * as 'meets/participants/swap' from '@/modules/meets/endpoints/participants/swap.js'; // MEET-SWAP-V1 (mop-up)
 export * as 'meets/matches/list' from '@/modules/meets/endpoints/matches/list.js';
 export * as 'meets/matches/upsert' from '@/modules/meets/endpoints/matches/upsert.js';
 export * as 'meets/matches/delete' from '@/modules/meets/endpoints/matches/delete.js';
