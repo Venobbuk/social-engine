@@ -5,7 +5,7 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import { Brackets } from 'typeorm';
+import { Brackets, In } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
 import { QueueService } from '@/core/QueueService.js';
@@ -292,6 +292,11 @@ export class ChatService {
 
 		const inserted = await this.chatMessagesRepository.insertOne(message);
 
+		// MOP-UP-CHAT CHAT-MENTION-V1 (E-chat-room.08): an @mention of a room member notifies that member (notifyRoomMentions).
+		if (params.system == null && message.text) {
+			this.notifyRoomMentions(fromUser.id, toRoom, memberships.map(m => m.userId), message.text).catch(() => undefined);
+		}
+
 		// NUKE-REVIEW-FIXES-V1 (review finding 6): an album is ONE notification, not one per photo. A meet photo is now a
 		// file message (NUKE-MEET-PHOTOS-V1), and a host posting a 20-photo post-match album used to push 20 times to every
 		// player. A FILE-ONLY message (no text — i.e. an upload, never a typed line) from the same sender into the same
@@ -348,6 +353,54 @@ export class ChatService {
 		}, 3000);
 
 		return packedMessage;
+	}
+
+	/** MOP-UP-CHAT CHAT-MENTION-V1 (Reclub E-chat-room.08: @mentions notify). A room message that names a MEMBER of the room
+	 *  with "@" notifies that member once — in every GripBat room (meet chat, club chat, group chat: all of them are native
+	 *  chat rooms sent through createMessageToRoom). A DM needs nothing: its one recipient is already notified of every
+	 *  message (createMessageToUser's newChatMessage).
+	 *  G11: EXTENDS native chat. Misskey's own 'mention' notification is note-only (it carries a noteId and the packer drops
+	 *  it without the note — core/NoteCreateService.ts:156, core/entities/NotificationEntityService.ts), and mfm-js's
+	 *  extractMentions (misc/extract-mentions.ts:9) only knows ASCII usernames, while the app's @ picker writes the member's
+	 *  display name with the spaces taken out (app ChatThread.tsx mention()). So an "@token" is matched against the room's
+	 *  members only — username OR squashed display name — and the notification is the native 'app' notification every
+	 *  GripBat door already uses, with the sender as the notifier (native NotificationService: self, muting and the
+	 *  per-type receive config are applied there), the room as its link, and the reader's language applied by the app
+	 *  (lib/social NOTIF_HEAD). Nobody outside the room is ever looked up, so a mention cannot leak a message to a
+	 *  non-member. The account-wide "chat notifications off" is respected; a per-room mute is not — a muted busy meet
+	 *  chat still tells you when someone addresses you by name (Slack / Discord default), which is the point of a mention.
+	 *  Returns the ids notified. */
+	@bindThis
+	public async notifyRoomMentions(fromUserId: MiUser['id'], room: MiChatRoom, memberIds: MiUser['id'][], text: string): Promise<MiUser['id'][]> {
+		const tokens = new Set<string>();
+		for (const m of text.matchAll(/(?:^|[^A-Za-z0-9_@.])@([^\s@]{1,64})/gu)) {
+			const t = m[1].replace(/[.,!?;:\u3001\u3002\uff01\uff0c\uff1a\uff1b\uff1f)\]\uff09\u300d\u300f"'\u2026]+$/u, '').toLowerCase();
+			if (t) tokens.add(t);
+		}
+		if (tokens.size === 0) return [];
+		const others = [...new Set(memberIds)].filter(id => id !== fromUserId);   // a self-mention never notifies
+		if (others.length === 0) return [];
+		const squash = (x: string | null | undefined) => (x ?? '').replace(/\s+/g, '').toLowerCase();
+		const users = await this.usersRepository.findBy({ id: In(others) });
+		const hit = users.filter(u => u.host == null && (tokens.has(u.usernameLower) || (u.name != null && tokens.has(squash(u.name)))));
+		if (hit.length === 0) return [];
+		const chatOff = await this.mutedUserIdsForRoom(room.id, hit.map(u => u.id));
+		const sender = await this.usersRepository.findOneBy({ id: fromUserId });
+		const who = ((sender?.name ?? '').trim() || sender?.username) ?? '';
+		const roomName = (room.name ?? '').trim();
+		const meetId = await this.chatRoomsRepository.manager.query('SELECT id FROM meet WHERE "chatRoomId" = $1 LIMIT 1', [room.id])
+			.then((r: { id: string }[]) => (r[0] ? r[0].id : null)).catch(() => null);
+		const link = meetId ? 'meetchat:' + meetId : 'chat:' + room.id;   // a meet's room opens on the meet's Chat tab
+		const header = roomName ? `${who} mentioned you in ${roomName}` : `${who} mentioned you`;
+		const body = text.length > 140 ? text.slice(0, 139) + '\u2026' : text;
+		const notified: MiUser['id'][] = [];
+		for (const u of hit) {
+			if (chatOff.has(u.id)) continue;
+			if (await this.userBlockingService.checkBlocked(u.id, fromUserId)) continue;
+			this.notificationService.createNotification(u.id, 'app', { customHeader: header, customBody: body, customIcon: null, appAccessTokenId: null, customLink: link }, fromUserId);
+			notified.push(u.id);
+		}
+		return notified;
 	}
 
 	@bindThis
