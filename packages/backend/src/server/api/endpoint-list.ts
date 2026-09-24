@@ -191,6 +191,15 @@ export * as 'venues/locations/delete' from '@/modules/venues/endpoints/locations
 export * as 'venues/feedback' from '@/modules/venues/endpoints/feedback-create.js';
 export * as 'venues/feedback/list' from '@/modules/venues/endpoints/feedback-list.js';
 export * as 'venues/claim' from '@/modules/venues/endpoints/claim.js';
+export * as 'venues/media/list' from '@/modules/venues/endpoints/media-list.js'; // VENUES-REST-V1
+export * as 'venues/media/add' from '@/modules/venues/endpoints/media-add.js'; // VENUES-REST-V1
+export * as 'venues/media/delete' from '@/modules/venues/endpoints/media-delete.js'; // VENUES-REST-V1
+export * as 'venues/media/pin' from '@/modules/venues/endpoints/media-pin.js'; // VENUES-REST-V1
+export * as 'venues/update' from '@/modules/venues/endpoints/update.js'; // VENUES-REST-V1
+export * as 'venues/delete' from '@/modules/venues/endpoints/delete.js'; // VENUES-REST-V1
+export * as 'venues/pin' from '@/modules/venues/endpoints/pin.js'; // VENUES-REST-V1
+export * as 'venues/pinned' from '@/modules/venues/endpoints/pinned.js'; // VENUES-REST-V1
+export * as 'discover/community' from '@/modules/discover/endpoints/community.js'; // VENUES-REST-V1
 export * as 'geo/search' from '@/modules/discover/endpoints/geo-search.js'; // DISCOVER-W2D
 export * as 'geo/reverse' from '@/modules/discover/endpoints/geo-reverse.js'; // DISCOVER-W2D
 export * as 'discover/search' from '@/modules/discover/endpoints/search.js'; // DISCOVER-W2D

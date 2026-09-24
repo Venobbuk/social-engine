@@ -21,6 +21,16 @@ export const packedVenueSchema = {
 		ownerUserId: { type: 'string', optional: false, nullable: true, format: 'id' },
 		courtCount: { type: 'number', optional: false, nullable: true },
 		distanceKm: { type: 'number', optional: true, nullable: true },
+		// VENUES-REST-V1: venues/show (for the reader) · venues/search + venues/pinned (photos / cover)
+		coOwnerIds: { type: 'array', optional: true, nullable: false, items: { type: 'string', optional: false, nullable: false } },
+		canManage: { type: 'boolean', optional: true, nullable: false },
+		canDelete: { type: 'boolean', optional: true, nullable: false },
+		canManageOwners: { type: 'boolean', optional: true, nullable: false },
+		isPinned: { type: 'boolean', optional: true, nullable: false },
+		mediaCount: { type: 'number', optional: true, nullable: false },
+		notes: { type: 'string', optional: true, nullable: true },
+		cover: { type: 'string', optional: true, nullable: true },
+		photos: { type: 'array', optional: true, nullable: false, items: { type: 'object', optional: false, nullable: false } },
 		updatedAt: { type: 'string', optional: false, nullable: false, format: 'date-time' },
 	},
 } as const;

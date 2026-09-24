@@ -7,6 +7,12 @@ import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { VenueService } from '@/modules/venues/VenueService.js';
 import { packVenue } from './_shared.js';
+import { Inject } from '@nestjs/common';
+import type { DataSource } from 'typeorm';
+import type { DriveFilesRepository } from '@/models/_.js';
+import { DI } from '@/di-symbols.js';
+import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
+import { coversOf } from '@/modules/venues/VenueExtras.js';   // VENUES-REST-V1
 
 // VENUE-V1: nearby / keyword venue search (Reclub Venues pane). Verified only unless includeUnderReview.
 export const meta = {
@@ -30,10 +36,17 @@ export const paramDef = {
 
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
-	constructor(private venueService: VenueService) {
+	constructor(
+		private venueService: VenueService,
+		@Inject(DI.db) private db: DataSource,
+		@Inject(DI.driveFilesRepository) private driveFilesRepository: DriveFilesRepository,
+		private driveFileEntityService: DriveFileEntityService,
+	) {
 		super(meta, paramDef, async (ps) => {
 			const rows = await this.venueService.search({ q: ps.q, lat: ps.lat, lng: ps.lng, radiusKm: ps.radiusKm, includeUnderReview: ps.includeUnderReview, limit: ps.limit });
-			return rows.map(packVenue);
+			// VENUES-REST-V1 search: the card's photo carousel (C-discover.23) — up to 5 per venue, one query for the page
+			const covers = await coversOf(this.db, this.driveFilesRepository, this.driveFileEntityService, rows.map(r => r.id), 5);
+			return rows.map(r => ({ ...packVenue(r), photos: covers[r.id] ?? [] }));
 		});
 	}
 }

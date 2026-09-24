@@ -11,6 +11,7 @@ import { isGripbatStaff, notStaffError } from '@/modules/staff.js';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { VenueService } from '@/modules/venues/VenueService.js';
 import { venueErrors, packVenue, toVenueApiError } from './_shared.js';
+import { venueRestErrors } from '@/modules/venues/VenueExtras.js';   // VENUES-REST-V1
 
 // Reclub staff: verify / close a venue, assign its owner (module 7379 venue-owner). STAFF-ROLE-V1 (batch-1 review fix):
 // holders of the GripBat staff role only (modules/staff.ts), not Misskey moderators.
@@ -19,7 +20,7 @@ export const meta = {
 	requireCredential: true,
 	kind: 'write:meets',
 	res: { type: 'object', optional: false, nullable: false, ref: 'Venue' },
-	errors: { noSuchVenue: venueErrors.noSuchVenue, notStaff: notStaffError },
+	errors: { noSuchVenue: venueErrors.noSuchVenue, notStaff: notStaffError, noSuchUser: venueRestErrors.noSuchUser },
 } as const;
 
 export const paramDef = {
@@ -29,6 +30,8 @@ export const paramDef = {
 		status: { type: 'string', nullable: true, enum: ['verified', 'under_review', 'closed'] },
 		ownerUserId: { type: 'string', format: 'misskey:id', nullable: true },
 		notes: { type: 'string', nullable: true, maxLength: 2048 },
+		// VENUES-REST-V1: Reclub venue-owner.tsx picks several players — the first is the primary owner, the rest co-owners
+		ownerUserIds: { type: 'array', maxItems: 10, uniqueItems: true, items: { type: 'string', format: 'misskey:id' } },
 	},
 	required: ['venueId'],
 } as const;
@@ -46,6 +49,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (ps.status != null) patch.status = ps.status;
 				if (ps.ownerUserId !== undefined) patch.ownerUserId = ps.ownerUserId;
 				if (ps.notes !== undefined) patch.notes = ps.notes;
+				if (ps.ownerUserIds !== undefined) {   // VENUES-REST-V1 owners: every id must be a real local user
+					const ids = ps.ownerUserIds;
+					const found = ids.length ? await this.db.query(`SELECT id FROM "user" WHERE id = ANY($1) AND host IS NULL`, [ids]) as { id: string }[] : [];
+					if (found.length !== ids.length) throw new ApiError(venueRestErrors.noSuchUser);
+					patch.ownerUserId = ids[0] ?? null;
+					await this.db.query(`UPDATE venue SET "coOwnerIds" = $2 WHERE id = $1`, [ps.venueId, ids.slice(1)]);
+				}
 				return packVenue(await this.venueService.staffUpdate(ps.venueId, patch));
 			} catch (e) {
 				return toVenueApiError(e);
