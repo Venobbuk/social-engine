@@ -328,9 +328,14 @@ export class CompetitionService {
 			const people = await this.entriesRepository.countBy({ competitionId: c.id, status: In(['pending', 'confirmed', 'forfeit', 'freeAgent', 'spectator']) });
 			if (people) throw this.err('cannot_delete', 'People have joined this competition — cancel it first, so they are told.');
 		}
-		const roomId = c.chatRoomId;
+		// FIX-S2 COMP-ROOMS-GONE-V1: EVERY room of the competition goes with it — the general room, the Forum / Staff / Captain
+		// rooms (c.chatRooms) and each team's room (entry.chatRoomId, read before the FK CASCADE removes the entries). Only the
+		// general room was deleted, so a Forum room survived its competition in its members' inbox (arixiz58mpah00ul,
+		// 2026-09-24). G11 EXTEND: the native ChatService.deleteRoom, as MeetService.deleteMeet does for a meet's room.
+		const teamRooms = (await this.entriesRepository.findBy({ competitionId: c.id })).map((e) => e.chatRoomId);
+		const roomIds = Array.from(new Set([c.chatRoomId, ...Object.values(c.chatRooms ?? {}), ...teamRooms].filter((x): x is string => typeof x === 'string' && x.length > 0)));
 		await this.competitionsRepository.delete(c.id);
-		if (roomId) { const room = await this.chatService.findRoomById(roomId).catch(() => null); if (room) await this.chatService.deleteRoom(room).catch(() => undefined); }
+		for (const roomId of roomIds) { const room = await this.chatService.findRoomById(roomId).catch(() => null); if (room) await this.chatService.deleteRoom(room).catch(() => undefined); }
 	}
 
 	// -------------------------------------------------------------------------------------------- entries
