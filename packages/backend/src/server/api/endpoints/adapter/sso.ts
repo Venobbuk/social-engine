@@ -42,7 +42,8 @@ import { readFileSync } from 'node:fs';
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { UsersRepository, AccessTokensRepository, RolesRepository, RoleAssignmentsRepository, MiRole } from '@/models/_.js';
+import type { UsersRepository, AccessTokensRepository, RolesRepository, RoleAssignmentsRepository, RegistryItemsRepository, MiRole } from '@/models/_.js';
+import { SSO_HANDLE_KEY } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 import { RoleService } from '@/core/RoleService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { isDuplicateKeyValueError } from '@/misc/is-duplicate-key-value-error.js';
@@ -66,6 +67,7 @@ export const meta = {
 		unknownIssuer: { message: 'Unknown SSO issuer.', code: 'ADAPTER_SSO_UNKNOWN_ISSUER', id: '4b2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f02' },
 		unconfigured: { message: 'SSO is not configured on this server.', code: 'ADAPTER_SSO_UNCONFIGURED', id: '4b2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f03' },
 		replayed: { message: 'This SSO token has already been used.', code: 'ADAPTER_SSO_REPLAYED', id: '4b2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f04' },
+		retired: { message: 'Sign in with your GripBat account.', code: 'ADAPTER_SSO_RETIRED', id: '4b2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f05' },
 	},
 	res: {
 		type: 'object',
@@ -106,6 +108,7 @@ const EXPECTED_TENANT = process.env.ADAPTER_SSO_TENANT ?? null; // optional seco
 // tenant list is production's ("boyau") only; the UAT container sets ADAPTER_SSO_STAFF_TENANTS=boyau-uat.
 const STAFF_TENANTS = (process.env.ADAPTER_SSO_STAFF_TENANTS ?? 'boyau').split(',').map(x => x.trim()).filter(Boolean);
 const MAX_TTL_SEC = 300;
+const SSO_LOGIN_OFF = process.env.ADAPTER_SSO_LOGIN === 'off'; // GRIPBAT-ACCOUNTS-V1 retirement switch
 const CLOCK_SKEW_SEC = 60; // tolerate a minute of clock drift between the mint and this box
 
 // First-party USER scope for the SSO credential. Every non-admin permission in misskey-js consts plus the
@@ -185,6 +188,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.accessTokensRepository)
 		private accessTokensRepository: AccessTokensRepository,
 
+		@Inject(DI.registryItemsRepository)
+		private registryItemsRepository: RegistryItemsRepository,
+
 		@Inject(DI.rolesRepository)
 		private rolesRepository: RolesRepository,
 
@@ -200,6 +206,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private loggerService: LoggerService,
 	) {
 		super(meta, paramDef, async (ps) => {
+			// GRIPBAT-ACCOUNTS-V1 (G15.15): the seam is retired for GripBat (the app signs in natively). It stays open only while
+			// other lanes' probes still sign in through it; ADAPTER_SSO_LOGIN=off (both compose files) closes it — a refusal, no delete.
+			if (SSO_LOGIN_OFF) throw new ApiError(meta.errors.retired);
 			let claims: Claims;
 			try {
 				claims = verifyJwt(ps.jwt);
@@ -240,7 +249,18 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// path for these password-unknown accounts. (Defense-in-depth follow-up: a dedicated (iss,sub)→userId link
 			// table, so a tombstoned/renamed row can never be mismatched. Left out here to avoid colliding with the
 			// engine-batch1 entity-list edits; see report.)
-			const existing = await this.usersRepository.findOneBy({ usernameLower: username, host: null as never });
+			let existing = await this.usersRepository.findOneBy({ usernameLower: username, host: null as never });
+			/* GRIPBAT-ACCOUNTS-V1 (G15.15): GripBat accounts are native now and a person CHOOSES a username
+			 * (gb/account/username). An account this seam made keeps its seam handle as a registry alias (SSO_HANDLE_KEY),
+			 * so while the seam still runs (other lanes' probes, until ADAPTER_SSO_LOGIN=off) the SAME account is found. */
+			if (!existing) {
+				const alias = await this.registryItemsRepository.createQueryBuilder('r')
+					.where('r.key = :k', { k: SSO_HANDLE_KEY })
+					.andWhere('r.domain IS NULL')
+					.andWhere('r.value = to_jsonb(CAST(:v AS text))', { v: username })
+					.getOne();
+				if (alias) existing = await this.usersRepository.findOneBy({ id: alias.userId, host: null as never });
+			}
 			if (existing) {
 				/* ACCOUNT-BUGS-V1 (2026-09-23) — WHICH NAME WINS: THE PERSON'S OWN GRIPBAT NAME.
 				 * hkpl's name SEEDS the GripBat display name: it is written when the account has no name of its own (null,

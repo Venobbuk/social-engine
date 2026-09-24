@@ -211,4 +211,30 @@ export class DuprSubmitService {
 		if (res.status === 200 && json.found && json.last_error) return { duprError: String(json.last_error).slice(0, 512) }; // still retrying at hkpl
 		return {};
 	}
+
+	/**
+	 * GRIPBAT-ACCOUNTS-V1 (spec §7, G15.15) — the DUPR CONNECT doors. With GripBat owning its accounts there is no hkpl
+	 * user to hang a DUPR link on, so hkpl performs the partner consent check / partner rating read for a GripBat user
+	 * through S2S doors keyed by the GripBat user id + tenant (hkpl routes/social-dupr-connect.js, staged for the hkpl
+	 * window). Same URL, same secret, same local-address rule as the submit door — the hkpl facts stay in THIS file.
+	 * Only paths under /api/v1/social/dupr/ (sso-url | verify | ratings) — never the submit path, never the reader.
+	 * Never throws: { status: 0 } when hkpl is unreachable or unconfigured.
+	 */
+	@bindThis
+	public async connectDoor(path: 'sso-url' | 'verify' | 'ratings', body: Record<string, unknown> | null): Promise<{ status: number; json: Record<string, unknown> }> {
+		if (!this.isConfigured()) return { status: 0, json: { reason: 'hkpl_unconfigured' } };
+		try {
+			const res = await this.httpRequestService.send(`${HKPL_URL}/api/v1/social/dupr/${path}`, {
+				method: body == null ? 'GET' : 'POST',
+				headers: body == null ? { 'x-social-secret': HKPL_SECRET } : { 'content-type': 'application/json', 'x-social-secret': HKPL_SECRET },
+				...(body == null ? {} : { body: JSON.stringify({ ...body, tenant: DUPR_TENANT }) }),
+				timeout: 15_000,
+				isLocalAddressAllowed: HKPL_ALLOW_LOCAL,
+			}, { throwErrorWhenResponseNotOk: false });
+			const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+			return { status: res.status, json: (json && typeof json === 'object') ? json : {} };
+		} catch (err) {
+			return { status: 0, json: { reason: 'hkpl_unreachable', detail: (err as Error).message } };
+		}
+	}
 }

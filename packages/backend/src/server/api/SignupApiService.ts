@@ -18,7 +18,10 @@ import { MiLocalUser } from '@/models/User.js';
 import { FastifyReplyError } from '@/misc/fastify-reply-error.js';
 import { bindThis } from '@/decorators.js';
 import { L_CHARS, secureRndstr } from '@/misc/secure-rndstr.js';
+import { getIpHash } from '@/misc/get-ip-hash.js';
+import { PASSWORD_MIN, appLink, mailCopy, normalizeEmail, placeholderUsername, sandboxReveal, usernameProblem } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 import { SigninService } from './SigninService.js';
+import { RateLimiterService } from './RateLimiterService.js';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
 @Injectable()
@@ -51,7 +54,15 @@ export class SignupApiService {
 		private signupService: SignupService,
 		private signinService: SigninService,
 		private emailService: EmailService,
+		private rateLimiterService: RateLimiterService,
 	) {
+	}
+
+	/* GRIPBAT-ACCOUNTS-V1 — a refusal the app can word (Misskey answered most sign-up refusals with a bare 400 and no
+	 * body, so a taken address and a bad password read the same). Misskey's own error envelope. */
+	private refuse(reply: FastifyReply, status: number, code: string, message: string) {
+		reply.code(status);
+		return { error: { code, message, id: `gb-signup-${code.toLowerCase()}` } };
 	}
 
 	@bindThis
@@ -108,32 +119,51 @@ export class SignupApiService {
 			}
 		}
 
-		const username = body['username'];
+		/* GRIPBAT-ACCOUNTS-V1 (spec §1a). EXTEND of the native sign-up, email-required branch:
+		 *  - the username is NOT asked at sign-up: a placeholder gb_<12 hex> is issued and the person chooses the real one in
+		 *    onboarding (gb/account/username). A username the client does send must pass the same rules. Never email-derived.
+		 *  - password >= PASSWORD_MIN; the address is normalised (one address = one account, any letter case);
+		 *  - refusals carry a code (EMAIL_INVALID / EMAIL_TAKEN / PASSWORD_TOO_SHORT / USERNAME_* / REGISTRATION_CLOSED);
+		 *  - 10 sign-ups an hour per IP (Misskey had no limit on this route; RateLimiterService is the native limiter). */
+		if (process.env.NODE_ENV !== 'test') {
+			const rl = await this.rateLimiterService.limit({ key: 'gb-signup', duration: 60 * 60 * 1000, max: 10 }, getIpHash(request.ip));
+			if (rl != null) return this.refuse(reply, 429, 'RATE_LIMITED', 'Too many sign-ups from this network. Try again later.');
+		}
+		const askedUsername = typeof body['username'] === 'string' && body['username'] !== '' ? body['username'] : null;
+		if (askedUsername != null) {
+			const p = usernameProblem(askedUsername, this.meta.preservedUsernames);
+			if (p) return this.refuse(reply, 400, p, 'That username cannot be used.');
+		}
+		let username = askedUsername ?? placeholderUsername();
 		const password = body['password'];
 		const host: string | null = process.env.NODE_ENV === 'test' ? (body['host'] ?? null) : null;
 		const invitationCode = body['invitationCode'];
-		const emailAddress = body['emailAddress'];
+		const emailAddress = typeof body['emailAddress'] === 'string' ? normalizeEmail(body['emailAddress']) : body['emailAddress'];
+		const lang = typeof (body as { lang?: unknown }).lang === 'string' ? String((body as { lang?: string }).lang).slice(0, 12) : null;
+
+		if (typeof password !== 'string' || password.length < PASSWORD_MIN) return this.refuse(reply, 400, 'PASSWORD_TOO_SHORT', `Use at least ${PASSWORD_MIN} characters.`);
 
 		if (this.meta.emailRequiredForSignup) {
 			if (emailAddress == null || typeof emailAddress !== 'string') {
-				reply.code(400);
-				return;
+				return this.refuse(reply, 400, 'EMAIL_INVALID', 'Enter a valid email address.');
 			}
 
 			const res = await this.emailService.validateEmailForAccount(emailAddress);
 			if (!res.available) {
-				reply.code(400);
-				return;
+				return res.reason === 'used'
+					? this.refuse(reply, 400, 'EMAIL_TAKEN', 'An account with that email already exists.')
+					: this.refuse(reply, 400, 'EMAIL_INVALID', 'Enter a valid email address.');
 			}
 		}
+		// a placeholder that happens to exist already: draw again (48 bits — practically never)
+		for (let i = 0; askedUsername == null && i < 3 && await this.usersRepository.exists({ where: { usernameLower: username, host: IsNull() } }); i++) username = placeholderUsername();
 
 		let ticket: MiRegistrationTicket | null = null;
 
 		// テスト時はこの機構は障害となるため無効にする
 		if (process.env.NODE_ENV !== 'test' && this.meta.disableRegistration) {
 			if (invitationCode == null || typeof invitationCode !== 'string') {
-				reply.code(400);
-				return;
+				return this.refuse(reply, 403, 'REGISTRATION_CLOSED', 'Sign-up is closed right now.');
 			}
 
 			ticket = await this.registrationTicketsRepository.findOneBy({
@@ -198,11 +228,11 @@ export class SignupApiService {
 				password: hash,
 			});
 
-			const link = `${this.config.url}/signup-complete/${code}`;
-
-			this.emailService.sendEmail(emailAddress!, 'Signup',
-				`To complete signup, please click this link:<br><a href="${link}">${link}</a>`,
-				`To complete signup, please click this link: ${link}`);
+			// GRIPBAT-ACCOUNTS-V1: the link opens the GripBat app (server-configured origin, G15.13), not the engine's stock
+			// client; the mail is GripBat's, in the reader's language, and carries the code for pasting too.
+			const link = appLink('verify', code, this.config.url);
+			const m = mailCopy('signup', lang, { code, link });
+			this.emailService.sendEmail(emailAddress!, m.subject, m.html, m.text).catch(() => { /* logged by EmailService */ });
 
 			if (ticket) {
 				await this.registrationTicketsRepository.update(ticket.id, {
@@ -211,6 +241,8 @@ export class SignupApiService {
 				});
 			}
 
+			// GRIPBAT-ACCOUNTS-V1 UAT sandbox: a reserved test address on the GB_SANDBOX_MAIL container gets the code back
+			if (sandboxReveal(emailAddress)) return { pending: true, _dev_code: code };
 			reply.code(204);
 			return;
 		} else {
@@ -246,14 +278,16 @@ export class SignupApiService {
 	public async signupPending(request: FastifyRequest<{ Body: { code: string; } }>, reply: FastifyReply) {
 		const body = request.body;
 
-		const code = body['code'];
+		// GRIPBAT-ACCOUNTS-V1: a pasted code may carry spaces; unknown / expired / already-used answer a code the app words
+		const code = String(body['code'] ?? '').trim();
+		const pendingFound = code ? await this.userPendingsRepository.findOneBy({ code }) : null;
+		if (pendingFound == null) return this.refuse(reply, 400, 'CODE_INVALID', 'That code is not valid. Sign up again to get a new one.');
+		if (this.idService.parse(pendingFound.id).date.getTime() + (1000 * 60 * 30) < Date.now()) return this.refuse(reply, 400, 'CODE_EXPIRED', 'That code has expired. Sign up again to get a new one.');
+		// two sign-ups with one address: the first redeemed wins, the other can no longer make a second account
+		if (!(await this.emailService.validateEmailForAccount(pendingFound.email)).available) return this.refuse(reply, 400, 'EMAIL_TAKEN', 'An account with that email already exists. Sign in instead.');
 
 		try {
-			const pendingUser = await this.userPendingsRepository.findOneByOrFail({ code });
-
-			if (this.idService.parse(pendingUser.id).date.getTime() + (1000 * 60 * 30) < Date.now()) {
-				throw new FastifyReplyError(400, 'EXPIRED');
-			}
+			const pendingUser = pendingFound;
 
 			const { account } = await this.signupService.signup({
 				username: pendingUser.username,
@@ -270,7 +304,12 @@ export class SignupApiService {
 				email: pendingUser.email,
 				emailVerified: true,
 				emailVerifyCode: null,
+				emailNotificationTypes: [], // GRIPBAT-ACCOUNTS-V1: GripBat mails only about the account itself (notices go in-app / push)
 			});
+			// GRIPBAT-ACCOUNTS-V1: CHAT-SCOPE-V1 — a member can message anyone (Reclub inbox), as adapter/sso accounts could
+			await this.usersRepository.update(account.id, { chatScope: 'everyone' });
+			// the other pending sign-ups for this address are spent
+			await this.userPendingsRepository.delete({ email: pendingUser.email });
 
 			const ticket = await this.registrationTicketsRepository.findOneBy({ pendingUserId: pendingUser.id });
 			if (ticket) {

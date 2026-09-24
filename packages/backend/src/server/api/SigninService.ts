@@ -14,6 +14,7 @@ import { SigninEntityService } from '@/core/entities/SigninEntityService.js';
 import { bindThis } from '@/decorators.js';
 import { EmailService } from '@/core/EmailService.js';
 import { NotificationService } from '@/core/NotificationService.js';
+import { mailCopy } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
 @Injectable()
@@ -50,9 +51,9 @@ export class SigninService {
 
 			const profile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
 			if (profile.email && profile.emailVerified) {
-				this.emailService.sendEmail(profile.email, 'New login / ログインがありました',
-					'There is a new login. If you do not recognize this login, update the security status of your account, including changing your password. / 新しいログインがありました。このログインに心当たりがない場合は、パスワードを変更するなど、アカウントのセキュリティ状態を更新してください。',
-					'There is a new login. If you do not recognize this login, update the security status of your account, including changing your password. / 新しいログインがありました。このログインに心当たりがない場合は、パスワードを変更するなど、アカウントのセキュリティ状態を更新してください。');
+				// GRIPBAT-ACCOUNTS-V1: the security notice is GripBat's, in the account's language (was Misskey's EN/JA text)
+				const m = mailCopy('newLogin', profile.lang);
+				this.emailService.sendEmail(profile.email, m.subject, m.html, m.text).catch(() => { /* logged by EmailService */ });
 			}
 		});
 

@@ -13,6 +13,7 @@ import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
 import { EmailService } from '@/core/EmailService.js';
 import { L_CHARS, secureRndstr } from '@/misc/secure-rndstr.js';
+import { appLink, mailCopy, normalizeEmail, sandboxReveal } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 
 export const meta = {
 	tags: ['reset password'],
@@ -29,17 +30,31 @@ export const meta = {
 	errors: {
 
 	},
+
+	res: {
+		type: 'object',
+		optional: false, nullable: false,
+		properties: {
+			_dev_code: { type: 'string', optional: true, nullable: false },
+		},
+	},
 } as const;
 
 export const paramDef = {
 	type: 'object',
 	properties: {
-		username: { type: 'string' },
+		username: { type: 'string' }, // GRIPBAT-ACCOUNTS-V1: optional — Reclub asks the email only
 		email: { type: 'string' },
+		lang: { type: 'string', maxLength: 12 },
 	},
-	required: ['username', 'email'],
+	required: ['email'],
 } as const;
 
+/* GRIPBAT-ACCOUNTS-V1 (spec §3) — EXTEND of the native request:
+ *  - the email alone finds the account (its VERIFIED address, any letter case); a username, when sent, must match too;
+ *  - the answer is the same whether or not the address has an account (no enumeration through this door);
+ *  - the mail is GripBat's, in the reader's language, and links the GripBat app (server-configured origin, G15.13);
+ *  - UAT sandbox: a reserved test address on the GB_SANDBOX_MAIL container gets the token back (_dev_code). */
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
@@ -59,27 +74,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private emailService: EmailService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const user = await this.usersRepository.findOneBy({
-				usernameLower: ps.username.toLowerCase(),
-				host: IsNull(),
-			});
-
-			// 合致するユーザーが登録されていなかったら無視
-			if (user == null) {
-				return;
-			}
-
-			const profile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
-
-			// 合致するメアドが登録されていなかったら無視
-			if (profile.email !== ps.email) {
-				return;
-			}
-
-			// メアドが認証されていなかったら無視
-			if (!profile.emailVerified) {
-				return;
-			}
+			const email = normalizeEmail(ps.email);
+			const profile = await this.userProfilesRepository.createQueryBuilder('p')
+				.where('p.emailVerified = true')
+				.andWhere('LOWER(p.email) = :e', { e: email })
+				.getOne();
+			// 合致するメアドが登録されていなかったら無視 (same answer as a sent mail)
+			if (profile == null) return {};
+			const user = await this.usersRepository.findOneBy({ id: profile.userId, host: IsNull() });
+			if (user == null || user.isSuspended || user.isDeleted) return {};
+			if (ps.username != null && ps.username !== '' && user.usernameLower !== ps.username.toLowerCase()) return {};
 
 			const token = secureRndstr(64, { chars: L_CHARS });
 
@@ -89,11 +93,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				token,
 			});
 
-			const link = `${this.config.url}/reset-password/${token}`;
-
-			this.emailService.sendEmail(ps.email, 'Password reset requested',
-				`To reset password, please click this link:<br><a href="${link}">${link}</a>`,
-				`To reset password, please click this link: ${link}`);
+			const m = mailCopy('reset', ps.lang ?? profile.lang, { link: appLink('reset', token, this.config.url) });
+			this.emailService.sendEmail(profile.email!, m.subject, m.html, m.text).catch(() => { /* logged by EmailService */ });
+			return sandboxReveal(email) ? { _dev_code: token } : {};
 		});
 	}
 }
