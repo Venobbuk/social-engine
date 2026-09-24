@@ -252,7 +252,7 @@ user-friendly, or closer to what the user needs." So when a product choice comes
 5. **Private means private.** A private club/meet — its existence, name, members, counts, schedule, location — is
    readable only by owner, admins, members, and invite-token holders (`ClubService.mayReadClub`). Every sibling door
    that reads a club goes through that one guard.
-6. **No payment gateway in v1.** Payment = the host/coach's own payment info shown to members, the player marks paid
+6. *(G15.6-AIRWALLEX, operator 2026-09-24: "the payment is coming — local Hong Kong payment methods, Airwallex". An OPTIONAL "Pay now" route through Airwallex — local HK methods (FPS, PayMe, AlipayHK, WeChat Pay HK, Octopus, cards, as enabled on the operator's Airwallex account) — beside the manual method below, which stays. Hosts/coaches choose. Built and proven against Airwallex SANDBOX only; no live money path until the operator supplies live keys and arms it (contract-kit rule H). Payment credentials are handled by the operator, never typed by an agent. Not started yet — scheduled after the gap-closing round.)* **No payment gateway in v1.** Payment = the host/coach's own payment info shown to members, the player marks paid
    and uploads proof, the host confirms. Collecting money on behalf (a gateway) is an optional convenience later,
    never compulsory.
 7. **Coaching:** any club owner/admin may post lessons — GripBat never verifies or judges credentials; a coach
