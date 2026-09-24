@@ -382,7 +382,7 @@ export class ChatService {
 		if (others.length === 0) return [];
 		const squash = (x: string | null | undefined) => (x ?? '').replace(/\s+/g, '').toLowerCase();
 		const users = await this.usersRepository.findBy({ id: In(others) });
-		const hit = users.filter(u => u.host == null && (tokens.has(u.usernameLower) || (u.name != null && tokens.has(squash(u.name)))));
+		const hit = users.filter(u => u.host == null && (tokens.has(u.username.toLowerCase()) /* usernameLower is select:false on MiUser — findBy never loads it */ || (u.name != null && tokens.has(squash(u.name)))));
 		if (hit.length === 0) return [];
 		const chatOff = await this.mutedUserIdsForRoom(room.id, hit.map(u => u.id));
 		const sender = await this.usersRepository.findOneBy({ id: fromUserId });
