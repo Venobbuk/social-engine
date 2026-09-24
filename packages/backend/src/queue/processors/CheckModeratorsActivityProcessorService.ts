@@ -4,6 +4,7 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
+import { GB_PUBLIC_ORIGIN } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 import { In } from 'typeorm';
 import type Logger from '@/logger.js';
 import { bindThis } from '@/decorators.js';
@@ -115,6 +116,11 @@ export class CheckModeratorsActivityProcessorService {
 	@bindThis
 	public async process(): Promise<void> {
 		this.logger.info('start.');
+		/* GRIPBAT-ACCOUNTS-V1 (measured 2026-09-24 15:30 HKT): this native job saw the root account idle for 7 days, switched BOTH
+		 * engines to invitation-only (meta.disableRegistration = true: every GripBat sign-up answered REGISTRATION_CLOSED) and
+		 * posted a Japanese/English "Change to Invitation-Only" announcement to every member. GripBat's staff are not Misskey
+		 * moderators and GripBat owns its sign-up (G15.15): on a GripBat engine (GB_PUBLIC_ORIGIN set) the job does nothing. */
+		if (GB_PUBLIC_ORIGIN) { this.logger.info('GripBat engine: sign-up is never closed by moderator inactivity'); return; }
 
 		const meta = await this.metaService.fetch(false);
 		if (!meta.disableRegistration) {
