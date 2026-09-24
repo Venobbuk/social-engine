@@ -1,0 +1,589 @@
+{
+ "id": "comp-fixes-a",
+ "at": "2026-09-24T05:29:45.685Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "app": "1b82072",
+ "engine": "b862cec790",
+ "rows": [
+  {
+   "id": "D-comp-create.18",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "plant: an unrestricted player creates (default stays: anyone may)",
+     "ev": "{\"status\":200}"
+    },
+    {
+     "pass": true,
+     "what": "the role policy reaches the account (i.policies)",
+     "ev": "{\"canCreateCompetition\":false}"
+    },
+    {
+     "pass": true,
+     "what": "competitions/create refuses the restricted account",
+     "ev": "{\"status\":403,\"code\":\"ROLE_PERMISSION_DENIED\"}"
+    },
+    {
+     "pass": true,
+     "what": "wizard shows the restricted state + Request support",
+     "ev": "關閉\n建立賽事\n你目前無法建立賽事。如需協助，請聯絡客服。\n尋求支援\n主頁\n探索\n社群\n收件箱\n更多"
+    },
+    {
+     "pass": true,
+     "what": "after the role is removed the account creates again",
+     "ev": "{\"status\":200}"
+    }
+   ]
+  },
+  {
+   "id": "BUG-registration-line",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "Tournaments list row of a competition opening in 3 days",
+     "ev": "29 Sept 2026 · Registration opens in 3 days · Hosting"
+    },
+    {
+     "pass": true,
+     "what": "the hub header says the same",
+     "ev": "REGISTRATION OPENS IN 3 DAYS · MANAGER"
+    },
+    {
+     "pass": true,
+     "what": "Discover card of the same competition",
+     "ev": "Registration is closed | 4/8 | [probe] comp-fixes-a FO opens later 0522 | Ken Wong · 29 Sept · Registration opens in 3 days | Registration opens in 3 days | 0/8"
+    }
+   ]
+  },
+  {
+   "id": "BUG-draw-tab-zh",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "zh_Hant Draw tab",
+     "ev": "{\"want\":\"抽籤\",\"has\":true,\"hasTie\":false,\"tabs\":[]}"
+    },
+    {
+     "pass": true,
+     "what": "zh_Hans Draw tab",
+     "ev": "{\"want\":\"抽签\",\"has\":true,\"hasTie\":false,\"tabs\":[]}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.26",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "sub-tab Staff",
+     "ev": "Staff • 1"
+    },
+    {
+     "pass": true,
+     "what": "sub-tab Your team",
+     "ev": "Your team"
+    },
+    {
+     "pass": true,
+     "what": "sub-tab Confirmed",
+     "ev": "Confirmed • 4"
+    },
+    {
+     "pass": true,
+     "what": "sub-tab Free agents",
+     "ev": "Free agents • 0"
+    },
+    {
+     "pass": true,
+     "what": "sub-tab Spectators",
+     "ev": "Spectators • 0"
+    },
+    {
+     "pass": true,
+     "what": "sub-tab Withdrawn",
+     "ev": "Withdrawn • 0"
+    },
+    {
+     "pass": true,
+     "what": "sub-tab Invited",
+     "ev": "Invited • 0"
+    },
+    {
+     "pass": true,
+     "what": "Staff pane lists the staff",
+     "ev": "Admins/Referees present"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.27",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "Teams and Gender sort pressed",
+     "ev": "{\"seeds\":[\"[probe] comp-fixes-a Team Amy\",\"[probe] comp-fixes-a Team Tom\",\"[probe] comp-fixes-a R1\",\"[probe] comp-fixes-a R2\"],\"teams\":[\"[probe] comp-fixes-a Team Amy\",\"[probe] comp-fixes-a Team Tom\",\"[probe] comp-fixes-a R1\",\"[probe] comp-fixes-a R2\"],\"gender\":[\"[probe] comp-fixes-a Team Amy\",\"[probe] comp-fixes-a Team Tom\",\"[probe] comp-fixes-a R1\",\"[probe] comp-fixes-a R2\"]}"
+    },
+    {
+     "pass": true,
+     "what": "Teams sort puts full teams before reserved spots",
+     "ev": "[\"[probe] comp-fixes-a Team Amy\",\"[probe] comp-fixes-a Team Tom\",\"[probe] comp-fixes-a R1\",\"[probe] comp-fixes-a R2\"]"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.36",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "plant: before, a player sees the roster",
+     "ev": "{\"users\":2}"
+    },
+    {
+     "pass": true,
+     "what": "host pressed Hide roster → saved on the engine",
+     "ev": "{\"hideRoster\":true}"
+    },
+    {
+     "pass": true,
+     "what": "a player now gets no roster (names and size only)",
+     "ev": "{\"users\":0,\"rosterHidden\":true,\"rosterCount\":2}"
+    },
+    {
+     "pass": true,
+     "what": "the team's own members still see it",
+     "ev": "{\"users\":2}"
+    },
+    {
+     "pass": true,
+     "what": "the player sees \"2 players\", no names",
+     "ev": "2 players · Open for 1 more · Unpaid | 2 players · Open for 1 more · Unpaid"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.38",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "Auto approve switch pressed → off on the engine",
+     "ev": "{\"spectatorAutoApprove\":false}"
+    },
+    {
+     "pass": true,
+     "what": "plant: with Auto approve off a spectator is a REQUEST",
+     "ev": "{\"status\":\"spectatorPending\"}"
+    },
+    {
+     "pass": true,
+     "what": "Requested list shown",
+     "ev": "REQUESTED TO BE SPECTATOR"
+    },
+    {
+     "pass": true,
+     "what": "Approve pressed → spectator",
+     "ev": "{\"status\":\"spectator\"}"
+    },
+    {
+     "pass": true,
+     "what": "Invite to team pressed → the spectator is invited to Team Amy",
+     "ev": "{\"invitedUserIds\":[\"ar7jww4yjhqz003s\"]}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.39",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "plant: a player already entered is refused",
+     "ev": "{\"invitedRow\":false}"
+    },
+    {
+     "pass": true,
+     "what": "host invites a player → invited row + the player sees the invitation",
+     "ev": "{\"row\":\"invited\",\"myHostInvitation\":true}"
+    },
+    {
+     "pass": true,
+     "what": "another player does not see the invitation rows",
+     "ev": "{\"visibleToOthers\":false}"
+    },
+    {
+     "pass": true,
+     "what": "Cancel invitation pressed → the row is gone",
+     "ev": "{\"gone\":true}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.28",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "Invite (outsider) creates an invitation the player accepts (not a direct add)",
+     "ev": "{\"status\":\"invited\",\"entered\":false}"
+    },
+    {
+     "pass": true,
+     "what": "Add club member lists the club and invites the member picked",
+     "ev": "{\"listed\":true,\"invited\":true}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.43",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "role Referee for a player",
+     "ev": "{\"refereeIds\":[\"ari4hb3c3hac0001\"]}"
+    },
+    {
+     "pass": true,
+     "what": "Assign positions → Left side",
+     "ev": "{\"positions\":{\"ari4hcj63hac0006\":\"Left side\"}}"
+    },
+    {
+     "pass": true,
+     "what": "Move to spectator → out of the team, a spectator row",
+     "ev": "{\"teamUsers\":[\"ari4hd793hac0009\"],\"spectator\":true}"
+    },
+    {
+     "pass": true,
+     "what": "plant: a player already in a team cannot take the spot",
+     "ev": "{\"captainId\":null}"
+    },
+    {
+     "pass": true,
+     "what": "Swap from community on a TEAM reserved spot → its captain",
+     "ev": "{\"captainId\":\"ar89kz29mnr7001o\",\"openSlots\":2}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.44",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "reserved spot gender / age / level saved",
+     "ev": "{\"reserved\":{\"level\":3.5,\"gender\":\"female\",\"ageGroup\":\"adult\"}}"
+    },
+    {
+     "pass": true,
+     "what": "the row shows them",
+     "ev": "Female · Adult · Level 3.5"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.16",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "plant: no cover before",
+     "ev": "{\"covers\":0}"
+    },
+    {
+     "pass": true,
+     "what": "Add cover photo → a cover on the engine (primary)",
+     "ev": "{\"covers\":1,\"coverUrl\":true}"
+    },
+    {
+     "pass": true,
+     "what": "the hub header shows the primary cover",
+     "ev": "{\"headerUsesCover\":true,\"imgs\":[\"https://media.social.silkvo.com/files/c78fad38-6a8f-4daa-82d5-416bc7dded70.png\",\"https://media.social.silkvo.com/files/thumbnail-a7b79ceb-cd7a-435e-be28-5e530324a462.webp\"]}"
+    },
+    {
+     "pass": true,
+     "what": "Delete cover → removed",
+     "ev": "{\"covers\":0}"
+    },
+    {
+     "pass": true,
+     "what": "refusal: a file that is not the host's image",
+     "ev": "{\"status\":400,\"code\":\"NO_SUCH_FILE\"}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.41",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "Your team pane: state, members, spots, Recruit now",
+     "ev": "Your team: [probe] comp-fixes-a Team Amy | [probe] comp-fixes-a Team Amy | Your team can have 1 more members. | Recruit now | You are in: [probe] comp-fixes-a Team Amy · This competition is starting in 3 day(s)"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.61",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "rooms strip for a captain",
+     "ev": "[\"Forum\",\"General chat\",\"Team chat\",\"Captain chat\",\"Staff chat\"]"
+    },
+    {
+     "pass": true,
+     "what": "Team chat pressed → its room opens",
+     "ev": "{\"call\":\"competitions/chat -> 200\"}"
+    },
+    {
+     "pass": true,
+     "what": "a message in the team room (read back from the room)",
+     "ev": "{\"messageStored\":true,\"roomId\":\"arinlsgq7ay200bn\"}"
+    },
+    {
+     "pass": true,
+     "what": "audience rules: spectator ✗ team, player ✗ staff, host ✓ staff, spectator ✓ forum",
+     "ev": "{\"spectatorTeam\":400,\"playerStaff\":400,\"hostStaff\":200,\"spectatorForum\":200}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-team-detail.04",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "roster badges (Captain, Referee), position, paid mark",
+     "ev": "Players · Unpaid | Amy Chan · Captain · Referee | Left side"
+    },
+    {
+     "pass": true,
+     "what": "empty place: Assign player seats a player",
+     "ev": "{\"userIds\":[\"ari4hb3c3hac0001\",\"ari4hcj63hac0006\",\"ar7jww4yjhqz003s\"]}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-team-detail.05",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "member sheet: roles / positions / Set staff / move",
+     "ev": "Amy Chan · Captain · Referee | Make captain | Assign positions | Set staff | Move to Spectator"
+    },
+    {
+     "pass": true,
+     "what": "Make captain pressed",
+     "ev": "{\"captainId\":\"ari4hcj63hac0006\"}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-team-detail.07",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "pull down on the team page → the page re-fetches (competitions/show)",
+     "ev": "{\"box\":true,\"showCalls\":1,\"calls\":[\"competitions/show -> 200\",\"competitions/matches/list -> 200\",\"competitions/entries -> 200\",\"competitions/standings -> 200\"]}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.67",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "withdrawn captain footer",
+     "ev": "[probe] comp-fixes-a Team Tom has withdrawn from this competition. | Reactivate team"
+    },
+    {
+     "pass": true,
+     "what": "Reactivate team pressed → back in (confirmed)",
+     "ev": "{\"status\":\"confirmed\"}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-team-detail.03",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "Reactivate team (kebab row: same door)",
+     "ev": "{\"status\":\"confirmed\"}"
+    },
+    {
+     "pass": true,
+     "what": "Delete team",
+     "ev": "{\"gone\":true}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-team-detail.06",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "Delete team and leave competition pressed → the team is gone",
+     "ev": "{\"gone\":true}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-upsert-team.04",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "the warning names the current team",
+     "ev": "warning shown"
+    },
+    {
+     "pass": true,
+     "what": "a new team with amy as captain; she left the old one",
+     "ev": "{\"newTeam\":\"Amy Chan\",\"oldMembers\":[\"ari4hcj63hac0006\",\"ar7jww4yjhqz003s\"]}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.64",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "invited footer",
+     "ev": "You are invited to this competition. | Join as a player | Decline"
+    },
+    {
+     "pass": true,
+     "what": "Join as a player pressed → entered",
+     "ev": "{\"myEntry\":\"confirmed\"}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.68",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "entrant countdown while registration is open",
+     "ev": "You are in: Amy Chan · This competition is starting in 3 day(s)"
+    },
+    {
+     "pass": true,
+     "what": "ended footer",
+     "ev": "This competition has ended. + See standings"
+    },
+    {
+     "pass": true,
+     "what": "cancelled footer",
+     "ev": "Competition is cancelled"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.70",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "ended popup (first visit)",
+     "ev": "Congratulations! | Congratulations! Amy Chan finished 1st place."
+    },
+    {
+     "pass": true,
+     "what": "once only: no popup on the second visit",
+     "ev": "{\"again\":false}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.66",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "spectator request footer",
+     "ev": "Waiting for admin to approve. | Cancel request | Go to forum"
+    },
+    {
+     "pass": true,
+     "what": "Go to forum → the forum room opens",
+     "ev": "{\"call\":\"competitions/chat -> 200\"}"
+    },
+    {
+     "pass": true,
+     "what": "Cancel request pressed → no request",
+     "ev": "{\"mySpectatorRequest\":null}"
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.63",
+   "verdict": "pass",
+   "checks": [
+    {
+     "pass": true,
+     "what": "competition referee gets the referee footer, never \"Join as a spectator\"",
+     "ev": "You are the referee of 1 upcoming match. | See matches"
+    }
+   ]
+  }
+ ],
+ "cleanup": [
+  "role removed",
+  "rooms 3",
+  "rooms 1",
+  "arinfqdk7ay20044 200",
+  "arinfqpl7ay2004o 200",
+  "arinfqu47ay2004u 200",
+  "arinfqw97ay2004w 200",
+  "arinfrpk7ay2005a sql-deleted (ended: the API keeps a finished podium)",
+  "arinfsfk7ay2005v 200",
+  "arinfsq37ay20062 200",
+  "arinfx1f7ay20064 200",
+  "arinpm6f7ay200e9 200"
+ ],
+ "shots_dir": "/root/gen/cfa/l6/shots",
+ "evidence": [
+  "pass D-comp-create.18 (5/5)",
+  "pass BUG-registration-line (3/3)",
+  "pass BUG-draw-tab-zh (2/2)",
+  "pass D-comp-detail.26 (8/8)",
+  "pass D-comp-detail.27 (2/2)",
+  "pass D-comp-detail.36 (5/5)",
+  "pass D-comp-detail.38 (5/5)",
+  "pass D-comp-detail.39 (4/4)",
+  "pass D-comp-detail.28 (2/2)",
+  "pass D-comp-detail.43 (5/5)",
+  "pass D-comp-detail.44 (2/2)",
+  "pass D-comp-detail.16 (5/5)",
+  "pass D-comp-detail.41 (1/1)",
+  "pass D-comp-detail.61 (4/4)",
+  "pass D-comp-team-detail.04 (2/2)",
+  "pass D-comp-team-detail.05 (2/2)",
+  "pass D-comp-team-detail.07 (1/1)",
+  "pass D-comp-detail.67 (2/2)",
+  "pass D-comp-team-detail.03 (2/2)",
+  "pass D-comp-team-detail.06 (1/1)",
+  "pass D-comp-upsert-team.04 (2/2)",
+  "pass D-comp-detail.64 (2/2)",
+  "pass D-comp-detail.68 (3/3)",
+  "pass D-comp-detail.70 (2/2)",
+  "pass D-comp-detail.66 (3/3)",
+  "pass D-comp-detail.63 (1/1)"
+ ]
+}
