@@ -1,13 +1,14 @@
 {
  "id": "mop-up-chat",
  "phase": "after",
- "at": "2026-09-24T08:57:12.500Z",
+ "at": "2026-09-24T11:24:40.546Z",
  "condition_fired": true,
  "verdict": "pass",
  "cleanup": "ok",
  "cleanupLog": [
   "item1: room 204 · meet delete 400 · meet cancel 200 · notifications removed 4",
-  "item2: fixture meets left 0"
+  "item2: fixture meets left 0",
+  "item5: room 204"
  ],
  "rows": [
   {
@@ -15,17 +16,17 @@
    "status": "closed",
    "level": "L6",
    "evidence": [
-    "PASS fixture real: [probe] room owned by Mei, Ken a member, Amy not (read back from chat_room_membership)",
-    "PASS API: Mei writes \"@ken @amy @mei\" in the room -> Ken gets exactly one app notification, header \"Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room\", link chat:<room>, notifier = Mei",
+    "PASS fixture real: [probe] room owned by Tom, Mei + Ken members, Amy not (read back from chat_room_membership)",
+    "PASS API: Mei writes \"@ken @amy @mei\" in the room -> Ken gets exactly one app notification, header \"Mei Lam mentioned you in [probe] mop-up-chat muffwtjm room\", link chat:<room>, notifier = Mei",
     "PASS API: a non-member @mention does not leak (Amy: 0 notifications carrying the tag)",
     "PASS API: a self-mention does not notify (Mei: 0)",
     "PASS API: a mention by squashed display name (\"@MeiLam\") notifies Mei once",
     "PASS self-test: a mention of a name nobody in the room carries notifies nobody (the counter can read 0)",
     "PASS API: in a MEET room the mention links meetchat:<meet> (the meet's Chat tab)",
     "PASS L6 UI (Mei, 390 px): \"@\" + 2 letters offers Ken, the pick writes \"@KenWong\", Enter sends it, and Ken is notified (read back as Ken)",
-    "PASS L6 UI (Ken, 390 px, en): the Notifications row reads \"Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room\" and the tap opens /pages/chat/index?room=<room>",
-    "PASS L6 UI (Ken, 390 px, zh_Hant): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat mufaq68q room」提及了你\"",
-    "PASS L6 UI (Ken, 390 px, zh_Hans): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat mufaq68q room」提到了你\""
+    "PASS L6 UI (Ken, 390 px, en): the Notifications row reads \"Mei Lam mentioned you in [probe] mop-up-chat muffwtjm room\" and the tap opens /pages/chat/index?room=<room>",
+    "PASS L6 UI (Ken, 390 px, zh_Hant): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat muffwtjm room」提及了你\"",
+    "PASS L6 UI (Ken, 390 px, zh_Hans): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat muffwtjm room」提到了你\""
    ]
   },
   {
@@ -60,6 +61,16 @@
     "PASS G2 clubs/settings/show 503 once -> Announcement offered",
     "PASS unforced: 10 fresh opens of the owner's composer all offer Announcement"
    ]
+  },
+  {
+   "item": "longpress-menus",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS L6 (Ken, 390 px): a long-press on each of 16 bubbles opens the menu and the release selects nothing (no write request, no state change, menu still open)",
+    "PASS L6: after the release, a deliberate tap on the ✌️ reaction still works (one chat/messages/react, stored on the message — read back as Ken)",
+    "PASS L6 (Mei, 390 px, Home): a long-press on the club crest opens the club menu and the release selects nothing (no clubs/me/update, no navigation, menu open)"
+   ]
   }
  ],
  "evidence": [
@@ -82,27 +93,30 @@
   },
   {
    "item": "E-chat-room.08",
-   "name": "fixture real: [probe] room owned by Mei, Ken a member, Amy not (read back from chat_room_membership)",
+   "name": "fixture real: [probe] room owned by Tom, Mei + Ken members, Amy not (read back from chat_room_membership)",
    "pass": true,
    "evidence": {
-    "roomId": "ariv1hanwgjk001q",
+    "roomId": "arj08dt9mpah01hl",
     "create": 200,
     "invite": 200,
-    "join": 204,
-    "members": "ari4hbuh3hac0003"
+    "join": [
+     204,
+     204
+    ],
+    "members": "ari4hbuh3hac0003,ari4hcj63hac0006"
    }
   },
   {
    "item": "E-chat-room.08",
-   "name": "API: Mei writes \"@ken @amy @mei\" in the room -> Ken gets exactly one app notification, header \"Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room\", link chat:<room>, notifier = Mei",
+   "name": "API: Mei writes \"@ken @amy @mei\" in the room -> Ken gets exactly one app notification, header \"Mei Lam mentioned you in [probe] mop-up-chat muffwtjm room\", link chat:<room>, notifier = Mei",
    "pass": true,
    "evidence": {
     "send": 200,
     "ken": [
      {
-      "header": "Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room",
-      "body": "[probe] mop-up-chat mufaq68q A hi @ken_host @amy_player @mei_clubowner!",
-      "link": "chat:ariv1hanwgjk001q",
+      "header": "Mei Lam mentioned you in [probe] mop-up-chat muffwtjm room",
+      "body": "[probe] mop-up-chat muffwtjm A hi @ken_host @amy_player @mei_clubowner!",
+      "link": "chat:arj08dt9mpah01hl",
       "user": "ari4hcj63hac0006"
      }
     ]
@@ -130,7 +144,7 @@
    "pass": true,
    "evidence": {
     "mei": [
-     "Ken Wong mentioned you in [probe] mop-up-chat mufaq68q room"
+     "Ken Wong mentioned you in [probe] mop-up-chat muffwtjm room"
     ]
    }
   },
@@ -147,11 +161,11 @@
    "evidence": {
     "create": 200,
     "join": 200,
-    "meetRoom": "ariv1phewgjk0021",
+    "meetRoom": "arj08nv6mpah01i0",
     "ken": [
      [
-      "Mei Lam mentioned you in [probe] mop-up-chat mufaq68q meet",
-      "meetchat:ariv1ph8wgjk0020"
+      "Mei Lam mentioned you in [probe] mop-up-chat muffwtjm meet",
+      "meetchat:arj08ntempah01hz"
      ]
     ]
    }
@@ -165,29 +179,29 @@
      "Ken Wong"
     ],
     "sent": [
-     "@KenWong [probe] mop-up-chat mufaq68q E ui ping"
+     "@KenWong [probe] mop-up-chat muffwtjm E ui ping"
     ],
     "kenGot": [
-     "Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room"
+     "Mei Lam mentioned you in [probe] mop-up-chat muffwtjm room"
     ],
     "shot": "probes/mop-up-chat-shots/i1-mei-mention-sent.png"
    }
   },
   {
    "item": "E-chat-room.08",
-   "name": "L6 UI (Ken, 390 px, en): the Notifications row reads \"Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room\" and the tap opens /pages/chat/index?room=<room>",
+   "name": "L6 UI (Ken, 390 px, en): the Notifications row reads \"Mei Lam mentioned you in [probe] mop-up-chat muffwtjm room\" and the tap opens /pages/chat/index?room=<room>",
    "pass": true,
    "evidence": {
     "opened": {
      "clicked": true,
-     "url": "/app/pages/chat/index?room=ariv1hanwgjk001q"
+     "url": "/app/pages/chat/index?room=arj08dt9mpah01hl"
     },
     "shot": "probes/mop-up-chat-shots/i1-ken-inbox-en.png"
    }
   },
   {
    "item": "E-chat-room.08",
-   "name": "L6 UI (Ken, 390 px, zh_Hant): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat mufaq68q room」提及了你\"",
+   "name": "L6 UI (Ken, 390 px, zh_Hant): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat muffwtjm room」提及了你\"",
    "pass": true,
    "evidence": {
     "opened": null,
@@ -196,7 +210,7 @@
   },
   {
    "item": "E-chat-room.08",
-   "name": "L6 UI (Ken, 390 px, zh_Hans): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat mufaq68q room」提到了你\"",
+   "name": "L6 UI (Ken, 390 px, zh_Hans): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat muffwtjm room」提到了你\"",
    "pass": true,
    "evidence": {
     "opened": null,
@@ -383,7 +397,7 @@
    "evidence": {
     "found": true,
     "composerShown": true,
-    "ms": 1394,
+    "ms": 1702,
     "fired": [
      "i x2"
     ],
@@ -397,7 +411,7 @@
    "evidence": {
     "found": true,
     "composerShown": true,
-    "ms": 1356,
+    "ms": 1683,
     "fired": [
      "settings/show x1"
     ],
@@ -411,17 +425,174 @@
    "evidence": {
     "ok": "10/10",
     "ms": [
-     760,
-     770,
-     799,
-     473,
-     425,
-     852,
-     591,
-     444,
-     512,
-     717
+     1182,
+     812,
+     820,
+     918,
+     795,
+     857,
+     847,
+     755,
+     762,
+     783
     ]
+   }
+  },
+  {
+   "item": "longpress-menus",
+   "name": "L6 (Ken, 390 px): a long-press on each of 16 bubbles opens the menu and the release selects nothing (no write request, no state change, menu still open)",
+   "pass": true,
+   "evidence": {
+    "tried": [
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 569,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 570,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 570,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 607,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     },
+     {
+      "y": 570,
+      "under": "[probe] mop-up-chat muffwtjm l",
+      "writes": [],
+      "menuOpen": true
+     }
+    ]
+   }
+  },
+  {
+   "item": "longpress-menus",
+   "name": "L6: after the release, a deliberate tap on the ✌️ reaction still works (one chat/messages/react, stored on the message — read back as Ken)",
+   "pass": true,
+   "evidence": {
+    "sent": [
+     "✌"
+    ],
+    "status": [
+     204
+    ],
+    "reacted": true,
+    "reactions": [
+     {
+      "user": {
+       "id": "ari4hbuh3hac0003",
+       "name": "Ken Wong",
+       "username": "ken_host",
+       "host": null,
+       "avatarUrl": "https://uat.social.silkvo.com/identicon/ken_host@uat.social.silkvo.com",
+       "avatarBlurhash": null,
+       "avatarDecorations": [],
+       "isBot": false,
+       "isCat": false,
+       "emojis": {},
+       "onlineStatus": "online",
+       "badgeRoles": []
+      },
+      "reaction": "✌"
+     }
+    ],
+    "shot": "probes/mop-up-chat-shots/i5-after-deliberate-tap-reacts.png"
+   }
+  },
+  {
+   "item": "longpress-menus",
+   "name": "L6 (Mei, 390 px, Home): a long-press on the club crest opens the club menu and the release selects nothing (no clubs/me/update, no navigation, menu open)",
+   "pass": true,
+   "evidence": {
+    "under": {
+     "menuTop": null,
+     "cls": "bt-crestimg",
+     "text": "",
+     "onMenuItem": false,
+     "hitCls": null
+    },
+    "writes": [],
+    "menuOpen": true,
+    "moved": false,
+    "shot": "probes/mop-up-chat-shots/i5-after-crest-release.png"
    }
   }
  ]

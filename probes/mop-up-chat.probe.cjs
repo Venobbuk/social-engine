@@ -18,7 +18,7 @@ const fs = require('fs');
 const { execFileSync } = require('child_process');
 const MU = require('/root/gen/mop-up/mu-lib.cjs');
 const PHASE = process.env.PHASE || 'after';
-const ONLY = (process.env.ONLY || '1,2,3,4').split(',');
+const ONLY = (process.env.ONLY || '1,2,3,4,5').split(',');
 const N3 = Number(process.env.N3 || 10), N4 = Number(process.env.N4 || 10);
 const TS = Date.now().toString(36);
 const TAG = '[probe] mop-up-chat ' + TS;
@@ -59,16 +59,16 @@ async function persona(k) { const s = await MU.who(k); const me = await api('i',
 // ============================================================================================ 1. mention notification
 async function item1(b, P) {
   const I = 'E-chat-room.08';
-  const { mei, ken, amy } = P;
+  const { mei, ken, amy, tom } = P;
   const notifs = async (p) => ((await api('i/notifications', { limit: 50, markAsRead: false }, p.token)).j || []);
   const withTag = (list, tag) => list.filter((n) => JSON.stringify([n.header, n.body]).includes(tag || TAG));
   let roomId = null, meetId = null;
   try {
-    const room = await api('chat/rooms/create', { name: TAG + ' room' }, mei.token); roomId = room.j && room.j.id;
-    const inv = await api('chat/rooms/invitations/create', { roomId, userId: ken.id }, mei.token);
-    const jn = await api('chat/rooms/join', { roomId }, ken.token);
+    const room = await api('chat/rooms/create', { name: TAG + ' room' }, tom.token); roomId = room.j && room.j.id;   // chat/rooms/create: 10 a day per user
+    const inv = await api('chat/rooms/invitations/create', { roomId, userId: ken.id }, tom.token); await api('chat/rooms/invitations/create', { roomId, userId: mei.id }, tom.token);
+    const jn = await api('chat/rooms/join', { roomId }, ken.token); const jm = await api('chat/rooms/join', { roomId }, mei.token);
     const mem = psql(`select string_agg("userId", ',') from chat_room_membership where "roomId" = '${roomId}';`);
-    add(I, 'fixture real: [probe] room owned by Mei, Ken a member, Amy not (read back from chat_room_membership)', room.s === 200 && jn.s === 204 && mem.includes(ken.id) && !mem.includes(amy.id), { roomId, create: room.s, invite: inv.s, join: jn.s, members: mem });
+    add(I, 'fixture real: [probe] room owned by Tom, Mei + Ken members, Amy not (read back from chat_room_membership)', room.s === 200 && jn.s === 204 && jm.s === 204 && mem.includes(ken.id) && mem.includes(mei.id) && !mem.includes(amy.id), { roomId, create: room.s, invite: inv.s, join: [jn.s, jm.s], members: mem });
     // A — Mei mentions Ken (member), Amy (NOT a member) and herself, by username
     const t1 = TAG + ' A hi @' + ken.username + ' @' + amy.username + ' @' + mei.username + '!';
     const s1 = await api('chat/messages/create-to-room', { toRoomId: roomId, text: t1 }, mei.token);
@@ -124,11 +124,11 @@ async function item1(b, P) {
     }
   } finally {
     const c = [];
-    if (roomId) c.push('room ' + (await api('chat/rooms/delete', { roomId }, mei.token)).s);
+    if (roomId) c.push('room ' + (await api('chat/rooms/delete', { roomId }, tom.token)).s);
     if (meetId) { const d = await api('meets/delete', { meetId }, ken.token); c.push('meet delete ' + d.s); if (d.s >= 300) c.push('meet cancel ' + (await api('meets/cancel', { meetId }, ken.token)).s); }
     // the notifications this probe caused (their header/body carry the tag) are removed from the three inboxes
     let x = 0;
-    for (const p of [ken, mei, amy]) {
+    for (const p of [ken, mei, amy, tom]) {
       const key = 'uat.social.silkvo.com:notificationTimeline:' + p.id;
       const raw = redis(['XREVRANGE', key, '+', '-', 'COUNT', '200']).split('\n');
       for (let i = 0; i < raw.length; i++) if (/^\d+-\d+$/.test(raw[i].trim()) && raw[i + 2] && raw[i + 2].includes(TAG)) { redis(['XDEL', key, raw[i].trim()]); x++; }
@@ -260,6 +260,96 @@ async function item4(b) {
   add(I, 'unforced: ' + N4 + ' fresh opens of the owner\'s composer all offer Announcement', runs.every((r) => r.found), { ok: runs.filter((r) => r.found).length + '/' + N4, ms: runs.map((r) => r.ms) });
 }
 
+// ============================================================================================ 5. long-press menus (release must select nothing)
+async function touchHold(page, x, y, ms) {   // a real finger through CDP: down, hold, (snapshot what is under it), up
+  const c = await page.target().createCDPSession();
+  await c.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+  await sleep(ms);
+  const under = await page.evaluate((x, y) => { const e = document.elementFromPoint(x, y); if (!e) return null; const hit = e.closest('.ct-act, .ct-rxbtn, .ask-item, [class*="sheet"] [class*="item"], [class*="Sheet"] *'); const mt = document.querySelector('.ct-menu'); return { menuTop: mt ? Math.round(mt.getBoundingClientRect().top) : null, cls: String(e.className || '').slice(0, 60), text: (e.innerText || '').trim().slice(0, 30), onMenuItem: !!(e.closest('.ct-act') || e.closest('.ct-rxbtn')) || /Take a break|End the break|Pin to home|Unpin from home|Open club/.test((e.innerText || '').trim()) && (e.innerText || '').trim().length < 30, hitCls: hit ? String(hit.className || '').slice(0, 40) : null }; }, x, y);
+  await c.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await c.detach().catch(() => undefined);
+  return under;
+}
+async function touchTap(page, x, y) { const c = await page.target().createCDPSession(); await c.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] }); await sleep(60); await c.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await c.detach().catch(() => undefined); }
+const centre = (page, sel, block = 'nearest') => page.evaluate((sel, block) => { const e = document.querySelector(sel); if (!e) return null; e.scrollIntoView({ block }); const r = e.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), bottom: Math.round(r.bottom), left: Math.round(r.left), right: Math.round(r.right) }; }, sel, block);
+async function item5(b, P) {
+  const I = 'longpress-menus';
+  const { ken, tom } = P;
+  let roomId = null;
+  const WRITE = /chat\/messages\/(react|unreact|delete|report|translate)|clubs\/me\/update|venues\/pin/;
+  try {
+    { const rc = await api('chat/rooms/create', { name: TAG + ' lp room' }, tom.token); if (rc.s !== 200) throw new Error('fixture room -> ' + rc.s); roomId = rc.j.id; }
+    await api('chat/rooms/invitations/create', { roomId, userId: ken.id }, tom.token); await api('chat/rooms/join', { roomId }, ken.token);
+    const ids = [];
+    for (let i = 1; i <= 8; i++) { const r = await api('chat/messages/create-to-room', { toRoomId: roomId, text: TAG + ' lp ' + i + ' — hold me' }, tom.token); if (r.s !== 200) throw new Error('fixture message ' + i + ' -> ' + r.s + ' ' + JSON.stringify(r.j).slice(0, 120)); ids.push(r.j.id); await sleep(400); }
+    // ---- chat bubbles: every visible bubble from the bottom up, one fresh page each, until the release lands on a menu item
+    const tried = []; let hitAny = false, activatedAny = false, lastPos = null;
+    // press points: the last bubbles near their lower edge (where the sheet rises) and at their centre
+    const points = [];
+    for (const mid of ids.slice().reverse().slice(0, 4)) { points.push({ mid, at: 'lowleft' }); points.push({ mid, at: 'low' }); points.push({ mid, at: 'lowright' }); points.push({ mid, at: 'mid' }); }
+    for (const pt of points) { const mid = pt.mid;
+      const { ctx, page } = await MU.newCtx(b, 'host-ken', 390);
+      try {
+        await MU.open(page, 'chat/index?room=' + roomId);
+        const c0 = await centre(page, '#ct' + mid + ' .ct-bubble'); if (!c0) { tried.push({ mid, error: 'no bubble', url: page.url().replace(MU.APPHOST, ''), text: (await txt(page)).slice(0, 160), shot: await MU.shot(page, 'i5-nobubble') }); continue; }
+        const pos = { x: pt.at === 'lowleft' ? c0.left + 30 : pt.at === 'lowright' ? c0.right - 30 : c0.x, y: /^low/.test(pt.at) ? c0.bottom - 5 : c0.y };
+        page.__req = [];
+        const under = await touchHold(page, pos.x, pos.y, 900);
+        await sleep(1500);
+        const t = await txt(page);
+        const writes = page.__req.filter((r) => WRITE.test(r.url)).map((r) => r.url.replace(/^\/api\//, ''));
+        const menuOpen = /\bCopy\b/.test(t) && /Report|Reply/.test(t);
+        const stateChange = /Copied|Replying to|Reacted|Reported|Translat/.test(t);
+        const activated = writes.length > 0 || stateChange;   // a menu ITEM ran (request or state change); !menuOpen alone = the release hit the backdrop
+        tried.push({ mid, pos, under, writes, menuOpen, stateChange });
+        if (under && under.onMenuItem) { hitAny = true; lastPos = { mid, pos }; }
+        if (activated) activatedAny = true;
+        if (PHASE !== 'after' && (activated || !menuOpen)) await MU.shot(page, 'i5-before-chat-release-' + tried.length);
+        if (PHASE !== 'after' && activated) break;
+      } finally { await ctx.close(); }
+    }
+    if (PHASE !== 'after') add(I, 'BEFORE (planted): a CDP long-press on a chat bubble — the menu opens under the finger and the release activates it (request or state change)', activatedAny, { tried });
+    else {
+      add(I, 'L6 (Ken, 390 px): a long-press on each of ' + tried.length + ' bubbles opens the menu and the release selects nothing (no write request, no state change, menu still open)', tried.length >= 12 && tried.every((x) => x.menuOpen && !x.writes.length && !x.stateChange), { tried: tried.map((x) => ({ y: x.pos && x.pos.y, under: x.under && x.under.text, writes: x.writes, menuOpen: x.menuOpen })) });
+      // a deliberate second tap on an item still works: long-press, release, then TAP the ✌️ reaction -> engine read-back
+      const { ctx, page } = await MU.newCtx(b, 'host-ken', 390);
+      try {
+        await MU.open(page, 'chat/index?room=' + roomId);
+        const mid = ids[ids.length - 1]; const pos = await centre(page, '#ct' + mid + ' .ct-bubble');
+        await touchHold(page, pos.x, pos.y, 900); await sleep(1200);
+        const rx = await centre(page, '.ct-rxbtn'); page.__req = [];
+        if (rx) await touchTap(page, rx.x, rx.y); await sleep(2500);
+        const sent = page.__req.filter((r) => /chat\/messages\/react$/.test(r.url)).map((r) => JSON.parse(r.body));
+        // native chat/messages/show answers NO_SUCH_MESSAGE for a ROOM message (measured) — read it back from the room's own timeline
+        const tl = await api('chat/messages/room-timeline', { roomId, limit: 30 }, ken.token);
+        const shown = { j: Array.isArray(tl.j) ? tl.j.find((x) => x.id === mid) : null };
+        const reacted = shown.j && Array.isArray(shown.j.reactions) && shown.j.reactions.some((r) => (r.user && r.user.id === ken.id) || r.userId === ken.id);   // two packers: { user } and { userId }
+        const shot = await MU.shot(page, 'i5-after-deliberate-tap-reacts');
+        add(I, 'L6: after the release, a deliberate tap on the ✌️ reaction still works (one chat/messages/react, stored on the message — read back as Ken)', sent.length === 1 && reacted, { sent: sent.map((s) => s.reaction), status: page.__resp.filter((r) => /chat\/messages\/react$/.test(r.url)).map((r) => r.status), reacted, reactions: shown.j && shown.j.reactions, shot });
+      } finally { await ctx.close(); }
+    }
+    // ---- the club crest menu on Home (the one that put tester2 on a break)
+    { const { ctx, page } = await MU.newCtx(b, 'clubowner-mei', 390);
+      try {
+        await MU.open(page, 'home/index');
+        if (await domClick(page, /^Not now$/)) await sleep(1200);   // the Home location prompt (a modal over everything) is answered first
+        const sel = await page.evaluate(() => { const els = Array.from(document.querySelectorAll('.bt-crest')); const i = els.findIndex((e) => /UAT Paddle Club/.test(e.innerText || '')); if (i < 0) return null; els[i].setAttribute('data-mucd', '1'); return '[data-mucd="1"]'; });
+        if (!sel) add(I, 'club crest on Home', false, { error: 'no UAT Paddle Club crest on Mei\'s Home' });
+        else {
+          const pos = await centre(page, sel, 'center'); page.__req = []; const url0 = page.url();
+          const under = await touchHold(page, pos.x, pos.y, 900); await sleep(1500);
+          const t = await txt(page); const writes = page.__req.filter((r) => WRITE.test(r.url)).map((r) => r.url);
+          const menuOpen = /Take a break|End the break/.test(t) && /Open club/.test(t); const moved = page.url() !== url0;
+          const shot = await MU.shot(page, 'i5-' + PHASE + '-crest-release');
+          if (writes.length) { const st = await api('clubs/me/update', { channelId: CLUB, paused: false }, P.mei.token); cleanupLog.push('item5: crest release wrote ' + writes.join(',') + ' — paused reset ' + st.s); }
+          add(I, 'L6 (Mei, 390 px, Home): a long-press on the club crest opens the club menu and the release selects nothing (no clubs/me/update, no navigation, menu open)', PHASE === 'after' ? (menuOpen && !writes.length && !moved) : true, { under, writes, menuOpen, moved, shot });
+        }
+      } finally { await ctx.close(); } }
+  } finally {
+    if (roomId) cleanupLog.push('item5: room ' + (await api('chat/rooms/delete', { roomId }, tom.token)).s);
+  }
+}
+
 // ============================================================================================ main
 (async () => {
   const b = await MU.browser();
@@ -270,6 +360,7 @@ async function item4(b) {
     if (ONLY.includes('2')) await item2(b, P).catch((e) => add('D-street-cred-by-activity.02', 'item 2 ran', false, { error: e.message }));
     if (ONLY.includes('3')) await item3(b).catch((e) => add('lesson-after-signin', 'item 3 ran', false, { error: e.message }));
     if (ONLY.includes('4')) await item4(b).catch((e) => add('owner-composer-announcement', 'item 4 ran', false, { error: e.message }));
+    if (ONLY.includes('5')) await item5(b, P).catch((e) => add('longpress-menus', 'item 5 ran', false, { error: e.message }));
   } finally { await b.close(); }
   // the historical facts behind items 3 and 4 (nginx access log, read at run time while the files exist)
   const logs = ['/var/log/nginx/access.log', '/var/log/nginx/access.log.1'].filter((f) => fs.existsSync(f));
