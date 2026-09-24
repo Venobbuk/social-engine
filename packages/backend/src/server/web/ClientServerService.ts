@@ -66,6 +66,7 @@ import { BiosPage } from './views/bios.js';
 import { CliPage } from './views/cli.js';
 import { FlushPage } from './views/flush.js';
 import { ErrorPage } from './views/error.js';
+import { GB_PUBLIC_ORIGIN } from '@/misc/gb-accounts.js'; // SHARE-ORIGIN-V1
 
 import type { FastifyError, FastifyInstance, FastifyPluginOptions, FastifyReply } from 'fastify';
 
@@ -762,7 +763,10 @@ export class ClientServerService {
 			const { kind, id } = request.params;
 			// CLUB-SHARE-V2 (fix-S3): 'clubh' = a club by its handle — the /clubs/@handle short link's preview
 			if (!(kind === 'clubh' ? /^[A-Za-z0-9_]{3,30}$/.test(id) : shareIdRe.test(id))) return shareNotFound(reply);
-			const base = this.config.url;
+			// SHARE-ORIGIN-V1 (fix-S4, G2): the card's image / url / refresh are on the GripBat origin of THIS container (server
+			// config GB_PUBLIC_ORIGIN, never a request header — G15.13), not the engine host: every share preview printed
+			// social.silkvo.com and a tap landed there. The art and /share/avatar/ are served on the GripBat hosts too.
+			const base = GB_PUBLIC_ORIGIN || this.config.url;
 			let card: ShareCard | null = null;
 
 			if (kind === 'meet') {

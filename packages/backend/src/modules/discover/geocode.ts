@@ -138,7 +138,12 @@ function fromPhoton(f: PhotonFeature): GeoHit | null {
 	if (!c || !okLat(c[1]) || !okLng(c[0])) return null;
 	const street = [p.housenumber, p.street].filter(Boolean).join(' ');
 	const name = String(p.name ?? '') || street || String(p.district ?? p.locality ?? p.city ?? '');
-	const address = [p.name && street ? street : null, p.locality, p.district, p.city].filter((x) => x != null && String(x) !== '' && String(x) !== name).map(String).join(', ') || null;
+	// GEO-LABEL-V1 (fix-S4, C-map-picker.02): OSM sometimes carries an ADDRESS in locality ("27 Magazine Gap Road" on the
+	// house at 50 Magazine Gap Road) — the pin read "50 Magazine Gap Road, 27 Magazine Gap Road, Wan Chai District". An area
+	// part that names the label's own street again is dropped; the street line itself (when the feature has a name) stays.
+	const streetLc = String(p.street ?? '').trim().toLowerCase();
+	const area = [p.locality, p.district, p.city].filter((x) => !(streetLc && String(x ?? '').toLowerCase().includes(streetLc)));
+	const address = [p.name && street ? street : null, ...area].filter((x) => x != null && String(x) !== '' && String(x) !== name).map(String).join(', ') || null;
 	return { label: name || `${c[1].toFixed(5)}, ${c[0].toFixed(5)}`, address, lat: round6(c[1]), lng: round6(c[0]), source: 'photon', externalId: p.osm_type && p.osm_id ? `osm:${p.osm_type}${p.osm_id}` : null, kind: p.osm_value != null ? String(p.osm_value) : null };
 }
 
