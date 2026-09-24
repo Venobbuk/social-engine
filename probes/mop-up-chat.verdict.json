@@ -1,0 +1,428 @@
+{
+ "id": "mop-up-chat",
+ "phase": "after",
+ "at": "2026-09-24T08:57:12.500Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "cleanup": "ok",
+ "cleanupLog": [
+  "item1: room 204 · meet delete 400 · meet cancel 200 · notifications removed 4",
+  "item2: fixture meets left 0"
+ ],
+ "rows": [
+  {
+   "item": "E-chat-room.08",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS fixture real: [probe] room owned by Mei, Ken a member, Amy not (read back from chat_room_membership)",
+    "PASS API: Mei writes \"@ken @amy @mei\" in the room -> Ken gets exactly one app notification, header \"Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room\", link chat:<room>, notifier = Mei",
+    "PASS API: a non-member @mention does not leak (Amy: 0 notifications carrying the tag)",
+    "PASS API: a self-mention does not notify (Mei: 0)",
+    "PASS API: a mention by squashed display name (\"@MeiLam\") notifies Mei once",
+    "PASS self-test: a mention of a name nobody in the room carries notifies nobody (the counter can read 0)",
+    "PASS API: in a MEET room the mention links meetchat:<meet> (the meet's Chat tab)",
+    "PASS L6 UI (Mei, 390 px): \"@\" + 2 letters offers Ken, the pick writes \"@KenWong\", Enter sends it, and Ken is notified (read back as Ken)",
+    "PASS L6 UI (Ken, 390 px, en): the Notifications row reads \"Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room\" and the tap opens /pages/chat/index?room=<room>",
+    "PASS L6 UI (Ken, 390 px, zh_Hant): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat mufaq68q room」提及了你\"",
+    "PASS L6 UI (Ken, 390 px, zh_Hans): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat mufaq68q room」提到了你\""
+   ]
+  },
+  {
+   "item": "D-street-cred-by-activity.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS fixture real: 33 [probe] activities with a kudos for Ken; the engine pages them (offset 0 -> 30 rows, offset 30 -> the rest, no overlap)",
+    "PASS L6 UI (Ken, 390 px): By activity shows the first page with \"Load more\"; a (double) tap sends ONE request with offset = rows on screen, appends the rest, 0 duplicates, and the button goes away"
+   ]
+  },
+  {
+   "item": "lesson-after-signin",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS F1 coaches/schedules/show 503 once -> ok",
+    "PASS F2 the coaching gate (endpoint coaches/schedules/of-user) 503 once -> ok",
+    "PASS F3 adapter-style 429 on the whoami (i) twice -> ok",
+    "PASS F4 coaches/schedules/show 503 every time, then released and Retry pressed -> error->ok",
+    "PASS F5 hkpl down for the whole visit (v1/tenant, public/homepage, public/tenant-brand 502 — as at 16:28 during an hkpl restart) -> ok",
+    "PASS F5 the tab bar is GripBat's (Discover / Inbox), not the league's (Schedule / Standings)",
+    "PASS unforced: 10 fresh sign-ins straight to the lesson page all load it; adapter/sso is never called (the door that 429d is gone from /app/)"
+   ]
+  },
+  {
+   "item": "owner-composer-announcement",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS G1 the whoami (i) 502 twice — as at 2026-09-24 14:28:12 -> Announcement offered",
+    "PASS G2 clubs/settings/show 503 once -> Announcement offered",
+    "PASS unforced: 10 fresh opens of the owner's composer all offer Announcement"
+   ]
+  }
+ ],
+ "evidence": [
+  {
+   "item": "lesson-after-signin",
+   "what": "the failing stranger run 2026-09-23 16:31:58 HKT: adapter/sso answered 429 on the lesson page",
+   "lines": [
+    "127.0.0.1 - - [23/Sep/2026:16:31:58 +0800] \"POST /api/adapter/sso HTTP/1.1\" 429 234 \"https://uat.gripbat.com/app/pages/signin/index?lang=en&next=%2Fpages%2Flesson%2Findex%3Fid%3Darhdp6fp1zxb0034\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like",
+    "47.243.226.46 - - [23/Sep/2026:16:31:58 +0800] \"POST /api/adapter/sso HTTP/2.0\" 429 234 \"https://uat.gripbat.com/app/pages/signin/index?lang=en&next=%2Fpages%2Flesson%2Findex%3Fid%3Darhdp6fp1zxb0034\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, ",
+    "47.243.226.46 - - [23/Sep/2026:16:31:58 +0800] \"POST /api/adapter/sso HTTP/2.0\" 429 234 \"https://uat.gripbat.com/app/pages/lesson/index?id=arhdp6fp1zxb0034\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/146.0.0.0 Safari",
+    "127.0.0.1 - - [23/Sep/2026:16:31:58 +0800] \"POST /api/adapter/sso HTTP/1.1\" 429 234 \"https://uat.gripbat.com/app/pages/lesson/index?id=arhdp6fp1zxb0034\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/146.0.0.0 Safari/537"
+   ]
+  },
+  {
+   "item": "owner-composer-announcement",
+   "what": "the failing U12a run 2026-09-24 14:28:12 HKT: the whoami answered 502; no clubs/settings/show and no competitions/list followed (the composer never mounted)",
+   "lines": [
+    "47.243.226.46 - - [24/Sep/2026:14:28:12 +0800] \"GET /app/js/framework.09393032.js HTTP/2.0\" 304 0 \"https://uat.gripbat.com/app/pages/feed/index?club=arippposnsrn0005&compose=1&lang=en\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Hea"
+   ]
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "fixture real: [probe] room owned by Mei, Ken a member, Amy not (read back from chat_room_membership)",
+   "pass": true,
+   "evidence": {
+    "roomId": "ariv1hanwgjk001q",
+    "create": 200,
+    "invite": 200,
+    "join": 204,
+    "members": "ari4hbuh3hac0003"
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "API: Mei writes \"@ken @amy @mei\" in the room -> Ken gets exactly one app notification, header \"Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room\", link chat:<room>, notifier = Mei",
+   "pass": true,
+   "evidence": {
+    "send": 200,
+    "ken": [
+     {
+      "header": "Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room",
+      "body": "[probe] mop-up-chat mufaq68q A hi @ken_host @amy_player @mei_clubowner!",
+      "link": "chat:ariv1hanwgjk001q",
+      "user": "ari4hcj63hac0006"
+     }
+    ]
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "API: a non-member @mention does not leak (Amy: 0 notifications carrying the tag)",
+   "pass": true,
+   "evidence": {
+    "amy": 0
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "API: a self-mention does not notify (Mei: 0)",
+   "pass": true,
+   "evidence": {
+    "mei": 0
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "API: a mention by squashed display name (\"@MeiLam\") notifies Mei once",
+   "pass": true,
+   "evidence": {
+    "mei": [
+     "Ken Wong mentioned you in [probe] mop-up-chat mufaq68q room"
+    ]
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "self-test: a mention of a name nobody in the room carries notifies nobody (the counter can read 0)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "API: in a MEET room the mention links meetchat:<meet> (the meet's Chat tab)",
+   "pass": true,
+   "evidence": {
+    "create": 200,
+    "join": 200,
+    "meetRoom": "ariv1phewgjk0021",
+    "ken": [
+     [
+      "Mei Lam mentioned you in [probe] mop-up-chat mufaq68q meet",
+      "meetchat:ariv1ph8wgjk0020"
+     ]
+    ]
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "L6 UI (Mei, 390 px): \"@\" + 2 letters offers Ken, the pick writes \"@KenWong\", Enter sends it, and Ken is notified (read back as Ken)",
+   "pass": true,
+   "evidence": {
+    "suggestions": [
+     "Ken Wong"
+    ],
+    "sent": [
+     "@KenWong [probe] mop-up-chat mufaq68q E ui ping"
+    ],
+    "kenGot": [
+     "Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room"
+    ],
+    "shot": "probes/mop-up-chat-shots/i1-mei-mention-sent.png"
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "L6 UI (Ken, 390 px, en): the Notifications row reads \"Mei Lam mentioned you in [probe] mop-up-chat mufaq68q room\" and the tap opens /pages/chat/index?room=<room>",
+   "pass": true,
+   "evidence": {
+    "opened": {
+     "clicked": true,
+     "url": "/app/pages/chat/index?room=ariv1hanwgjk001q"
+    },
+    "shot": "probes/mop-up-chat-shots/i1-ken-inbox-en.png"
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "L6 UI (Ken, 390 px, zh_Hant): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat mufaq68q room」提及了你\"",
+   "pass": true,
+   "evidence": {
+    "opened": null,
+    "shot": "probes/mop-up-chat-shots/i1-ken-inbox-zh_Hant.png"
+   }
+  },
+  {
+   "item": "E-chat-room.08",
+   "name": "L6 UI (Ken, 390 px, zh_Hans): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat mufaq68q room」提到了你\"",
+   "pass": true,
+   "evidence": {
+    "opened": null,
+    "shot": "probes/mop-up-chat-shots/i1-ken-inbox-zh_Hans.png"
+   }
+  },
+  {
+   "item": "D-street-cred-by-activity.02",
+   "name": "fixture real: 33 [probe] activities with a kudos for Ken; the engine pages them (offset 0 -> 30 rows, offset 30 -> the rest, no overlap)",
+   "pass": true,
+   "evidence": {
+    "reviews": "33",
+    "activitiesTotal": 33,
+    "page0": 30,
+    "page1": 3
+   }
+  },
+  {
+   "item": "D-street-cred-by-activity.02",
+   "name": "L6 UI (Ken, 390 px): By activity shows the first page with \"Load more\"; a (double) tap sends ONE request with offset = rows on screen, appends the rest, 0 duplicates, and the button goes away",
+   "pass": true,
+   "evidence": {
+    "firstPageTagRows": 30,
+    "requests": [
+     {
+      "offset": 30,
+      "limit": 30
+     }
+    ],
+    "tagRowsAfter": 33,
+    "duplicates": 0,
+    "loadMoreGone": true,
+    "shot": "probes/mop-up-chat-shots/i2-by-activity-after-load-more.png",
+    "rowsHint": 0
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "F1 coaches/schedules/show 503 once -> ok",
+   "pass": true,
+   "evidence": {
+    "state": "ok",
+    "fired": [
+     "schedules/show x1"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-after-F1.png"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "F2 the coaching gate (endpoint coaches/schedules/of-user) 503 once -> ok",
+   "pass": true,
+   "evidence": {
+    "state": "ok",
+    "fired": [
+     "gate x1"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-after-F2.png"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "F3 adapter-style 429 on the whoami (i) twice -> ok",
+   "pass": true,
+   "evidence": {
+    "state": "ok",
+    "fired": [
+     "i x2"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-after-F3.png"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "F4 coaches/schedules/show 503 every time, then released and Retry pressed -> error->ok",
+   "pass": true,
+   "evidence": {
+    "state": "error->ok",
+    "fired": [
+     "schedules/show x3"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-after-F4.png"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "F5 hkpl down for the whole visit (v1/tenant, public/homepage, public/tenant-brand 502 — as at 16:28 during an hkpl restart) -> ok",
+   "pass": true,
+   "evidence": {
+    "state": "ok",
+    "fired": [
+     "hkpl tenant reads x8"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-after-F5.png"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "F5 the tab bar is GripBat's (Discover / Inbox), not the league's (Schedule / Standings)",
+   "pass": true,
+   "evidence": {
+    "bar": "Home | Home | Discover | Discover | Community | Community | Inbox | Inbox | See more | See more | Home | Home | Discover | Discover | Community | Community | Inbox | Inbox | See more | See more"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "unforced: 10 fresh sign-ins straight to the lesson page all load it; adapter/sso is never called (the door that 429d is gone from /app/)",
+   "pass": true,
+   "evidence": {
+    "ok": "10/10",
+    "runs": [
+     {
+      "i": 0,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 1,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 2,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 3,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 4,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 5,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 6,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 7,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 8,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     },
+     {
+      "i": 9,
+      "state": "ok",
+      "sso": 0,
+      "bad": []
+     }
+    ]
+   }
+  },
+  {
+   "item": "owner-composer-announcement",
+   "name": "G1 the whoami (i) 502 twice — as at 2026-09-24 14:28:12 -> Announcement offered",
+   "pass": true,
+   "evidence": {
+    "found": true,
+    "composerShown": true,
+    "ms": 1394,
+    "fired": [
+     "i x2"
+    ],
+    "shot": "probes/mop-up-chat-shots/i4-after-G1.png"
+   }
+  },
+  {
+   "item": "owner-composer-announcement",
+   "name": "G2 clubs/settings/show 503 once -> Announcement offered",
+   "pass": true,
+   "evidence": {
+    "found": true,
+    "composerShown": true,
+    "ms": 1356,
+    "fired": [
+     "settings/show x1"
+    ],
+    "shot": "probes/mop-up-chat-shots/i4-after-G2.png"
+   }
+  },
+  {
+   "item": "owner-composer-announcement",
+   "name": "unforced: 10 fresh opens of the owner's composer all offer Announcement",
+   "pass": true,
+   "evidence": {
+    "ok": "10/10",
+    "ms": [
+     760,
+     770,
+     799,
+     473,
+     425,
+     852,
+     591,
+     444,
+     512,
+     717
+    ]
+   }
+  }
+ ]
+}

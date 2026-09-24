@@ -1,0 +1,175 @@
+{
+ "id": "mop-up-chat",
+ "phase": "before",
+ "at": "2026-09-24T08:19:41.539Z",
+ "condition_fired": true,
+ "verdict": "fail",
+ "cleanup": "ok",
+ "cleanupLog": [
+  "item2: fixture meets left 0"
+ ],
+ "rows": [
+  {
+   "item": "D-street-cred-by-activity.02",
+   "status": "still-open",
+   "level": "below L6",
+   "evidence": [
+    "PASS fixture real: 33 [probe] activities with a kudos for Ken; the engine pages them (offset 0 -> 30 rows, offset 30 -> the rest, no overlap)",
+    "FAIL L6 UI (Ken, 390 px): By activity shows the first page with \"Load more\"; a (double) tap sends ONE request with offset = rows on screen, appends the rest, 0 duplicates, and the button goes away"
+   ]
+  },
+  {
+   "item": "lesson-after-signin",
+   "status": "closed",
+   "level": "L5",
+   "evidence": [
+    "PASS BEFORE (planted) F1 coaches/schedules/show 503 once -> notfound",
+    "PASS BEFORE (planted) F2 the coaching gate (endpoint coaches/schedules/of-user) 503 once -> off",
+    "PASS BEFORE (planted) F3 adapter-style 429 on the whoami (i) twice -> ok",
+    "PASS BEFORE (planted) F4 coaches/schedules/show 503 every time, then released and Retry pressed -> notfound"
+   ]
+  },
+  {
+   "item": "owner-composer-announcement",
+   "status": "closed",
+   "level": "L5",
+   "evidence": [
+    "PASS BEFORE (planted) G1 the whoami (i) 502 twice — as at 2026-09-24 14:28:12 -> Announcement MISSING",
+    "PASS BEFORE (planted) G2 clubs/settings/show 503 once -> Announcement MISSING"
+   ]
+  }
+ ],
+ "evidence": [
+  {
+   "item": "lesson-after-signin",
+   "what": "the failing stranger run 2026-09-23 16:31:58 HKT: adapter/sso answered 429 on the lesson page",
+   "lines": [
+    "127.0.0.1 - - [23/Sep/2026:16:31:58 +0800] \"POST /api/adapter/sso HTTP/1.1\" 429 234 \"https://uat.gripbat.com/app/pages/signin/index?lang=en&next=%2Fpages%2Flesson%2Findex%3Fid%3Darhdp6fp1zxb0034\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like",
+    "47.243.226.46 - - [23/Sep/2026:16:31:58 +0800] \"POST /api/adapter/sso HTTP/2.0\" 429 234 \"https://uat.gripbat.com/app/pages/signin/index?lang=en&next=%2Fpages%2Flesson%2Findex%3Fid%3Darhdp6fp1zxb0034\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, ",
+    "47.243.226.46 - - [23/Sep/2026:16:31:58 +0800] \"POST /api/adapter/sso HTTP/2.0\" 429 234 \"https://uat.gripbat.com/app/pages/lesson/index?id=arhdp6fp1zxb0034\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/146.0.0.0 Safari",
+    "127.0.0.1 - - [23/Sep/2026:16:31:58 +0800] \"POST /api/adapter/sso HTTP/1.1\" 429 234 \"https://uat.gripbat.com/app/pages/lesson/index?id=arhdp6fp1zxb0034\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/146.0.0.0 Safari/537"
+   ]
+  },
+  {
+   "item": "owner-composer-announcement",
+   "what": "the failing U12a run 2026-09-24 14:28:12 HKT: the whoami answered 502; no clubs/settings/show and no competitions/list followed (the composer never mounted)",
+   "lines": [
+    "47.243.226.46 - - [24/Sep/2026:14:28:12 +0800] \"GET /app/js/framework.09393032.js HTTP/2.0\" 304 0 \"https://uat.gripbat.com/app/pages/feed/index?club=arippposnsrn0005&compose=1&lang=en\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Hea"
+   ]
+  },
+  {
+   "item": "D-street-cred-by-activity.02",
+   "name": "fixture real: 33 [probe] activities with a kudos for Ken; the engine pages them (offset 0 -> 30 rows, offset 30 -> the rest, no overlap)",
+   "pass": true,
+   "evidence": {
+    "reviews": "33",
+    "activitiesTotal": 33,
+    "page0": 30,
+    "page1": 3
+   }
+  },
+  {
+   "item": "D-street-cred-by-activity.02",
+   "name": "L6 UI (Ken, 390 px): By activity shows the first page with \"Load more\"; a (double) tap sends ONE request with offset = rows on screen, appends the rest, 0 duplicates, and the button goes away",
+   "pass": false,
+   "evidence": {
+    "firstPageTagRows": 30,
+    "requests": [
+     {
+      "offset": 30,
+      "limit": 30
+     },
+     {
+      "offset": 30,
+      "limit": 30
+     }
+    ],
+    "tagRowsAfter": 36,
+    "duplicates": 3,
+    "loadMoreGone": true,
+    "shot": "probes/mop-up-chat-shots/i2-by-activity-after-load-more.png",
+    "rowsHint": 0
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "BEFORE (planted) F1 coaches/schedules/show 503 once -> notfound",
+   "pass": true,
+   "evidence": {
+    "state": "notfound",
+    "fired": [
+     "schedules/show x1"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-before-F1.png"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "BEFORE (planted) F2 the coaching gate (endpoint coaches/schedules/of-user) 503 once -> off",
+   "pass": true,
+   "evidence": {
+    "state": "off",
+    "fired": [
+     "gate x1"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-before-F2.png"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "BEFORE (planted) F3 adapter-style 429 on the whoami (i) twice -> ok",
+   "pass": true,
+   "evidence": {
+    "state": "ok",
+    "fired": [
+     "i x2"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-before-F3.png"
+   }
+  },
+  {
+   "item": "lesson-after-signin",
+   "name": "BEFORE (planted) F4 coaches/schedules/show 503 every time, then released and Retry pressed -> notfound",
+   "pass": true,
+   "evidence": {
+    "state": "notfound",
+    "fired": [
+     "schedules/show x1"
+    ],
+    "url": "/app/pages/lesson/index?id=ari4jxdx3hac00ba",
+    "shot": "probes/mop-up-chat-shots/i3-before-F4.png"
+   }
+  },
+  {
+   "item": "owner-composer-announcement",
+   "name": "BEFORE (planted) G1 the whoami (i) 502 twice — as at 2026-09-24 14:28:12 -> Announcement MISSING",
+   "pass": true,
+   "evidence": {
+    "found": false,
+    "composerShown": false,
+    "ms": 12277,
+    "fired": [
+     "i x2"
+    ],
+    "shot": "probes/mop-up-chat-shots/i4-before-G1.png"
+   }
+  },
+  {
+   "item": "owner-composer-announcement",
+   "name": "BEFORE (planted) G2 clubs/settings/show 503 once -> Announcement MISSING",
+   "pass": true,
+   "evidence": {
+    "found": false,
+    "composerShown": true,
+    "ms": 12183,
+    "fired": [
+     "settings/show x1"
+    ],
+    "shot": "probes/mop-up-chat-shots/i4-before-G2.png"
+   }
+  }
+ ]
+}
