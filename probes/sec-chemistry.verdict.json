@@ -1,6 +1,6 @@
 {
  "id": "sec-chemistry",
- "at": "2026-09-24T05:26:00.913Z",
+ "at": "2026-09-24T06:52:57.357Z",
  "phase": "after",
  "condition_fired": true,
  "verdict": "pass",
@@ -58,19 +58,75 @@
     "dims": 1,
     "authorIdInBody": false
    }
+  },
+  {
+   "id": "(b) gb-pairs.signed-out.unclear-positive-reads-neutral",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "row": {
+     "a": "aqxxu4p6sfmc000c",
+     "b": "ar7jww4yjhqz003s",
+     "matches": 1,
+     "wins": 1,
+     "expected": 1
+    },
+    "db": {
+     "n": 1,
+     "w": 1,
+     "e": 0.669
+    }
+   }
+  },
+  {
+   "id": "(a) match-summary.signed-out.no-per-match-ratings",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "players": 4,
+    "withRatings": 0
+   }
+  },
+  {
+   "id": "(a) matches.signed-out.no-rating-deltas",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "rows": 4,
+    "withDelta": 0
+   }
+  },
+  {
+   "id": "(a) gb-edge.signed-out.no-rating-series",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "history": 0,
+    "trend30": null
+   }
+  },
+  {
+   "id": "fixture.player-with-private-games",
+   "ok": true,
+   "got": "no prod player has a live private rated game — (c) not measurable on prod (recorded, not a failure)"
   }
  ],
  "evidence": [
   "INFO phase=after target=http://127.0.0.1:3961 (web-uat) + https://social.silkvo.com signed-out",
-  "INFO engines — web sha256:9ca16ae297e9c46c906c1d4a78193779fad4b317505c5c46f3dbdeff0e06f2fb b862cec7908332f5f11da63306784d49cb91c684 · web-uat sha256:9ca16ae297e9c46c906c1d4a78193779fad4b317505c5c46f3dbdeff0e06f2fb b862cec7908332f5f11da63306784d49cb91c684",
-  "INFO fixture [probe] SPX-f37qmi — negative pair edge -0.197, positive pair edge 0.885 (read back through the doors' rule); gb-fair predictions {\"member\":10,\"outsider\":20,\"bare\":64}",
+  "INFO engines — web sha256:e133072f6b4091b41570aa1b13fb5368c18fe035cfbac8dcd536137031940dd6 24c9a6719e602bacd503ca7558b2f536832d69bf · web-uat sha256:e133072f6b4091b41570aa1b13fb5368c18fe035cfbac8dcd536137031940dd6 24c9a6719e602bacd503ca7558b2f536832d69bf",
+  "INFO fixture [probe] SPX-f6bbki — negative pair edge -0.197, positive pair edge 0.516 (read back through the doors' rule); gb-fair predictions {\"member\":23,\"outsider\":33,\"bare\":59}",
   "PASS cleanup — exit 0, live [probe] SPX meets 0, chemistry rating rows left 0",
   "PASS PROD gb-pairs.signed-out.negative-pair-reads-neutral — {\"status\":200,\"row\":{\"a\":\"aqxxu5bosfmc000k\",\"b\":\"aqxxu57esfmc000i\",\"matches\":2,\"wins\":0,\"expected\":0},\"db\":{\"n\":2,\"w\":0,\"e\":1.789}}",
   "PASS PROD gb-edge.signed-out.no-negative-partner — {\"status\":200,\"partners\":[]}",
   "PASS PROD reviews/show.signed-out.endorser-hidden — {\"status\":200,\"endorsements\":1,\"authorIdInBody\":false}",
   "PASS PROD reviews/list.signed-out.endorser-hidden — {\"status\":200,\"authorIdInBody\":false}",
   "PASS PROD reviews/meet-summary.signed-out.givers-hidden — {\"status\":200,\"dims\":1,\"authorIdInBody\":false}",
-  "INFO sweep: 104 assertions, leaks 0, broken 0",
-  "INFO chemistry + review families: 55 assertions, 0 failing"
+  "PASS PROD (b) gb-pairs.signed-out.unclear-positive-reads-neutral — {\"status\":200,\"row\":{\"a\":\"aqxxu4p6sfmc000c\",\"b\":\"ar7jww4yjhqz003s\",\"matches\":1,\"wins\":1,\"expected\":1},\"db\":{\"n\":1,\"w\":1,\"e\":0.669}}",
+  "PASS PROD (a) match-summary.signed-out.no-per-match-ratings — {\"status\":200,\"players\":4,\"withRatings\":0}",
+  "PASS PROD (a) matches.signed-out.no-rating-deltas — {\"status\":200,\"rows\":4,\"withDelta\":0}",
+  "PASS PROD (a) gb-edge.signed-out.no-rating-series — {\"status\":200,\"history\":0,\"trend30\":null}",
+  "PASS PROD fixture.player-with-private-games — \"no prod player has a live private rated game — (c) not measurable on prod (recorded, not a failure)\"",
+  "INFO sweep: 147 assertions, leaks 0, broken 0",
+  "INFO chemistry + review families: 98 assertions, 0 failing"
  ]
 }
