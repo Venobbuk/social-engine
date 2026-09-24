@@ -37,8 +37,9 @@ const compVisible = (c: string, v: string) => `(${c}.visibility = 'public' OR ${
  *  The EXISTS requires the match row to be there and the meet / competition not to be cancelled: the same rule as
  *  FRESH-EYES-V1's edgeOf() guard (modules/stats/GbRating.ts, master d7abe5128d, "a rating row cannot outlive the
  *  match that justified it") and as historyPage / activitiesPage below (`status <> 'cancelled'`). The two compose:
- *  a row counts only while the match that justified it is alive AND the viewer may see where it was played. */
-const logVisible = (l: string, v: string) => `(${l}.source = 'openplay'
+ *  a row counts only while the match that justified it is alive AND the viewer may see where it was played.
+ *  SEC-CHEM-V2: exported — GbRating's pair record (gb-pairs, gb-fair, gb-edge partners) reads through the same rule. */
+export const logVisible =(l: string, v: string) => `(${l}.source = 'openplay'
 	OR (${l}.source = 'meet' AND EXISTS (SELECT 1 FROM meet_match vmm JOIN meet vm ON vm.id = vmm."meetId" WHERE vmm.id = ${l}."matchId" AND vm.status <> 'cancelled' AND ${meetVisible('vm', v)}))
 	OR (${l}.source = 'competition' AND EXISTS (SELECT 1 FROM competition_match vcm JOIN competition vc ON vc.id = vcm."competitionId" WHERE vcm.id = ${l}."matchId" AND vc.status <> 'cancelled' AND ${compVisible('vc', v)})))`;
 

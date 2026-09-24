@@ -8,7 +8,7 @@ import { In } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import type { MeetsRepository, MeetReviewsRepository, BlockingsRepository } from '@/models/_.js';
-import { MeetService } from '@/modules/meets/MeetService.js';
+import { MeetService, reviewAuthorKnown } from '@/modules/meets/MeetService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import { WARNING_PUBLIC_THRESHOLD } from '@/modules/meets/models/MeetReview.js';
@@ -95,6 +95,17 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				rows = v.reviews.filter(r => ps.archived ? self && r.archivedAt != null : r.archivedAt == null);
 				if (ps.meetId) rows = rows.filter(r => r.meetId === ps.meetId);   // MEET-KUDOS-V1: narrows, never widens
 				if (ps.competitionId) rows = rows.filter(r => r.competitionId === ps.competitionId);   // KUDOS-CHAT-V1
+				// SEC-REVIEW-AUTHOR-V1 (G15.5): "the kudos X received IN meet M" says X was on M's roster. For a private meet /
+				// competition the caller may not see, that is a membership fact — answered as nothing, like a missing meet.
+				if ((ps.meetId || ps.competitionId) && rows.length) {
+					const meet = ps.meetId ? await this.meetsRepository.findOneBy({ id: ps.meetId }) : null;
+					const okMeet = !ps.meetId || (meet != null && await this.meetService.mayViewPrivate(meet, me ? me.id : null));
+					const okComp = !ps.competitionId || (await this.meetsRepository.manager.query(
+						`SELECT 1 FROM "competition" c WHERE c.id = $1 AND (c.visibility = 'public' OR c."hostId" = $2
+						   OR EXISTS (SELECT 1 FROM "competition_entry" e WHERE e."competitionId" = c.id AND $2 = ANY(e."userIds")))`,
+						[ps.competitionId, me ? me.id : '']) as unknown[]).length > 0;   // the meet-summary competition rule
+					if (!okMeet || !okComp) rows = [];
+				}
 				if (win) rows = rows.filter(r => r.createdAt >= win[0] && r.createdAt < win[1]);   // KUDOS-CHAT-V1
 				warningCount = v.warningCount; warningsPublic = v.warningsPublic;
 			}
@@ -136,7 +147,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 			}
 			// review-batch2 #9: the page's users in ONE packMany (was one pack() per row)
-			const isKnown = (r: MiMeetReview) => given || (!!me && r.authorId === me.id) || (self && r.type !== 'warning');
+			const isKnown = (r: MiMeetReview) => reviewAuthorKnown(r, me?.id);   // SEC-REVIEW-AUTHOR-V1: the ONE rule (MeetService)
 			const needIds = Array.from(new Set(page.filter(isKnown).map(r => given ? r.targetUserId : r.authorId)));
 			const packedUsers = new Map<string, unknown>();
 			if (needIds.length) for (const u of await this.userEntityService.packMany(needIds, me, { schema: 'UserLite' })) packedUsers.set(u.id, u);

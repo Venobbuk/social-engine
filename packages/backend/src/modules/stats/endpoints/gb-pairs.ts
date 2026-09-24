@@ -39,14 +39,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// wins and expected for ANY pair, 40 a call, with no credential — so edge = (wins - expected) / matches
 			// was computable for strangers. Scouting keeps what it needs (how often a pair has played, and a pair that
 			// is doing WELL); a pair the caller is not in keeps its bad news to itself.
-			const rows = await pairsOf(this.db, ps.pairs as [string, string][], ps.sport);
-			const meId = me?.id ?? null;
-			return rows.map(r => {
-				if (meId && (r.a === meId || r.b === meId)) return r;           // your own chemistry, in full
-				const edge = r.matches > 0 ? (r.wins - r.expected) / r.matches : 0;
-				if (edge >= 0) return r;                                         // positive chemistry is public, as on gb-edge
-				return { a: r.a, b: r.b, matches: r.matches, wins: null, expected: null, chemistryHidden: true };
-			});
+			// SEC-CHEM-V2 (2026-09-24): the V1 answer to an outsider's negative pair — { wins: null, expected: null,
+			// chemistryHidden: true } beside positive pairs in numbers — was itself the leak: the marker named every
+			// negative pair. The rule now lives in GbRating.pairsOf (chemFor): one shape for every row; for a pair the
+			// caller is not in, a negative record reads as neutral; and only matches the caller may see are counted.
+			return await pairsOf(this.db, ps.pairs as [string, string][], ps.sport, me?.id ?? null);
 		});
 	}
 }

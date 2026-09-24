@@ -4,6 +4,29 @@
  */
 
 import type { DataSource } from 'typeorm';
+import { logVisible } from './MatchHistory.js';
+
+/* SEC-CHEM-V2 (2026-09-24, lane sec-chemistry; G15.3) — ONE chemistry rule, applied by every door that states or
+ * derives partner chemistry (gb-pairs, gb-fair, gb-edge; gb-suggest only ever reads the viewer's own pairs and is
+ * stricter still). A NEGATIVE chemistry figure is private to the two players it is about; positive may be shown. For
+ * anyone else a negative pair is treated as NEUTRAL (0) *before* any arithmetic, ranking or rounding, so it cannot
+ * be read off a sort order, a fairness split or a response shape. What this replaced (measured on UAT 2026-09-24):
+ * gb-pairs answered an outsider's negative pair as { wins: null, expected: null, chemistryHidden: true } while a
+ * positive pair came back in numbers — the marker itself told every caller WHICH pairs were negative.
+ * The pair record is read through MatchHistory.logVisible (the rule pair-summary already applies): a match counts
+ * only while it and its meet / competition are live AND the viewer may see where it was played — a private meet's
+ * games never reach a stranger's numbers (G15.5). */
+export const chemFor = (edge: number, viewerId: string | null, a: string, b: string): number =>
+	edge < 0 && !(viewerId != null && (viewerId === a || viewerId === b)) ? 0 : edge;
+
+/** SEC-CHEM-V2: a pair's record together (a's rows with partner b) as the viewer may know it. */
+async function pairRecord(db: DataSource, a: string, b: string, sport: string, viewerId: string | null): Promise<{ n: number; w: number; e: number }> {
+	const x = (await db.query(
+		`SELECT count(*)::int n, coalesce(sum(CASE WHEN l.won THEN 1 ELSE 0 END),0)::int w, coalesce(sum(l.expected),0)::float e
+		 FROM gb_rating_log l WHERE l."userId" = $1 AND l."partnerId" = $2 AND l.sport = $3 AND NOT l.skipped AND ${logVisible('l', '$4')}`,
+		[a, b, sport, viewerId ?? '']))[0];
+	return { n: x ? Number(x.n) : 0, w: x ? Number(x.w) : 0, e: x ? Number(x.e) : 0 };
+}
 
 // GB-RATING-V1 (2026-09-19, operator: "new players not on hkpl — use our open play, tournaments and social matches, the
 // way hkpl does it, not copied from hkpl players"). GripBat's OWN rating + Edge analytics, from GripBat's own matches:
@@ -144,10 +167,11 @@ export async function processRatings(db: DataSource, limit = 200): Promise<{ rat
 	return { rated, skipped };
 }
 
-type LogRow = { matchId: string; source: string; partnerId: string | null; opponentIds: string[]; pre: number; post: number; teamRating: number; oppRating: number; expected: number; won: boolean; games: [number, number][]; playedAt: Date };
+type LogRow = { matchId: string; source: string; partnerId: string | null; opponentIds: string[]; pre: number; post: number; teamRating: number; oppRating: number; expected: number; won: boolean; games: [number, number][]; playedAt: Date; vis: boolean };
 
-/** The Edge for one player from their GripBat matches: rating + trend, partner chemistry, clutch, form, upsets. */
-export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball'): Promise<Record<string, unknown>> {
+/** The Edge for one player from their GripBat matches: rating + trend, partner chemistry, clutch, form, upsets.
+ *  SEC-CHEM-V2: `viewerId` decides the partner list (G15.3) — omitted means an outsider, never the subject. */
+export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball', viewerId: string | null = null): Promise<Record<string, unknown>> {
 	/* FRESH-EYES P1-2 (2026-09-20) — A RATING ROW CANNOT OUTLIVE THE MATCH THAT JUSTIFIED IT.
 	 *
 	 * pendingMatches() above refuses to rate a match in a cancelled meet, and MeetService.cancel() now takes back
@@ -161,8 +185,9 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 	 * running total and would keep reporting matches this query has just excluded — which is the contradiction. */
 	const GUARD = liveLog('gb_rating_log');   // ACCOUNT-BUGS-V1: meets AND competitions, and an orphaned row (match gone) of either
 	const rows = (await db.query(
-		`SELECT "matchId", source, "partnerId", "opponentIds", pre, post, "teamRating", "oppRating", expected, won, games, "playedAt"
-		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD} ORDER BY "playedAt" DESC LIMIT 300`, [userId, sport]) as LogRow[])
+		`SELECT "matchId", source, "partnerId", "opponentIds", pre, post, "teamRating", "oppRating", expected, won, games, "playedAt",
+		        ${logVisible('gb_rating_log', '$3')} AS vis
+		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD} ORDER BY "playedAt" DESC LIMIT 300`, [userId, sport, viewerId ?? '']) as LogRow[])
 		.map((r) => ({ ...r, pre: Number(r.pre), post: Number(r.post), teamRating: Number(r.teamRating), oppRating: Number(r.oppRating), expected: Number(r.expected) }));
 	const rt = (await db.query('SELECT rating, matches FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [userId, sport]))[0];
 	const counted = Number(((await db.query(
@@ -175,14 +200,18 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 	const monthAgo = Date.now() - 30 * 86400e3;
 	const older = rows.find((r) => new Date(r.playedAt).getTime() < monthAgo);
 	const trend30 = rating != null ? rating - (older ? older.post : rows[rows.length - 1].pre) : null;
-	// partner chemistry
+	// partner chemistry — SEC-CHEM-V2: someone else's Edge counts only the matches the viewer may see (G15.5), and a
+	// negative partner is DROPPED before the sort and the top-8 cut unless the viewer is one of that pair (G15.3).
+	const isSubject = viewerId != null && viewerId === userId;
 	const byP = new Map<string, { partnerId: string; matches: number; wins: number; expected: number }>();
 	for (const r of rows) {
-		if (!r.partnerId) continue;
+		if (!r.partnerId || !(isSubject || r.vis)) continue;
 		const o = byP.get(r.partnerId) ?? { partnerId: r.partnerId, matches: 0, wins: 0, expected: 0 };
 		o.matches++; if (r.won) o.wins++; o.expected += r.expected; byP.set(r.partnerId, o);
 	}
-	const partners = [...byP.values()].filter((o) => o.matches >= 2).map((o) => ({ ...o, winRate: o.wins / o.matches, expectedRate: o.expected / o.matches, edge: (o.wins - o.expected) / o.matches })).sort((a, b) => b.edge - a.edge).slice(0, 8);
+	const partners = [...byP.values()].filter((o) => o.matches >= 2).map((o) => ({ ...o, winRate: o.wins / o.matches, expectedRate: o.expected / o.matches, edge: (o.wins - o.expected) / o.matches }))
+		.filter((o) => chemFor(o.edge, viewerId, userId, o.partnerId) === o.edge)
+		.sort((a, b) => b.edge - a.edge).slice(0, 8);
 	// clutch
 	let close = 0, closeWon = 0, dec = 0, decWon = 0;
 	for (const r of rows) {
@@ -212,14 +241,13 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 export async function fairTeamsOf(db: DataSource, userIds: string[], sport = 'pickleball', viewerId: string | null = null): Promise<{ teamA: string[]; teamB: string[]; teamAWinPct: number; fairness: number }[]> {
 	const r = await Promise.all(userIds.map((u) => currentRating(db, u, sport).then((x) => x.rating)));
 	const chem = async (a: string, b: string): Promise<number> => {
-		const x = (await db.query(`SELECT count(*)::int n, sum(CASE WHEN won THEN 1 ELSE 0 END)::float w, sum(expected)::float e FROM gb_rating_log WHERE "userId" = $1 AND "partnerId" = $2 AND sport = $3 AND NOT skipped AND ${liveLog('gb_rating_log')}`, [a, b, sport]))[0];
-		const c = x && x.n >= 2 ? (x.w - x.e) / x.n : 0;
+		const x = await pairRecord(db, a, b, sport, viewerId);   // SEC-CHEM-V2: live AND visible to the viewer
+		const c = x.n >= 2 ? (x.w - x.e) / x.n : 0;
 		// SEC-ANON-CHEM-V1 (2026-09-21, permission-sweep hole 5): a NEGATIVE chemistry score is private to the two
 		// players it is about, and it is recoverable from teamAWinPct by comparing the three splits against the
 		// ratings. So a caller who is not one of the pair sees the pair's chemistry only when it is positive — the
-		// same rule gb-edge and gb-pairs apply. Balancing still works: ratings carry it, good chemistry still counts.
-		if (c < 0 && !(viewerId && (viewerId === a || viewerId === b))) return 0;
-		return c;
+		// same rule gb-edge and gb-pairs apply (SEC-CHEM-V2: the one chemFor). Balancing still works.
+		return chemFor(c, viewerId, a, b);
 	};
 	const pairs: [number[], number[]][] = [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]];
 	const out = [];
@@ -253,12 +281,18 @@ export async function risingOf(db: DataSource, sport = 'pickleball', limit = 20)
 	return rows.map((r) => ({ userId: r.userId, rating: Number(r.rating), gain: Number(r.gain), matches: Number(r.matches), upsets: Number(r.upsets) }));
 }
 
-/** A pair's record together (GripBat matches): matches, wins, expected wins — the scouting line under a team. */
-export async function pairsOf(db: DataSource, pairs: [string, string][], sport = 'pickleball'): Promise<{ a: string; b: string; matches: number; wins: number; expected: number }[]> {
+/** A pair's record together (GripBat matches): matches, wins, expected wins — the scouting line under a team.
+ *  SEC-CHEM-V2: as the VIEWER may know it. The record (matches, wins) is the one stats/pair-summary already shows;
+ *  `expected` is the chemistry half, so for a pair the viewer is not in, a below-expectation record is stated as
+ *  exactly-as-expected (expected = wins, edge 0) — the neutral a pair with no chemistry reads, in the same shape as
+ *  every other row, so no field, null or marker singles the negative pairs out. */
+export async function pairsOf(db: DataSource, pairs: [string, string][], sport = 'pickleball', viewerId: string | null = null): Promise<{ a: string; b: string; matches: number; wins: number; expected: number }[]> {
 	const out = [];
 	for (const [a, b] of pairs.slice(0, 40)) {
-		const x = (await db.query(`SELECT count(*)::int n, coalesce(sum(CASE WHEN won THEN 1 ELSE 0 END),0)::int w, coalesce(sum(expected),0)::float e FROM gb_rating_log WHERE "userId" = $1 AND "partnerId" = $2 AND sport = $3 AND NOT skipped AND ${liveLog('gb_rating_log')}`, [a, b, sport]))[0];
-		out.push({ a, b, matches: x ? x.n : 0, wins: x ? x.w : 0, expected: x ? Math.round(x.e * 100) / 100 : 0 });
+		const x = await pairRecord(db, a, b, sport, viewerId);
+		const edge = x.n > 0 ? (x.w - x.e) / x.n : 0;
+		const expected = chemFor(edge, viewerId, a, b) === edge ? Math.round(x.e * 100) / 100 : x.w;
+		out.push({ a, b, matches: x.n, wins: x.w, expected });
 	}
 	return out;
 }

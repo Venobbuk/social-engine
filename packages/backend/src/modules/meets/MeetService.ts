@@ -49,6 +49,21 @@ const MAYBE_PURGE_MINUTES = 120;         // "People in Maybe list will be remove
 const INVITE_AUTO_CONFIRM_DAYS = 3;      // "You will be auto-confirmed in 3 days if no action is taken."
 const NO_SHOW_WINDOW_DAYS = 30;          // "No showed {{count}} times in 30 days"
 
+/* SEC-REVIEW-AUTHOR-V1 (2026-09-24, lane sec-chemistry; G15.4) — ONE rule for who may learn a review's AUTHOR, applied by
+ * every review door (reviews/show via packReviews, reviews/list, reviews/meet-summary's givers):
+ *   the author always; the person reviewed for an endorsement or feedback ("attributed" — G15.4), never for a warning
+ *   ("anonymous to the person warned" — G15.4); nobody else, signed in or out.
+ * Why not "endorsements are signed for everyone": Reclub hides kudos givers from everyone but paying Supporters, the
+ * recipient included ("Curious who gave you kudos?" upsell, spec_meets §5.1 / §5.4) — GripBat gives the recipient that for
+ * free (REVIEWS-LIST-V1) and no more. Measured 2026-09-24: reviews/list applied this while reviews/show packed every
+ * endorsement's author for any caller, a signed-out one included. The endorsement itself (body, dimensions, counts)
+ * stays public; only who wrote it is held back. */
+export function reviewAuthorKnown(r: { type: string; authorId: string; targetUserId: string }, viewerId: string | null | undefined): boolean {
+	if (!viewerId) return false;
+	if (viewerId === r.authorId) return true;
+	return viewerId === r.targetUserId && r.type !== 'warning';
+}
+
 /** A participant row as the raw driver returns it (camelCase columns, dates as Date). */
 type Row = MiMeetParticipant;
 
@@ -838,8 +853,9 @@ export class MeetService {
 		// is worse than no report — it invites retaliation and teaches everyone else not to file one. An endorsement or
 		// a piece of feedback is still attributed (that is the point of it); a warning is attributed only back to the
 		// person who wrote it, so they can see and withdraw their own.
+		// SEC-REVIEW-AUTHOR-V1: the one author rule (reviewAuthorKnown) — this door used to name every endorser to anyone.
 		const packRow = async (r: MiMeetReview) => ({
-			author: r.type === 'warning' && viewerId !== r.authorId
+			author: !reviewAuthorKnown(r, viewerId)
 				? null
 				: await users.pack(r.authorId, null, { schema: 'UserLite' as const }).catch(() => null),
 			body: r.body,

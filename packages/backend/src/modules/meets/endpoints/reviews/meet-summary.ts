@@ -11,6 +11,7 @@ import { DI } from '@/di-symbols.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import { meetErrors } from '../_shared.js';
+import { MeetService, reviewAuthorKnown } from '@/modules/meets/MeetService.js';
 
 // MEET-KUDOS-V1 — the Kudos tab on a past meet (triage A-meet-detail.65): per dimension, who was kudos'd in THIS
 // meet, plus what I received and what I gave here.
@@ -57,6 +58,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.meetsRepository)
 		private meetsRepository: MeetsRepository,
 		private userEntityService: UserEntityService,
+		private meetService: MeetService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			// KUDOS-CHAT-V1: a competition's kudos (competitionId) or a meet's; one of the two
@@ -73,6 +75,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			} else {
 				const meet = ps.meetId ? await this.meetsRepository.findOneBy({ id: ps.meetId }) : null;
 				if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
+				// SEC-REVIEW-AUTHOR-V1 (G15.5): a private meet's kudos name its people — the ONE private-meet rule
+				// (MeetService.mayViewPrivate, as meets/show) decides, and a refusal reads like a missing meet.
+				if (!(await this.meetService.mayViewPrivate(meet, me?.id ?? null))) throw new ApiError(meta.errors.noSuchMeet);
 				ref = { col: 'meetId', id: meet.id };
 			}
 
@@ -96,8 +101,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (me && r.authorId === me.id) myGiven.set(r.targetUserId, dims);
 				for (const d of dims) {
 					const c = cats.get(d) ?? { count: 0, recipients: new Set<string>(), givers: new Set<string>(), byGiver: new Map<string, number>(), byRecipient: new Map<string, number>() };
-					c.count++; c.recipients.add(r.targetUserId); c.givers.add(r.authorId);
-					c.byGiver.set(r.authorId, (c.byGiver.get(r.authorId) ?? 0) + 1); c.byRecipient.set(r.targetUserId, (c.byRecipient.get(r.targetUserId) ?? 0) + 1);
+					c.count++; c.recipients.add(r.targetUserId);
+					// SEC-REVIEW-AUTHOR-V1: who GAVE a kudos is named only to its giver and its recipient (MeetService.reviewAuthorKnown)
+					if (reviewAuthorKnown({ ...r, type: 'endorsement' }, me?.id)) { c.givers.add(r.authorId); c.byGiver.set(r.authorId, (c.byGiver.get(r.authorId) ?? 0) + 1); }
+					c.byRecipient.set(r.targetUserId, (c.byRecipient.get(r.targetUserId) ?? 0) + 1);
 					cats.set(d, c);
 				}
 			}
