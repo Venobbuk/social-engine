@@ -1,0 +1,581 @@
+{
+ "id": "fix-S5",
+ "at": "2026-09-24T18:01:31.549Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  {
+   "phase": "after",
+   "engineRev": "0a71463386bf7c00c37c60f1308c0c927c74c9c1",
+   "appBundle": "js/app.1efc1192.js",
+   "stamp": "u1ttj"
+  },
+  {
+   "rows": [
+    {
+     "row": "A-roles-action.02",
+     "pass": true,
+     "vsReclub": {
+      "before": "worse — \"View profileMessage\" with no gap read as one broken link",
+      "after": "equal — two labelled links stacked at the header's right (Reclub: a chat icon + More)"
+     }
+    },
+    {
+     "row": "A-generate-teams.04/force-position",
+     "pass": true,
+     "vsReclub": null
+    },
+    {
+     "row": "A-generate-teams.04",
+     "pass": true,
+     "vsReclub": {
+      "before": "worse — Force position, Balance positions and Reset positions missing",
+      "after": "equal — Force position per player (participant sheet, Reclub's per-player overrides), Balance positions, Reset positions; the preview names each player's position"
+     }
+    },
+    {
+     "row": "D-meet-custom-match.03/no-teams",
+     "pass": true,
+     "vsReclub": {
+      "before": "worse — the preset rows were hidden, no empty state, no way to set teams up from here",
+      "after": "equal — Reclub's empty state and its two ways on (copy without Reclub's \"setup\" slip)"
+     }
+    },
+    {
+     "row": "A-roles-action.12",
+     "pass": true,
+     "vsReclub": {
+      "before": "worse — the host-side Swap was missing (only the player's own Swap my spot)",
+      "after": "equal — Reclub's Swap from the participant sheet via add-from-community; ours confirms with both names first"
+     }
+    },
+    {
+     "row": "D-meet-custom-match.03/uneven",
+     "pass": true,
+     "vsReclub": {
+      "before": "worse — the second tap silently emptied the first side (TEAM 1 · 0/4)",
+      "after": "better — the host is told why (a match needs the same number each side) and chooses; Reclub does not explain it either"
+     }
+    },
+    {
+     "row": "A-promote-meet.02",
+     "pass": true,
+     "vsReclub": {
+      "before": "worse — the mock read \"… for <meet> on <when>\" but players got \"… is looking for players — 7 seats, <when>\" with no meet name",
+      "after": "equal — Reclub's mock push, now the very text delivered (one engine source), meet name + venue + time"
+     }
+    },
+    {
+     "row": "A-promote-meet.06",
+     "pass": true,
+     "vsReclub": {
+      "before": "equal (delivery unproven at L6 — the 45-min sweeper ate the first run's notifications)",
+      "after": "equal — delivered, read on the member's own inbox in both languages"
+     }
+    },
+    {
+     "row": "A-meet-detail.41",
+     "pass": true,
+     "vsReclub": {
+      "before": "worse — the section was hidden (no empty line); the reward-points reminder missing",
+      "after": "better — Reclub's empty line plus the way on (invite the club's members from here); the reward-points payment-tag reminder is out of scope: GripBat has no reward-points system (orchestrator decision under G15.0 — inventing one to copy a reminder is not a user need)"
+     }
+    },
+    {
+     "row": "D-meet-score-sheet.02",
+     "pass": true,
+     "vsReclub": {
+      "before": "worse — the round / court pickers looked usable but Save stayed disabled until a score was typed",
+      "after": "equal — Reclub sets round / court on the score sheet; ours saves them before play too"
+     }
+    },
+    {
+     "row": "D-meet-score-sheet.04",
+     "pass": true,
+     "vsReclub": {
+      "before": "equal (fixture SEEDED by SQL — not a real engine path)",
+      "after": "equal — the same note, now on a match the engine itself submitted through the UAT cage; ours also labels it honestly as Test only on UAT"
+     }
+    }
+   ]
+  },
+  {
+   "controls": [
+    {
+     "name": "fixture",
+     "pass": true
+    },
+    {
+     "name": "promote.safe",
+     "pass": true
+    },
+    {
+     "name": "dupr.gate",
+     "pass": true
+    },
+    {
+     "name": "dupr.receipt",
+     "pass": true
+    }
+   ]
+  },
+  {
+   "cleanup": {
+    "arjed4nniziq00iy": "200/400",
+    "arjed4oyiziq00j5": "200/400",
+    "arjed4pyiziq00jc": "200/400",
+    "club": 200,
+    "acct-a": 204,
+    "acct-b": 204,
+    "acct-c": 204,
+    "acct-d": 204,
+    "acct-e": 204,
+    "acct-f": 204,
+    "pending": "0",
+    "liveUsers": 0,
+    "liveMeets": 0,
+    "fakeLinks": 0
+   }
+  },
+  {
+   "errors": []
+  },
+  {
+   "missing": []
+  }
+ ],
+ "detail": {
+  "id": "fix-S5",
+  "phase": "after",
+  "at": "2026-09-24T17:55:46.615Z",
+  "stamp": "u1ttj",
+  "rows": [
+   {
+    "row": "A-roles-action.02",
+    "what": "participant sheet header: \"View profile\" and \"Message\" are separate, not run together (>= 2 px apart vertically or >= 6 px horizontally) at 390 px EN",
+    "pass": true,
+    "ev": {
+     "r": [
+      {
+       "t": "View profile",
+       "l": 319,
+       "r": 386,
+       "top": 127,
+       "b": 146
+      },
+      {
+       "t": "Message",
+       "l": 335,
+       "r": 386,
+       "top": 150,
+       "b": 168
+      }
+     ],
+     "headText": "[F | [probe] fix-S5 u1ttj C | 3.5 · Confirmed to play | View profile | Message"
+    },
+    "shot": "probes/fix-S5-shots/after-psheet-c-en.png",
+    "vsReclub": {
+     "before": "worse — \"View profileMessage\" with no gap read as one broken link",
+     "after": "equal — two labelled links stacked at the header's right (Reclub: a chat icon + More)"
+    }
+   },
+   {
+    "row": "A-generate-teams.04/force-position",
+    "what": "participant sheet: \"Force position\" chips (None · Left side · Right side · Either side); tapping Left side stores meet_participant.forcePosition (read back); 繁 shows 指定位置 · 左邊",
+    "pass": true,
+    "ev": {
+     "fpOn": true,
+     "fpBack": "Left side",
+     "req": [
+      "{\"meetId\":\"arjed4nniziq00iy\",\"participantId\":\"arjed4t3iziq00jl\",\"forcePosition\":\"Left side\",\"i\":\"…\"}"
+     ],
+     "zh": {
+      "force": true,
+      "left": true,
+      "head": "[F | [probe] fix-S5 u1ttj C | 3.5 · 已確認出賽 | 查看檔案 | 訊息"
+     }
+    },
+    "shot": "probes/fix-S5-shots/after-psheet-c-en.png"
+   },
+   {
+    "row": "A-generate-teams.04",
+    "what": "Generate teams: \"Balance positions\" switch sends balancePositions:true, the preview names each forced position, and the engine splits the two Left-side players on every one of 6 seeds; \"Reset positions\" (confirm) clears every forced position (read back 0); 繁 shows 平衡位置",
+    "pass": true,
+    "ev": {
+     "balOn": true,
+     "req": [
+      "{\"meetId\":\"arjed4nniziq00iy\",\"numTeams\":2,\"balanceSkill\":true,\"balanceGender\":false,\"blindTeamsMinutes\":null,\"force\":[],\"seed\":2023922548,\"persist\":false,\"balancePositions\":true,\"i\":\"…\"}"
+     ],
+     "chipsWithPos": 8,
+     "engine": {
+      "split": [
+       true,
+       true,
+       true,
+       true,
+       true,
+       true
+      ],
+      "togetherWithoutSwitch": [
+       false,
+       false,
+       false,
+       false,
+       false,
+       true
+      ]
+     },
+     "resetBtn": true,
+     "toast": "Positions reset",
+     "resetBack": 0,
+     "zh": "Balance positions = 平衡位置"
+    },
+    "shot": "probes/fix-S5-shots/after-teams-preview-en.png",
+    "vsReclub": {
+     "before": "worse — Force position, Balance positions and Reset positions missing",
+     "after": "equal — Force position per player (participant sheet, Reclub's per-player overrides), Balance positions, Reset positions; the preview names each player's position"
+    }
+   },
+   {
+    "row": "D-meet-custom-match.03/no-teams",
+    "what": "Create custom match with no preset teams: \"Teams have not been set up yet.\" + Generate teams + Manage participants; Generate teams opens the teams sheet; 繁 尚未設定隊伍。",
+    "pass": true,
+    "ev": {
+     "noteOn": true,
+     "opened": true,
+     "zh": "尚未設定隊伍。"
+    },
+    "shot": "probes/fix-S5-shots/after-custom-noteams-en.png",
+    "vsReclub": {
+     "before": "worse — the preset rows were hidden, no empty state, no way to set teams up from here",
+     "after": "equal — Reclub's empty state and its two ways on (copy without Reclub's \"setup\" slip)"
+    }
+   },
+   {
+    "row": "A-roles-action.12",
+    "what": "host participant sheet › Swap → the add-from-community picker (Friends) → \"Swap in\" → confirm naming both → B's seat now F's (same row, confirmed, count unchanged), B off the meet; B told \"You were removed from <meet>.\", F told \"You are confirmed to play <meet>…\"; a non-host is refused, the host row is refused; 繁 chip 替換",
+    "pass": true,
+    "ev": {
+     "swapChip": true,
+     "sheet": "Swap [probe] fix-S5 u1ttj B",
+     "row": "ok",
+     "dlg": "Swap [probe] fix-S5 u1ttj B for [probe] fix-S5 u1ttj F? | [probe] fix-S5 u1ttj F is confirmed in this spot and [probe] fix-S5 u1ttj B leaves the meet. | Cancel | Confirm || Swap [probe] fix-S5 u1ttj B | Choose who takes this spot. They are confirmed in its place and [probe] fix-S5 u1ttj B leaves the meet. | Friends | Saved | Recent activity | Meets | Free agents | Spectators | Club tags | [probe] fix-S5 u1ttj F | @fs5u1ttjf | Swap in",
+     "toast": "now has this spot",
+     "req": [
+      "{\"meetId\":\"arjed4nniziq00iy\",\"participantId\":\"arjed4r4iziq00jf\",\"userId\":\"arjed4foiziq00ie\",\"i\":\"…\"}"
+     ],
+     "done": {
+      "seatUser": "arjed4foiziq00ie",
+      "seatStatus": "confirmed",
+      "bRow": false,
+      "confirmed": 5,
+      "before": 5
+     },
+     "told": {
+      "B": "You were removed from [probe] fix-S5 u1ttj m1.",
+      "F": "You are confirmed to play [probe] fix-S5 u1ttj m1. Please be on time."
+     },
+     "refusals": {
+      "nonHost": 400,
+      "nonHostCode": "MEET_NOT_HOST",
+      "hostRow": 400,
+      "g1Still": true,
+      "dNotIn": true
+     },
+     "zhChip": "交換"
+    },
+    "shot": "probes/fix-S5-shots/after-host-swap-sheet.png",
+    "vsReclub": {
+     "before": "worse — the host-side Swap was missing (only the player's own Swap my spot)",
+     "after": "equal — Reclub's Swap from the participant sheet via add-from-community; ours confirms with both names first"
+    }
+   },
+   {
+    "row": "D-meet-custom-match.03/uneven",
+    "what": "preset teams of different sizes (red 1, blue 3): the second pick asks \"Teams of different sizes\" naming both and the side it would clear; Cancel keeps Team 1 (1/1); Pick anyway fills Team 2 (3/3) and clears Team 1 (0/3) — never silent",
+    "pass": true,
+    "ev": {
+     "dlg": "Teams of different sizes | Blue team (3) and Red team (1) are different sizes. A match needs the same number of players on each side. Pick Blue team anyway and clear Team 1? | Cancel | Pick anyway || Create custom match | FORMAT | Doubles | Singles | TEAM 1 · BY PRESET TEAMS | TEAM 2 · BY PRESET TEAMS | TEAM 1 · 1/1 | [probe] fix-S5 u1ttj A | [probe] fix-S5 u1ttj F | [probe] fix-S5 u1ttj C | [probe] fix-S5 u1ttj G1 | [probe] fix-S5 u1ttj G2 | TEAM 2 · 0/1 | [probe] fix-S5 u1ttj A | [probe] fix-S5 u1ttj F | [probe] fix-S5 u1ttj C | [probe] fix-S5 u1ttj G1 | [probe] fix-S5 u1ttj G2 | Round | − | 1 | + | COURT | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | MATCH NOTES | Save match",
+     "t1Team1": "1/1",
+     "cancel": {
+      "t1": "1/1",
+      "t2": "0/1"
+     },
+     "pick": {
+      "t1": "0/3",
+      "t2": "3/3"
+     }
+    },
+    "shot": "probes/fix-S5-shots/after-uneven-dialog.png",
+    "vsReclub": {
+     "before": "worse — the second tap silently emptied the first side (TEAM 1 · 0/4)",
+     "after": "better — the host is told why (a match needs the same number each side) and chooses; Reclub does not explain it either"
+    }
+   },
+   {
+    "row": "A-promote-meet.02",
+    "what": "\"What players will see\" = the delivered notification, exactly: header \"GripBat · Looking for players\" + body; the body names the meet (\"[probe] fix-S5 u1ttj m1\"); 繁 preview is the same sentence through the inbox localizer (招募 + the meet name)",
+    "pass": true,
+    "ev": {
+     "previewEn": [
+      "GripBat · Looking for players",
+      "[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. Can you join?"
+     ],
+     "delivered": "[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. Can you join?",
+     "previewZh": [
+      "GripBat · 招募球員",
+      "[probe] fix-S5 u1ttj A 正為 Sat 26 Sept, 07:00 的[probe] fix-S5 u1ttj m1招募 3 位球友，你能參加嗎？"
+     ]
+    },
+    "shot": "probes/fix-S5-shots/after-promote-preview-en.png",
+    "vsReclub": {
+     "before": "worse — the mock read \"… for <meet> on <when>\" but players got \"… is looking for players — 7 seats, <when>\" with no meet name",
+     "after": "equal — Reclub's mock push, now the very text delivered (one engine source), meet name + venue + time"
+    }
+   },
+   {
+    "row": "A-promote-meet.06",
+    "what": "Promote (club audience) delivers to exactly this run's [probe] members off the meet (b,d,e) within 62 ms, nobody else (F, the players on the meet); \"Meet promoted to N players\" sheet; the member's inbox shows it in EN and 繁 (招募球員 + the meet name)",
+    "pass": true,
+    "ev": {
+     "confirm": "Promote this meet? | 3 club members get one notification. | Cancel | Confirm",
+     "sheet": "Meet promoted to 3 players | Share with friends | Copy message | Cancel || Share with friends | Copy message",
+     "got": {
+      "b": [
+       "[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. Can you join?"
+      ],
+      "c": [],
+      "d": [
+       "[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. Can you join?"
+      ],
+      "e": [
+       "[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. Can you join?"
+      ],
+      "f": []
+     },
+     "inboxEn": "Looking for players\n[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. C · 25 Sept, 01:59 am",
+     "inboxZh": [
+      "招募球員",
+      "[probe] fix-S5 u1ttj A 正為 Sat 26 Sept, 07:00 的[probe] fix-S5 u1ttj m1招募 3 位球友，你能參加嗎？ · 9月25日 01:59"
+     ]
+    },
+    "shot": "probes/fix-S5-shots/after-member-inbox-en.png",
+    "vsReclub": {
+     "before": "equal (delivery unproven at L6 — the 45-min sweeper ate the first run's notifications)",
+     "after": "equal — delivered, read on the member's own inbox in both languages"
+    }
+   },
+   {
+    "row": "A-meet-detail.41",
+    "what": "host, club meet with no club invitation: \"INVITED CLUBS • 0\" + \"No clubs have been invited to this meet yet.\" + Invite club members → Members → toast \"N invited\" → the club is listed (clubs/meets/invited-clubs read back 1); 繁 這個活動尚未邀請任何球會。 · reward-points reminder OUT OF SCOPE (no reward points in GripBat)",
+    "pass": true,
+    "ev": {
+     "line": true,
+     "toast": "4 invited",
+     "clubs": [
+      "[probe] fix-S5 u1ttj club"
+     ],
+     "zh": "這個活動尚未邀請任何球會。"
+    },
+    "shot": "probes/fix-S5-shots/after-invclubs-empty-en.png",
+    "vsReclub": {
+     "before": "worse — the section was hidden (no empty line); the reward-points reminder missing",
+     "after": "better — Reclub's empty line plus the way on (invite the club's members from here); the reward-points payment-tag reminder is out of scope: GripBat has no reward-points system (orchestrator decision under G15.0 — inventing one to copy a reminder is not a user need)"
+    }
+   },
+   {
+    "row": "D-meet-score-sheet.02",
+    "what": "unplayed match: Save starts disabled, turns on once Court 3 is picked, saves court without a score (request has courtIndex 2 and no scores; read back courtIndex 2, scores []); 繁 card shows 3 號場",
+    "pass": true,
+    "ev": {
+     "saveDisabledBefore": true,
+     "saveDisabledAfterCourt": false,
+     "req": [
+      "{\"meetId\":\"arjed4nniziq00iy\",\"matchId\":\"arjeinnziziq00ls\",\"courtIndex\":2,\"i\":\"…\"}"
+     ],
+     "back": {
+      "courtIndex": 2,
+      "scores": []
+     },
+     "zh": "3 號場"
+    },
+    "shot": "probes/fix-S5-shots/after-score-court-en.png",
+    "vsReclub": {
+     "before": "worse — the round / court pickers looked usable but Save stayed disabled until a score was typed",
+     "after": "equal — Reclub sets round / court on the score sheet; ours saves them before play too"
+    }
+   },
+   {
+    "row": "D-meet-score-sheet.04",
+    "what": "a match submitted through the REAL engine path (UAT cage, sandbox:<id>) is read-only: the card says Test only and a tap says \"Submitted to DUPR — These matches have already been submitted to DUPR and can no longer be edited.\"; 繁 the same note in Chinese",
+    "pass": true,
+    "ev": {
+     "card": "No assigned court | Test only | Share | ••• | Expected 20% · 80% | [F | [probe] fix-S5 u1ttj B | 11 | [F | [probe] fix-S5 u1ttj C | 5 | Test environment — not sent to DUPR",
+     "note": "Submitted to DUPR | These matches have already been submitted to DUPR and can no longer be edited. | OK",
+     "zhNote": "已提交 DUPR | 這些比賽已提交 DUPR，無法再修改。 | 好"
+    },
+    "shot": "probes/fix-S5-shots/after-dupr-note-en.png",
+    "vsReclub": {
+     "before": "equal (fixture SEEDED by SQL — not a real engine path)",
+     "after": "equal — the same note, now on a match the engine itself submitted through the UAT cage; ours also labels it honestly as Test only on UAT"
+    }
+   }
+  ],
+  "controls": [
+   {
+    "name": "fixture",
+    "what": "M1 holds A (host) + B + C + two reserved guests confirmed; club open with B C D E; M2 club meet empty; M3 has B + C (read back)",
+    "pass": true,
+    "ev": {
+     "confirmed": 5,
+     "pid": {
+      "B": "arjed4r4iziq00jf",
+      "C": "arjed4t3iziq00jl",
+      "G1": "arjed4v0iziq00jr",
+      "G2": "arjed4vxiziq00js",
+      "A": "arjed4nyiziq00j0"
+     }
+    }
+   },
+   {
+    "name": "promote.safe",
+    "what": "Promote is pressed only when the engine's preview reach equals this run's [probe] club members not on the meet (b,d,e)",
+    "pass": true,
+    "ev": {
+     "reach": 3,
+     "expected": [
+      "b",
+      "d",
+      "e"
+     ]
+    }
+   },
+   {
+    "name": "dupr.gate",
+    "what": "SAFETY GATE: every running web-uat container carries DUPR_SUBMIT_SANDBOX=1 and runs the cage code (marker from CODE in the built tree)",
+    "pass": true,
+    "ev": {
+     "env": "1",
+     "mark": 1,
+     "envAll": [
+      "social-engine-web-uat-1=1"
+     ]
+    }
+   },
+   {
+    "name": "dupr.receipt",
+    "what": "the caged engine path wrote submitted | sandbox:<id> | sandbox_not_sent; 0 hits on /api/v1/social/dupr/submit in the nginx window; links restored",
+    "pass": true,
+    "ev": {
+     "status": 200,
+     "row": "submitted|sandbox:arjejlzniziq00lt|sandbox_not_sent",
+     "hits": 0
+    }
+   }
+  ],
+  "errors": [],
+  "cleanup": {
+   "arjed4nniziq00iy": "200/400",
+   "arjed4oyiziq00j5": "200/400",
+   "arjed4pyiziq00jc": "200/400",
+   "club": 200,
+   "acct-a": 204,
+   "acct-b": 204,
+   "acct-c": 204,
+   "acct-d": 204,
+   "acct-e": 204,
+   "acct-f": 204,
+   "pending": "0",
+   "liveUsers": 0,
+   "liveMeets": 0,
+   "fakeLinks": 0
+  },
+  "fx": {
+   "engineRev": "0a71463386bf7c00c37c60f1308c0c927c74c9c1",
+   "appBundle": "js/app.1efc1192.js",
+   "club": "arjed4jeiziq00ij",
+   "meets": {
+    "M1": "arjed4nniziq00iy",
+    "M2": "arjed4oyiziq00j5",
+    "M3": "arjed4pyiziq00jc"
+   },
+   "pid": {
+    "B": "arjed4r4iziq00jf",
+    "C": "arjed4t3iziq00jl",
+    "G1": "arjed4v0iziq00jr",
+    "G2": "arjed4vxiziq00js",
+    "A": "arjed4nyiziq00j0"
+   },
+   "m1Confirmed": 5,
+   "fpReq": [
+    "{\"meetId\":\"arjed4nniziq00iy\",\"participantId\":\"arjed4t3iziq00jl\",\"forcePosition\":\"Left side\",\"i\":\"…\"}"
+   ],
+   "fp": {
+    "fpOn": true,
+    "fpBack": "Left side"
+   },
+   "sheetZh": {
+    "force": true,
+    "left": true,
+    "head": "[F | [probe] fix-S5 u1ttj C | 3.5 · 已確認出賽 | 查看檔案 | 訊息"
+   },
+   "balance": {
+    "split": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "togetherWithoutSwitch": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     true
+    ]
+   },
+   "resetDialog": "Reset positions? | Every player loses their forced position. | Cancel | Confirm || Preview teams | Number of teams · 2 | − | 2 | + | Minimum of 2 teams | Balance skill levels | Balance genders | Balance positions | Spreads each forced position evenly across the teams. Set a position in a player's sheet. | Blind teams | Only reveal teams at a certain time before meet start | FORCE TEAMS | Tap a player to pin them to a team; tap again to cycle. | Reset positions | [F | [probe] fix-S5 u1ttj A | 3.5 | [F | [probe] fix-S5 u1ttj B | 3.0 · Right side | [F | [probe] fix-S5 u1ttj C | 3.5 · Left side | [F | [probe] fix-S5 u1ttj G1 | 3.5 · Left side | [F | [probe] fix-S5 u1ttj G2 | 3.0 · Right side | PREVIEW | Red team | Avg: 3.33 | [probe] fix-S5 u1ttj G1 · Left side | [probe] fix-S5 u1ttj G2 · Right side | [probe] fix-S5 u1ttj A | Blue team | Avg: 3.25 | [probe] fix-S5 u1ttj C · Left side | [probe] fix-S5 u1ttj B · Right side | Tap a player to move them to the next team. | Regenerate | Confirm",
+   "swapRow": "ok",
+   "swapSheet": "Swap [probe] fix-S5 u1ttj B",
+   "previewEn": {
+    "lines": [
+     "GripBat · Looking for players",
+     "[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. Can you join?"
+    ],
+    "card": "What players will see\nGripBat · Looking for players\n[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. Can you join?"
+   },
+   "previewZh": {
+    "lines": [
+     "GripBat · 招募球員",
+     "[probe] fix-S5 u1ttj A 正為 Sat 26 Sept, 07:00 的[probe] fix-S5 u1ttj m1招募 3 位球友，你能參加嗎？"
+    ],
+    "card": "球友會看到的通知\nGripBat · 招募球員\n[probe] fix-S5 u1ttj A 正為 Sat 26 Sept, 07:00 的[probe] fix-S5 u1ttj m1招募 3 位球友，你能參加嗎？"
+   },
+   "enginePreview": {
+    "audience": "club",
+    "gate": "ok",
+    "windowHours": 36,
+    "radiusKm": 20,
+    "promotedAt": null,
+    "reach": 3,
+    "followers": 0,
+    "nearby": 0,
+    "club": 3,
+    "sent": false,
+    "header": "Looking for players",
+    "body": "[probe] fix-S5 u1ttj A is looking for 3 players for [probe] fix-S5 u1ttj m1 on Sat 26 Sept, 07:00. Can you join?"
+   },
+   "deliveredMs": 62,
+   "scoreMatch": "arjeinnziziq00ls",
+   "dupr": {
+    "status": 200,
+    "row": "submitted|sandbox:arjejlzniziq00lt|sandbox_not_sent",
+    "hits": 0
+   }
+  },
+  "missing": []
+ }
+}
