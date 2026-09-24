@@ -71,6 +71,45 @@ async function prodReads() {
 		const m = await call('meets/reviews/meet-summary', { meetId: x.meet });
 		rec('reviews/meet-summary.signed-out.givers-hidden', m.status === 200 && Array.isArray(m.json && m.json.dims) && !m.text.includes(x.author), { status: m.status, dims: ((m.json && m.json.dims) || []).length, authorIdInBody: m.text.includes(x.author) });
 	}
+	// ── G15.3 addendum on PRODUCTION rows (read-only, signed out) ─────────────────────────────────────────────────
+	const X = require('/root/social-engine/probes/sec-chem-fixture.cjs');
+	// (b) a positive pair that is NOT clear (fewer than 3 matches signed-out may see) must read neutral
+	const up = sql(`SELECT row_to_json(t) FROM (SELECT l."userId" a, l."partnerId" b, count(*)::int n, sum(CASE WHEN l.won THEN 1 ELSE 0 END)::int w, sum(l.expected)::float e
+		FROM gb_rating_log l WHERE NOT l.skipped AND l."partnerId" IS NOT NULL AND ${X.visSql('')}
+		GROUP BY 1, 2 HAVING count(*) BETWEEN 1 AND 2 AND sum(CASE WHEN l.won THEN 1 ELSE 0 END) > sum(l.expected) LIMIT 1) t;`);
+	if (!up) rec('fixture.unclear-positive-pair-exists', false, 'no unclear positive pair on prod');
+	else {
+		const p = JSON.parse(up);
+		const r = await call('stats/gb-pairs', { pairs: [[p.a, p.b]] });
+		const row = Array.isArray(r.json) ? r.json[0] : null;
+		rec('(b) gb-pairs.signed-out.unclear-positive-reads-neutral', r.status === 200 && !!row && row.wins === row.expected && Object.keys(row).sort().join(',') === 'a,b,expected,matches,wins', { status: r.status, row, db: { n: p.n, w: p.w, e: Math.round(p.e * 1000) / 1000 } });
+	}
+	// (a) a public rated match: no before/after, no deltas, no rating series for a signed-out caller
+	const pm = sql(`SELECT row_to_json(t) FROM (SELECT l."matchId" m, l."userId" u FROM gb_rating_log l JOIN meet_match mm ON mm.id = l."matchId" JOIN meet m ON m.id = mm."meetId"
+		WHERE l.source = 'meet' AND NOT l.skipped AND m.visibility = 'public' AND m.status <> 'cancelled' ORDER BY l."playedAt" DESC LIMIT 1) t;`);
+	if (!pm) rec('fixture.public-rated-match-exists', false, 'no public rated match on prod');
+	else {
+		const x = JSON.parse(pm);
+		const ms = await call('stats/match-summary', { source: 'meet', matchId: x.m });
+		const pl = ((ms.json && ms.json.teams) || []).flatMap((t) => t.players || []);
+		rec('(a) match-summary.signed-out.no-per-match-ratings', ms.status === 200 && pl.length > 0 && pl.every((q) => q.ratingPre == null && q.ratingPost == null), { status: ms.status, players: pl.length, withRatings: pl.filter((q) => q.ratingPre != null || q.ratingPost != null).length });
+		const mt = await call('stats/matches', { userId: x.u, limit: 20 });
+		const mrows = Array.isArray(mt.json) ? mt.json : null;
+		rec('(a) matches.signed-out.no-rating-deltas', mt.status === 200 && !!mrows && mrows.length > 0 && mrows.every((q) => q.ratingDelta == null), { status: mt.status, rows: mrows ? mrows.length : null, withDelta: mrows ? mrows.filter((q) => q.ratingDelta != null).length : null });
+		const ed = await call('stats/gb-edge', { userId: x.u });
+		rec('(a) gb-edge.signed-out.no-rating-series', ed.status === 200 && Array.isArray(ed.json && ed.json.history) && ed.json.history.length === 0 && ed.json.trend30 == null, { status: ed.status, history: ed.json && Array.isArray(ed.json.history) ? ed.json.history.length : null, trend30: ed.json && ed.json.trend30 });
+	}
+	// (c) a player with PRIVATE rated games: the signed-out chip counts only what signed-out may see
+	const pv = sql(`SELECT row_to_json(t) FROM (SELECT l."userId" u FROM gb_rating_log l JOIN meet_match mm ON mm.id = l."matchId" JOIN meet m ON m.id = mm."meetId"
+		WHERE NOT l.skipped AND l.source = 'meet' AND m.status <> 'cancelled' AND m.visibility <> 'public' LIMIT 1) t;`);
+	if (!pv) rec('fixture.player-with-private-games', true, 'no prod player has a live private rated game — (c) not measurable on prod (recorded, not a failure)');
+	else {
+		const u = JSON.parse(pv).u;
+		const want = X.visibleRating(sql, u, '');
+		const r = await call('stats/gb-ratings', { userIds: [u] });
+		const row = Array.isArray(r.json) ? r.json.find((q) => q.userId === u) || null : null;
+		rec('(c) gb-ratings.signed-out.public-games-only', r.status === 200 && (want ? !!row && row.matches === want.n && Math.abs(row.rating - want.rating) < 1e-6 : row === null), { status: r.status, row, want });
+	}
 	return out;
 }
 
@@ -108,7 +147,7 @@ async function prodReads() {
 		const arr = Array.isArray(sweep.results) ? sweep.results : null;
 		// G16.6: an empty or wrong-shaped result must FAIL loudly, never count to zero
 		const fam = (p) => (arr || []).filter((o) => o.id.startsWith(p)).length;
-		const need = { 'SELFTEST.': 1, 'H3.gbpairs.': 12, 'H3E.gbedge.': 6, 'H4.endorsement.': 8, 'H4.meetsummary.': 8, 'H5.gbfair.': 7 };
+		const need = { 'SELFTEST.': 1, 'H3.gbpairs.': 12, 'H3E.gbedge.': 6, 'H4.endorsement.': 8, 'H4.meetsummary.': 8, 'H5.gbfair.': 7, 'HB.': 9, 'HA.': 18, 'HC.': 16 };
 		const short = Object.entries(need).filter(([p, n]) => fam(p) < n).map(([p, n]) => p + fam(p) + '/' + n);
 		if (!arr || arr.length === 0 || short.length) { say('FAIL the sweep output lacks assertion families: ' + (arr ? short.join(' ') : 'no results array')); verdict = 'fail'; }
 		else {
@@ -116,7 +155,7 @@ async function prodReads() {
 			say('INFO sweep: ' + arr.length + ' assertions, leaks ' + leaks.length + ', broken ' + broken.length);
 			for (const l of leaks) say('LEAK ' + l.id + ' ' + JSON.stringify(l.got).slice(0, 260));
 			for (const l of broken) say('BROKEN ' + l.id + ' ' + JSON.stringify(l.got).slice(0, 260));
-			const chemFam = arr.filter((o) => /^(SELFTEST|H3|H3E|H4|H5)\./.test(o.id));
+			const chemFam = arr.filter((o) => /^(SELFTEST|H3|H3E|H4|H5|HA|HB|HC)\./.test(o.id));
 			say('INFO chemistry + review families: ' + chemFam.length + ' assertions, ' + chemFam.filter((o) => !o.ok).length + ' failing');
 			verdict = leaks.length === 0 && broken.length === 0 && prod.ok && cleanupOk ? 'pass' : 'fail';
 		}

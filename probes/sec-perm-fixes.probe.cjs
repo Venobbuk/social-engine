@@ -17,6 +17,7 @@ require('/root/social-engine/probes/_guard.cjs');
 const fs = require('fs');
 const { execFileSync } = require('child_process');
 const L = require('/root/social-engine/probes/sec-lib.cjs');
+const X = require('/root/social-engine/probes/sec-chem-fixture.cjs');   // SEC-CHEM-V3: the rules re-stated independently of the engine
 
 const TARGET = process.env.TARGET || 'http://127.0.0.1:3961';
 const PHASE = process.env.PHASE || 'after';
@@ -304,27 +305,106 @@ async function main() {
 	});
 
 	await section('H5', async () => {
-		// ══ HOLE 5 — stats/gb-fair leaked the same chemistry through teamAWinPct ════════════════════════════
+		// ══ HOLE 5 — stats/gb-fair: teamAWinPct, per caller class (SEC-CHEM-V3 + SEC-RATING-VIEW-V1) ══════════════════
+		// sec-perm-fixes.fairfour.cjs PREDICTED every class's reading from the rules re-stated in the probe (chemistry:
+		// the pair's true value, else only CLEAR positive; ratings: as the caller may know them) before any call is made,
+		// and refused if the rule could not move anon's number. Every class must read exactly its own prediction.
+		const FOUR = F.fairFour, PRED = F.fairPredict;
+		if (!PRED || PRED.anon == null || PRED.ruleOff == null) throw new Error('no per-class gb-fair prediction — refusing to measure hole 5');
+		const want = [...F.negPair].sort().join('+');
+		const split = (j) => (j || []).find((x) => [...x.teamA].sort().join('+') === want || [...x.teamB].sort().join('+') === want) || null;
+		const pctFor = (s) => (s == null ? null : ([...s.teamA].sort().join('+') === want ? s.teamAWinPct : 100 - s.teamAWinPct));
+		const get = async (tok) => { const r = await T('stats/gb-fair', { userIds: FOUR }, tok); const s = split(r.json); return { status: r.status, rows: A(r.json).length, split: s, pct: pctFor(s) }; };
+		const a = await get(ANON), st = await get(STAFF), cm = await get(P[F.member.slug].token), ownA = await get(P[F.stranger.slug].token), ownB = await get(P[F.admin.slug].token);
+		const g = (x, want2) => ({ status: x.status, read: x.pct, predicted: want2, ruleOff: PRED.ruleOff });
+		leak('H5.gbfair.anonymous.winPct', 5, 'anonymous', a.status === 200 && a.pct === PRED.anon, g(a, PRED.anon));
+		leak('H5.gbfair.staff.winPct', 5, 'staff', st.status === 200 && st.pct === PRED.anon, g(st, PRED.anon));
+		leak('H5.gbfair.positive-pair-member-C.winPct', 5, 'positive-pair member (stranger to A+B)', cm.status === 200 && cm.pct === PRED.posPairMemberC, g(cm, PRED.posPairMemberC));
+		feat('H5.gbfair.NEG-PAIR-MEMBER-A.full', 5, 'player A', ownA.status === 200 && ownA.rows === 3 && ownA.pct === PRED.negPairMemberA, g(ownA, PRED.negPairMemberA));
+		feat('H5.gbfair.NEG-PAIR-MEMBER-B.full', 5, 'player B', ownB.status === 200 && ownB.pct === PRED.negPairMemberB, g(ownB, PRED.negPairMemberB));
+		ctrl('H5.gbfair.RULE-MOVES-THE-NUMBER', 5, 'anonymous', PRED.ruleOff.chemistry !== PRED.anon, { anonPredicted: PRED.anon, ifNegativeNotNeutralised: PRED.ruleOff.chemistry });
+		ctrl('H5.gbfair.BALANCING-still-works', 5, 'anonymous', a.status === 200 && a.rows === 3 && a.split != null && a.split.fairness != null, { status: a.status, rows: a.rows, fairness: a.split && a.split.fairness });
+	});
+
+	await section('HB', async () => {
+		// ══ G15.3 addendum (b) — positive chemistry reaches an outsider only when CLEAR (>= 3 matches AND >= +5 pts) ══════
+		// C+E won twice together: positive, but only 2 matches — anyone but C and E must read it neutral, in the same shape.
+		const pairs = async (pair, tok) => { const r = await T('stats/gb-pairs', { pairs: [pair] }, tok); return { status: r.status, row: A(r.json)[0] || null }; };
+		const UP = CH.unclearPair; if (!UP) throw new Error('fixture has no unclear-positive pair');
+		const trueEdge = Math.round(X.edgeOfRec(CH.readBack.unclear.member) * 100) / 100;
+		for (const [who, tok] of [['anonymous', ANON], ['stranger', P[F.owner.slug].token], ['player A', P[F.stranger.slug].token], ['player B', P[F.admin.slug].token]]) {
+			const r = await pairs(UP, tok);
+			leak('HB.gbpairs.UNCLEAR-positive-reads-neutral.' + who, 'b', who, r.status === 200 && neutralSafe(r.row) && edgeOfRow(r.row) === 0, { status: r.status, row: r.row, recomputed_edge: edgeOfRow(r.row), true_edge: trueEdge });
+		}
+		for (const [who, tok] of [['pair member C', P[F.member.slug].token], ['pair member E (staff)', STAFF]]) {
+			const r = await pairs(UP, tok);
+			feat('HB.gbpairs.UNCLEAR-positive.' + who + '-sees-true', 'b', who, r.status === 200 && edgeOfRow(r.row) !== null && Math.abs(edgeOfRow(r.row) - trueEdge) <= 0.011, { status: r.status, row: r.row, true_edge: trueEdge });
+		}
 		{
-			// The four are chosen by sec-perm-fixes.fairfour.cjs so the split holding the negative pair lands where the
-			// chemistry term cannot be clamped away — and the readings are PREDICTED from the engine's own arithmetic over
-			// the REAL rated rows (read through the doors' rule) before the call is made.
-			const FOUR = F.fairFour, PRED = F.fairPredict;
-			if (!PRED || PRED.negPairMemberPct === PRED.outsiderPct) throw new Error('no usable gb-fair prediction — refusing to measure hole 5');
-			const want = [...F.negPair].sort().join('+');
-			const split = (j) => (j || []).find((x) => [...x.teamA].sort().join('+') === want || [...x.teamB].sort().join('+') === want) || null;
-			const pctFor = (s) => (s == null ? null : ([...s.teamA].sort().join('+') === want ? s.teamAWinPct : 100 - s.teamAWinPct));
-			const get = async (tok) => { const r = await T('stats/gb-fair', { userIds: FOUR }, tok); const s = split(r.json); return { status: r.status, rows: A(r.json).length, split: s, pct: pctFor(s) }; };
-			const a = await get(ANON), st = await get(STAFF), posm = await get(P[F.member.slug].token), own = await get(P[F.stranger.slug].token), own2 = await get(P[F.admin.slug].token);
-			leak('H5.gbfair.anonymous.winPct', 5, 'anonymous', a.status === 200 && a.pct === PRED.outsiderPct, { status: a.status, anonWinPct: a.pct, predicted_outsider: PRED.outsiderPct, predicted_negPairMember: PRED.negPairMemberPct, rows: a.rows });
-			leak('H5.gbfair.staff.winPct', 5, 'staff', st.status === 200 && st.pct === PRED.outsiderPct, { status: st.status, staffWinPct: st.pct, predicted_outsider: PRED.outsiderPct });
-			feat('H5.gbfair.NEG-PAIR-MEMBER-A.full', 5, 'negative-pair member', own.status === 200 && own.rows === 3 && own.pct === PRED.negPairMemberPct, { status: own.status, rows: own.rows, winPct: own.pct, predicted: PRED.negPairMemberPct });
-			feat('H5.gbfair.NEG-PAIR-MEMBER-B.full', 5, 'negative-pair member', own2.status === 200 && own2.pct === PRED.negPairMemberPct, { status: own2.status, winPct: own2.pct, predicted: PRED.negPairMemberPct });
-			// POSITIVE chemistry is not private: a member of the positive pair (outside the negative one) reads exactly what
-			// an outsider reads — and that reading carries the positive term (outsiderPct != the bare-rating split).
-			ctrl('H5.gbfair.POSITIVE-pair-member-matches-outsider', 5, 'positive-pair member', posm.status === 200 && posm.pct === a.pct && posm.pct === PRED.outsiderPct, { status: posm.status, posPairMemberWinPct: posm.pct, anonWinPct: a.pct, predicted_outsider: PRED.outsiderPct });
-			ctrl('H5.gbfair.POSITIVE-term-present', 5, 'anonymous', PRED.outsiderPct !== PRED.bareRatingPct && a.pct === PRED.outsiderPct, { outsider: PRED.outsiderPct, bareRatingSplit: PRED.bareRatingPct, anon: a.pct });
-			ctrl('H5.gbfair.BALANCING-still-works', 5, 'anonymous', a.status === 200 && a.rows === 3 && a.split != null && a.split.fairness != null, { status: a.status, rows: a.rows, fairness: a.split && a.split.fairness });
+			const e = await T('stats/gb-edge', { userId: F.member.id }, ANON);   // C's Edge, anonymous: D (clear) yes, E (unclear) no
+			const ids = ((e.json && e.json.partners) || []).map((p) => p.partnerId);
+			leak('HB.gbedge.UNCLEAR-partner-dropped.anonymous', 'b', 'anonymous', e.status === 200 && !ids.includes(F.staff.id), { status: e.status, partners: ids });
+			ctrl('HB.gbedge.CLEAR-partner-shown.anonymous', 'b', 'anonymous', e.status === 200 && ids.includes(F.owner.id), { status: e.status, partners: ids });
+			const s = await T('stats/gb-edge', { userId: F.member.id }, STAFF);   // E looks at C's Edge: sees the C+E pair (theirs)
+			const sid = ((s.json && s.json.partners) || []).map((p) => p.partnerId);
+			feat('HB.gbedge.UNCLEAR-partner.member-E-sees-own', 'b', 'pair member E (staff)', s.status === 200 && sid.includes(F.staff.id), { status: s.status, partners: sid });
+		}
+	});
+
+	await section('HA', async () => {
+		// ══ G15.3 addendum (a) — per-match rating before/after and rating changes: the player themselves only ═════════
+		const g1 = CH.g.g1.matchId;
+		const classes = [['anonymous', ANON, null], ['stranger', P[F.owner.slug].token, F.owner.id], ['player A', P[F.stranger.slug].token, F.stranger.id], ['player B', P[F.admin.slug].token, F.admin.id], ['staff', STAFF, F.staff.id]];
+		for (const [who, tok, uid] of classes) {
+			const r = await T('stats/match-summary', { source: 'meet', matchId: g1 }, tok);
+			const players = ((r.json && r.json.teams) || []).flatMap((t) => t.players || []);
+			const foreign = players.filter((p) => p.userId !== uid && (p.ratingPre != null || p.ratingPost != null)).map((p) => p.userId);
+			leak('HA.matchsummary.others-ratings-hidden.' + who, 'a', who, r.status === 200 && players.length === 4 && foreign.length === 0, { status: r.status, players: players.length, othersWithRatings: foreign });
+			if (uid && players.some((p) => p.userId === uid)) {
+				const mine = players.find((p) => p.userId === uid);
+				feat('HA.matchsummary.own-rating-shown.' + who, 'a', who, mine.ratingPre != null && mine.ratingPost != null, { pre: mine.ratingPre, post: mine.ratingPost });
+			}
+		}
+		for (const [who, tok, uid] of classes) {
+			const r = await T('stats/matches', { userId: F.stranger.id, limit: 20 }, tok);   // A's matches
+			const rows = A(r.json);
+			const withDelta = rows.filter((x) => x.ratingDelta != null).length;
+			if (uid === F.stranger.id) feat('HA.matches.own-deltas-shown', 'a', who, r.status === 200 && withDelta > 0, { status: r.status, rows: rows.length, withDelta });
+			else leak('HA.matches.others-deltas-hidden.' + who, 'a', who, r.status === 200 && rows.length > 0 && withDelta === 0, { status: r.status, rows: rows.length, withDelta });
+		}
+		for (const [who, tok, uid] of classes) {
+			const e = await T('stats/gb-edge', { userId: F.stranger.id }, tok);   // A's Edge: the per-match rating series + trend
+			const h = e.json && Array.isArray(e.json.history) ? e.json.history.length : null;
+			if (uid === F.stranger.id) feat('HA.gbedge.own-history-shown', 'a', who, e.status === 200 && h > 0, { status: e.status, history: h, trend30: e.json && e.json.trend30 });
+			else leak('HA.gbedge.others-history-hidden.' + who, 'a', who, e.status === 200 && h === 0 && e.json.trend30 == null, { status: e.status, history: h, trend30: e.json && e.json.trend30 });
+		}
+	});
+
+	await section('HC', async () => {
+		// ══ G15.3 addendum (c) — a private meet's games never feed a figure a stranger sees ════════════════════════════
+		// Player A has private rated games (g5 + the feedback game); the fixture proved the outsider's view differs from A's.
+		const sqlSbx = X.sqlOn('se_sbx');
+		const classes = [['anonymous', ANON, ''], ['stranger', P[F.owner.slug].token, F.owner.id], ['player B', P[F.admin.slug].token, F.admin.id], ['staff', STAFF, F.staff.id], ['player A', P[F.stranger.slug].token, F.stranger.id]];
+		for (const [who, tok, vid] of classes) {
+			const want = X.visibleRating(sqlSbx, F.stranger.id, vid);   // n + newest post the doors must use for this viewer
+			const kind = vid === F.stranger.id ? feat : leak;
+			const e = await T('stats/gb-edge', { userId: F.stranger.id }, tok);
+			kind('HC.gbedge.rating+matches.' + who, 'c', who, e.status === 200 && !!want && e.json.matches === want.n && Math.abs(Number(e.json.rating) - want.rating) < 1e-6, { status: e.status, rating: e.json && e.json.rating, matches: e.json && e.json.matches, want });
+			const r = await T('stats/gb-ratings', { userIds: [F.stranger.id] }, tok);
+			const row = A(r.json).find((x) => x.userId === F.stranger.id) || null;
+			kind('HC.gbratings.chip.' + who, 'c', who, r.status === 200 && !!row && !!want && row.matches === want.n && Math.abs(row.rating - want.rating) < 1e-6, { status: r.status, row, want });
+			let rk = null;
+			for (let off = 0; off < 500 && !rk; off += 50) {
+				const k = await T('stats/gb-rankings', { type: 'doubles', limit: 50, offset: off }, tok);
+				const rows = (k.json && k.json.rows) || [];
+				rk = rows.find((x) => x.userId === F.stranger.id) || (vid === F.stranger.id && k.json && k.json.mine) || null;
+				if (rows.length < 50) break;
+			}
+			kind('HC.gbrankings.rating.' + who, 'c', who, !!rk && !!want && Math.abs(rk.rating - Math.round(want.rating * 1000) / 1000) < 0.0006, { found: !!rk, rating: rk && rk.rating, want: want && want.rating });
+		}
+		{
+			const a = X.visibleRating(sqlSbx, F.stranger.id, ''), self = X.visibleRating(sqlSbx, F.stranger.id, F.stranger.id);
+			ctrl('HC.fixture.private-games-exist', 'c', 'n/a', !!a && !!self && a.n < self.n && Math.abs(a.rating - self.rating) > 1e-6, { outsider: a, self });
 		}
 	});
 
