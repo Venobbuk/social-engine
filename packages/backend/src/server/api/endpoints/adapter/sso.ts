@@ -68,6 +68,7 @@ export const meta = {
 		unconfigured: { message: 'SSO is not configured on this server.', code: 'ADAPTER_SSO_UNCONFIGURED', id: '4b2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f03' },
 		replayed: { message: 'This SSO token has already been used.', code: 'ADAPTER_SSO_REPLAYED', id: '4b2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f04' },
 		retired: { message: 'Sign in with your GripBat account.', code: 'ADAPTER_SSO_RETIRED', id: '4b2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f05' },
+		suspended: { message: 'This account has been blocked.', code: 'ACCOUNT_SUSPENDED', id: '4b2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f06', httpStatusCode: 403 },
 	},
 	res: {
 		type: 'object',
@@ -261,6 +262,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					.getOne();
 				if (alias) existing = await this.usersRepository.findOneBy({ id: alias.userId, host: null as never });
 			}
+			// GRIPBAT-ACCOUNTS-V1 (E-auth-login.05, measured by account-rest): a suspended account was handed a credential here,
+			// then every call answered 403 and the app showed Home signed in. It is refused with a code the app words.
+			if (existing && existing.isSuspended) throw new ApiError(meta.errors.suspended);
 			if (existing) {
 				/* ACCOUNT-BUGS-V1 (2026-09-23) — WHICH NAME WINS: THE PERSON'S OWN GRIPBAT NAME.
 				 * hkpl's name SEEDS the GripBat display name: it is written when the account has no name of its own (null,
