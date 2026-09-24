@@ -17,7 +17,7 @@
 //      Select All; a bad level value is refused by the engine
 //   S  short link: meets/show {referenceCode} resolves (the door pages/link uses); https://uat.gripbat.com/m/<code> status noted
 // Before the engine batch ships this probe MUST fail (the planted-fault run); after, every check must pass.
-// Everything created is "[probe] club-posts-links …"-named and removed in finally. Verdict → probes/club-posts-links.verdict.json
+// Everything created is "[probe] club-posts-links …"-named and removed in finally. Result → probes/club-posts-links.api.json (the lane verdict is composed by /root/gen/cpl-verdict.cjs)
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -26,7 +26,7 @@ const BRAND = process.env.BRAND || 'https://uat.gripbat.com';
 const QA_P = process.env.QA_P || (fs.readFileSync('/root/hkpl-server/.env', 'utf8').match(/^QA_BYPASS_PASSWORD=(.+)$/m) || [])[1] || 'hkpl-uat-2026';
 const PERSONAS = JSON.parse(fs.readFileSync('/root/uat-personas.json', 'utf8')).personas;
 const P = (slug) => PERSONAS.find((p) => p.slug === slug);
-const OUT = process.env.OUT || path.join(__dirname, 'club-posts-links.verdict.json');
+const OUT = process.env.OUT || path.join(__dirname, 'club-posts-links.api.json');
 const checks = []; const ok = (id, n, p, d) => { checks.push({ id, name: n, pass: !!p, detail: d }); console.log((p ? 'PASS ' : 'FAIL ') + id + ' ' + n + ' — ' + JSON.stringify(d).slice(0, 260)); };
 const cleanup = [];
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -224,6 +224,13 @@ async function meet(host, tag, extra) {
     // A club meet (mei hosts) whose audience 'club' = the club's members minus the host: amy + tom + ken join, so the reach
     // cannot be a blind 0 (G16.6). The expected numbers are counted independently in SQL from the players' own level rows.
     for (const u of [tom, ken]) await se('clubs/join', { channelId: C.id }, u.token);
+    // A gender / age fact on ONE member (amy, her own meets/level door) so the gender and age filters must pick exactly
+    // her — a filter that ignored its value would answer 3, one that matched nobody would answer 0 (G16.6). Restored in finally.
+    const was = sql(`SELECT coalesce(gender, 'none') || '|' || coalesce("ageGroup", 'none') FROM meet_player_level WHERE "userId" = '${amy.id}' AND sport = 'pickleball';`) || 'none|none';
+    const [wasG, wasA] = was.split('|');
+    const setLv = await se('meets/level', { sport: 'pickleball', gender: 'female', ageGroup: 'adult' }, amy.token);
+    cleanup.push(async () => { await se('meets/level', { sport: 'pickleball', gender: wasG || 'none', ageGroup: wasA || 'none' }, amy.token); });
+    if (setLv.status >= 300) throw new Error('meets/level fixture ' + setLv.status + ' ' + setLv.text.slice(0, 120));
     const pmeet = await meet(mei, 'promote preview', { h: 20, channelId: C.id });
     const prev = (extra) => se('meets/promote', { meetId: pmeet.id, preview: true, audience: 'club', ...extra }, mei.token);
     const all = await prev({}); const fem = await prev({ genders: ['female'] }); const mal = await prev({ genders: ['male'] });
@@ -241,8 +248,8 @@ async function meet(host, tag, extra) {
       lv: cnt(`EXISTS (SELECT 1 FROM meet_player_level l WHERE l."userId" = u AND l.sport = 'pickleball' AND COALESCE(l."selfLevel", NULL) >= 3.0 AND COALESCE(l."selfLevel", NULL) < 4.0)`),
     };
     ok('F0', 'preview answers (gate ok), sent:false, and the club audience is the 3 members (not a blind 0)', all.json && all.json.gate === 'ok' && all.json.sent === false && R(all) === exp.all, { status: all.status, reach: R(all), expected: exp.all, gate: all.json && all.json.gate });
-    ok('F1', 'gender filter = the members whose own level row says female / male (independent SQL count)', R(fem) === exp.female && R(mal) === exp.male, { female: R(fem), expFemale: exp.female, male: R(mal), expMale: exp.male });
-    ok('F2', 'age-group filter (adult) and level band (3.0 + 3.5) match the SQL count', R(adult) === exp.adult && R(lv) === exp.lv, { adult: R(adult), expAdult: exp.adult, lv: R(lv), expLv: exp.lv });
+    ok('F1', 'gender filter = the members whose own level row says female / male (independent SQL count; the fixture makes female ≥ 1)', exp.female >= 1 && R(fem) === exp.female && R(mal) === exp.male && R(fem) < R(all), { female: R(fem), expFemale: exp.female, male: R(mal), expMale: exp.male, all: R(all) });
+    ok('F2', 'age-group filter (adult) and level band (3.0 + 3.5) match the SQL count', exp.adult >= 1 && R(adult) === exp.adult && R(lv) === exp.lv && R(lv) < R(all), { adult: R(adult), expAdult: exp.adult, lv: R(lv), expLv: exp.lv });
     ok('F3', 'Select All (every age group) = no filter', R(sel) === R(all), { all: R(all), selectAll: R(sel) });
     ok('F4', 'a level value outside the list is refused by the engine', bad.status === 400, { status: bad.status, err: code(bad) });
     const after = await se('meets/show', { meetId: pmeet.id }, mei.token);

@@ -1,0 +1,381 @@
+{
+ "id": "club-posts-links.ui",
+ "at": "2026-09-24T06:00:05.671Z",
+ "app": "https://uat.gripbat.com/app",
+ "viewport": "390x844",
+ "pass": 40,
+ "fail": 1,
+ "checks": [
+  {
+   "id": "U0",
+   "name": "PLANTED: the admins-only post must NOT be on the member's screen (an assertion for it would pass only if the rule is broken)",
+   "pass": true,
+   "detail": {
+    "adminsShown": false
+   }
+  },
+  {
+   "id": "U1a",
+   "name": "member sees the Public and the Members post (B-content-editor.07)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U1b",
+   "name": "the title (native cw) is drawn as the post title (B-content-editor.02)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U1c",
+   "name": "MFM drawn: bold / italic / link text without the markup (B-content-editor.03)",
+   "pass": true,
+   "detail": {
+    "line": "[probe] club-posts-links ui muf4df5v Bring water and smile the rules"
+   }
+  },
+  {
+   "id": "U1d",
+   "name": "the bold span renders bold (computed font-weight ≥ 700)",
+   "pass": true,
+   "detail": {
+    "boldWeight": "700"
+   }
+  },
+  {
+   "id": "U1e",
+   "name": "the /m/<code> line is drawn as a MEET CARD with the meet's name, not as a raw link (B-content-editor.08)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U1f",
+   "name": "the poll offers \"+ Add option\" (the author allowed it)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U2a",
+   "name": "real click Opt A → engine: my vote on A; real click Opt B → engine: my vote MOVED to B (B-create-poll.03)",
+   "pass": true,
+   "detail": {
+    "afterA": [
+     true,
+     false
+    ],
+    "afterB": [
+     "false:0",
+     "true:1"
+    ]
+   }
+  },
+  {
+   "id": "U2b",
+   "name": "tap my own choice again → engine: vote taken back",
+   "pass": true,
+   "detail": {
+    "v3": [
+     "false:0",
+     "false:0"
+    ]
+   }
+  },
+  {
+   "id": "U2c",
+   "name": "real \"+ Add option\" → Opt C stored with addedBy = amy (B-create-poll.02)",
+   "pass": true,
+   "detail": {
+    "choices": [
+     "Opt A/",
+     "Opt B/",
+     "Opt C/ari4hb3c3hac0001"
+    ]
+   }
+  },
+  {
+   "id": "U2d",
+   "name": "the added option shows \"Added by you\" to its author",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U3a",
+   "name": "composer: Post to (club chips + My feed), a Title field, tools B / I / Link / Photo / Poll / Activity / Club / Player, Who can see",
+   "pass": true,
+   "detail": {
+    "toolTexts": [
+     "B",
+     "I",
+     "Link",
+     "Photo",
+     "Poll",
+     "Activity",
+     "Club",
+     "Player"
+    ],
+    "titleField": true
+   }
+  },
+  {
+   "id": "U3b",
+   "name": "type chips: Post · Question · Review; no Announcement for a member (B-content-editor.06)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U3c",
+   "name": "audience chips Public / Members / Admins",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U3d",
+   "name": "real Post → engine: the note has cw \"Members only title\" and visibility followers (L6 of .02 + .07)",
+   "pass": true,
+   "detail": {
+    "id": "ariopbhxb3nb001i",
+    "cw": "Members only title",
+    "vis": "followers"
+   }
+  },
+  {
+   "id": "U4a",
+   "name": "real Club pick + Review + Post → engine: text carries the club link and #review (B-select-group.01 / .06)",
+   "pass": true,
+   "detail": {
+    "picked": true,
+    "text": "[probe] club-posts-links ui muf4df5v REVIEW-WITH-CLUB\nhttps://uat.gripbat.com/app/pages/community/index?id=ariooougb3nb000s\n\n#review",
+    "tags": [
+     "review"
+    ]
+   }
+  },
+  {
+   "id": "U4b",
+   "name": "the post shows the REVIEW pill and the club card (club name), not the raw link",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U5",
+   "name": "real \"My feed\" post → engine: a note with NO club (B-select-channel.02)",
+   "pass": true,
+   "detail": {
+    "id": "ariopxttb3nb001t"
+   }
+  },
+  {
+   "id": "U6",
+   "name": "club kebab has \"Post question\" → opens the composer with Question selected",
+   "pass": true,
+   "detail": {
+    "url": "https://uat.gripbat.com/app/pages/feed/index?club=ariooougb3nb000s&compose=1&type=question",
+    "onChips": [
+     "[probe] club-posts-links ui muf4df5v club",
+     "Question"
+    ]
+   }
+  },
+  {
+   "id": "U7",
+   "name": "rule OFF: the member's post with another club's meet → \"The club admin has restricted links to outside activities.\" and nothing stored",
+   "pass": true,
+   "detail": {
+    "stored": "0"
+   }
+  },
+  {
+   "id": "U8-nonmember",
+   "name": "NON-member sees the Public post only — no Members / Admins post (G15.5)",
+   "pass": true,
+   "detail": {
+    "pub": true,
+    "mem": false,
+    "adm": false
+   }
+  },
+  {
+   "id": "U8-nonmember-link",
+   "name": "NON-member opening the members post by its link sees no text of it",
+   "pass": true,
+   "detail": {
+    "shown": false
+   }
+  },
+  {
+   "id": "U8-anon",
+   "name": "anonymous sees the Public post only — no Members / Admins post (G15.5)",
+   "pass": true,
+   "detail": {
+    "pub": true,
+    "mem": false,
+    "adm": false
+   }
+  },
+  {
+   "id": "U8-anon-link",
+   "name": "anonymous opening the members post by its link sees no text of it",
+   "pass": true,
+   "detail": {
+    "shown": false
+   }
+  },
+  {
+   "id": "U9a",
+   "name": "Manage club › General: Club handle + Allow outside activity links",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U9b",
+   "name": "live availability: \"@<handle> is available\" (B-set-profile.03)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U9c",
+   "name": "real Save → engine: the club's handle read back",
+   "pass": true,
+   "detail": {
+    "handle": "cpl_ui_muf4dfr8"
+   }
+  },
+  {
+   "id": "U9d",
+   "name": "real switch tap → engine: allowOutsideLinks false (B-set-comms.03)",
+   "pass": true,
+   "detail": {
+    "read": false,
+    "found": true
+   }
+  },
+  {
+   "id": "U10",
+   "name": "Invite players: search + Friends · Saved · Recent activity · Meets · Free agents · Spectators · Club tags (B-invite-friends.01)",
+   "pass": true,
+   "detail": {
+    "missing": []
+   }
+  },
+  {
+   "id": "U10b",
+   "name": "the Recent activity tab loads a list or its empty line (not a spinner)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U11a",
+   "name": "promote card: Choose skill levels / genders / age groups + Select All (A-promote-meet.04)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U11b",
+   "name": "real chip taps: all / Male off (= female) / Female off (= male) each equal the engine preview; amy is female so female = 1, male = 0 (not a blind zero)",
+   "pass": true,
+   "detail": {
+    "screenAll": "1",
+    "engineAll": 1,
+    "screenFemale": "1",
+    "engineFemale": 1,
+    "screenMale": 0,
+    "engineMale": 0
+   }
+  },
+  {
+   "id": "U11c",
+   "name": "nothing was sent (Promote never pressed): meet not promoted",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U12a",
+   "name": "the owner's composer offers Announcement",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U12b",
+   "name": "real Announcement post → engine: pinned on the club (clubs/posts/announce)",
+   "pass": true,
+   "detail": {
+    "aid": "ariort6rb3nb005y",
+    "pins": [
+     "ariort6rb3nb005y"
+    ]
+   }
+  },
+  {
+   "id": "U13",
+   "name": "zh_Hant: 發佈到 / 誰可以看到此帖子 / 我的動態, and no English composer labels",
+   "pass": true,
+   "detail": {
+    "en": []
+   }
+  },
+  {
+   "id": "U14a",
+   "name": "pages/link?m=<code> replaces itself with the meet page (A-short-links.01, app half)",
+   "pass": true,
+   "detail": {
+    "url": "https://uat.gripbat.com/app/pages/meet/index?id=arioooxib3nb000v"
+   }
+  },
+  {
+   "id": "U14b",
+   "name": "pages/link?club=<handle> opens the club (B-link-club.02, app half)",
+   "pass": true,
+   "detail": {
+    "url": "https://uat.gripbat.com/app/pages/community/index?id=ariooougb3nb000s"
+   }
+  },
+  {
+   "id": "U14c",
+   "name": "a wrong code shows Reclub's \"Swing and a miss!\"",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "id": "U14d",
+   "name": "https://uat.gripbat.com/m/<code> → 302 to the link page (nginx; STAGED by the orchestrator)",
+   "pass": false,
+   "detail": {
+    "status": 200,
+    "location": null
+   }
+  },
+  {
+   "id": "Z1",
+   "name": "cleanup: no [probe] club-posts-links note / live meet / live club left (DB)",
+   "pass": true,
+   "detail": {
+    "left": 0
+   }
+  }
+ ],
+ "shots": [
+  "/root/walk/cpl-u1-member-forum.png",
+  "/root/walk/cpl-u2-member-poll-added.png",
+  "/root/walk/cpl-u3-member-composer.png",
+  "/root/walk/cpl-u3-after-post.png",
+  "/root/walk/cpl-u4-club-picker.png",
+  "/root/walk/cpl-u4-review-card.png",
+  "/root/walk/cpl-u6-club-kebab.png",
+  "/root/walk/cpl-u6-post-question.png",
+  "/root/walk/cpl-u7-outside-refused.png",
+  "/root/walk/cpl-u8-nonmember-forum.png",
+  "/root/walk/cpl-u8-nonmember-members-post-by-link.png",
+  "/root/walk/cpl-u8-anon-forum.png",
+  "/root/walk/cpl-u8-anon-members-post-by-link.png",
+  "/root/walk/cpl-u9-handle-available.png",
+  "/root/walk/cpl-u10-invite-tabs.png",
+  "/root/walk/cpl-u10-invite-recent.png",
+  "/root/walk/cpl-u11-promote-filters.png",
+  "/root/walk/cpl-u11-promote-male-off.png",
+  "/root/walk/cpl-u11-promote-female-off.png",
+  "/root/walk/cpl-u13-composer-zhHant.png",
+  "/root/walk/cpl-u14-link-meet.png",
+  "/root/walk/cpl-u14-link-club.png",
+  "/root/walk/cpl-u14-link-bad.png"
+ ]
+}

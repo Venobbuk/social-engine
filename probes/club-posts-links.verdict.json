@@ -1,0 +1,399 @@
+{
+ "id": "club-posts-links",
+ "at": "2026-09-24T06:02:43.505Z",
+ "condition_fired": true,
+ "verdict": "fail",
+ "summary": "engine probe 49/50, L6 UI walk 40/41 at 390 px on https://uat.gripbat.com/app; failing: api:S2, ui:U14d",
+ "running": {
+  "engine": "image rev b862cec790 (carries 739d7fc0b7), web + web-uat equal",
+  "app": "70fe204 (13:26 deploy)"
+ },
+ "planted": {
+  "engine_before_ship": "probes/club-posts-links.before.json 14/50 on the pre-ship engine",
+  "ui": "U0 admins-only post absent for a member",
+  "rule": "O10 rule ON → passes",
+  "poll": "P1 native re-vote still ALREADY_VOTED"
+ },
+ "rows": [
+  {
+   "id": "B-content-editor.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "T1"
+    ],
+    "ui": [
+     "U1b",
+     "U3d"
+    ],
+    "failing": []
+   },
+   "reuse": "REUSED native note.cw (notes/create cw)",
+   "note": "title typed in the composer, stored as cw, drawn as the post title"
+  },
+  {
+   "id": "B-content-editor.03",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "T1"
+    ],
+    "ui": [
+     "U1c",
+     "U1d",
+     "U3a"
+    ],
+    "failing": []
+   },
+   "reuse": "REUSED Misskey MFM in the text; NEW app renderer lib/club-posts mfmSpans (searched: no MFM renderer in the app)",
+   "note": "toolbar B / I / Link; bold/italic/link drawn without markup"
+  },
+  {
+   "id": "B-content-editor.06",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [],
+    "ui": [
+     "U3b",
+     "U4a",
+     "U4b",
+     "U12a",
+     "U12b"
+    ],
+    "failing": []
+   },
+   "reuse": "REUSED native hashtags (#question / #review) + clubs/posts/announce",
+   "note": "Post / Question / Announcement (admins) / Review"
+  },
+  {
+   "id": "B-content-editor.07",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "A0",
+     "A1",
+     "A2",
+     "A3",
+     "A4",
+     "A5",
+     "A6",
+     "A7",
+     "A8",
+     "A9",
+     "P9"
+    ],
+    "ui": [
+     "U0",
+     "U1a",
+     "U3c",
+     "U3d",
+     "U8-nonmember",
+     "U8-nonmember-link",
+     "U8-anon",
+     "U8-anon-link"
+    ],
+    "failing": []
+   },
+   "reuse": "EXTENDED native note.visibility (followers = club members, specified = club admins) at NoteEntityService / QueryService / channels/timeline",
+   "note": "G15.5 measured as member, NON-member and anonymous"
+  },
+  {
+   "id": "B-content-editor.08",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [],
+    "ui": [
+     "U1e",
+     "U4a",
+     "U4b"
+    ],
+    "failing": []
+   },
+   "reuse": "REUSED app links + existing show doors (meets/show, channels/show, users/show, competitions/show) for the cards",
+   "note": "meet card (from /m/<code>) and club card (picker) observed; player / competition cards built, not observed on screen"
+  },
+  {
+   "id": "B-select-group.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [],
+    "ui": [
+     "U4a",
+     "U4b"
+    ],
+    "failing": []
+   },
+   "reuse": "REUSED channels/followed list in the picker",
+   "note": "real Club pick → link stored → card drawn"
+  },
+  {
+   "id": "B-select-channel.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [],
+    "ui": [
+     "U3a",
+     "U5"
+    ],
+    "failing": []
+   },
+   "reuse": "REUSED notes/create without channel (My feed) + competitions/announcements/post (competitions I run)",
+   "note": "My feed observed; the competition destination appears only for a host of a live competition — built, not observed (mei hosts none)"
+  },
+  {
+   "id": "B-club-menu.05",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [],
+    "ui": [
+     "U6"
+    ],
+    "failing": []
+   },
+   "reuse": "REUSED feed composer ?compose=1&type=question",
+   "note": ""
+  },
+  {
+   "id": "A-short-links.01",
+   "status": "still-open",
+   "level": "L4",
+   "evidence": {
+    "api": [
+     "S1",
+     "S2"
+    ],
+    "ui": [
+     "U14a",
+     "U14c",
+     "U14d"
+    ],
+    "failing": [
+     "S2",
+     "U14d"
+    ]
+   },
+   "reuse": "REUSED meets/show {referenceCode}; NEW pages/link resolver",
+   "note": "app half L6 (pages/link?m= → meet); the nginx /m/ rewrite is STAGED by the orchestrator, so https://uat.gripbat.com/m/<code> still answers 200 (the app shell)"
+  },
+  {
+   "id": "B-link-club.02",
+   "status": "still-open",
+   "level": "L5",
+   "evidence": {
+    "api": [
+     "H3"
+    ],
+    "ui": [
+     "U14b",
+     "U14d"
+    ],
+    "failing": [
+     "U14d"
+    ]
+   },
+   "reuse": "EXTENDED clubs/by-code {handle}",
+   "note": "app half L6 (pages/link?club=); the nginx /clubs/@ rewrite is STAGED"
+  },
+  {
+   "id": "B-set-profile.03",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "H1",
+     "H2",
+     "H4",
+     "H5",
+     "H6",
+     "H7",
+     "H8"
+    ],
+    "ui": [
+     "U9a",
+     "U9b",
+     "U9c"
+    ],
+    "failing": []
+   },
+   "reuse": "NEW club_setting.handle + clubs/handle-available (modelled on native username/available)",
+   "note": "live availability, taken, reserved, private club hidden from non-members"
+  },
+  {
+   "id": "B-create-poll.03",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "P1",
+     "P2",
+     "P3"
+    ],
+    "ui": [
+     "U2a",
+     "U2b"
+    ],
+    "failing": []
+   },
+   "reuse": "EXTENDED native notes/polls/vote {replace}; NEW notes/polls/unvote (Misskey has none)",
+   "note": "real clicks: vote, change, take back — read back from the engine"
+  },
+  {
+   "id": "B-create-poll.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "P0",
+     "P4",
+     "P5",
+     "P6",
+     "P7",
+     "P8"
+    ],
+    "ui": [
+     "U1f",
+     "U2c",
+     "U2d"
+    ],
+    "failing": []
+   },
+   "reuse": "EXTENDED native poll row (allowAddChoices, choiceAddedBy); NEW notes/polls/add-choice",
+   "note": ""
+  },
+  {
+   "id": "A-promote-meet.04",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "F0",
+     "F1",
+     "F2",
+     "F3",
+     "F4",
+     "F5"
+    ],
+    "ui": [
+     "U11a",
+     "U11b",
+     "U11c"
+    ],
+    "failing": []
+   },
+   "reuse": "EXTENDED meets/promote + MeetExtras.promoteAudience (levels / genders / ageGroups)",
+   "note": "preview only, never sent; screen reach = engine preview = independent SQL count"
+  },
+  {
+   "id": "B-invite-friends.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [],
+    "ui": [
+     "U10",
+     "U10b"
+    ],
+    "failing": []
+   },
+   "reuse": "REUSED PeopleSearch, friendLists, savedPlayers, myNetwork, meets/show, competitions/entries, clubs/members",
+   "note": "tabs rendered and a tab loads; an invite sent from a tab is the existing clubs/invitations/create door (not re-clicked)"
+  },
+  {
+   "id": "B-set-comms.03",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "O0",
+     "O1",
+     "O2",
+     "O3",
+     "O4",
+     "O5",
+     "O6",
+     "O7",
+     "O8",
+     "O9",
+     "O10"
+    ],
+    "ui": [
+     "U7",
+     "U9d"
+    ],
+    "failing": []
+   },
+   "reuse": "NEW club_setting.allowOutsideLinks + one gate (modules/clubs/club-post-rules.ts) in notes/create, clubs/posts/edit, chat/messages/create-to-room",
+   "note": "planted: rule ON → the same post passes"
+  },
+  {
+   "id": "B-content-editor.09",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "O1",
+     "O5"
+    ],
+    "ui": [
+     "U7"
+    ],
+    "failing": []
+   },
+   "reuse": "duplicate of B-set-comms.03",
+   "note": "the composer shows the Reclub sentence"
+  },
+  {
+   "id": "E-chat-room.21",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "api": [
+     "O6",
+     "O7",
+     "O9"
+    ],
+    "ui": [],
+    "failing": []
+   },
+   "reuse": "duplicate of B-set-comms.03",
+   "note": "engine refusal in the club chat L6 by API read-back (not stored); the chat screen copy is the kudos-chat lane's"
+  }
+ ],
+ "evidence": {
+  "api": "probes/club-posts-links.api.json",
+  "ui": "probes/club-posts-links-ui.json",
+  "shots": [
+   "/root/walk/cpl-u1-member-forum.png",
+   "/root/walk/cpl-u2-member-poll-added.png",
+   "/root/walk/cpl-u3-member-composer.png",
+   "/root/walk/cpl-u3-after-post.png",
+   "/root/walk/cpl-u4-club-picker.png",
+   "/root/walk/cpl-u4-review-card.png",
+   "/root/walk/cpl-u6-club-kebab.png",
+   "/root/walk/cpl-u6-post-question.png",
+   "/root/walk/cpl-u7-outside-refused.png",
+   "/root/walk/cpl-u8-nonmember-forum.png",
+   "/root/walk/cpl-u8-nonmember-members-post-by-link.png",
+   "/root/walk/cpl-u8-anon-forum.png",
+   "/root/walk/cpl-u8-anon-members-post-by-link.png",
+   "/root/walk/cpl-u9-handle-available.png",
+   "/root/walk/cpl-u10-invite-tabs.png",
+   "/root/walk/cpl-u10-invite-recent.png",
+   "/root/walk/cpl-u11-promote-filters.png",
+   "/root/walk/cpl-u11-promote-male-off.png",
+   "/root/walk/cpl-u11-promote-female-off.png",
+   "/root/walk/cpl-u13-composer-zhHant.png",
+   "/root/walk/cpl-u14-link-meet.png",
+   "/root/walk/cpl-u14-link-club.png",
+   "/root/walk/cpl-u14-link-bad.png"
+  ]
+ }
+}
