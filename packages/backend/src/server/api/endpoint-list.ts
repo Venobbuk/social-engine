@@ -22,6 +22,14 @@ export * as 'adapter/account/deletion' from './endpoints/adapter/account-deletio
 export * as 'adapter/account/restore' from './endpoints/adapter/account-restore.js';   // ACCOUNT-GRACE-V1
 export * as 'gb/status' from './endpoints/gb/status.js';   // GB-MAINTENANCE-V1 (public)
 export * as 'gb/maintenance' from './endpoints/gb/maintenance.js';   // GB-MAINTENANCE-V1 (GripBat staff)
+export * as 'gb/account/me' from './endpoints/gb/account-me.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/account/username' from './endpoints/gb/account-username.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/auth/code' from './endpoints/gb/auth-code.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/auth/code/verify' from './endpoints/gb/auth-code-verify.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/dupr/connection' from './endpoints/gb/dupr-connection.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/dupr/connect' from './endpoints/gb/dupr-connect.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/dupr/sso-url' from './endpoints/gb/dupr-sso-url.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/dupr/resync' from './endpoints/gb/dupr-resync.js'; // GRIPBAT-ACCOUNTS-V1
 export * as 'admin/accounts/create' from './endpoints/admin/accounts/create.js';
 export * as 'admin/accounts/delete' from './endpoints/admin/accounts/delete.js';
 export * as 'admin/accounts/find-by-email' from './endpoints/admin/accounts/find-by-email.js';

@@ -16,6 +16,7 @@ import { LoggerService } from '@/core/LoggerService.js';
 import { bindThis } from '@/decorators.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { escapeHtml } from '@/misc/escape-html.js';
+import { GB_PUBLIC_ORIGIN, GB_REPLY_TO, isReservedTestAddress, normalizeEmail, sandboxReveal } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 
 @Injectable()
 export class EmailService {
@@ -41,9 +42,14 @@ export class EmailService {
 	@bindThis
 	public async sendEmail(to: string, subject: string, html: string, text: string) {
 		if (!this.meta.enableEmail) return;
+		// GRIPBAT-ACCOUNTS-V1: a reserved test domain (.test / .invalid / example.*) has no inbox — never send there, on any host.
+		if (isReservedTestAddress(to)) { this.logger.info(`not sent (reserved test address): ${subject}`); return; }
 
-		const iconUrl = `${this.config.url}/static-assets/mi-white.png`;
-		const emailSettingUrl = `${this.config.url}/settings/email`;
+		/* GRIPBAT-ACCOUNTS-V1 (G2): the frame is GripBat's — navy header with the wordmark, coral button, and the footer
+		 * links the GripBat app on the person's host (GB_PUBLIC_ORIGIN). Misskey's frame printed the engine host
+		 * (…social.silkvo.com) and an "Email setting" link into the engine's stock client, neither a GripBat surface. */
+		const home = GB_PUBLIC_ORIGIN || this.config.url.replace(/\/+$/, '');
+		const homeLabel = home.replace(/^https?:\/\//, '');
 
 		const enableAuth = this.meta.smtpUser != null && this.meta.smtpUser !== '';
 
@@ -67,77 +73,29 @@ export class EmailService {
 		<meta charset="utf-8">
 		<title>${ escapeHtml(subject) }</title>
 		<style>
-			html {
-				background: #eee;
-			}
-
-			body {
-				padding: 16px;
-				margin: 0;
-				font-family: sans-serif;
-				font-size: 14px;
-			}
-
-			a {
-				text-decoration: none;
-				color: #86b300;
-			}
-			a:hover {
-				text-decoration: underline;
-			}
-
-			main {
-				max-width: 500px;
-				margin: 0 auto;
-				background: #fff;
-				color: #555;
-			}
-				main > header {
-					padding: 32px;
-					background: #86b300;
-				}
-					main > header > img {
-						max-width: 128px;
-						max-height: 28px;
-						vertical-align: bottom;
-					}
-				main > article {
-					padding: 32px;
-				}
-					main > article > h1 {
-						margin: 0 0 1em 0;
-					}
-				main > footer {
-					padding: 32px;
-					border-top: solid 1px #eee;
-				}
-
-			nav {
-				box-sizing: border-box;
-				max-width: 500px;
-				margin: 16px auto 0 auto;
-				padding: 0 32px;
-			}
-				nav > a {
-					color: #888;
-				}
+			html { background: #f3f5f8; }
+			body { padding: 16px; margin: 0; font-family: -apple-system, 'Segoe UI', Roboto, 'Noto Sans TC', sans-serif; font-size: 15px; line-height: 1.5; }
+			main { max-width: 500px; margin: 0 auto; background: #ffffff; color: #0B192C; border-radius: 18px; overflow: hidden; }
+			main > header { padding: 24px 32px; background: #0B192C; color: #ffffff; font-size: 22px; font-weight: bold; letter-spacing: 0.5px; }
+			main > article { padding: 28px 32px; }
+			main > article > h1 { margin: 0 0 16px 0; font-size: 20px; }
+			article a { display: inline-block; background: #FF5A36; color: #ffffff; padding: 12px 22px; border-radius: 999px; font-weight: bold; text-decoration: none; }
+			article b { font-size: 22px; letter-spacing: 3px; }
+			article small { color: #6b7686; font-size: 12px; word-break: break-all; }
+			nav { box-sizing: border-box; max-width: 500px; margin: 16px auto 0 auto; padding: 0 32px; font-size: 12px; }
+			nav > a { color: #6b7686; text-decoration: none; }
 		</style>
 	</head>
 	<body>
 		<main>
-			<header>
-				<img src="${ escapeHtml(this.meta.logoImageUrl ?? this.meta.iconUrl ?? iconUrl) }"/>
-			</header>
+			<header>GripBat</header>
 			<article>
 				<h1>${ escapeHtml(subject) }</h1>
 				<div>${ sanitizedHtml }</div>
 			</article>
-			<footer>
-				<a href="${ escapeHtml(emailSettingUrl) }">${ 'Email setting' }</a>
-			</footer>
 		</main>
 		<nav>
-			<a href="${ escapeHtml(this.config.url) }">${ escapeHtml(this.config.host) }</a>
+			<a href="${ escapeHtml(home + '/app/') }">${ escapeHtml(homeLabel) }</a>
 		</nav>
 	</body>
 </html>`;
@@ -150,6 +108,7 @@ export class EmailService {
 					name: this.meta.name,
 					address: this.meta.email!,
 				} : this.meta.email!,
+				replyTo: GB_REPLY_TO, // GRIPBAT-ACCOUNTS-V1: replies reach the brand inbox (G2) whatever address the relay lets us send from
 				to: to,
 				subject: subject,
 				text: text,
@@ -175,10 +134,11 @@ export class EmailService {
 			};
 		}
 
-		const exist = await this.userProfilesRepository.countBy({
-			emailVerified: true,
-			email: emailAddress,
-		});
+		// GRIPBAT-ACCOUNTS-V1: one address is one account whatever its letter case (Amy@x.com = amy@x.com)
+		const exist = await this.userProfilesRepository.createQueryBuilder('p')
+			.where('p.emailVerified = true')
+			.andWhere('LOWER(p.email) = :e', { e: normalizeEmail(emailAddress) })
+			.getCount();
 
 		if (exist !== 0) {
 			return {
@@ -192,7 +152,8 @@ export class EmailService {
 			reason?: string | null,
 		} = { valid: true, reason: null };
 
-		if (this.meta.enableActiveEmailValidation) {
+		// GRIPBAT-ACCOUNTS-V1: a UAT test address (reserved domain, GB_SANDBOX_MAIL container only) has no MX by definition
+		if (this.meta.enableActiveEmailValidation && !sandboxReveal(emailAddress)) {
 			if (this.meta.enableVerifymailApi && this.meta.verifymailAuthKey != null) {
 				validated = await this.verifyMail(emailAddress, this.meta.verifymailAuthKey);
 			} else if (this.meta.enableTruemailApi && this.meta.truemailInstance && this.meta.truemailAuthKey != null) {

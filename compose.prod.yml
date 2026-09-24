@@ -25,6 +25,9 @@ services:
       # Production's audience never changes. (web-uat sets its own in compose.uat.yml.)
       ADAPTER_SSO_AUDIENCE: "social.silkvo.com"
       COACHING_V1: "true"   # PROD-PARITY-V1 (2026-09-23, operator): prod runs what UAT runs — no feature is held back on prod
+      # GRIPBAT-ACCOUNTS-V1 (G15.15): where the engine's account mails link to — SERVER config, never a request header (G15.13).
+      # Must differ per host (web = gripbat.com, web-uat = uat.gripbat.com). web has NO GB_SANDBOX_MAIL: production never returns a code.
+      GB_PUBLIC_ORIGIN: "https://gripbat.com"
     env_file:
       - /root/social-engine.env          # OSS_SOCIAL_* — created by the operator, never by the agent
       - /root/social-engine.hkpl.env     # ADAPTER_HKPL_URL / _S2S_SECRET / _ALLOW_LOCAL — MEET-MATCH-V1 (SOCIAL-DUPR-V1 door)

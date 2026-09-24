@@ -12,9 +12,11 @@ import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { EmailService } from '@/core/EmailService.js';
 import type { Config } from '@/config.js';
 import { DI } from '@/di-symbols.js';
-import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { L_CHARS, secureRndstr } from '@/misc/secure-rndstr.js';
 import { UserAuthService } from '@/core/UserAuthService.js';
+import { GlobalEventService } from '@/core/GlobalEventService.js';
+import { appLink, mailCopy, normalizeEmail, sandboxReveal, EMAIL_CHANGE_PREFIX } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
+import * as Redis from 'ioredis';
 import { ApiError } from '../../error.js';
 
 export const meta = {
@@ -72,13 +74,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.meta)
 		private serverSettings: MiMeta,
 
+		@Inject(DI.redis)
+		private redisClient: Redis.Redis,
+
 		@Inject(DI.userProfilesRepository)
 		private userProfilesRepository: UserProfilesRepository,
 
 		private userEntityService: UserEntityService,
 		private emailService: EmailService,
 		private userAuthService: UserAuthService,
-		private globalEventService: GlobalEventService,
+		private globalEventService: GlobalEventService, // eslint-disable-line @typescript-eslint/no-unused-vars -- verify-email publishes meUpdated now
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const token = ps.token;
@@ -101,44 +106,32 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.incorrectPassword);
 			}
 
-			if (ps.email != null) {
-				const res = await this.emailService.validateEmailForAccount(ps.email);
-				if (!res.available) {
-					throw new ApiError(meta.errors.unavailable);
-				}
-			} else if (this.serverSettings.emailRequiredForSignup) {
-				throw new ApiError(meta.errors.emailRequired);
+			/* GRIPBAT-ACCOUNTS-V1 (spec §4) — EXTEND: the CURRENT address keeps working until the new one is proven.
+			 * Native wrote the new address at once, unverified — one typo and the person could neither sign in by email nor
+			 * reset. The new address and its code now wait in Redis (24 h); verify-email swaps it in. Mail + link are
+			 * GripBat's (server-configured origin, G15.13); a UAT test address gets the code back (_dev_code). */
+			if (ps.email == null) {
+				if (this.serverSettings.emailRequiredForSignup) throw new ApiError(meta.errors.emailRequired);
+				throw new ApiError(meta.errors.unavailable);
+			}
+			const email = normalizeEmail(ps.email);
+			const res = await this.emailService.validateEmailForAccount(email);
+			if (!res.available) {
+				throw new ApiError(meta.errors.unavailable);
 			}
 
-			await this.userProfilesRepository.update(me.id, {
-				email: ps.email,
-				emailVerified: false,
-				emailVerifyCode: null,
-			});
+			const code = secureRndstr(16, { chars: L_CHARS });
+			await this.redisClient.set(EMAIL_CHANGE_PREFIX + code, JSON.stringify({ userId: me.id, email }), 'EX', 24 * 60 * 60);
+
+			const m = mailCopy('emailChange', profile.lang, { code, link: appLink('email', code, this.config.url) });
+			this.emailService.sendEmail(email, m.subject, m.html, m.text).catch(() => { /* logged by EmailService */ });
 
 			const iObj = await this.userEntityService.pack(me.id, me, {
 				schema: 'MeDetailed',
 				includeSecrets: true,
 			});
 
-			// Publish meUpdated event
-			this.globalEventService.publishMainStream(me.id, 'meUpdated', iObj);
-
-			if (ps.email != null) {
-				const code = secureRndstr(16, { chars: L_CHARS });
-
-				await this.userProfilesRepository.update(me.id, {
-					emailVerifyCode: code,
-				});
-
-				const link = `${this.config.url}/verify-email/${code}`;
-
-				this.emailService.sendEmail(ps.email, 'Email verification',
-					`To verify email, please click this link:<br><a href="${link}">${link}</a>`,
-					`To verify email, please click this link: ${link}`);
-			}
-
-			return iObj;
+			return Object.assign(iObj, sandboxReveal(email) ? { _dev_code: code } : {});
 		});
 	}
 }

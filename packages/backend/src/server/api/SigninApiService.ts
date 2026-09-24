@@ -26,6 +26,7 @@ import { UserAuthService } from '@/core/UserAuthService.js';
 import { CaptchaService } from '@/core/CaptchaService.js';
 import { LoggerService } from '@/core/LoggerService.js';
 import { FastifyReplyError } from '@/misc/fastify-reply-error.js';
+import { normalizeEmail } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 import { RateLimiterService } from './RateLimiterService.js';
 import { SigninService } from './SigninService.js';
 import type { AuthenticationResponseJSON } from '@simplewebauthn/server';
@@ -124,10 +125,21 @@ export class SigninApiService {
 		}
 
 		// Fetch user
-		const user = await this.usersRepository.findOneBy({
-			usernameLower: username.toLowerCase(),
-			host: IsNull(),
-		}) as MiLocalUser;
+		// GRIPBAT-ACCOUNTS-V1 (spec §1): the identifier may be the account's VERIFIED email (Reclub signs in by email) —
+		// an unverified or pending address never signs anyone in. A username still works (Misskey native).
+		let user: MiLocalUser | null;
+		if (username.includes('@')) {
+			const prof = await this.userProfilesRepository.createQueryBuilder('p')
+				.where('p.emailVerified = true')
+				.andWhere('LOWER(p.email) = :e', { e: normalizeEmail(username) })
+				.getOne();
+			user = prof ? await this.usersRepository.findOneBy({ id: prof.userId, host: IsNull() }) as MiLocalUser | null : null;
+		} else {
+			user = await this.usersRepository.findOneBy({
+				usernameLower: username.toLowerCase(),
+				host: IsNull(),
+			}) as MiLocalUser | null;
+		}
 
 		if (user == null) {
 			return error(404, {
