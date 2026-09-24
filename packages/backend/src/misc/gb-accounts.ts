@@ -41,6 +41,12 @@ export async function rotateNativeToken(users: UsersRepository, events: GlobalEv
 export const GB_PUBLIC_ORIGIN = (process.env.GB_PUBLIC_ORIGIN ?? '').trim().replace(/\/+$/, '');
 export const GB_SANDBOX_MAIL = process.env.GB_SANDBOX_MAIL === '1';
 export const PASSWORD_MIN = 8;
+/* PROBE-RL-EXEMPT-V1 (orchestrator 2026-09-24) — the ONE helper: every probe on the box reaches the engine from one address,
+ * so per-IP limits throttled every lane's proof. GB_RATE_LIMIT_EXEMPT_IPS is set on web-uat ONLY (compose.uat.yml); prod
+ * has none. request.ip is not client-settable (trustProxy = private ranges; a spoofed X-Forwarded-For stayed limited).
+ * Used by the sign-in / sign-up limiters and, for the ANONYMOUS account doors below only, by the endpoint limiter. */
+export const GB_RL_EXEMPT = new Set((process.env.GB_RATE_LIMIT_EXEMPT_IPS ?? '').split(',').map(x => x.trim()).filter(Boolean));
+export const GB_RL_EXEMPT_ENDPOINTS = new Set(['request-reset-password', 'reset-password', 'verify-email', 'gb/auth/code', 'gb/auth/code/verify']);
 /* Where a reply to any GripBat mail goes (G2). MEASURED 2026-09-23 17:05 HKT: the box's relay (SiteGround,
  * c1113206.sgvps.net) refuses a MAIL FROM on gripbat.com (550 "not hosted on this server") and accepts the relay's own
  * mailbox — so the From: is "GripBat <relay mailbox>" (meta.email) until gripbat.com mail is hosted (operator, spec §12),

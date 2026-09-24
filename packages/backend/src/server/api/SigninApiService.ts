@@ -23,7 +23,7 @@ import { getIpHash } from '@/misc/get-ip-hash.js';
  * sign-up limits (10/hour) throttled every lane's proof. GB_RATE_LIMIT_EXEMPT_IPS (set on web-uat ONLY, compose.uat.yml)
  * lists addresses exempt from these two limiters. request.ip is not client-settable here: trustProxy only trusts
  * private ranges and takes the nearest untrusted hop (measured: a spoofed X-Forwarded-For stayed limited). Prod: unset. */
-const GB_RL_EXEMPT = new Set((process.env.GB_RATE_LIMIT_EXEMPT_IPS ?? '').split(',').map(x => x.trim()).filter(Boolean));
+import { GB_RL_EXEMPT } from '@/misc/gb-accounts.js'; // PROBE-RL-EXEMPT-V1: the one helper
 import type { MiLocalUser } from '@/models/User.js';
 import { IdService } from '@/core/IdService.js';
 import { bindThis } from '@/decorators.js';

@@ -4,6 +4,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { GB_RL_EXEMPT, GB_RL_EXEMPT_ENDPOINTS } from '@/misc/gb-accounts.js'; // PROBE-RL-EXEMPT-V1
 import * as fs from 'node:fs';
 import * as stream from 'node:stream/promises';
 import { Inject, Injectable } from '@nestjs/common';
@@ -327,7 +328,11 @@ export class ApiCallService implements OnApplicationShutdown {
 			throw new ApiError(accessDenied);
 		}
 
-		if (ep.meta.limit) {
+		// PROBE-RL-EXEMPT-V1 (UAT only): the box's own address skips the per-IP limit of the anonymous account doors
+		// (GB_RL_EXEMPT_ENDPOINTS) — a signed-in caller is limited per user as always
+		const rlExempt = user == null && GB_RL_EXEMPT.has(request.ip) && GB_RL_EXEMPT_ENDPOINTS.has(ep.name);
+		if (rlExempt) this.logger.debug(`rl-exempt account door ${ep.name}`);
+		if (ep.meta.limit && !rlExempt) {
 			let limitActor: string | null = null;
 			if (user) {
 				limitActor = user.id;
