@@ -1,0 +1,136 @@
+{
+  "id": "gripbat-sso",
+  "at": "2026-09-24T10:20:51.976Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": [
+    {
+      "id": "N1.foreign-origin-refused",
+      "pass": true,
+      "detail": {
+        "status": 400
+      }
+    },
+    {
+      "id": "S1.one-tap-home",
+      "pass": true,
+      "detail": {
+        "button": true,
+        "league": true,
+        "landed": "https://uat.gripbat.com/app/pages/home/index",
+        "path": [
+          "https://uat.gripbat.com/app/pages/signin/index",
+          "https://uat.silkvo.com/api/v1/auth/sso/social/gripbat",
+          "https://uat.gripbat.com/app/pages/signin/index"
+        ]
+      }
+    },
+    {
+      "id": "S2.account",
+      "pass": true,
+      "detail": {
+        "handle": "probe_sky_rider",
+        "email": true,
+        "verified": "true",
+        "onboarded": "true",
+        "alias": "1"
+      }
+    },
+    {
+      "id": "S3.dupr-carried",
+      "pass": true,
+      "detail": {
+        "connection": {
+          "connected": true,
+          "duprId": "ZZEE07",
+          "doubles": 3.75,
+          "singles": null,
+          "source": "dupr-partner",
+          "sandbox": true,
+          "resyncAvailableAt": null
+        },
+        "level": "ZZEE07|dupr-partner|3.75",
+        "inRankings": true
+      }
+    },
+    {
+      "id": "S4.same-account",
+      "pass": true,
+      "detail": {
+        "second": "ariy47f8mpah014r",
+        "same": true,
+        "accounts": "1"
+      }
+    },
+    {
+      "id": "S5.linked-by-email",
+      "pass": true,
+      "detail": {
+        "native": "ariy4bkcmpah0151",
+        "sso": "ariy4bkcmpah0151",
+        "linked": true,
+        "accounts": "1"
+      }
+    },
+    {
+      "id": "S6.testers-home",
+      "pass": true,
+      "detail": {
+        "tester1": {
+          "handle": "player2",
+          "onHome": true,
+          "sawOnboard": false
+        },
+        "tester2": {
+          "handle": "player1",
+          "onHome": true,
+          "sawOnboard": false
+        }
+      }
+    },
+    {
+      "id": "P1.prod-signed-out",
+      "pass": true,
+      "detail": {
+        "button": true,
+        "leagues": [
+          "Continue with your HKPL account",
+          "HKPL",
+          "Macau",
+          "GBA",
+          "SZPB"
+        ],
+        "landed": "https://hkpl.com.hk/sign-in.html?next=%2Fapi%2Fv1%2Fauth%2Fsso%2Fsocial%2Fgripbat%3Freturn%3Dhttps%253A%252F%252Fgripbat.com"
+      }
+    },
+    {
+      "id": "S7.dupr-doors",
+      "pass": true,
+      "detail": {
+        "ssoUrl": "200 https://dashboard.dupr.com/login-external-app/Y2stZDliZThjODQtYWEyNS00N2ZiLWZkYmItNWRiYjFlNjdiZGY4",
+        "connection": 200
+      }
+    }
+  ],
+  "cleanup": [
+    {
+      "fakeDuprCleared": "ZZEE07"
+    },
+    {
+      "gripbat": "ariy47f8mpah014r",
+      "deleted": 204
+    },
+    {
+      "gripbat": "ariy4bkcmpah0151",
+      "deleted": 204
+    },
+    {
+      "hkpl": "gbsso-…@example.test",
+      "deleted": 200
+    },
+    {
+      "hkpl": "gbsso-…@example.test",
+      "deleted": 200
+    }
+  ]
+}

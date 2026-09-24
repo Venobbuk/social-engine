@@ -1,6 +1,6 @@
 {
   "id": "gripbat-accounts",
-  "at": "2026-09-24T08:19:38.089Z",
+  "at": "2026-09-24T10:26:15.252Z",
   "mode": "after",
   "condition_fired": true,
   "verdict": "pass",
@@ -17,7 +17,7 @@
     {
       "id": "A1.pending-row",
       "pass": true,
-      "detail": "user_pending gb_614f975cd388|gbacc-a2c1f4@example.invalid (placeholder handle, normalised email)"
+      "detail": "user_pending gb_7c59a138627b|gbacc-07862b@example.invalid (placeholder handle, normalised email)"
     },
     {
       "id": "A1.no-account-before-verify",
@@ -43,11 +43,11 @@
       "id": "A1.needs-username",
       "pass": true,
       "detail": {
-        "id": "arits669ohyd001t",
-        "username": "gb_614f975cd388",
+        "id": "ariyb0vompah018m",
+        "username": "gb_7c59a138627b",
         "staff": false,
         "needsUsername": true,
-        "email": "gbacc-a2c1f4@example.invalid",
+        "email": "gbacc-07862b@example.invalid",
         "emailVerified": true
       }
     },
@@ -84,7 +84,7 @@
       "pass": true,
       "detail": {
         "status": 200,
-        "stored": "pba2c1f4x"
+        "stored": "pb07862bx"
       }
     },
     {
@@ -98,8 +98,8 @@
       "detail": {
         "update": 200,
         "signin": 200,
-        "name": "[probe] gb-accts a2c1f4",
-        "handle": "pba2c1f4x"
+        "name": "[probe] gb-accts 07862b",
+        "handle": "pb07862bx"
       }
     },
     {
@@ -176,7 +176,7 @@
         },
         "link": "200 true",
         "after": true,
-        "ssoUrl": "400 DUPR_DOOR_NOT_LIVE"
+        "ssoUrl": "200 "
       }
     },
     {
@@ -232,7 +232,7 @@
       "detail": {
         "typed": true,
         "next": true,
-        "stored": "pua2c1f4x"
+        "stored": "pu07862bx"
       }
     },
     {
@@ -240,8 +240,8 @@
       "pass": true,
       "detail": {
         "tokenStored": true,
-        "answersAs": "pua2c1f4x",
-        "want": "pua2c1f4x"
+        "answersAs": "pu07862bx",
+        "want": "pu07862bx"
       }
     },
     {
@@ -262,7 +262,7 @@
     {
       "id": "U2.version-line",
       "pass": true,
-      "detail": "GripBat · Version 1.0 · build cde3e818"
+      "detail": "GripBat · Version 1.0 · build 6de01df6"
     }
   ],
   "cleanup": [
@@ -270,15 +270,15 @@
       "unsuspended": 204
     },
     {
-      "email": "gbacc-a2c1f4-new@example.invalid",
+      "email": "gbacc-07862b-new@example.invalid",
       "deleted": 204
     },
     {
-      "email": "gbacc-a2c1f4-susp@example.invalid",
+      "email": "gbacc-07862b-susp@example.invalid",
       "deleted": 204
     },
     {
-      "email": "gbacc-a2c1f4-ui@example.invalid",
+      "email": "gbacc-07862b-ui@example.invalid",
       "deleted": 204
     },
     {
@@ -286,7 +286,7 @@
     }
   ],
   "blocked": {
-    "token": "HeIKofGTyEbn4PTq",
-    "userId": "aritsdsnohyd003l"
+    "token": "pUymz5O1LnO8YiRN",
+    "userId": "ariyb90mmpah0194"
   }
 }

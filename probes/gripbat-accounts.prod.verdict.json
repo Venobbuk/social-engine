@@ -1,6 +1,6 @@
 {
   "id": "gripbat-accounts.prod",
-  "at": "2026-09-24T08:20:32.788Z",
+  "at": "2026-09-24T10:27:26.328Z",
   "condition_fired": true,
   "verdict": "pass",
   "evidence": [
@@ -12,7 +12,7 @@
         "revealed": false,
         "accountBeforeCode": "0",
         "verify": 200,
-        "handle": "gb_68456e437116"
+        "handle": "gb_3dc9075594e5"
       }
     },
     {
@@ -22,7 +22,7 @@
         "chosen": 200,
         "name": 200,
         "emailSignin": 200,
-        "handle": "pp543069x",
+        "handle": "pp0e1970x",
         "nameKept": true
       }
     },
@@ -48,7 +48,7 @@
       "pass": true,
       "detail": {
         "welcome": true,
-        "version": "GripBat · Version 1.0 · build cde3e818"
+        "version": "GripBat · Version 1.0 · build 6de01df6"
       }
     },
     {
