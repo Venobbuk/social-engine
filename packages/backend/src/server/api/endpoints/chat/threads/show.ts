@@ -43,6 +43,8 @@ export const meta = {
 			chatMuted: { type: 'boolean', optional: false, nullable: false },
 			canModerate: { type: 'boolean', optional: false, nullable: false },
 			managed: { type: 'string', optional: false, nullable: true, enum: ['meet', 'club', 'competition'] },
+			// KUDOS-CHAT-V1 (E-chat-room.03): the id of that meet / club (channel) / competition, for Reclub's See club in the header
+			managedId: { type: 'string', optional: true, nullable: true },
 			archived: { type: 'boolean', optional: false, nullable: false },
 		},
 	},
@@ -88,6 +90,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					chatMuted,
 					canModerate: await runsRoom(this.db, room.id, me.id),
 					managed: await roomManagement(this.db, room.id),
+					managedId: ((await this.db.query('SELECT "channelId" AS id FROM "club_setting" WHERE "chatRoomId" = $1 UNION ALL SELECT id FROM "meet" WHERE "chatRoomId" = $1 UNION ALL SELECT id FROM "competition" WHERE "chatRoomId" = $1 LIMIT 1', [room.id]) as { id: string }[])[0] ?? { id: null }).id,
 					archived: mutes.some(m => m.scope === 'archiveRoom' && m.targetId === room.id),
 				};
 			}
