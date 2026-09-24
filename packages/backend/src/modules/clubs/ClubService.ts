@@ -784,12 +784,27 @@ export class ClubService {
 		if (!room) {
 			const ownerId = channel.userId ?? user.id;
 			const owner = await this.usersRepository.findOneByOrFail({ id: ownerId });
-			room = await this.chatService.createRoom(owner, { name: channel.name, description: 'Club chat' });
-			await this.clubSettingsRepository.update({ channelId: channel.id }, { chatRoomId: room.id });
+			const minted = await this.chatService.createRoom(owner, { name: channel.name, description: 'Club chat' });
+			// CLUB-CHAT-RACE-V1: only the first mint is kept — a second concurrent first-open adopts the winner's room
+			const won = await this.db.query(`UPDATE "club_setting" SET "chatRoomId" = $1 WHERE "channelId" = $2 AND "chatRoomId" IS NULL RETURNING 1`, [minted.id, channel.id]) as unknown[];
+			const wonRows = (Array.isArray(won[0]) ? won[0] : won) as unknown[];   // UPDATE … RETURNING: [rows, count] or rows
+			if (wonRows.length) room = minted;
+			else {
+				const again = (await this.db.query(`SELECT "chatRoomId" FROM "club_setting" WHERE "channelId" = $1`, [channel.id]) as { chatRoomId: string | null }[])[0];
+				const other = again && again.chatRoomId ? await this.chatService.findRoomById(again.chatRoomId) : null;
+				if (other) { await this.chatService.deleteRoom(minted).catch(() => undefined); room = other; } else room = minted;
+			}
 		}
 		if (room.ownerId !== user.id && !(await this.chatService.isRoomMember(room, user.id))) {
-			await this.chatService.createRoomInvitation(room.ownerId, room.id, user.id, { notify: false });
-			await this.chatService.joinToRoom(user.id, room.id);
+			// CLUB-CHAT-RACE-V1: seating is idempotent — a duplicate invitation means a concurrent open is seating them
+			try { await this.chatService.createRoomInvitation(room.ownerId, room.id, user.id, { notify: false }); } catch (e) { if (!/duplicate key|unique constraint/i.test(String(e instanceof Error ? e.message : e))) throw e; }
+			for (let i = 0; i < 3; i++) {
+				try { await this.chatService.joinToRoom(user.id, room.id); break; } catch (e) {
+					if (await this.chatService.isRoomMember(room, user.id)) break;
+					if (i === 2) throw e;
+					await new Promise(r => setTimeout(r, 250));
+				}
+			}
 		}
 		return { roomId: room.id };
 	}
