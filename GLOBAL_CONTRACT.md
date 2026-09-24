@@ -187,6 +187,23 @@ the target. Every screen does at least what Reclub's does (function AND anatomy,
 `better | equal | worse`. `worse` is a defect even when the function works (more taps, a slower menu, a confusing order,
 clipped or wrong text, a missing confirm, a dead end). Never copy Reclub's mistakes (its grammar slips, its missing
 confirms, its dead ends): match the function, beat the execution. Every L6 row carries its vs-Reclub judgement.
+**BETTER-RUBRIC (operator 2026-09-24: "how do you judge better — usability, design, features, wow, the human angle?").**
+`better / equal / worse` is decided on six measured axes, in this order — a win on a later axis never buys back a loss on
+an earlier one:
+1. **Function** — every capability Reclub's screen has, GripBat's has (else not better, full stop).
+2. **Effort** — taps + screens to finish the task, counted on BOTH apps for the same task; fewer or equal to win.
+3. **Clarity** — no dead end, no raw code / handle / id, no clipped or wrong text, every empty state has a next step,
+   correct in EN / 繁 / 简.
+4. **Trust** — confirm before anything destructive or irreversible, privacy rules (G15.3/.4/.5) held, errors say what to do.
+5. **Speed** — the screen answers as fast as Reclub's or faster (measured time-to-usable at 390 px on UAT).
+6. **Wow** — what only GripBat has (coaching booking, DUPR built in, partner chemistry, verified venues, web app,
+   one-tap HKPL sign-in): showcased, but never a substitute for 1–5.
+**The human test:** a stranger who has never seen GripBat gets a task and no instructions; every hesitation, wrong tap or
+"what now?" is a defect even when every automated check passed.
+**TOP-20 TASK BENCHMARK** (`/root/gen/l6-scope/TASKS.json`): the 20 things users come to do (find & join a meet, host a
+meet, run a club, book a lesson, post lessons as a coach, enter a competition, score a match, submit to DUPR, give
+kudos, message a player, pay & mark paid, sign up / sign in, …) measured side by side on the 6 axes. The demo's
+"better than Reclub" claims come ONLY from this table.
 
 ## G15 — Product decisions (operator-signed; do not re-litigate)
 These are settled. A change that contradicts one is not finished, however well it works.
