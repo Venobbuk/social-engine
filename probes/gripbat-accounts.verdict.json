@@ -1,0 +1,292 @@
+{
+  "id": "gripbat-accounts",
+  "at": "2026-09-24T08:19:38.089Z",
+  "mode": "after",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": [
+    {
+      "id": "A1.signup",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "code": "",
+        "devCode": true
+      }
+    },
+    {
+      "id": "A1.pending-row",
+      "pass": true,
+      "detail": "user_pending gb_614f975cd388|gbacc-a2c1f4@example.invalid (placeholder handle, normalised email)"
+    },
+    {
+      "id": "A1.no-account-before-verify",
+      "pass": true,
+      "detail": "no user_profile carries the address before the code is redeemed"
+    },
+    {
+      "id": "A1.password-floor",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "code": "PASSWORD_TOO_SHORT"
+      }
+    },
+    {
+      "id": "A1.verified-signed-in",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "id": "A1.needs-username",
+      "pass": true,
+      "detail": {
+        "id": "arits669ohyd001t",
+        "username": "gb_614f975cd388",
+        "staff": false,
+        "needsUsername": true,
+        "email": "gbacc-a2c1f4@example.invalid",
+        "emailVerified": true
+      }
+    },
+    {
+      "id": "A1.email-taken",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "code": "EMAIL_TAKEN"
+      }
+    },
+    {
+      "id": "A2.refused",
+      "pass": true,
+      "detail": {
+        "GripBat_fan": "USERNAME_RESERVED",
+        "grip_bat": "USERNAME_RESERVED",
+        "hkpl_1234": "USERNAME_RESERVED",
+        "gb_abc": "USERNAME_RESERVED",
+        "ab": "USERNAME_TOO_SHORT",
+        "bad-name": "USERNAME_INVALID"
+      }
+    },
+    {
+      "id": "A2.available-says-why",
+      "pass": true,
+      "detail": {
+        "available": false,
+        "reason": "USERNAME_TAKEN"
+      }
+    },
+    {
+      "id": "A2.chosen-stored",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "stored": "pba2c1f4x"
+      }
+    },
+    {
+      "id": "A2.never-email-derived",
+      "pass": true,
+      "detail": "no account on se_sbx has a username equal to its email local part"
+    },
+    {
+      "id": "A3.email-signin+name",
+      "pass": true,
+      "detail": {
+        "update": 200,
+        "signin": 200,
+        "name": "[probe] gb-accts a2c1f4",
+        "handle": "pba2c1f4x"
+      }
+    },
+    {
+      "id": "A3.wrong-password",
+      "pass": true,
+      "detail": {
+        "status": 403
+      }
+    },
+    {
+      "id": "A4.request",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "ghost": 200,
+        "sameAnswerShape": true
+      }
+    },
+    {
+      "id": "A4.reset",
+      "pass": true,
+      "detail": {
+        "reset": 204,
+        "oldTokenAfter": 401,
+        "newPw": 200,
+        "oldPw": 403,
+        "reuse": "RESET_EXPIRED"
+      }
+    },
+    {
+      "id": "A5.email-change",
+      "pass": true,
+      "detail": {
+        "request": 200,
+        "oldBefore": 200,
+        "newBefore": 404,
+        "verify": 204,
+        "newAfter": 200,
+        "oldAfter": 404
+      }
+    },
+    {
+      "id": "A6.code",
+      "pass": true,
+      "detail": {
+        "request": 200,
+        "wrong": "CODE_INVALID",
+        "right": 200
+      }
+    },
+    {
+      "id": "A7.personas-native",
+      "pass": true,
+      "detail": {
+        "player-amy": "ok",
+        "host-ken": "ok",
+        "clubowner-mei": "ok",
+        "clubadmin-tom": "ok",
+        "admin": "ok"
+      }
+    },
+    {
+      "id": "A8.dupr",
+      "pass": true,
+      "detail": {
+        "before": {
+          "connected": false,
+          "duprId": null,
+          "doubles": null,
+          "singles": null,
+          "source": null,
+          "sandbox": true,
+          "resyncAvailableAt": null
+        },
+        "link": "200 true",
+        "after": true,
+        "ssoUrl": "400 DUPR_DOOR_NOT_LIVE"
+      }
+    },
+    {
+      "id": "A9.rankings",
+      "pass": true,
+      "detail": {
+        "uatTotal": 47,
+        "prodTotal": 0,
+        "prodNote": "production lists GripBat-connected members only"
+      }
+    },
+    {
+      "id": "A10.suspended-refused",
+      "pass": true,
+      "detail": {
+        "suspend": 204,
+        "rightPw": "403 ACCOUNT_SUSPENDED",
+        "wrongPw": "403 (no code: no oracle)",
+        "oldToken": "403 YOUR_ACCOUNT_SUSPENDED"
+      }
+    },
+    {
+      "id": "P1.prod-parity",
+      "pass": true,
+      "detail": {
+        "signup": "400 PASSWORD_TOO_SHORT",
+        "me": 401,
+        "reset": 200,
+        "revealed": false
+      }
+    },
+    {
+      "id": "L1.league-signin",
+      "pass": true,
+      "detail": {
+        "page": 200,
+        "wrongLogin": 401
+      }
+    },
+    {
+      "id": "U1.signup-to-onboarding",
+      "pass": true,
+      "detail": {
+        "typed": true,
+        "created": true,
+        "testCode": true,
+        "url": "https://uat.gripbat.com/app/pages/onboard/index"
+      }
+    },
+    {
+      "id": "U1.username-chosen",
+      "pass": true,
+      "detail": {
+        "typed": true,
+        "next": true,
+        "stored": "pua2c1f4x"
+      }
+    },
+    {
+      "id": "U1.home-signed-in",
+      "pass": true,
+      "detail": {
+        "tokenStored": true,
+        "answersAs": "pua2c1f4x",
+        "want": "pua2c1f4x"
+      }
+    },
+    {
+      "id": "U1.no-hkpl-auth",
+      "pass": true,
+      "detail": {
+        "hkplAuthOrSsoCalls": []
+      }
+    },
+    {
+      "id": "U2.blocked-told",
+      "pass": true,
+      "detail": {
+        "told": true,
+        "signedOutForm": true
+      }
+    },
+    {
+      "id": "U2.version-line",
+      "pass": true,
+      "detail": "GripBat · Version 1.0 · build cde3e818"
+    }
+  ],
+  "cleanup": [
+    {
+      "unsuspended": 204
+    },
+    {
+      "email": "gbacc-a2c1f4-new@example.invalid",
+      "deleted": 204
+    },
+    {
+      "email": "gbacc-a2c1f4-susp@example.invalid",
+      "deleted": 204
+    },
+    {
+      "email": "gbacc-a2c1f4-ui@example.invalid",
+      "deleted": 204
+    },
+    {
+      "pendingRemoved": "0"
+    }
+  ],
+  "blocked": {
+    "token": "HeIKofGTyEbn4PTq",
+    "userId": "aritsdsnohyd003l"
+  }
+}

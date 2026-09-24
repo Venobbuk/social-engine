@@ -1,0 +1,27 @@
+{
+ "id": "hkpl-gripbat-accounts",
+ "at": "2026-09-24T04:47:57.879Z",
+ "mode": "dry",
+ "condition_fired": true,
+ "verdict": "pass",
+ "outcome": "dry_run_ready",
+ "evidence": [
+  "preflight ok: deploy lock /root/gen/hkpl-deploy.lock is free",
+  "preflight ok: no other deploy.sh is running",
+  "preflight ok: worktree /root/hkpl-wt-accounts is on gripbat-accounts/dupr-connect",
+  "preflight ok: worktree clean",
+  "preflight ok: prod HEAD == origin/main (98df5b2c vs 98df5b2c) — the deploy ships only this batch",
+  "branch: 1 commit(s) ahead of origin/main, 1 behind: fb646c96 GRIPBAT-ACCOUNTS-V1 (hkpl): DUPR connect for a GripBat user, ;",
+  "preflight ok: branch has the batch commits",
+  "preflight ok: rebase onto origin/main is conflict-free",
+  "check ok: scripts/social-dupr-connect.test.cjs (social-dupr-connect: all pass)",
+  "preflight ok: prod tree /root/hkpl-server is on main",
+  "preflight ok: prod tree local edits (CLAUDE.md scripts/smoke.sh) do not collide with the batch",
+  "preflight ok: live compose is valid (docker compose config)",
+  "preflight ok: live compose carries oom_score_adj -500 on hkpl-app",
+  "preflight ok: running image id known",
+  "running now: commit 98df5b2c, image 5dbaef1dd225, restarts 0, up since 2026-09-24T04:45:46.607317262Z",
+  "calm state: 6850 MB available, 5 earlyoom kills in 10 min",
+  "health baseline: hkpl.com.hk / 200, /api/health 200, push route answers: {\"error\":\"social_s2s_unauthorized\"} (after the batch: social_s2s_unauthorized)"
+ ]
+}

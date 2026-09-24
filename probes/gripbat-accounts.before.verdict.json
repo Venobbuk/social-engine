@@ -1,0 +1,237 @@
+{
+  "id": "gripbat-accounts",
+  "at": "2026-09-24T05:14:41.581Z",
+  "mode": "before",
+  "condition_fired": true,
+  "verdict": "fail",
+  "evidence": [
+    {
+      "id": "A1.signup",
+      "pass": false,
+      "detail": {
+        "status": 400,
+        "code": "",
+        "devCode": false
+      }
+    },
+    {
+      "id": "A1.pending-row",
+      "pass": false,
+      "detail": "user_pending none (placeholder handle, normalised email)"
+    },
+    {
+      "id": "A1.no-account-before-verify",
+      "pass": true,
+      "detail": "no user_profile carries the address before the code is redeemed"
+    },
+    {
+      "id": "A1.password-floor",
+      "pass": false,
+      "detail": {
+        "status": 400,
+        "code": ""
+      }
+    },
+    {
+      "id": "A1.verified-signed-in",
+      "pass": false,
+      "detail": {
+        "status": 0
+      }
+    },
+    {
+      "id": "A1.needs-username",
+      "pass": false,
+      "detail": 0
+    },
+    {
+      "id": "A1.email-taken",
+      "pass": false,
+      "detail": {
+        "status": 400,
+        "code": ""
+      }
+    },
+    {
+      "id": "A2.refused",
+      "pass": false,
+      "detail": {
+        "GripBat_fan": "",
+        "grip_bat": "",
+        "hkpl_1234": "",
+        "gb_abc": "",
+        "ab": "",
+        "bad-name": ""
+      }
+    },
+    {
+      "id": "A2.available-says-why",
+      "pass": false,
+      "detail": {
+        "available": true
+      }
+    },
+    {
+      "id": "A2.chosen-stored",
+      "pass": false,
+      "detail": {
+        "status": 404,
+        "stored": ""
+      }
+    },
+    {
+      "id": "A2.never-email-derived",
+      "pass": true,
+      "detail": "no account on se_sbx has a username equal to its email local part"
+    },
+    {
+      "id": "A3.email-signin+name",
+      "pass": false,
+      "detail": {
+        "update": 401,
+        "signin": 404
+      }
+    },
+    {
+      "id": "A3.wrong-password",
+      "pass": false,
+      "detail": {
+        "status": 429
+      }
+    },
+    {
+      "id": "A4.request",
+      "pass": false,
+      "detail": {
+        "status": 400,
+        "ghost": 400,
+        "sameAnswerShape": true
+      }
+    },
+    {
+      "id": "A4.reset",
+      "pass": false,
+      "detail": {
+        "reset": 0,
+        "oldTokenAfter": 401,
+        "newPw": 429,
+        "oldPw": 429,
+        "reuse": ""
+      }
+    },
+    {
+      "id": "A5.email-change",
+      "pass": false,
+      "detail": {
+        "request": 401,
+        "oldBefore": 429,
+        "newBefore": 429,
+        "verify": 0,
+        "newAfter": 429,
+        "oldAfter": 429
+      }
+    },
+    {
+      "id": "A6.code",
+      "pass": false,
+      "detail": {
+        "request": 404,
+        "wrong": "",
+        "right": 0
+      }
+    },
+    {
+      "id": "A7.personas-native",
+      "pass": true,
+      "detail": {
+        "player-amy": "ok",
+        "host-ken": "ok",
+        "clubowner-mei": "ok",
+        "clubadmin-tom": "ok",
+        "admin": "ok"
+      }
+    },
+    {
+      "id": "A8.dupr",
+      "pass": false,
+      "detail": {
+        "before": {
+          "message": "Route POST:/api/gb/dupr/connection not found",
+          "error": "Not Found",
+          "statusCode": 404
+        },
+        "link": "404 undefined",
+        "ssoUrl": "404 "
+      }
+    },
+    {
+      "id": "A9.rankings",
+      "pass": true,
+      "detail": {
+        "uatTotal": 47,
+        "prodTotal": 0,
+        "prodNote": "production lists GripBat-connected members only"
+      }
+    },
+    {
+      "id": "P1.prod-parity",
+      "pass": false,
+      "detail": {
+        "signup": "400 ",
+        "me": 404,
+        "reset": 400,
+        "revealed": false
+      }
+    },
+    {
+      "id": "L1.league-signin",
+      "pass": true,
+      "detail": {
+        "page": 200,
+        "wrongLogin": 401
+      }
+    },
+    {
+      "id": "U1.signup-to-onboarding",
+      "pass": false,
+      "detail": {
+        "typed": false,
+        "created": false,
+        "testCode": false,
+        "url": "https://uat.gripbat.com/app/pages/signin/index?signup=1"
+      }
+    },
+    {
+      "id": "U1.username-chosen",
+      "pass": false,
+      "detail": {
+        "typed": false,
+        "next": false,
+        "stored": ""
+      }
+    },
+    {
+      "id": "U1.home-signed-in",
+      "pass": true,
+      "detail": {
+        "tokenStored": true
+      }
+    },
+    {
+      "id": "U1.no-hkpl-auth",
+      "pass": false,
+      "detail": {
+        "hkplAuthOrSsoCalls": [
+          "https://uat.gripbat.com/api/v1/auth/me",
+          "https://uat.gripbat.com/api/v1/auth/me",
+          "https://uat.gripbat.com/api/v1/auth/me"
+        ]
+      }
+    }
+  ],
+  "cleanup": [
+    {
+      "pendingRemoved": "0"
+    }
+  ]
+}

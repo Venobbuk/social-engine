@@ -1,0 +1,73 @@
+{
+  "id": "gripbat-accounts.prod",
+  "at": "2026-09-24T08:20:32.788Z",
+  "condition_fired": true,
+  "verdict": "pass",
+  "evidence": [
+    {
+      "id": "P2.signup",
+      "pass": true,
+      "detail": {
+        "signup": 204,
+        "revealed": false,
+        "accountBeforeCode": "0",
+        "verify": 200,
+        "handle": "gb_68456e437116"
+      }
+    },
+    {
+      "id": "P3.username+name",
+      "pass": true,
+      "detail": {
+        "chosen": 200,
+        "name": 200,
+        "emailSignin": 200,
+        "handle": "pp543069x",
+        "nameKept": true
+      }
+    },
+    {
+      "id": "P4.suspended",
+      "pass": true,
+      "detail": {
+        "suspend": 204,
+        "right": "403 ACCOUNT_SUSPENDED",
+        "wrong": "403 (plain)"
+      }
+    },
+    {
+      "id": "PR.rankings-engine",
+      "pass": true,
+      "detail": {
+        "total": 0,
+        "note": "GripBat-connected members only (0 = none linked yet)"
+      }
+    },
+    {
+      "id": "PU.signin-screen",
+      "pass": true,
+      "detail": {
+        "welcome": true,
+        "version": "GripBat · Version 1.0 · build cde3e818"
+      }
+    },
+    {
+      "id": "PU.no-hkpl-auth",
+      "pass": true,
+      "detail": {
+        "hkplAuthOrSsoCalls": []
+      }
+    }
+  ],
+  "cleanup": [
+    {
+      "unsuspended": 204
+    },
+    {
+      "deleted": 204
+    },
+    {
+      "pendingRemoved": "0"
+    }
+  ]
+}
