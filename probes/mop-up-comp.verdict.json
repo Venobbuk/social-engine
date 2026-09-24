@@ -1,0 +1,620 @@
+{
+ "id": "mop-up-comp",
+ "at": "2026-09-24T08:21:51.789Z",
+ "condition_fired": true,
+ "checks": [
+  {
+   "item": "setup.signin",
+   "what": "five personas (the native logins that exist: admin = host, amy, mei, tom, ken) signed in natively (engine token, /api/i answers)",
+   "pass": true,
+   "evidence": {
+    "host": "uat_admin",
+    "amy": "amy_player",
+    "mei": "mei_clubowner",
+    "tom": "tom_clubadmin",
+    "ken": "ken_host"
+   }
+  },
+  {
+   "item": "I1.setup",
+   "what": "fixture is real: open team competition (2–3 per team); Team A amy+mei (1 open place), Team R captain tom alone (his invitation to ken cancelled)",
+   "pass": true,
+   "evidence": {
+    "A": 1,
+    "R": 1
+   }
+  },
+  {
+   "item": "I1.engine.plant-incomplete",
+   "what": "PLANT/CONTROL: tom alone in a 2–3 team is NOT complete (complete false) and has 2 open places",
+   "pass": true,
+   "evidence": {
+    "complete": false,
+    "openSlots": 2
+   }
+  },
+  {
+   "item": "I1.engine.captain-reserve",
+   "what": "the CAPTAIN reserves one place under a name (row: 1 reserved place, name/gender/level stored); the team is now complete with 1 open place",
+   "pass": true,
+   "evidence": {
+    "status": 200,
+    "row": [
+     {
+      "at": "2026-09-24T08:21:54.213Z",
+      "id": "aritv2xxohyd004y",
+      "byId": "ari4hd793hac0009",
+      "name": "[probe] mop-up guest R",
+      "level": 3.5,
+      "gender": "male",
+      "ageGroup": null
+     }
+    ],
+    "complete": true,
+    "openSlots": 1
+   }
+  },
+  {
+   "item": "I1.engine.refuse-stranger",
+   "what": "a player with no role on Team R (ken) and another team player (mei) may not reserve on Team R (COMPETITION_FORBIDDEN); row unchanged",
+   "pass": true,
+   "evidence": {
+    "ken": "COMPETITION_FORBIDDEN",
+    "mei": "COMPETITION_FORBIDDEN"
+   }
+  },
+  {
+   "item": "I1.engine.full",
+   "what": "PLANT: a team of 3 holding 1 player + 2 reserved places is full — a 3rd reserve AND a partner invite are refused (COMPETITION_TEAM_FULL); the 2nd place took the default name",
+   "pass": true,
+   "evidence": {
+    "second": 200,
+    "full": "COMPETITION_TEAM_FULL",
+    "invite": "COMPETITION_TEAM_FULL"
+   }
+  },
+  {
+   "item": "I1.engine.release",
+   "what": "the captain releases a place: 1 left, 1 open place again",
+   "pass": true,
+   "evidence": {
+    "status": 200,
+    "left": 1
+   }
+  },
+  {
+   "item": "I1.engine.captain-swap",
+   "what": "Swap from community by the CAPTAIN invites the player (consent): the place is gone, admin waits in invitedUserIds, not seated",
+   "pass": true,
+   "evidence": {
+    "status": 200,
+    "invited": [
+     "ari4hdzd3hac000c"
+    ],
+    "users": 1
+   }
+  },
+  {
+   "item": "I1.engine.no-such-place",
+   "what": "an unknown place id is refused (NO_SUCH_ENTRY), the real one stays",
+   "pass": true,
+   "evidence": {
+    "code": "NO_SUCH_ENTRY"
+   }
+  },
+  {
+   "item": "I1.ui.captain-reserve",
+   "what": "captain tom presses Reserve a spot → the editor (Name / Gender / Age group / Level) → Save: a 2nd reserved place is stored and both show as Reserved on the team page",
+   "pass": true,
+   "evidence": {
+    "before": 1,
+    "after": [
+     "[probe] mop-up guest R",
+     "Reserved spot"
+    ]
+   }
+  },
+  {
+   "item": "I1.ui.before",
+   "what": "Team A (1 open place): the host sees Reserve a spot beside Invite a partner; no Reserved row yet",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "I1.ui.reserve",
+   "what": "host presses Reserve a spot, names it, picks Female, Save → stored ({name, gender female}); the row reads \"[probe] mop-up guest · Reserved · Female\"; the team is full so Reserve a spot is gone",
+   "pass": true,
+   "evidence": {
+    "row": [
+     {
+      "at": "2026-09-24T08:22:21.626Z",
+      "id": "aritvo3eohyd0054",
+      "byId": "ari4hdzd3hac000c",
+      "name": "[probe] mop-up guest",
+      "level": null,
+      "gender": "female",
+      "ageGroup": null
+     }
+    ]
+   }
+  },
+  {
+   "item": "I1.ui.edit",
+   "what": "the Reserved row opens Reclub's options (Edit reserved info · Swap from community · Remove reserved spot); Edit reserved info → level 4.0 stored and shown",
+   "pass": true,
+   "evidence": {
+    "row": [
+     {
+      "at": "2026-09-24T08:22:21.626Z",
+      "id": "aritvo3eohyd0054",
+      "byId": "ari4hdzd3hac000c",
+      "name": "[probe] mop-up guest",
+      "level": 4,
+      "gender": "female",
+      "ageGroup": null
+     }
+    ]
+   }
+  },
+  {
+   "item": "I1.ui.release",
+   "what": "Remove reserved spot asks first, then the place is released (row: none) and Reserve a spot is back",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "I1.ui.swap",
+   "what": "Swap from community (host): the searched player takes the reserved place — stored in userIds, the place is gone, the row shows the player",
+   "pass": true,
+   "evidence": {
+    "users": 3,
+    "places": 0
+   }
+  },
+  {
+   "item": "I1.ui.swap-notified",
+   "what": "the seated player is told: the i/notifications of ken carry \"The host placed you in [probe] mop-up Team A for …\" (the sentence the app already translates)",
+   "pass": true,
+   "evidence": {
+    "body": "The host placed you in [probe] mop-up Team A for [probe] mop-up comp 9jrql places."
+   }
+  },
+  {
+   "item": "I1.i18n.zh_Hant",
+   "what": "zh_Hant: the reserved place's sheet is in zh_Hant (Swap from community / Remove reserved spot translated, no English left)",
+   "pass": true,
+   "evidence": {
+    "sample": "從社群換入"
+   }
+  },
+  {
+   "item": "I1.i18n.zh_Hans",
+   "what": "zh_Hans: the reserved place's sheet is in zh_Hans (Swap from community / Remove reserved spot translated, no English left)",
+   "pass": true,
+   "evidence": {
+    "sample": "从社区换入"
+   }
+  },
+  {
+   "item": "I1.start",
+   "what": "at the start a team completed by a reserved place plays (Team R = tom + 1 reserved place stays confirmed; the same team WITHOUT the place read complete=false, the plant above)",
+   "pass": true,
+   "evidence": {
+    "status": 200,
+    "R": "confirmed",
+    "A": "confirmed"
+   }
+  },
+  {
+   "item": "I1.started-refused",
+   "what": "after the start the roster is fixed: reserve refused (COMPETITION_STARTED)",
+   "pass": true,
+   "evidence": {
+    "code": "COMPETITION_STARTED"
+   }
+  },
+  {
+   "item": "I2.setup",
+   "what": "fixture is real: started team round robin (Team A amy+mei, Team B tom+ken) with named default sets (Opener / Decider tiebreaker) and court labels; its generated match",
+   "pass": true,
+   "evidence": {
+    "matches": 1
+   }
+  },
+  {
+   "item": "BUG.draw-hidden-copy",
+   "what": "a STARTED competition's Draw tab says everyone sees the matchups (never \"Only you can see the matchups until the start\")",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "BUG.score-values",
+   "what": "Score values modal (EN): one OK button (no 取消), whole words, \"Draw: 1 point\" singular — observed rendered",
+   "pass": true,
+   "evidence": {
+    "text": "Score values\nStandard win: 3 points — a match won in its regular games.\nStandard loss: 0 points — a match lost in its regular games.\nTiebreaker win: 2 points — a match won in a game marked Tiebreaker.\nTiebreaker loss: 1 point — a match lost in a game marked Tiebreaker.\nDraw: 1 point — a round robin match with no winner.\nOK",
+    "buttons": [
+     "OK"
+    ],
+    "wb": "normal"
+   }
+  },
+  {
+   "item": "D-match-format.17.formats",
+   "what": "pressing \"Learn more about competition formats\" opens its help (/Competition formats[\\s\\S]*Consolation bracket/) and OK closes it",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-match-format.17.calculation",
+   "what": "pressing \"Learn more about point calculation\" opens its help (/Point calculation[\\s\\S]*Tiebreakers/) and OK closes it",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-detail.45.pane",
+   "what": "the format pane lists Standings Calculation and Tiebreaker priority beside the two Learn more links and Reset matches",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "BUG.single-elim-copy",
+   "what": "single elimination: the seeding line reads \"Automatic: by the seeds\", never \"by the pool standings\"",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-match-detail.01",
+   "what": "header names the stage (\"Round robin · Round n\"); pressing Swap sides flips the two teams on screen (before/after)",
+   "pass": true,
+   "evidence": {
+    "o1": [
+     "[probe] mop-up Team B",
+     "[probe] mop-up Team A"
+    ],
+    "o2": [
+     "[probe] mop-up Team A",
+     "[probe] mop-up Team B"
+    ]
+   }
+  },
+  {
+   "item": "D-comp-match-detail.02",
+   "what": "the match kebab (Share image · Manage score sets · Assign players · Clear all assignment · Edit match · Set availability) — Edit match renames (read back), Set availability stores ken = yes, Clear all assignment empties the planted line-up",
+   "pass": true,
+   "evidence": {
+    "name": "Mop-up final",
+    "ken": "yes",
+    "planted": true,
+    "cleared": {
+     "p1": null,
+     "p2": null
+    }
+   }
+  },
+  {
+   "item": "D-match-share-image.02",
+   "what": "Share image pressed in the browser GENERATES the card: a PNG blob (signature 89504e47…), 1080×1080, > 20 KB, written to disk and read by `file`",
+   "pass": true,
+   "evidence": {
+    "type": "image/png",
+    "size": 222108,
+    "sig": "89504e470d0a1a0a",
+    "width": 1080,
+    "height": 1080,
+    "file": "PNG image data, 1080 x 1080, 8-bit/color RGBA, non-interlaced",
+    "path": "probes/mop-up-comp-shots/i2-share-image.png"
+   }
+  },
+  {
+   "item": "D-score-board.02",
+   "what": "the score sheet's \"See stat definitions\" pressed opens the definitions (TB W/L, Score Diff) and OK closes them",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-score.04",
+   "what": "Stopwatch Start counts up (00:0n); Timer → 5 min reads 05:00 and Start counts DOWN (04:5x, then lower)",
+   "pass": true,
+   "evidence": {
+    "stopwatch": "00:04",
+    "set": "05:00",
+    "t1": "04:56",
+    "t2": "04:54"
+   }
+  },
+  {
+   "item": "D-comp-score-sets.01",
+   "what": "Remove game on a scored game asks first (\"This game has scores…\"); Cancel keeps 2 games, Remove game + Save stores 1 (read back)",
+   "pass": true,
+   "evidence": {
+    "g0": 2,
+    "g1": 2,
+    "g2": 1
+   }
+  },
+  {
+   "item": "D-match-format.13",
+   "what": "a fresh match's score sheet opens on the competition's default sets: two games named Opener and Decider (the second marked Tiebreaker)",
+   "pass": true,
+   "evidence": {
+    "inputs": [
+     "Opener"
+    ]
+   }
+  },
+  {
+   "item": "D-comp-match-detail.06",
+   "what": "before/after: without a receipt no \"Submitted by\"; with a (planted, sandbox, never sent) receipt the DUPR row reads \"Submitted by <host name>\"",
+   "pass": true,
+   "evidence": {
+    "name": "UAT Admin"
+   }
+  },
+  {
+   "item": "D-comp-sublocations.01",
+   "what": "the host renames court 1 in the wizard (Centre → Show court, saved: courtLabels read back) and the team page's match row follows (before Centre, after Show court)",
+   "pass": true,
+   "evidence": {
+    "labels": "Show court,Court B"
+   }
+  },
+  {
+   "item": "D-comp-manage-seeds.02",
+   "what": "Manage seeds shows \"#n in pool m\" rows with the Playoffs / Consolation toggle; ▲ on seed #2 + Update seeds redraws the final in the new order (before/after read back), the consolation bracket kept",
+   "pass": true,
+   "evidence": {
+    "before": "ariu0qstohyd007c,ariu0qs7ohyd0078",
+    "after": "ariu0qs7ohyd0078,ariu0qstohyd007c",
+    "consolation": "1"
+   }
+  },
+  {
+   "item": "D-match-format.16",
+   "what": "the wizard on a drawn competition: Consolation bracket off + Update + Confirm shows Reclub's stage warning (\"…reset the playoff and consolation matches and scores.\"); Reset and save proceeds — playoff + consolation removed, the 2 pool matches kept, the setting stored",
+   "pass": true,
+   "evidence": {
+    "left": "regular:2",
+    "consolationBracket": "f"
+   }
+  },
+  {
+   "item": "BUG.score-values.control",
+   "what": "CONTROL: the same button detector reads the two-button Reset confirm as Cancel + Confirm (it is not blind)",
+   "pass": true,
+   "evidence": [
+    "Cancel",
+    "Confirm"
+   ]
+  },
+  {
+   "item": "D-comp-detail.45",
+   "what": "the format pane's Reset matches pressed: the confirm lists the consequences; confirmed, the matches are removed (before n>0, after 0) and registration is open again as the confirm says (status open, lockRegistration false — Reclub confirm-reset \"Registration open\"; before the MOP-UP-COMP fix it read closed|true)",
+   "pass": true,
+   "evidence": {
+    "before": "3",
+    "after": "0",
+    "status": "open|false"
+   }
+  },
+  {
+   "item": "ui.errors",
+   "what": "no page errors in the host session",
+   "pass": true,
+   "evidence": []
+  },
+  {
+   "item": "G13.cleanup",
+   "what": "every [probe] mop-up comp competition of this run deleted (rows left in se_sbx = 0)",
+   "pass": true,
+   "evidence": {
+    "left": "0",
+    "cleanup": {
+     "aritv28zohyd004k": 200,
+     "aritx1xbohyd005f": 200,
+     "aritxiw8ohyd0064": 200,
+     "ariu0qplohyd006y": 200
+    }
+   }
+  }
+ ],
+ "errors": [],
+ "cleanup": {
+  "aritv28zohyd004k": 200,
+  "aritx1xbohyd005f": 200,
+  "aritxiw8ohyd0064": 200,
+  "ariu0qplohyd006y": 200
+ },
+ "shots": [
+  "probes/mop-up-comp-shots/i1-captain-team.png",
+  "probes/mop-up-comp-shots/i1-captain-editor.png",
+  "probes/mop-up-comp-shots/i1-captain-reserved.png",
+  "probes/mop-up-comp-shots/i1-host-team-before.png",
+  "probes/mop-up-comp-shots/i1-host-reserved.png",
+  "probes/mop-up-comp-shots/i1-place-sheet.png",
+  "probes/mop-up-comp-shots/i1-host-released.png",
+  "probes/mop-up-comp-shots/i1-swap-search.png",
+  "probes/mop-up-comp-shots/i1-host-swapped.png",
+  "probes/mop-up-comp-shots/i1-sheet-zh_Hant.png",
+  "probes/mop-up-comp-shots/i1-sheet-zh_Hans.png",
+  "probes/mop-up-comp-shots/i2-draw.png",
+  "probes/mop-up-comp-shots/i2-score-values.png",
+  "probes/mop-up-comp-shots/i2-formats.png",
+  "probes/mop-up-comp-shots/i2-calculation.png",
+  "probes/mop-up-comp-shots/i2-ko-draw.png",
+  "probes/mop-up-comp-shots/i2-match.png",
+  "probes/mop-up-comp-shots/i2-swapped.png",
+  "probes/mop-up-comp-shots/i2-kebab.png",
+  "probes/mop-up-comp-shots/i2-share-toast.png",
+  "probes/mop-up-comp-shots/i2-score-sheet.png",
+  "probes/mop-up-comp-shots/i2-stat-defs.png",
+  "probes/mop-up-comp-shots/i2-timer.png",
+  "probes/mop-up-comp-shots/i2-removed-game.png",
+  "probes/mop-up-comp-shots/i2-fresh-match.png",
+  "probes/mop-up-comp-shots/i2-fresh-sheet.png",
+  "probes/mop-up-comp-shots/i2-before-receipt.png",
+  "probes/mop-up-comp-shots/i2-after-receipt.png",
+  "probes/mop-up-comp-shots/i2-team-before.png",
+  "probes/mop-up-comp-shots/i2-wizard.png",
+  "probes/mop-up-comp-shots/i2-team-after.png",
+  "probes/mop-up-comp-shots/i2-c2-draw.png",
+  "probes/mop-up-comp-shots/i2-manage-seeds.png",
+  "probes/mop-up-comp-shots/i2-seeds-updated.png",
+  "probes/mop-up-comp-shots/i2-c2-wizard.png",
+  "probes/mop-up-comp-shots/i2-reset-warning.png",
+  "probes/mop-up-comp-shots/i2-reset-confirm.png"
+ ],
+ "fresh": "aritzty2ohyd006s",
+ "cleanupOk": true,
+ "verdict": "pass",
+ "fails": 0,
+ "passes": 42,
+ "evidence": [
+  "pass setup.signin: five personas (the native logins that exist: admin = host, amy, mei, tom, ken) signed in natively (engine token, /api/i answers)",
+  "pass I1.setup: fixture is real: open team competition (2–3 per team); Team A amy+mei (1 open place), Team R captain tom alone (his invitation to ken cancelled)",
+  "pass I1.engine.plant-incomplete: PLANT/CONTROL: tom alone in a 2–3 team is NOT complete (complete false) and has 2 open places",
+  "pass I1.engine.captain-reserve: the CAPTAIN reserves one place under a name (row: 1 reserved place, name/gender/level stored); the team is now complete with 1 open place",
+  "pass I1.engine.refuse-stranger: a player with no role on Team R (ken) and another team player (mei) may not reserve on Team R (COMPETITION_FORBIDDEN); row unchanged",
+  "pass I1.engine.full: PLANT: a team of 3 holding 1 player + 2 reserved places is full — a 3rd reserve AND a partner invite are refused (COMPETITION_TEAM_FULL); the 2nd place took the default name",
+  "pass I1.engine.release: the captain releases a place: 1 left, 1 open place again",
+  "pass I1.engine.captain-swap: Swap from community by the CAPTAIN invites the player (consent): the place is gone, admin waits in invitedUserIds, not seated",
+  "pass I1.engine.no-such-place: an unknown place id is refused (NO_SUCH_ENTRY), the real one stays",
+  "pass I1.ui.captain-reserve: captain tom presses Reserve a spot → the editor (Name / Gender / Age group / Level) → Save: a 2nd reserved place is stored and both show as Reserved on the team page",
+  "pass I1.ui.before: Team A (1 open place): the host sees Reserve a spot beside Invite a partner; no Reserved row yet",
+  "pass I1.ui.reserve: host presses Reserve a spot, names it, picks Female, Save → stored ({name, gender female}); the row reads \"[probe] mop-up guest · Reserved · Female\"; the team is full so Reserve a spot is gone",
+  "pass I1.ui.edit: the Reserved row opens Reclub's options (Edit reserved info · Swap from community · Remove reserved spot); Edit reserved info → level 4.0 stored and shown",
+  "pass I1.ui.release: Remove reserved spot asks first, then the place is released (row: none) and Reserve a spot is back",
+  "pass I1.ui.swap: Swap from community (host): the searched player takes the reserved place — stored in userIds, the place is gone, the row shows the player",
+  "pass I1.ui.swap-notified: the seated player is told: the i/notifications of ken carry \"The host placed you in [probe] mop-up Team A for …\" (the sentence the app already translates)",
+  "pass I1.i18n.zh_Hant: zh_Hant: the reserved place's sheet is in zh_Hant (Swap from community / Remove reserved spot translated, no English left)",
+  "pass I1.i18n.zh_Hans: zh_Hans: the reserved place's sheet is in zh_Hans (Swap from community / Remove reserved spot translated, no English left)",
+  "pass I1.start: at the start a team completed by a reserved place plays (Team R = tom + 1 reserved place stays confirmed; the same team WITHOUT the place read complete=false, the plant above)",
+  "pass I1.started-refused: after the start the roster is fixed: reserve refused (COMPETITION_STARTED)",
+  "pass I2.setup: fixture is real: started team round robin (Team A amy+mei, Team B tom+ken) with named default sets (Opener / Decider tiebreaker) and court labels; its generated match",
+  "pass BUG.draw-hidden-copy: a STARTED competition's Draw tab says everyone sees the matchups (never \"Only you can see the matchups until the start\")",
+  "pass BUG.score-values: Score values modal (EN): one OK button (no 取消), whole words, \"Draw: 1 point\" singular — observed rendered",
+  "pass D-match-format.17.formats: pressing \"Learn more about competition formats\" opens its help (/Competition formats[\\s\\S]*Consolation bracket/) and OK closes it",
+  "pass D-match-format.17.calculation: pressing \"Learn more about point calculation\" opens its help (/Point calculation[\\s\\S]*Tiebreakers/) and OK closes it",
+  "pass D-comp-detail.45.pane: the format pane lists Standings Calculation and Tiebreaker priority beside the two Learn more links and Reset matches",
+  "pass BUG.single-elim-copy: single elimination: the seeding line reads \"Automatic: by the seeds\", never \"by the pool standings\"",
+  "pass D-comp-match-detail.01: header names the stage (\"Round robin · Round n\"); pressing Swap sides flips the two teams on screen (before/after)",
+  "pass D-comp-match-detail.02: the match kebab (Share image · Manage score sets · Assign players · Clear all assignment · Edit match · Set availability) — Edit match renames (read back), Set availability stores ken = yes, Clear all assignment empties the planted line-up",
+  "pass D-match-share-image.02: Share image pressed in the browser GENERATES the card: a PNG blob (signature 89504e47…), 1080×1080, > 20 KB, written to disk and read by `file`",
+  "pass D-score-board.02: the score sheet's \"See stat definitions\" pressed opens the definitions (TB W/L, Score Diff) and OK closes them",
+  "pass D-comp-score.04: Stopwatch Start counts up (00:0n); Timer → 5 min reads 05:00 and Start counts DOWN (04:5x, then lower)",
+  "pass D-comp-score-sets.01: Remove game on a scored game asks first (\"This game has scores…\"); Cancel keeps 2 games, Remove game + Save stores 1 (read back)",
+  "pass D-match-format.13: a fresh match's score sheet opens on the competition's default sets: two games named Opener and Decider (the second marked Tiebreaker)",
+  "pass D-comp-match-detail.06: before/after: without a receipt no \"Submitted by\"; with a (planted, sandbox, never sent) receipt the DUPR row reads \"Submitted by <host name>\"",
+  "pass D-comp-sublocations.01: the host renames court 1 in the wizard (Centre → Show court, saved: courtLabels read back) and the team page's match row follows (before Centre, after Show court)",
+  "pass D-comp-manage-seeds.02: Manage seeds shows \"#n in pool m\" rows with the Playoffs / Consolation toggle; ▲ on seed #2 + Update seeds redraws the final in the new order (before/after read back), the consolation bracket kept",
+  "pass D-match-format.16: the wizard on a drawn competition: Consolation bracket off + Update + Confirm shows Reclub's stage warning (\"…reset the playoff and consolation matches and scores.\"); Reset and save proceeds — playoff + consolation removed, the 2 pool matches kept, the setting stored",
+  "pass BUG.score-values.control: CONTROL: the same button detector reads the two-button Reset confirm as Cancel + Confirm (it is not blind)",
+  "pass D-comp-detail.45: the format pane's Reset matches pressed: the confirm lists the consequences; confirmed, the matches are removed (before n>0, after 0) and registration is open again as the confirm says (status open, lockRegistration false — Reclub confirm-reset \"Registration open\"; before the MOP-UP-COMP fix it read closed|true)",
+  "pass ui.errors: no page errors in the host session",
+  "pass G13.cleanup: every [probe] mop-up comp competition of this run deleted (rows left in se_sbx = 0)"
+ ],
+ "rows": [
+  {
+   "item": "item1 reserve one place on a competition team (engine + app)",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "captain + host in the browser at 390 px, engine refusals per role, start keeps a team completed by a place, EN/繁/简 · checks: I1.setup, I1.engine.plant-incomplete, I1.engine.captain-reserve, I1.engine.refuse-stranger, I1.engine.full, I1.engine.release, I1.engine.captain-swap, I1.engine.no-such-place, I1.ui.captain-reserve, I1.ui.before, I1.ui.reserve, I1.ui.edit, I1.ui.release, I1.ui.swap, I1.ui.swap-notified, I1.i18n.zh_Hant, I1.i18n.zh_Hans, I1.start, I1.started-refused"
+  },
+  {
+   "item": "D-comp-detail.45",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "Reset matches pressed: matches 0, registration open (engine fix MOP-UP-COMP 8b4a62fa94) · checks: D-comp-detail.45.pane, D-comp-detail.45"
+  },
+  {
+   "item": "D-comp-manage-seeds.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "seed moved + Update seeds, final redrawn (read back) · checks: D-comp-manage-seeds.02"
+  },
+  {
+   "item": "D-comp-match-detail.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "stage header + Swap sides before/after · checks: D-comp-match-detail.01"
+  },
+  {
+   "item": "D-comp-match-detail.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "Edit match / Set availability / Clear all assignment pressed, rows read back · checks: D-comp-match-detail.02"
+  },
+  {
+   "item": "D-comp-match-detail.06",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "Submitted by <name> before/after a PLANTED sandbox receipt (no DUPR submit pressed, rule 9) · checks: D-comp-match-detail.06"
+  },
+  {
+   "item": "D-comp-score-sets.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "Remove game confirm: Cancel keeps 2, Remove + Save stores 1 · checks: D-comp-score-sets.01"
+  },
+  {
+   "item": "D-comp-score.04",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "stopwatch up, 5-min timer down · checks: D-comp-score.04"
+  },
+  {
+   "item": "D-score-board.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "See stat definitions opens the definitions · checks: D-score-board.02"
+  },
+  {
+   "item": "D-comp-sublocations.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "court renamed in the wizard, stored, team page follows · checks: D-comp-sublocations.01"
+  },
+  {
+   "item": "D-match-format.13",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "fresh match sheet opens on Opener / Decider (Tiebreaker) · checks: D-match-format.13"
+  },
+  {
+   "item": "D-match-format.16",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "wizard change on a drawn competition: stage warning, Reset and save, playoff+consolation removed, pools kept · checks: D-match-format.16"
+  },
+  {
+   "item": "D-match-format.17",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "both Learn more links pressed, help opens · checks: D-match-format.17.formats, D-match-format.17.calculation"
+  },
+  {
+   "item": "D-match-share-image.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "PNG generated: 1080x1080, file(1) reads it · checks: D-match-share-image.02"
+  },
+  {
+   "item": "BUG Score values modal copy",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "one OK, singular \"1 point\", word-break normal; detector control reads Cancel+Confirm · checks: BUG.score-values, BUG.score-values.control"
+  },
+  {
+   "item": "BUG Draw tab hidden-matchups copy (started)",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "started competition copy · checks: BUG.draw-hidden-copy"
+  },
+  {
+   "item": "BUG single elimination seeding copy",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "\"Automatic: by the seeds\" · checks: BUG.single-elim-copy"
+  }
+ ]
+}
