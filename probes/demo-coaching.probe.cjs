@@ -31,8 +31,8 @@ const CJK = /[㐀-鿿]/;
 // what each site page must be (title words); anything else that answers 200 is the wrong page
 const SITE_EXPECT = [
   [/^\/$|^\/(uat\/)?hub\.html$/, /GripBat/], [/\/demo\.html$/, /Get started|即刻開始|立即开始/], [/\/compare\.html$/, /Reclub/],
-  [/\/how\.html$/, /How|點樣|怎么/], [/\/depth\.html$/, /depth|深入|In depth/i], [/\/features\.html$/, /feature|功能/i],
-  [/\/tutorial\.html$/, /Tutorial|教學|教程/], [/\/terms\.html$/, /Terms|條款|条款/], [/\/privacy\.html$/, /Privacy|私隱|隐私/],
+  [/\/how\.html$/, /How|點樣|怎么/], [/\/depth\.html$/, /depth|深入|In depth/i], [/\/features\.html$/, /Everything it does|feature|功能/i],
+  [/\/tutorial\.html$/, /tutorial|教學|教程/i], [/\/terms\.html$/, /Terms|條款|条款/], [/\/privacy\.html$/, /Privacy|私隱|隐私/],
 ];
 
 async function fetchText(url) {
