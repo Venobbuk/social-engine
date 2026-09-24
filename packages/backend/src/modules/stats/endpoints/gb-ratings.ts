@@ -32,6 +32,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.db)
 		private db: DataSource,
 	) {
-		super(meta, paramDef, async (ps) => ratingsOf(this.db, ps.userIds, ps.sport));
+		// SEC-RATING-VIEW-V1 (G15.3 addendum (c)): the chips as the caller may know them — a private game never moves them
+		super(meta, paramDef, async (ps, me) => ratingsOf(this.db, ps.userIds, ps.sport, me?.id ?? null));
 	}
 }
