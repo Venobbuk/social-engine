@@ -221,7 +221,7 @@ export class DuprSubmitService {
 	 * Never throws: { status: 0 } when hkpl is unreachable or unconfigured.
 	 */
 	@bindThis
-	public async connectDoor(path: 'sso-url' | 'verify' | 'ratings', body: Record<string, unknown> | null): Promise<{ status: number; json: Record<string, unknown> }> {
+	public async connectDoor(path: 'sso-url' | 'verify' | 'ratings' | 'ratings-batch', body: Record<string, unknown> | null): Promise<{ status: number; json: Record<string, unknown> }> {
 		if (!this.isConfigured()) return { status: 0, json: { reason: 'hkpl_unconfigured' } };
 		try {
 			const res = await this.httpRequestService.send(`${HKPL_URL}/api/v1/social/dupr/${path}`, {
