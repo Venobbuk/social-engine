@@ -18,6 +18,7 @@ import { ApiLoggerService } from '../../ApiLoggerService.js';
 import type { FindOptionsWhere } from 'typeorm';
 import type { DataSource } from 'typeorm';
 import { deletionOf } from '@/modules/account/deletion.js';   // USER-GONE-V2 (mop-up, E-player.02)
+import { lastActiveIfAllowed } from '@/server/api/endpoints/i/gb-prefs.js';   // FIX-S8 LAST-ACTIVE-OPTIN-V1
 
 export const meta = {
 	tags: ['users'],
@@ -213,9 +214,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					}
 				}
 
-				return await this.userEntityService.pack(user, me, {
+				const packed = await this.userEntityService.pack(user, me, {
 					schema: 'UserDetailed',
 				});
+				// LAST-ACTIVE-OPTIN-V1 (lane fix-S8, E-chat-room.01): Reclub's "Active 2h ago" — only for a member who allows it
+				// (i/gb-prefs lastActiveExact; default = Misskey's onlineStatus buckets) and never to a signed-out visitor.
+				if (me != null && user.host == null && packed.onlineStatus !== 'unknown') {
+					const at = await lastActiveIfAllowed(this.db, user.id).catch(() => null);
+					if (at) Object.assign(packed, { lastActiveAt: at });
+				}
+				return packed;
 			}
 		});
 	}

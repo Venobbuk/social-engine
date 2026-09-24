@@ -59,6 +59,15 @@ export const packedChatMessageSchema = {
 			type: 'boolean',
 			optional: true, nullable: false,
 		},
+		// INBOX-KIND-V1 (fix-S8): chat/history only — the module that owns the room (meet / club / competition), null = a plain group
+		roomManaged: {
+			type: 'string',
+			optional: true, nullable: true,
+		},
+		roomManagedId: {
+			type: 'string',
+			optional: true, nullable: true,
+		},
 		attachment: {
 			type: 'object',
 			optional: true, nullable: true,

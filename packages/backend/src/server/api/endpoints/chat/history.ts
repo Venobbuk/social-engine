@@ -9,6 +9,7 @@ import { DI } from '@/di-symbols.js';
 import { ChatService } from '@/core/ChatService.js';
 import { ChatEntityService } from '@/core/entities/ChatEntityService.js';
 import { ApiError } from '@/server/api/error.js';
+import type { DataSource } from 'typeorm';
 
 export const meta = {
 	tags: ['chat'],
@@ -42,6 +43,7 @@ export const paramDef = {
 @Injectable()
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(
+		@Inject(DI.db) private db: DataSource,
 		private chatEntityService: ChatEntityService,
 		private chatService: ChatService,
 	) {
@@ -58,6 +60,21 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 				for (const message of packedMessages) {
 					message.isRead = readStateMap[message.toRoomId!] ?? false;
+				}
+				// INBOX-KIND-V1 (lane fix-S8, E-inbox.08): the GripBat module that owns each room — one query for the page — so the
+				// inbox files a meet / competition chat under Activity, a club's under Clubs and a hand-made group under Direct
+				// (it filed every room under Clubs). EXTENDS native chat/history; the rule is ChatModeration.roomManagement's.
+				const ids = [...new Set(roomIds.filter(Boolean))];
+				if (ids.length) {
+					const rows = await this.db.query(`SELECT "chatRoomId" AS "roomId", 'club' AS kind, "channelId" AS id FROM "club_setting" WHERE "chatRoomId" = ANY($1)
+						UNION ALL SELECT "chatRoomId", 'meet', id FROM "meet" WHERE "chatRoomId" = ANY($1)
+						UNION ALL SELECT "chatRoomId", 'competition', id FROM "competition" WHERE "chatRoomId" = ANY($1)`, [ids]) as { roomId: string; kind: string; id: string }[];
+					const by = new Map(rows.map(r => [r.roomId, r]));
+					for (const message of packedMessages) {
+						const k = by.get(message.toRoomId!);
+						message.roomManaged = k ? k.kind : null;
+						message.roomManagedId = k ? k.id : null;
+					}
 				}
 			} else {
 				const otherIds = history.map(m => m.fromUserId === me.id ? m.toUserId! : m.fromUserId!);

@@ -231,6 +231,7 @@ export * as 'stats/gb-suggest' from '@/modules/stats/endpoints/gb-suggest.js'; /
 export * as 'stats/kudos-by-activity' from '@/modules/stats/endpoints/kudos-by-activity.js';
 export * as 'stats/kudos-awards' from '@/modules/stats/endpoints/kudos-awards.js'; // KUDOS-CHAT-V1
 export * as 'stats/kudos-awards/seen' from '@/modules/stats/endpoints/kudos-awards-seen.js'; // KUDOS-CHAT-V1
+export * as 'stats/kudos-awards/sandbox-date' from '@/modules/stats/endpoints/kudos-awards-sandbox-date.js'; // FIX-S8 AWARD-SANDBOX-DOOR-V1
 export * as 'stats/matches' from '@/modules/stats/endpoints/matches.js'; // STATS-HISTORY-V1
 export * as 'stats/match-summary' from '@/modules/stats/endpoints/match-summary.js'; // STATS-HISTORY-V1
 export * as 'stats/activities' from '@/modules/stats/endpoints/activities.js'; // STATS-HISTORY-V1
@@ -453,6 +454,7 @@ export * as 'hashtags/show' from './endpoints/hashtags/show.js';
 export * as 'hashtags/trend' from './endpoints/hashtags/trend.js';
 export * as 'hashtags/users' from './endpoints/hashtags/users.js';
 export * as 'i' from './endpoints/i.js';
+export * as 'i/gb-prefs' from './endpoints/i/gb-prefs.js'; // FIX-S8 LAST-ACTIVE-OPTIN-V1
 export * as 'i/2fa/done' from './endpoints/i/2fa/done.js';
 export * as 'i/2fa/key-done' from './endpoints/i/2fa/key-done.js';
 export * as 'i/2fa/password-less' from './endpoints/i/2fa/password-less.js';
