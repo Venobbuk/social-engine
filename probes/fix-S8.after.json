@@ -1,0 +1,728 @@
+{
+ "id": "fix-S8",
+ "phase": "after",
+ "at": "2026-09-24T20:31:50.228Z",
+ "run": "mitw",
+ "rows": {
+  "E-chat-room.01:setting": {
+   "ok": true,
+   "evidence": {
+    "control": true,
+    "clicked": true,
+    "finger": {
+     "found": true,
+     "w": 100,
+     "h": 41,
+     "atRest": true,
+     "atEnd": "offscreen",
+     "coveredBy": null,
+     "ok": true
+    },
+    "afterReload": "Exact time",
+    "stored": {
+     "lastActiveExact": true,
+     "hideOnlineStatus": false
+    },
+    "shot": "probes/fix-S8-shots/after-presence-setting.png"
+   }
+  },
+  "E-chat-room.01:privacy": {
+   "ok": true,
+   "evidence": {
+    "signedIn": "2026-09-24T20:19:13.002Z",
+    "anonymous": null,
+    "notOptedIn": null
+   }
+  },
+  "D-street-cred-leaderboard.02": {
+   "ok": true,
+   "evidence": {
+    "request": "{\"timeframe\":\"LAST_3_MONTHS\",\"limit\":30,\"month\":\"2026-09\",\"i\":\"…\"}",
+    "status": 200,
+    "emptyShown": false,
+    "amyOnBoard": true,
+    "month": "Sep 2026",
+    "shot": "probes/fix-S8-shots/after-board-all-month.png"
+   }
+  },
+  "D-street-cred-leaderboard.01": {
+   "ok": true,
+   "evidence": {
+    "chips": 3,
+    "firstCardTop": 304,
+    "filterBar": true,
+    "finger": {
+     "found": true,
+     "w": 53,
+     "h": 32,
+     "atRest": true,
+     "atEnd": "offscreen",
+     "coveredBy": null,
+     "ok": true
+    },
+    "shot": "probes/fix-S8-shots/after-board-fold.png"
+   }
+  },
+  "D-kudo-ranking.02:en": {
+   "ok": true,
+   "evidence": {
+    "finger": {
+     "found": true,
+     "w": 390,
+     "h": 25,
+     "atRest": true,
+     "atEnd": true,
+     "coveredBy": null,
+     "ok": true
+    },
+    "missing": [],
+    "url": "/app/pages/my-stats/index?pane=board&lang=en",
+    "from": "/app/pages/my-stats/index?pane=board&lang=en",
+    "shot": "probes/fix-S8-shots/after-learnmore-en.png"
+   }
+  },
+  "D-kudo-ranking.02:zh_Hant": {
+   "ok": true,
+   "evidence": {
+    "finger": {
+     "found": true,
+     "w": 390,
+     "h": 25,
+     "atRest": true,
+     "atEnd": true,
+     "coveredBy": null,
+     "ok": true
+    },
+    "missing": [],
+    "url": "/app/pages/my-stats/index?pane=board&lang=zh_Hant",
+    "from": "/app/pages/my-stats/index?pane=board&lang=zh_Hant",
+    "shot": "probes/fix-S8-shots/after-learnmore-zh_Hant.png"
+   }
+  },
+  "D-street-cred-by-activity.02": {
+   "ok": true,
+   "evidence": {
+    "finger": {
+     "found": true,
+     "w": 390,
+     "h": 32,
+     "atRest": true,
+     "atEnd": true,
+     "coveredBy": null,
+     "ok": true
+    },
+    "activitiesTotal": 32,
+    "rowsBefore": 30,
+    "rowsAfter": 32,
+    "request": "{\"timeframe\":\"LAST_3_MONTHS\",\"offset\":30,\"limit\":30,\"i\":\"…\"}",
+    "shot": "probes/fix-S8-shots/after-loadmore.png"
+   }
+  },
+  "A-user-kudos-summary.04": {
+   "ok": true,
+   "evidence": {
+    "line": "You haven’t earned any kudos for Erne yet.",
+    "shot": "probes/fix-S8-shots/after-self-erne.png"
+   }
+  },
+  "A-user-kudos-summary.01:gutter": {
+   "ok": true,
+   "evidence": {
+    "left": 16,
+    "text": "Endorsed by 32 people",
+    "shot": "probes/fix-S8-shots/after-endorsed-gutter.png"
+   }
+  },
+  "G15.4": {
+   "ok": true,
+   "evidence": {
+    "apiStatus": 200,
+    "authorIdInPayload": false,
+    "warnVisible": true,
+    "namedOnScreen": false,
+    "shot": "probes/fix-S8-shots/after-g154.png"
+   }
+  },
+  "D-award-showcase.01": {
+   "ok": true,
+   "evidence": {
+    "plantHadAward": false,
+    "month": "2026-06",
+    "popup": true,
+    "showcase": true,
+    "engineAwards": [
+     "ALL",
+     "Dinking",
+     "Heart"
+    ],
+    "shots": [
+     "probes/fix-S8-shots/after-award-popup.png",
+     "probes/fix-S8-shots/after-award-showcase.png"
+    ]
+   }
+  },
+  "E-chat-by-participants.02": {
+   "ok": true,
+   "evidence": {
+    "opacity": 0.45,
+    "disabled": true,
+    "finger": {
+     "found": true,
+     "w": 358,
+     "h": 36,
+     "atRest": true,
+     "atEnd": true,
+     "coveredBy": null,
+     "ok": true
+    },
+    "requestsOnTap": 0,
+    "placeholder": "例如：星期二夜球友",
+    "shot": "probes/fix-S8-shots/after-create-group.png"
+   }
+  },
+  "E-chat-room.02": {
+   "ok": true,
+   "evidence": {
+    "boyauOnScreen": false,
+    "head": "Back\nASK US ANYTHING — A PERSON ANSWERS.\nGripBat Team\nProfile\nChat settings\nSay hello 👋\nThe GripBat Team is offline right now — a person answers between 09:00 ",
+    "shot": "probes/fix-S8-shots/after-support-head.png"
+   }
+  },
+  "E-inbox.08": {
+   "ok": true,
+   "evidence": {
+    "groupUnderDirect": true,
+    "groupUnderClubs": false,
+    "shot": "probes/fix-S8-shots/after-inbox-clubs.png"
+   }
+  },
+  "E-inbox.avatars": {
+   "ok": true,
+   "evidence": {
+    "rows": 51,
+    "noLogo": 0,
+    "bareRank": 0,
+    "shot": "probes/fix-S8-shots/after-inbox-avatars.png"
+   }
+  },
+  "E-inbox.07": {
+   "ok": false,
+   "evidence": {
+    "finger": {
+     "found": true,
+     "w": 76,
+     "h": 94,
+     "atRest": false,
+     "ok": false
+    },
+    "transform": "matrix(1, 0, 0, 1, -152, 0)",
+    "muteButton": true,
+    "engineMuted": false,
+    "shot": "probes/fix-S8-shots/after-swipe-open.png"
+   }
+  },
+  "E-chat-settings.members-gutter": {
+   "ok": true,
+   "evidence": {
+    "left": 16,
+    "text": "Members · 3",
+    "shot": "probes/fix-S8-shots/after-members-gutter.png"
+   }
+  },
+  "E-chat-room.08:brand-link": {
+   "ok": true,
+   "evidence": {
+    "opened": [
+     "https://uat.gripbat.com/how.html"
+    ],
+    "shot": "probes/fix-S8-shots/after-brand-link.png"
+   }
+  },
+  "notification-wrap": {
+   "ok": false,
+   "evidence": {
+    "longBodyOnScreen": false,
+    "longUnbrokenWord": false,
+    "offScreen": [],
+    "docOverflowPx": 0,
+    "shot": "probes/fix-S8-shots/after-notif-wrap.png"
+   }
+  },
+  "D-comp-detail.59": {
+   "ok": true,
+   "evidence": {
+    "dialogAtFirstPaint": false,
+    "dialogAfterPause": true,
+    "dialogAgainAfterReload": false,
+    "shots": [
+     "probes/fix-S8-shots/after-comp-early.png",
+     "probes/fix-S8-shots/after-comp-later.png"
+    ]
+   }
+  },
+  "brand-fallback": {
+   "ok": true,
+   "evidence": {
+    "brand": "#0b192c",
+    "leagueHome": false,
+    "shot": "probes/fix-S8-shots/after-brand-fallback.png"
+   }
+  },
+  "league-words": {
+   "ok": true,
+   "evidence": {
+    "head": "Back\nStandings\nNo standings here yet — each competition shows its own standings on its page.\nHome\nDiscover\nCommunity\nInbox\nSee more",
+    "shot": "probes/fix-S8-shots/after-standings.png"
+   }
+  },
+  "E-chat-room.01:en": {
+   "ok": true,
+   "evidence": {
+    "head": "Back ACTIVE 29M AGO Mei Lam Profile Chat settings",
+    "minutesSinceMeiSet": 16,
+    "shot": "probes/fix-S8-shots/after-presence-en.png"
+   }
+  },
+  "E-chat-room.01:zh_Hant": {
+   "ok": true,
+   "evidence": {
+    "head": "返回 29 分鐘前在線 Mei Lam 個人檔案 聊天設定",
+    "minutesSinceMeiSet": 16,
+    "shot": "probes/fix-S8-shots/after-presence-zh_Hant.png"
+   }
+  },
+  "C-home.03": {
+   "ok": true,
+   "evidence": {
+    "finger": {
+     "found": true,
+     "w": 89,
+     "h": 32,
+     "atRest": true,
+     "atEnd": "offscreen",
+     "coveredBy": null,
+     "ok": true
+    },
+    "card": true,
+    "oneTap": true,
+    "url": "/app/pages/meet/index?id=arjjxsk4fril01vm&tab=kudos&give=1",
+    "gridOpen": true,
+    "shot": "probes/fix-S8-shots/after-home-give.png"
+   }
+  },
+  "A-give-meet-kudos.02": {
+   "ok": true,
+   "evidence": {
+    "line": "You have not given kudos in this meet yet. Tap Give kudos to thank the players you played with.",
+    "shot": "probes/fix-S8-shots/after-kudos-tab.png"
+   }
+  }
+ },
+ "api": {
+  "meets/create [probe] fix-S8 M1 mitw": "200 by mei",
+  "add [probe] fix-S8 M1 mitw": 200,
+  "meets/create [probe] fix-S8 award mitw": "200 by admin",
+  "add [probe] fix-S8 award mitw": 200,
+  "meets/create [probe] fix-S8 LM01 mitw": "200 by admin",
+  "add [probe] fix-S8 LM01 mitw": 200,
+  "meets/create [probe] fix-S8 LM02 mitw": "200 by admin",
+  "add [probe] fix-S8 LM02 mitw": 200,
+  "meets/create [probe] fix-S8 LM03 mitw": "200 by admin",
+  "add [probe] fix-S8 LM03 mitw": 200,
+  "meets/create [probe] fix-S8 LM04 mitw": "200 by admin",
+  "add [probe] fix-S8 LM04 mitw": 200,
+  "meets/create [probe] fix-S8 LM05 mitw": "200 by admin",
+  "add [probe] fix-S8 LM05 mitw": 200,
+  "meets/create [probe] fix-S8 LM06 mitw": "200 by admin",
+  "add [probe] fix-S8 LM06 mitw": 200,
+  "meets/create [probe] fix-S8 LM07 mitw": "200 by admin",
+  "add [probe] fix-S8 LM07 mitw": 200,
+  "meets/create [probe] fix-S8 LM08 mitw": "200 by admin",
+  "add [probe] fix-S8 LM08 mitw": 200,
+  "meets/create [probe] fix-S8 LM09 mitw": "200 by admin",
+  "add [probe] fix-S8 LM09 mitw": 200,
+  "meets/create [probe] fix-S8 LM10 mitw": "200 by admin",
+  "add [probe] fix-S8 LM10 mitw": 200,
+  "meets/create [probe] fix-S8 LM11 mitw": "200 by admin",
+  "add [probe] fix-S8 LM11 mitw": 200,
+  "meets/create [probe] fix-S8 LM12 mitw": "200 by admin",
+  "add [probe] fix-S8 LM12 mitw": 200,
+  "meets/create [probe] fix-S8 LM13 mitw": "200 by admin",
+  "add [probe] fix-S8 LM13 mitw": 200,
+  "meets/create [probe] fix-S8 LM14 mitw": "200 by admin",
+  "add [probe] fix-S8 LM14 mitw": 200,
+  "meets/create [probe] fix-S8 LM15 mitw": "200 by admin",
+  "add [probe] fix-S8 LM15 mitw": 200,
+  "meets/create [probe] fix-S8 LM16 mitw": "200 by admin",
+  "add [probe] fix-S8 LM16 mitw": 200,
+  "meets/create [probe] fix-S8 LM17 mitw": "200 by admin",
+  "add [probe] fix-S8 LM17 mitw": 200,
+  "meets/create [probe] fix-S8 LM18 mitw": "200 by admin",
+  "add [probe] fix-S8 LM18 mitw": 200,
+  "meets/create [probe] fix-S8 LM19 mitw": "200 by admin",
+  "add [probe] fix-S8 LM19 mitw": 200,
+  "meets/create [probe] fix-S8 LM20 mitw": "200 by admin",
+  "add [probe] fix-S8 LM20 mitw": 200,
+  "meets/create [probe] fix-S8 LM21 mitw": "200 by admin",
+  "add [probe] fix-S8 LM21 mitw": 200,
+  "meets/create [probe] fix-S8 LM22 mitw": "200 by admin",
+  "add [probe] fix-S8 LM22 mitw": 200,
+  "meets/create [probe] fix-S8 LM23 mitw": "200 by admin",
+  "add [probe] fix-S8 LM23 mitw": 200,
+  "meets/create [probe] fix-S8 LM24 mitw": "200 by admin",
+  "add [probe] fix-S8 LM24 mitw": 200,
+  "meets/create [probe] fix-S8 LM25 mitw": "200 by ken",
+  "add [probe] fix-S8 LM25 mitw": 200,
+  "meets/create [probe] fix-S8 LM26 mitw": "200 by ken",
+  "add [probe] fix-S8 LM26 mitw": 200,
+  "meets/create [probe] fix-S8 LM27 mitw": "200 by ken",
+  "add [probe] fix-S8 LM27 mitw": 200,
+  "meets/create [probe] fix-S8 LM28 mitw": "200 by ken",
+  "add [probe] fix-S8 LM28 mitw": 200,
+  "meets/create [probe] fix-S8 LM29 mitw": "200 by ken",
+  "add [probe] fix-S8 LM29 mitw": 200,
+  "meets/create [probe] fix-S8 LM30 mitw": "200 by ken",
+  "add [probe] fix-S8 LM30 mitw": 200,
+  "meets/create [probe] fix-S8 LM31 mitw": "200 by ken",
+  "add [probe] fix-S8 LM31 mitw": 200,
+  "competitions/create": 200,
+  "entry Ken": 200,
+  "entry Amy": 200,
+  "entry Mei": 200,
+  "comp publish": 200,
+  "comp start": 200,
+  "comp finish": 200,
+  "chat/rooms/create": 200,
+  "invite amy": 200,
+  "amy joins": 204,
+  "invite mei": 200,
+  "mei joins": 204,
+  "msg link": 200,
+  "kudos LM0": 200,
+  "kudos LM1": 200,
+  "kudos LM2": 200,
+  "kudos LM3": 200,
+  "kudos LM4": 200,
+  "kudos LM5": 200,
+  "kudos LM6": 200,
+  "kudos LM7": 200,
+  "kudos LM8": 200,
+  "kudos LM9": 200,
+  "kudos LM10": 200,
+  "kudos LM11": 200,
+  "kudos LM12": 200,
+  "kudos LM13": 200,
+  "kudos LM14": 200,
+  "kudos LM15": 200,
+  "kudos LM16": 200,
+  "kudos LM17": 200,
+  "kudos LM18": 200,
+  "kudos LM19": 200,
+  "kudos LM20": 200,
+  "kudos LM21": 200,
+  "kudos LM22": 200,
+  "kudos LM23": 200,
+  "kudos LM24": 200,
+  "kudos LM25": 200,
+  "kudos LM26": 200,
+  "kudos LM27": 200,
+  "kudos LM28": 200,
+  "kudos LM29": 200,
+  "kudos LM30": 200,
+  "kudos MA": 200,
+  "warning M1": 200,
+  "sandbox-date 2026-06": 200
+ },
+ "fx": {
+  "meets": [
+   {
+    "id": "arjjxsk4fril01vm",
+    "host": "mei"
+   },
+   {
+    "id": "arjjxsq5fril01vx",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxst2fril01w4",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxsvgfril01wb",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxsxsfril01wi",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxt2yfril01wp",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxt60fril01ww",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxt85fril01x3",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtakfril01xa",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtfffril01xh",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxthrfril01xo",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtklfril01xv",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtmufril01y2",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtotfril01y9",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtqsfril01yg",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtt8fril01yn",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtvcfril01yu",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtxefril01z1",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxtzjfril01z8",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxu1gfril01zf",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxu3qfril01zm",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxu64fril01zt",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxu88fril0200",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxualfril0207",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxue4fril020e",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxuh7fril020l",
+    "host": "admin"
+   },
+   {
+    "id": "arjjxujcfril020s",
+    "host": "ken"
+   },
+   {
+    "id": "arjjxulpfril020z",
+    "host": "ken"
+   },
+   {
+    "id": "arjjxuobfril0216",
+    "host": "ken"
+   },
+   {
+    "id": "arjjxurjfril021d",
+    "host": "ken"
+   },
+   {
+    "id": "arjjxuv3fril021k",
+    "host": "ken"
+   },
+   {
+    "id": "arjjxuxtfril021r",
+    "host": "ken"
+   },
+   {
+    "id": "arjjxv0mfril021y",
+    "host": "ken"
+   }
+  ],
+  "reviews": [],
+  "support": "ar8tjvsqvskd0028",
+  "lastStart": 1790281963923,
+  "lmHost": {
+   "arjjxsk4fril01vm": "mei",
+   "arjjxsq5fril01vx": "admin",
+   "arjjxst2fril01w4": "admin",
+   "arjjxsvgfril01wb": "admin",
+   "arjjxsxsfril01wi": "admin",
+   "arjjxt2yfril01wp": "admin",
+   "arjjxt60fril01ww": "admin",
+   "arjjxt85fril01x3": "admin",
+   "arjjxtakfril01xa": "admin",
+   "arjjxtfffril01xh": "admin",
+   "arjjxthrfril01xo": "admin",
+   "arjjxtklfril01xv": "admin",
+   "arjjxtmufril01y2": "admin",
+   "arjjxtotfril01y9": "admin",
+   "arjjxtqsfril01yg": "admin",
+   "arjjxtt8fril01yn": "admin",
+   "arjjxtvcfril01yu": "admin",
+   "arjjxtxefril01z1": "admin",
+   "arjjxtzjfril01z8": "admin",
+   "arjjxu1gfril01zf": "admin",
+   "arjjxu3qfril01zm": "admin",
+   "arjjxu64fril01zt": "admin",
+   "arjjxu88fril0200": "admin",
+   "arjjxualfril0207": "admin",
+   "arjjxue4fril020e": "admin",
+   "arjjxuh7fril020l": "admin",
+   "arjjxujcfril020s": "ken",
+   "arjjxulpfril020z": "ken",
+   "arjjxuobfril0216": "ken",
+   "arjjxurjfril021d": "ken",
+   "arjjxuv3fril021k": "ken",
+   "arjjxuxtfril021r": "ken",
+   "arjjxv0mfril021y": "ken"
+  },
+  "m1": "arjjxsk4fril01vm",
+  "m1Start": 1790281960708,
+  "ma": "arjjxsq5fril01vx",
+  "lm": [
+   "arjjxst2fril01w4",
+   "arjjxsvgfril01wb",
+   "arjjxsxsfril01wi",
+   "arjjxt2yfril01wp",
+   "arjjxt60fril01ww",
+   "arjjxt85fril01x3",
+   "arjjxtakfril01xa",
+   "arjjxtfffril01xh",
+   "arjjxthrfril01xo",
+   "arjjxtklfril01xv",
+   "arjjxtmufril01y2",
+   "arjjxtotfril01y9",
+   "arjjxtqsfril01yg",
+   "arjjxtt8fril01yn",
+   "arjjxtvcfril01yu",
+   "arjjxtxefril01z1",
+   "arjjxtzjfril01z8",
+   "arjjxu1gfril01zf",
+   "arjjxu3qfril01zm",
+   "arjjxu64fril01zt",
+   "arjjxu88fril0200",
+   "arjjxualfril0207",
+   "arjjxue4fril020e",
+   "arjjxuh7fril020l",
+   "arjjxujcfril020s",
+   "arjjxulpfril020z",
+   "arjjxuobfril0216",
+   "arjjxurjfril021d",
+   "arjjxuv3fril021k",
+   "arjjxuxtfril021r",
+   "arjjxv0mfril021y"
+  ],
+  "comp": "arjjxv2yfril0225",
+  "room": "arjjxvfifril022q",
+  "meiPrefSetAt": 1790281923838,
+  "awardMonth": "2026-06"
+ },
+ "errors": [],
+ "cleanup": {
+  "award": "200 {\"reviewId\":\"arjjz4m7fril024z\",\"createdAt\":\"2026-09-24T20:48:50.737Z\",\"clearedAwards\":3}",
+  "meiPref": {
+   "lastActiveExact": false,
+   "hideOnlineStatus": false
+  },
+  "rv arjjz4hgfril024l": 204,
+  "rv arjjz4hwfril024n": 204,
+  "rv arjjz4iifril024p": 204,
+  "rv arjjz4j6fril024r": 204,
+  "rv arjjz4jofril024t": 204,
+  "rv arjjz4kcfril024v": 204,
+  "rv arjjz4l0fril024x": 204,
+  "rv arjjz4obfril0251": 204,
+  "rv arjjz4m7fril024z": 204,
+  "rv arjjz3t8fril0239": 204,
+  "rv arjjz3u4fril023b": 204,
+  "rv arjjz3unfril023d": 204,
+  "rv arjjz3vyfril023f": 204,
+  "rv arjjz3wwfril023h": 204,
+  "rv arjjz3ycfril023j": 204,
+  "rv arjjz3zhfril023l": 204,
+  "rv arjjz40nfril023n": 204,
+  "rv arjjz41sfril023p": 204,
+  "rv arjjz42pfril023r": 204,
+  "rv arjjz43gfril023t": 204,
+  "rv arjjz44jfril023v": 204,
+  "rv arjjz45bfril023x": 204,
+  "rv arjjz46qfril023z": 204,
+  "rv arjjz47sfril0241": 204,
+  "rv arjjz48jfril0243": 204,
+  "rv arjjz49wfril0245": 204,
+  "rv arjjz4aqfril0247": 204,
+  "rv arjjz4brfril0249": 204,
+  "rv arjjz4cmfril024b": 204,
+  "rv arjjz4d9fril024d": 204,
+  "rv arjjz4e9fril024f": 204,
+  "rv arjjz4fafril024h": 204,
+  "rv arjjz4gdfril024j": 204,
+  "meet arjjxsk4fril01vm": "cancel 200 delete 400 room 204",
+  "meet arjjxsq5fril01vx": "cancel 200 delete 400 room 204",
+  "meet arjjxst2fril01w4": "cancel 200 delete 400 room 204",
+  "meet arjjxsvgfril01wb": "cancel 200 delete 400 room 204",
+  "meet arjjxsxsfril01wi": "cancel 200 delete 400 room 204",
+  "meet arjjxt2yfril01wp": "cancel 200 delete 400 room 204",
+  "meet arjjxt60fril01ww": "cancel 200 delete 400 room 204",
+  "meet arjjxt85fril01x3": "cancel 200 delete 400 room 204",
+  "meet arjjxtakfril01xa": "cancel 200 delete 400 room 204",
+  "meet arjjxtfffril01xh": "cancel 200 delete 400 room 204",
+  "meet arjjxthrfril01xo": "cancel 200 delete 400 room 204",
+  "meet arjjxtklfril01xv": "cancel 200 delete 400 room 204",
+  "meet arjjxtmufril01y2": "cancel 200 delete 400 room 204",
+  "meet arjjxtotfril01y9": "cancel 200 delete 400 room 204",
+  "meet arjjxtqsfril01yg": "cancel 200 delete 400 room 204",
+  "meet arjjxtt8fril01yn": "cancel 200 delete 400 room 204",
+  "meet arjjxtvcfril01yu": "cancel 200 delete 400 room 204",
+  "meet arjjxtxefril01z1": "cancel 200 delete 400 room 204",
+  "meet arjjxtzjfril01z8": "cancel 200 delete 400 room 204",
+  "meet arjjxu1gfril01zf": "cancel 200 delete 400 room 204",
+  "meet arjjxu3qfril01zm": "cancel 200 delete 400 room 204",
+  "meet arjjxu64fril01zt": "cancel 200 delete 400 room 204",
+  "meet arjjxu88fril0200": "cancel 200 delete 400 room 204",
+  "meet arjjxualfril0207": "cancel 200 delete 400 room 204",
+  "meet arjjxue4fril020e": "cancel 200 delete 400 room 204",
+  "meet arjjxuh7fril020l": "cancel 200 delete 400 room 204",
+  "meet arjjxujcfril020s": "cancel 200 delete 400 room 204",
+  "meet arjjxulpfril020z": "cancel 200 delete 400 room 204",
+  "meet arjjxuobfril0216": "cancel 200 delete 400 room 204",
+  "meet arjjxurjfril021d": "cancel 200 delete 400 room 204",
+  "meet arjjxuv3fril021k": "cancel 200 delete 400 room 204",
+  "meet arjjxuxtfril021r": "cancel 200 delete 400 room 204",
+  "meet arjjxv0mfril021y": "cancel 200 delete 400 room 204",
+  "comp": 400,
+  "room": 204,
+  "awardsLeftForAmy": 0
+ },
+ "minutes": 17
+}

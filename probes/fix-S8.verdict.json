@@ -1,0 +1,498 @@
+{
+ "id": "fix-S8",
+ "at": "2026-09-24T21:49:19.928Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  {
+   "rows": [
+    {
+     "probeRow": "D-kudo-ranking.02:en",
+     "s8Row": "D-kudo-ranking.02",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → better",
+     "why": "Learn more opens the kudos / Street Cred article in place (18 kudos, 3 per player, how Street Cred is counted, monthly awards, where to see yours) in EN/繁/简 — Reclub sends you to a web help page; no dead end",
+     "evidence": {
+      "finger": {
+       "found": true,
+       "w": 390,
+       "h": 25,
+       "atRest": true,
+       "atEnd": true,
+       "coveredBy": null,
+       "ok": true
+      },
+      "missing": [],
+      "url": "/app/pages/my-stats/index?pane=board&lang=en",
+      "from": "/app/pages/my-stats/index?pane=board&lang=en",
+      "shot": "probes/fix-S8-shots/after-learnmore-en.png"
+     }
+    },
+    {
+     "probeRow": "D-kudo-ranking.02:zh_Hant",
+     "s8Row": "D-kudo-ranking.02",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → better",
+     "why": "繁 render of the same article",
+     "evidence": {
+      "finger": {
+       "found": true,
+       "w": 390,
+       "h": 25,
+       "atRest": true,
+       "atEnd": true,
+       "coveredBy": null,
+       "ok": true
+      },
+      "missing": [],
+      "url": "/app/pages/my-stats/index?pane=board&lang=zh_Hant",
+      "from": "/app/pages/my-stats/index?pane=board&lang=zh_Hant",
+      "shot": "probes/fix-S8-shots/after-learnmore-zh_Hant.png"
+     }
+    },
+    {
+     "probeRow": "E-chat-room.01:setting",
+     "s8Row": "E-chat-room.01",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal (trust+)",
+     "why": "chose an OPT-IN exact \"Active 2h ago\" over Reclub's always-on exact time: privacy first (G15.0) — buckets by default, exact only if the person allows it, hidden possible (native hideOnlineStatus); the choice persists across reload",
+     "evidence": {
+      "control": true,
+      "clicked": true,
+      "finger": {
+       "found": true,
+       "w": 100,
+       "h": 41,
+       "atRest": true,
+       "atEnd": "offscreen",
+       "coveredBy": null,
+       "ok": true
+      },
+      "afterReload": "Exact time",
+      "stored": {
+       "lastActiveExact": true,
+       "hideOnlineStatus": false
+      },
+      "shot": "probes/fix-S8-shots/after-presence-setting.png"
+     }
+    },
+    {
+     "probeRow": "E-chat-room.01:privacy",
+     "s8Row": "E-chat-room.01",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal (trust+)",
+     "why": "the engine gives the exact time only to signed-in viewers of a member who opted in",
+     "evidence": {
+      "signedIn": "2026-09-24T20:19:13.002Z",
+      "anonymous": null,
+      "notOptedIn": null
+     }
+    },
+    {
+     "probeRow": "E-chat-room.01:en",
+     "s8Row": "E-chat-room.01",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal (trust+)",
+     "why": "the other party sees \"Active N m ago\" in the chat header, as Reclub — when allowed",
+     "evidence": {
+      "head": "Back ACTIVE 29M AGO Mei Lam Profile Chat settings",
+      "minutesSinceMeiSet": 16,
+      "shot": "probes/fix-S8-shots/after-presence-en.png"
+     }
+    },
+    {
+     "probeRow": "E-chat-room.01:zh_Hant",
+     "s8Row": "E-chat-room.01",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal (trust+)",
+     "why": "繁 render of the header",
+     "evidence": {
+      "head": "返回 29 分鐘前在線 Mei Lam 個人檔案 聊天設定",
+      "minutesSinceMeiSet": 16,
+      "shot": "probes/fix-S8-shots/after-presence-zh_Hant.png"
+     }
+    },
+    {
+     "probeRow": "D-award-showcase.01",
+     "s8Row": "D-award-showcase.01",
+     "before": "pass",
+     "after": "pass",
+     "vsReclub": "NOT-VERIFIED → equal",
+     "why": "the monthly MOST STREET CRED award produced by the real read path (kudos dated into a closed month through the sandbox door, no SQL): popup on Home + Awards on the profile",
+     "evidence": {
+      "plantHadAward": false,
+      "month": "2026-06",
+      "popup": true,
+      "showcase": true,
+      "engineAwards": [
+       "ALL",
+       "Dinking",
+       "Heart"
+      ],
+      "shots": [
+       "probes/fix-S8-shots/after-award-popup.png",
+       "probes/fix-S8-shots/after-award-showcase.png"
+      ]
+     }
+    },
+    {
+     "probeRow": "D-street-cred-by-activity.02",
+     "s8Row": "D-street-cred-by-activity.02",
+     "before": "pass",
+     "after": "pass",
+     "vsReclub": "NOT-VERIFIED → equal",
+     "why": "31 kudos'd [probe] activities: Load more asks for offset 30 and the 31st arrives, as Reclub",
+     "evidence": {
+      "finger": {
+       "found": true,
+       "w": 390,
+       "h": 32,
+       "atRest": true,
+       "atEnd": true,
+       "coveredBy": null,
+       "ok": true
+      },
+      "activitiesTotal": 32,
+      "rowsBefore": 30,
+      "rowsAfter": 32,
+      "request": "{\"timeframe\":\"LAST_3_MONTHS\",\"offset\":30,\"limit\":30,\"i\":\"…\"}",
+      "shot": "probes/fix-S8-shots/after-loadmore.png"
+     }
+    },
+    {
+     "probeRow": "D-street-cred-leaderboard.02",
+     "s8Row": "D-street-cred-leaderboard.02",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "equal(issue) → equal",
+     "why": "root cause captured: the board sent gender:null → engine 400 INVALID_PARAM → drawn as \"No kudos\"; now no null keys, the month board shows its players",
+     "evidence": {
+      "request": "{\"timeframe\":\"LAST_3_MONTHS\",\"limit\":30,\"month\":\"2026-09\",\"i\":\"…\"}",
+      "status": 200,
+      "emptyShown": false,
+      "amyOnBoard": true,
+      "month": "Sep 2026",
+      "shot": "probes/fix-S8-shots/after-board-all-month.png"
+     }
+    },
+    {
+     "probeRow": "D-street-cred-leaderboard.01",
+     "s8Row": "D-street-cred-leaderboard.01",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → better",
+     "why": "one filter row (kind · period · gender) + a sheet instead of ~30 chips: the podium cards start above the fold at 390 px; header says the board is live",
+     "evidence": {
+      "chips": 3,
+      "firstCardTop": 304,
+      "filterBar": true,
+      "finger": {
+       "found": true,
+       "w": 53,
+       "h": 32,
+       "atRest": true,
+       "atEnd": "offscreen",
+       "coveredBy": null,
+       "ok": true
+      },
+      "shot": "probes/fix-S8-shots/after-board-fold.png"
+     }
+    },
+    {
+     "probeRow": "A-user-kudos-summary.04",
+     "s8Row": "A-user-kudos-summary.04",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → better",
+     "why": "\"You haven't earned any kudos for Erne yet.\" + live updates (Reclub: daily)",
+     "evidence": {
+      "line": "You haven’t earned any kudos for Erne yet.",
+      "shot": "probes/fix-S8-shots/after-self-erne.png"
+     }
+    },
+    {
+     "probeRow": "A-user-kudos-summary.01:gutter",
+     "s8Row": "A-user-kudos-summary.01",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal*",
+     "why": "the Endorsed-by line sits on the 16 px rail (*the \"1 people\" plural is lane fix-S6's PLURALS-V1, live on master 02d06d3)",
+     "evidence": {
+      "left": 16,
+      "text": "Endorsed by 32 people",
+      "shot": "probes/fix-S8-shots/after-endorsed-gutter.png"
+     }
+    },
+    {
+     "probeRow": "C-home.03",
+     "s8Row": "C-home.03",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "one tap on Home's Give kudos opens the give-kudos grid (?tab=kudos&give=1), as Reclub",
+     "evidence": {
+      "finger": {
+       "found": true,
+       "w": 89,
+       "h": 32,
+       "atRest": true,
+       "atEnd": "offscreen",
+       "coveredBy": null,
+       "ok": true
+      },
+      "card": true,
+      "oneTap": true,
+      "url": "/app/pages/meet/index?id=arjjxsk4fril01vm&tab=kudos&give=1",
+      "gridOpen": true,
+      "shot": "probes/fix-S8-shots/after-home-give.png"
+     }
+    },
+    {
+     "probeRow": "A-give-meet-kudos.02",
+     "s8Row": "A-give-meet-kudos.02",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "the Kudos tab says \"Tap Give kudos…\" — one route, no contradiction",
+     "evidence": {
+      "line": "You have not given kudos in this meet yet. Tap Give kudos to thank the players you played with.",
+      "shot": "probes/fix-S8-shots/after-kudos-tab.png"
+     }
+    },
+    {
+     "probeRow": "D-comp-detail.59",
+     "s8Row": "D-comp-detail.59",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal*",
+     "why": "the Congratulations popup no longer covers the page as it draws; once per reader, a moment later (*plural: fix-S6)",
+     "evidence": {
+      "dialogAtFirstPaint": false,
+      "dialogAfterPause": true,
+      "dialogAgainAfterReload": false,
+      "shots": [
+       "probes/fix-S8-shots/after-comp-early.png",
+       "probes/fix-S8-shots/after-comp-later.png"
+      ]
+     }
+    },
+    {
+     "probeRow": "E-chat-by-participants.02",
+     "s8Row": "E-chat-by-participants.02",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "Create group looks disabled (BTN-DISABLED-LOOK-V1, every disabled Btn app-wide) and sends nothing with nobody picked; 繁 placeholder 球友 (not 波友)",
+     "evidence": {
+      "opacity": 0.45,
+      "disabled": true,
+      "finger": {
+       "found": true,
+       "w": 358,
+       "h": 36,
+       "atRest": true,
+       "atEnd": true,
+       "coveredBy": null,
+       "ok": true
+      },
+      "requestsOnTap": 0,
+      "placeholder": "例如：星期二夜球友",
+      "shot": "probes/fix-S8-shots/after-create-group.png"
+     }
+    },
+    {
+     "probeRow": "E-chat-room.02",
+     "s8Row": "E-chat-room.02",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "the GripBat Team thread shows \"Ask us anything — a person answers.\" — no legacy @boyau anywhere (SUPPORT-HANDLE-V1)",
+     "evidence": {
+      "boyauOnScreen": false,
+      "head": "Back\nASK US ANYTHING — A PERSON ANSWERS.\nGripBat Team\nProfile\nChat settings\nSay hello 👋\nThe GripBat Team is offline right now — a person answers between 09:00 ",
+      "shot": "probes/fix-S8-shots/after-support-head.png"
+     }
+    },
+    {
+     "probeRow": "E-inbox.08",
+     "s8Row": "E-inbox.08",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "a hand-made group is filed under Direct (Reclub group DM), meet/competition chats under Activity, club chats under Clubs (engine roomManaged)",
+     "evidence": {
+      "groupUnderDirect": true,
+      "groupUnderClubs": false,
+      "shot": "probes/fix-S8-shots/after-inbox-clubs.png"
+     }
+    },
+    {
+     "probeRow": "E-inbox.avatars",
+     "s8Row": "E-inbox (quality)",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "every inbox row carries a picture — no bare \"•\" / weekday in the avatar slot",
+     "evidence": {
+      "rows": 24,
+      "noLogo": 0,
+      "bareRank": 0,
+      "shot": "probes/fix-S8-shots/after-inbox-avatars.png"
+     }
+    },
+    {
+     "probeRow": "E-inbox.07",
+     "s8Row": "E-inbox.07",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "equal(issue) → better",
+     "why": "swipe left → Mute / Archive as Reclub, and the ⋯ stays for mouse / keyboard",
+     "evidence": {
+      "finger": {
+       "found": true,
+       "w": 76,
+       "h": 261,
+       "atRest": true,
+       "ok": true
+      },
+      "transform": "matrix(1, 0, 0, 1, -152, 0)",
+      "muteButton": true,
+      "muteRequest": {
+       "at": 1790286270343,
+       "url": "/api/chat/rooms/mute",
+       "status": 204
+      },
+      "engineMuted": true,
+      "shot": "probes/fix-S8-shots/after-swipe-open.png"
+     }
+    },
+    {
+     "probeRow": "E-chat-settings.members-gutter",
+     "s8Row": "E-chat-settings (quality)",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "\"Members · N\" on the 16 px rail",
+     "evidence": {
+      "left": 16,
+      "text": "Members · 3",
+      "shot": "probes/fix-S8-shots/after-members-gutter.png"
+     }
+    },
+    {
+     "probeRow": "E-chat-room.08:brand-link",
+     "s8Row": "E-chat-room.08",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "equal(issue) → equal",
+     "why": "a gripbat.com link in a UAT chat opens uat.gripbat.com (the environment you are in)",
+     "evidence": {
+      "opened": [
+       "https://uat.gripbat.com/how.html"
+      ],
+      "shot": "probes/fix-S8-shots/after-brand-link.png"
+     }
+    },
+    {
+     "probeRow": "notification-wrap",
+     "s8Row": "notifications (quality)",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "a long unbroken notification body wraps inside 390 px",
+     "evidence": {
+      "longBodyOnScreen": false,
+      "longUnbrokenWord": true,
+      "offScreen": [],
+      "docOverflowPx": 0,
+      "shot": "probes/fix-S8-shots/after-notif-wrap.png"
+     }
+    },
+    {
+     "probeRow": "brand-fallback",
+     "s8Row": "brand (mop-up note)",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "hkpl tenant record unreadable → /app/ is still GripBat (navy, GripBat home), never the league",
+     "evidence": {
+      "brand": "#0b192c",
+      "leagueHome": false,
+      "shot": "probes/fix-S8-shots/after-brand-fallback.png"
+     }
+    },
+    {
+     "probeRow": "league-words",
+     "s8Row": "E-chat-room.02 family (legacy words)",
+     "before": "fail",
+     "after": "pass",
+     "vsReclub": "worse → equal",
+     "why": "no \"League Standings\" / \"Your league\" on GripBat",
+     "evidence": {
+      "head": "Back\nStandings\nNo standings here yet — each competition shows its own standings on its page.\nHome\nDiscover\nCommunity\nInbox\nSee more",
+      "shot": "probes/fix-S8-shots/after-standings.png"
+     }
+    },
+    {
+     "probeRow": "G15.4",
+     "s8Row": "G15.4",
+     "before": "pass",
+     "after": "pass",
+     "vsReclub": "ok → ok",
+     "why": "a warning's author is anonymous to the warned player (API payload + screen)",
+     "evidence": {
+      "apiStatus": 200,
+      "authorIdInPayload": false,
+      "warnVisible": true,
+      "namedOnScreen": false,
+      "shot": "probes/fix-S8-shots/after-g154.png"
+     }
+    }
+   ]
+  },
+  {
+   "afterFails": [],
+   "plantBlind": [],
+   "webkitFails": [],
+   "cleanupErrors": []
+  },
+  {
+   "before": {
+    "at": "2026-09-24T18:48:45.202Z",
+    "run": "xyfm",
+    "pass": 3,
+    "of": 26
+   },
+   "after": {
+    "at": "2026-09-24T20:31:50.228Z",
+    "run": "mitw",
+    "pass": 26,
+    "of": 26,
+    "minutes": 17
+   },
+   "webkit": {
+    "at": "2026-09-24T21:05:55.993Z",
+    "pass": 8,
+    "of": 8
+   }
+  },
+  {
+   "notVerified": {
+    "E-chat-room.14": "CSAT from the support account through its own sign-in — NOT done: the GripBat Team account has no sign-in of its own (no password, no SSO link); the staff→support session door this lane drafted was refused by the permission classifier, so it was not built. Operator decision needed (see lane note)."
+   }
+  },
+  {
+   "parked": [
+    "E-chat-room.09 Translate",
+    "E-chat-room.17 GIFs",
+    "E-giphy.01"
+   ]
+  }
+ ]
+}

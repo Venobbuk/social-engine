@@ -1,0 +1,125 @@
+{
+ "id": "fix-S8",
+ "phase": "after",
+ "at": "2026-09-24T21:42:00.293Z",
+ "run": "4rc4",
+ "rows": {
+  "E-chat-by-participants.02": {
+   "ok": true,
+   "evidence": {
+    "opacity": 0.45,
+    "disabled": true,
+    "finger": {
+     "found": true,
+     "w": 358,
+     "h": 36,
+     "atRest": true,
+     "atEnd": true,
+     "coveredBy": null,
+     "ok": true
+    },
+    "requestsOnTap": 0,
+    "placeholder": "例如：星期二夜球友",
+    "shot": "probes/fix-S8-shots/after-create-group.png"
+   }
+  },
+  "E-chat-room.02": {
+   "ok": true,
+   "evidence": {
+    "boyauOnScreen": false,
+    "head": "Back\nASK US ANYTHING — A PERSON ANSWERS.\nGripBat Team\nProfile\nChat settings\nSay hello 👋\nThe GripBat Team is offline right now — a person answers between 09:00 ",
+    "shot": "probes/fix-S8-shots/after-support-head.png"
+   }
+  },
+  "E-inbox.08": {
+   "ok": true,
+   "evidence": {
+    "groupUnderDirect": true,
+    "groupUnderClubs": false,
+    "shot": "probes/fix-S8-shots/after-inbox-clubs.png"
+   }
+  },
+  "E-inbox.avatars": {
+   "ok": true,
+   "evidence": {
+    "rows": 24,
+    "noLogo": 0,
+    "bareRank": 0,
+    "shot": "probes/fix-S8-shots/after-inbox-avatars.png"
+   }
+  },
+  "E-inbox.07": {
+   "ok": true,
+   "evidence": {
+    "finger": {
+     "found": true,
+     "w": 76,
+     "h": 261,
+     "atRest": true,
+     "ok": true
+    },
+    "transform": "matrix(1, 0, 0, 1, -152, 0)",
+    "muteButton": true,
+    "muteRequest": {
+     "at": 1790286270343,
+     "url": "/api/chat/rooms/mute",
+     "status": 204
+    },
+    "engineMuted": true,
+    "shot": "probes/fix-S8-shots/after-swipe-open.png"
+   }
+  },
+  "E-chat-settings.members-gutter": {
+   "ok": true,
+   "evidence": {
+    "left": 16,
+    "text": "Members · 3",
+    "shot": "probes/fix-S8-shots/after-members-gutter.png"
+   }
+  },
+  "E-chat-room.08:brand-link": {
+   "ok": true,
+   "evidence": {
+    "opened": [
+     "https://uat.gripbat.com/how.html"
+    ],
+    "shot": "probes/fix-S8-shots/after-brand-link.png"
+   }
+  },
+  "notification-wrap": {
+   "ok": true,
+   "evidence": {
+    "longBodyOnScreen": false,
+    "longUnbrokenWord": true,
+    "offScreen": [],
+    "docOverflowPx": 0,
+    "shot": "probes/fix-S8-shots/after-notif-wrap.png"
+   }
+  }
+ },
+ "api": {
+  "chat/rooms/create": 200,
+  "invite amy": 200,
+  "amy joins": 204,
+  "invite mei": 200,
+  "mei joins": 204,
+  "msg link": 200,
+  "msg long mention": 200
+ },
+ "fx": {
+  "meets": [],
+  "reviews": [],
+  "support": "ar8tjvsqvskd0028",
+  "room": "arjmg0z6fril032z"
+ },
+ "errors": [],
+ "cleanup": {
+  "meiPref": {
+   "lastActiveExact": false,
+   "hideOnlineStatus": false
+  },
+  "room": 204,
+  "awardsLeftForAmy": 0
+ },
+ "minutes": 4
+}

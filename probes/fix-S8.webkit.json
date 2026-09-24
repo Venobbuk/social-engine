@@ -1,0 +1,143 @@
+{
+ "id": "fix-S8-webkit",
+ "engine": "webkit",
+ "at": "2026-09-24T21:05:55.993Z",
+ "rows": {
+  "street-cred:en": {
+   "ok": true,
+   "evidence": {
+    "filterFinger": {
+     "found": true,
+     "w": 53,
+     "h": 32,
+     "atRest": true,
+     "atEnd": "offscreen",
+     "ok": true
+    },
+    "learnMoreFinger": {
+     "found": true,
+     "w": 390,
+     "h": 25,
+     "atRest": true,
+     "atEnd": true,
+     "ok": true
+    },
+    "firstCardTop": 304,
+    "article": true,
+    "clippedLines": 0
+   }
+  },
+  "street-cred:zh_Hant": {
+   "ok": true,
+   "evidence": {
+    "filterFinger": {
+     "found": true,
+     "w": 48,
+     "h": 32,
+     "atRest": true,
+     "atEnd": "offscreen",
+     "ok": true
+    },
+    "learnMoreFinger": {
+     "found": true,
+     "w": 390,
+     "h": 25,
+     "atRest": true,
+     "atEnd": true,
+     "ok": true
+    },
+    "firstCardTop": 286,
+    "article": true,
+    "clippedLines": 0
+   }
+  },
+  "support-head:en": {
+   "ok": true,
+   "evidence": {
+    "boyau": false,
+    "sendFinger": {
+     "found": true,
+     "w": 42,
+     "h": 42,
+     "atRest": true,
+     "atEnd": true,
+     "ok": true
+    }
+   }
+  },
+  "support-head:zh_Hans": {
+   "ok": true,
+   "evidence": {
+    "boyau": false,
+    "sendFinger": {
+     "found": true,
+     "w": 42,
+     "h": 42,
+     "atRest": true,
+     "atEnd": true,
+     "ok": true
+    }
+   }
+  },
+  "create-group:zh_Hant": {
+   "ok": true,
+   "evidence": {
+    "opacity": 0.45,
+    "placeholder": "例如：星期二夜球友",
+    "finger": {
+     "found": true,
+     "w": 358,
+     "h": 36,
+     "atRest": true,
+     "atEnd": true,
+     "ok": true
+    }
+   }
+  },
+  "inbox-avatars": {
+   "ok": true,
+   "evidence": {
+    "rows": 22,
+    "withLogo": 22
+   }
+  },
+  "presence-setting:zh_Hans": {
+   "ok": true,
+   "evidence": {
+    "chips": [
+     {
+      "found": true,
+      "w": 90,
+      "h": 41,
+      "atRest": true,
+      "atEnd": true,
+      "ok": true
+     },
+     {
+      "found": true,
+      "w": 60,
+      "h": 41,
+      "atRest": true,
+      "atEnd": true,
+      "ok": true
+     },
+     {
+      "found": true,
+      "w": 75,
+      "h": 41,
+      "atRest": true,
+      "atEnd": true,
+      "ok": true
+     }
+    ]
+   }
+  },
+  "brand-fallback": {
+   "ok": true,
+   "evidence": {
+    "brand": "#0b192c",
+    "league": false
+   }
+  }
+ }
+}
