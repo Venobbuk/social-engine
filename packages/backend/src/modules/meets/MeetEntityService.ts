@@ -88,6 +88,7 @@ export class MeetEntityService {
 			duprDoubles: level?.duprDoubles ?? null,
 			duprConnected: !!(level && level.duprId),
 			forceSkill: p.forceSkill ?? null,   // T3-MEET-HOST-V1 (A-generate-teams.04): the host's per-meet skill override the team balancer reads
+			forcePosition: p.forcePosition ?? null,   // FIX-S5 FORCE-POSITION-V1 (A-generate-teams.04): Reclub Force position — the team balancer reads it
 		};
 	}
 

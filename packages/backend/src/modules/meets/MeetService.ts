@@ -746,6 +746,67 @@ export class MeetService {
 	}
 
 	/**
+	 * FIX-S5 HOST-SWAP-V1 (2026-09-24; Reclub A-roles-action.12 — participant sheet › More › `common:swap` → add-from-community):
+	 * the HOST puts another player into a confirmed participant's seat. EXTENDS MEET-SWAP-V1 (swapSeat below): the same
+	 * seat-in-place rules (the row keeps its roster place, team and court; the confirmed count never moves; nobody on the
+	 * waitlist is skipped), the same checks on the new player (not blocked with a host, inside the level band, may see a
+	 * private meet — G15.5), refused once the meet has started. The seat may be a player, a reserved spot or a +1; a host
+	 * row never. A player swapped out is told the way Remove tells them (their +1 guests leave with them, as Remove does)
+	 * and leaves the chat; the new player is told they are confirmed. No new sentence: both are ones the app translates.
+	 */
+	@bindThis
+	public async hostSwapSeat(meet: MiMeet, host: MiUser, participantId: string, taker: MiUser): Promise<MiMeetParticipant> {
+		await this.assertHost(meet, host);
+		if (meet.type === 'listing') throw this.err('invalid_transition', 'This meet is a listing and only contains information.');
+		if (meet.status !== 'active') throw this.err('meet_not_active', 'This meet is not active.');
+		if (this.hasStarted(meet)) throw this.err('meet_started', 'This meet has already started.');
+		if ((meet.flags ?? []).includes('casual')) throw this.err('invalid_transition', 'A casual game cannot be handed to another player.');
+		if (await this.isBlockedWithHosts(meet, taker.id)) throw this.err('blocked', 'That player cannot join this meet.');
+		if (meet.visibility === 'private' && !(await this.mayViewPrivate(meet, taker.id))) throw this.err('private', 'That player is not in this private meet\'s club.');
+		const level = await this.meetLevelService.getLevel(taker.id, meet.sport);
+		if (this.meetLevelService.gateVerdict(meet, level) === 'denied') throw this.err('gate_denied', 'That player does not meet the level requirements.');
+		let outUserId: string | null = null;
+		const row = await this.withMeetLock(meet.id, async (em, locked) => {
+			if (this.hasStarted(locked)) throw this.err('meet_started', 'This meet has already started.');
+			const seat = (await em.query(`SELECT * FROM "meet_participant" WHERE "id" = $1 AND "meetId" = $2`, [participantId, meet.id]) as Row[])[0];
+			if (!seat) throw this.err('not_participant', 'No such participant on this meet.');
+			if (seat.status !== 'confirmed') throw this.err('invalid_transition', 'Only a confirmed spot can be swapped.');
+			if (seat.isHost || (seat.userId && seat.userId === locked.hostId)) throw this.err('invalid_transition', 'A host cannot be swapped out of the meet.');
+			if (seat.userId === taker.id) throw this.err('invalid_transition', 'Choose another player.');
+			const theirs = (await em.query(`SELECT * FROM "meet_participant" WHERE "meetId" = $1 AND "userId" = $2`, [meet.id, taker.id]) as Row[])[0];
+			if (theirs && theirs.status === 'confirmed') throw this.err('already_participant', 'That player is already confirmed on this meet.');
+			if (theirs) await this.leaveConfirmed(em, locked, theirs, 'delete');   // a waitlist place / request / invite becomes the seat
+			const out = seat.kind === 'user' && seat.userId ? seat.userId : null;
+			const guests = out ? await em.query(`SELECT * FROM "meet_participant" WHERE "meetId" = $1 AND "sponsorId" = $2 AND "kind" = 'plusOne'`, [meet.id, out]) as Row[] : [];
+			for (const g of guests) await this.leaveConfirmed(em, locked, g, 'delete');
+			await em.query(
+				`UPDATE "meet_participant" SET "userId" = $2, "kind" = 'user', "sponsorId" = NULL, "displayName" = NULL, "declaredLevel" = NULL, "extGender" = NULL, "extAge" = NULL,
+				        "tags" = '{}', "isCoach" = false, "isReferee" = false, "isPaymentCollector" = false, "paymentType" = NULL, "checkedInAt" = NULL,
+				        "receiptFileId" = NULL, "receiptUrl" = NULL, "receiptAt" = NULL, "receiptById" = NULL, "forceSkill" = NULL, "forcePosition" = NULL
+				  WHERE "id" = $1`, [seat.id, taker.id]);
+			if (guests.length) await this.promoteLocked(em, locked);
+			outUserId = out;
+			return (await this.getRow(em, seat.id))!;
+		});
+		if (meet.chatRoomId) {
+			if (outUserId) await this.chatService.leaveRoom(outUserId, meet.chatRoomId).catch(() => undefined);
+			try {
+				const room = await this.chatService.findRoomById(meet.chatRoomId);
+				if (room && !(await this.chatService.isRoomMember(room, taker.id))) {
+					await this.chatService.createRoomInvitation(meet.hostId, room.id, taker.id, { notify: false }).catch((e: any) => { if (!/already invited/.test(String(e && e.message))) throw e; });
+					await this.chatService.joinToRoom(taker.id, room.id);
+					await meetSystemLine(this.chatService, meet, 'joined', { name: taker.name ?? taker.username ?? null, userId: taker.id });
+				}
+			} catch {
+				// chat is best-effort
+			}
+		}
+		if (outUserId) this.notify(outUserId, meet, 'Removed', `You were removed from ${meet.name}.`);
+		this.notify(taker.id, meet, 'You are confirmed', `You are confirmed to play ${meet.name}. Please be on time.`);
+		return row as MiMeetParticipant;
+	}
+
+	/**
 	 * MEET-SWAP-V1 (lane mop-up, 2026-09-24; Reclub A-meet-detail.47 `common:swap` → `swapParticipant`, overlay
 	 * add-from-community): a confirmed player hands THEIR seat to another player. The seat changes hands in place — the same
 	 * row keeps its place in the roster, its team and court (a generated rotation keeps working), so the confirmed count never

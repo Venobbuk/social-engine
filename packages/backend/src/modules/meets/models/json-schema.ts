@@ -45,6 +45,7 @@ export const packedMeetParticipantSchema = {
 		agreedCurrency: { type: 'string', optional: true, nullable: true },
 		enrollmentId: { type: 'string', optional: true, nullable: true },
 		forceSkill: { type: 'number', optional: true, nullable: true },   // T3-MEET-HOST-V1
+		forcePosition: { type: 'string', optional: true, nullable: true },   // FIX-S5 FORCE-POSITION-V1
 	},
 } as const;
 

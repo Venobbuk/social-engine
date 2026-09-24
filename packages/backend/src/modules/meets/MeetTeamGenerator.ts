@@ -19,7 +19,7 @@
 export const TEAM_KEYS = ['red', 'blue', 'yellow', 'grey', 'white', 'black', 'cyan', 'green', 'orange', 'purple', 'pink', 'brown', 'navy', 'teal', 'lime', 'magenta', 'gold', 'silver', 'maroon', 'olive', 'coral', 'indigo', 'violet', 'tan', 'celtic', 'crimson'] as const;
 export type TeamKey = typeof TEAM_KEYS[number];
 
-export type TeamPlayer = { id: string; skill: number | null; gender: string | null; forceTeam: string | null };
+export type TeamPlayer = { id: string; skill: number | null; gender: string | null; forceTeam: string | null; position?: string | null };
 export type GeneratedTeam = { teamKey: string; participantIds: string[]; avgSkill: number | null };
 
 function rng(seed: number): () => number {
@@ -38,7 +38,7 @@ function median(xs: number[]): number | null {
 	return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-export function generateTeams(input: { players: TeamPlayer[]; numTeams: number; balanceSkill: boolean; balanceGender: boolean; seed: number; teamKeys?: string[] }): GeneratedTeam[] {
+export function generateTeams(input: { players: TeamPlayer[]; numTeams: number; balanceSkill: boolean; balanceGender: boolean; balancePositions?: boolean; seed: number; teamKeys?: string[] }): GeneratedTeam[] {
 	const n = Math.max(2, Math.min(TEAM_KEYS.length, Math.floor(input.numTeams)));
 	const keys = (input.teamKeys && input.teamKeys.length >= n ? input.teamKeys : TEAM_KEYS).slice(0, n);
 	const r = rng(input.seed);
@@ -64,9 +64,12 @@ export function generateTeams(input: { players: TeamPlayer[]; numTeams: number; 
 	};
 
 	// 2. the rest, per gender bucket when balancing genders (majority gender first, as Reclub's getMajorGender)
-	if (input.balanceGender) {
+	// FIX-S5 BALANCE-POSITIONS-V1 (Reclub meets:balance_positions, onToggleBalancePositions): the deal also runs per position
+	// (the host's Force position, else the assigned one), so each team gets the same spread of Left / Right side players;
+	// with both switches on, the bucket is gender x position. Players with no position form their own bucket.
+	if (input.balanceGender || input.balancePositions) {
 		const buckets = new Map<string, TeamPlayer[]>();
-		for (const p of free) { const g = p.gender || 'unknown'; buckets.set(g, [...(buckets.get(g) ?? []), p]); }
+		for (const p of free) { const g = (input.balanceGender ? (p.gender || 'unknown') : '') + '|' + (input.balancePositions ? (p.position || 'none') : ''); buckets.set(g, [...(buckets.get(g) ?? []), p]); }
 		for (const b of [...buckets.values()].sort((a, b) => b.length - a.length)) deal(b);
 	} else {
 		deal(free);

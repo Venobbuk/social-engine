@@ -13,7 +13,7 @@ import { MeetService } from '@/modules/meets/MeetService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ApiError } from '@/server/api/error.js';
-import { promoteAudience, promoteBody, promoteGate, PROMOTE_RADIUS_KM, PROMOTE_WINDOW_HOURS } from '@/modules/meets/MeetExtras.js';
+import { promoteAudience, promoteBody, promoteGate, PROMOTE_HEADER, PROMOTE_RADIUS_KM, PROMOTE_WINDOW_HOURS } from '@/modules/meets/MeetExtras.js';
 import type { PromoteAudienceKind } from '@/modules/meets/MeetExtras.js';
 import { meetErrors, toApiError } from './_shared.js';
 
@@ -42,6 +42,9 @@ export const meta = {
 			promotedAt: { type: 'string', optional: false, nullable: true },
 			windowHours: { type: 'number', optional: false, nullable: false },
 			radiusKm: { type: 'number', optional: false, nullable: false },
+			// FIX-S5 PROMOTE-ONE-SOURCE-V1: the exact header + body the players receive
+			header: { type: 'string', optional: true, nullable: false },
+			body: { type: 'string', optional: true, nullable: false },
 		},
 	},
 	errors: {
@@ -90,9 +93,15 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const kind = (ps.audience ?? 'all') as PromoteAudienceKind;
 			const filters = { levels: ps.levels ?? [], genders: ps.genders ?? [], ageGroups: ps.ageGroups ?? [] }; // PROMOTE-FILTERS-V1
 			const base = { audience: kind, gate, windowHours: PROMOTE_WINDOW_HOURS, radiusKm: PROMOTE_RADIUS_KM, promotedAt: meet.promotedAt ? new Date(meet.promotedAt).toISOString() : null };
+			// FIX-S5 PROMOTE-ONE-SOURCE-V1: one function writes the text for the preview and for the send
+			const textNow = async () => {
+				const host = await this.userEntityService.pack(meet.hostId, me, { schema: 'UserLite' }).catch(() => null);
+				const hostName = (host && (host.name || host.username)) || 'A host';
+				return { header: PROMOTE_HEADER, body: promoteBody(hostName, meet, await this.meetService.spotsLeft(meet)) };
+			};
 			if (ps.preview) {
 				const a = gate === 'ok' ? await promoteAudience(this.db, meet, kind, filters) : { userIds: [], followers: 0, nearby: 0, club: 0 };
-				return { ...base, reach: a.userIds.length, followers: a.followers, nearby: a.nearby, club: a.club, sent: false };
+				return { ...base, reach: a.userIds.length, followers: a.followers, nearby: a.nearby, club: a.club, sent: false, ...(await textNow()) };
 			}
 			if (gate === 'not_public') throw new ApiError(meta.errors.notPublic);
 			if (gate === 'too_early') throw new ApiError(meta.errors.tooEarly);
@@ -117,20 +126,17 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const claimed = await this.db.query(`UPDATE "meet" SET "promotedAt" = $2, "promotedReach" = $3, "flags" = array_append(array_remove("flags", 'COMMUNITY_PROMOTED'), 'COMMUNITY_PROMOTED') WHERE "id" = $1 AND "promotedAt" IS NULL RETURNING "id"`, [meet.id, now, userIds.length]) as { id: string }[];
 			if (!claimed.length) throw new ApiError(meta.errors.alreadyPromoted);
 
-			const host = await this.userEntityService.pack(meet.hostId, me, { schema: 'UserLite' }).catch(() => null);
-			const hostName = (host && (host.name || host.username)) || 'A host';
-			const spotsLeft = await this.meetService.spotsLeft(meet);
-			const body = promoteBody(hostName, meet, spotsLeft);
+			const { header, body } = await textNow();
 			for (const userId of userIds) {
 				this.notificationService.createNotification(userId, 'app', {
-					customHeader: 'Looking for players',
+					customHeader: header,
 					customBody: body,
 					customIcon: null,
 					appAccessTokenId: null,
 					customLink: 'meet:' + meet.id,
 				}, meet.hostId);
 			}
-			return { ...base, gate: 'ok', reach: userIds.length, followers: audience.followers, nearby: audience.nearby, club: audience.club, sent: true, promotedAt: now.toISOString() };
+			return { ...base, gate: 'ok', reach: userIds.length, followers: audience.followers, nearby: audience.nearby, club: audience.club, sent: true, promotedAt: now.toISOString(), header, body };
 		});
 	}
 }

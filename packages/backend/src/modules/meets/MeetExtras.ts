@@ -238,9 +238,13 @@ export async function promoteAudience(db: DataSource, meet: MiMeet, audience: Pr
 }
 
 /** Reclub `meets:notification.body` = "{{name}} is looking for {{num}} players {{datetime}} at {{location}}. Can you join?" — the app re-inserts the two captures. */
+// FIX-S5 PROMOTE-ONE-SOURCE-V1 (A-promote-meet.02): the meet's NAME is in the sentence, and meets/promote {preview} answers
+// this very string (and the header) — the app's "What players will see" renders it through the same localizer as the inbox,
+// so the preview and the delivered notification cannot drift. Singular for one seat.
+export const PROMOTE_HEADER = 'Looking for players';
 export function promoteBody(hostName: string, meet: MiMeet, spotsLeft: number): string {
 	const when = fmtWhen(meet);
-	return `${hostName} is looking for players — ${spotsLeft} ${spotsLeft === 1 ? 'seat' : 'seats'}, ${when}${meet.venueName ? ' at ' + meet.venueName : ''}. Can you join?`;
+	return `${hostName} is looking for ${spotsLeft === 1 ? '1 player' : spotsLeft + ' players'} for ${meet.name} on ${when}${meet.venueName ? ' at ' + meet.venueName : ''}. Can you join?`;
 }
 
 export function fmtWhen(meet: MiMeet): string {

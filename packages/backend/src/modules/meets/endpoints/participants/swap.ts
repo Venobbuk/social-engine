@@ -32,6 +32,8 @@ export const paramDef = {
 	properties: {
 		meetId: { type: 'string', format: 'misskey:id' },
 		userId: { type: 'string', format: 'misskey:id' },
+		// FIX-S5 HOST-SWAP-V1 (Reclub A-roles-action.12 participant sheet › Swap): the host names the seat to hand over
+		participantId: { type: 'string', format: 'misskey:id' },
 	},
 	required: ['meetId', 'userId'],
 } as const;
@@ -53,7 +55,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (taker == null || taker.isSuspended || taker.isDeleted) throw new ApiError(meta.errors.noSuchUser);
 			const giver = await this.usersRepository.findOneByOrFail({ id: me.id });
 			try {
-				await this.meetService.swapSeat(meet, giver, taker);
+				if (ps.participantId) await this.meetService.hostSwapSeat(meet, giver, ps.participantId, taker);   // FIX-S5 HOST-SWAP-V1
+				else await this.meetService.swapSeat(meet, giver, taker);
 				const fresh = await this.meetsRepository.findOneByOrFail({ id: meet.id });
 				return await this.meetEntityService.pack(fresh, me, { detailed: true });
 			} catch (e) {

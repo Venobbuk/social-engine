@@ -52,6 +52,9 @@ export const paramDef = {
 		seed: { type: 'integer', minimum: 0, maximum: 2147483647 },
 		persist: { type: 'boolean', default: false },
 		reset: { type: 'boolean', default: false },
+		// FIX-S5 (A-generate-teams.04): Reclub "Balance positions" and "Reset positions" (onResetForcePositions)
+		balancePositions: { type: 'boolean', default: false },
+		resetPositions: { type: 'boolean', default: false },
 	},
 	required: ['meetId'],
 } as const;
@@ -76,6 +79,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					await this.meetParticipantsRepository.update({ meetId: meet.id }, { teamKey: null });
 					return { teams: [], persisted: true, meet: await this.meetEntityService.pack(meet.id, me, { detailed: true }) };
 				}
+				if (ps.resetPositions) {
+					await this.meetParticipantsRepository.update({ meetId: meet.id }, { forcePosition: null });
+					return { teams: [], persisted: true, meet: await this.meetEntityService.pack(meet.id, me, { detailed: true }) };
+				}
 				const rows = ps.participantIds && ps.participantIds.length
 					? await this.meetParticipantsRepository.find({ where: { meetId: meet.id, id: In(ps.participantIds) } })
 					: await this.meetParticipantsRepository.find({ where: { meetId: meet.id, status: 'confirmed' } });
@@ -85,9 +92,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const players = rows.map(p => {
 					const l = p.userId ? levels.get(p.userId) ?? null : null;
 					const skill = p.forceSkill ?? p.declaredLevel ?? this.meetLevelService.levelValue(l, meet.levelBasis) ?? l?.duprDoubles ?? l?.selfLevel ?? null;
-					return { id: p.id, skill, gender: p.extGender ?? l?.gender ?? null, forceTeam: forced.get(p.id) ?? null };
+					return { id: p.id, skill, gender: p.extGender ?? l?.gender ?? null, forceTeam: forced.get(p.id) ?? null, position: p.forcePosition ?? p.positionId ?? null };
 				});
-				const teams = generateTeams({ players, numTeams: ps.numTeams, balanceSkill: ps.balanceSkill, balanceGender: ps.balanceGender, seed: ps.seed ?? Math.floor(Math.random() * 2147483647), teamKeys: [...TEAM_KEYS] });
+				const teams = generateTeams({ players, numTeams: ps.numTeams, balanceSkill: ps.balanceSkill, balanceGender: ps.balanceGender, balancePositions: ps.balancePositions, seed: ps.seed ?? Math.floor(Math.random() * 2147483647), teamKeys: [...TEAM_KEYS] });
 				if (!ps.persist) return { teams, persisted: false };
 				for (const t of teams) if (t.participantIds.length) await this.meetParticipantsRepository.update({ id: In(t.participantIds) }, { teamKey: t.teamKey });
 				if (ps.blindTeamsMinutes !== undefined && ps.blindTeamsMinutes !== meet.blindTeamsMinutes) await this.meetsRepository.update(meet.id, { blindTeamsMinutes: ps.blindTeamsMinutes });
