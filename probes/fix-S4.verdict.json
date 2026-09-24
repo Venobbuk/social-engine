@@ -1,0 +1,232 @@
+{
+ "id": "fix-S4",
+ "at": "2026-09-24T21:55:32.661Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  {
+   "rows": [
+    {
+     "id": "C-meet-filters.04",
+     "before": "still-open (1/3)",
+     "after": "closed (3/3)",
+     "webkit": "closed (3/4)",
+     "vsReclub": "worse → equal",
+     "why": "the clubs I own / run / belong to, like Reclub userClubsOnly",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-discover.11",
+     "before": "still-open (0/1)",
+     "after": "closed (2/2)",
+     "webkit": "closed (2/3)",
+     "vsReclub": "worse → better",
+     "why": "every real code opens; the row appears only when the club exists and names it (Reclub shows a row that can fail on tap)",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-select-venue.03",
+     "before": "still-open (0/1)",
+     "after": "closed (3/3)",
+     "webkit": "closed (2/5)",
+     "vsReclub": "worse → equal",
+     "why": "club venues, recent venues, nearby venues — Reclub loadClubVenues order",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-select-venue.04",
+     "before": "still-open (1/2)",
+     "after": "closed (2/2)",
+     "webkit": "n/a",
+     "vsReclub": "worse → equal",
+     "why": "Add venue → back to the form, selected, nothing typed is lost (Reclub)",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-discover.18",
+     "before": "still-open (1/2)",
+     "after": "closed (2/2)",
+     "webkit": "n/a",
+     "vsReclub": "worse → equal",
+     "why": "Reclub card anatomy: registration state in words + n upcoming matches; the status no longer squeezes the title (layout pass is fix-S6)",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-home.11",
+     "before": "still-open (0/2)",
+     "after": "closed (3/3)",
+     "webkit": "closed (1/3)",
+     "vsReclub": "worse → better",
+     "why": "Reclub's matches RSVP under the card, plus the opponent named and a tap-again clear",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-home.08",
+     "before": "still-open (0/1)",
+     "after": "closed (2/2)",
+     "webkit": "n/a",
+     "vsReclub": null,
+     "why": null,
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-venue.13",
+     "before": "still-open (0/2)",
+     "after": "closed (4/4)",
+     "webkit": "closed (5/5)",
+     "vsReclub": "worse → equal",
+     "why": "one header, one Back — Reclub anatomy",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-community-detail.01",
+     "before": "still-open (0/1)",
+     "after": "closed (2/2)",
+     "webkit": "closed (4/5)",
+     "vsReclub": "worse → equal",
+     "why": "one header, one Back — Reclub anatomy",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-discover.23",
+     "before": "still-open (0/1)",
+     "after": "closed (1/1)",
+     "webkit": "n/a",
+     "vsReclub": "worse → equal",
+     "why": "consistent Chinese wording",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "E-onb-location.02",
+     "before": "still-open (1/3)",
+     "after": "closed (3/3)",
+     "webkit": "n/a",
+     "vsReclub": "better → better",
+     "why": "area chips + current location + search + map pin; no premature error",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-filter-dates.01",
+     "before": "still-open (0/1)",
+     "after": "closed (4/4)",
+     "webkit": "closed (1/5)",
+     "vsReclub": "worse → equal",
+     "why": "one range calendar + Confirm, as Reclub (was two wheel pickers)",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-home.13",
+     "before": "still-open (0/1)",
+     "after": "closed (2/2)",
+     "webkit": "n/a",
+     "vsReclub": "equal → equal",
+     "why": "Reclub: \"Add friends to see their activities\" + See recent activities — same next step",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-map-picker.02",
+     "before": "closed (1/1)",
+     "after": "closed (1/1)",
+     "webkit": "n/a",
+     "vsReclub": "worse → equal",
+     "why": "a clean address under the pin",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "G2",
+     "before": "closed (1/1)",
+     "after": "closed (1/1)",
+     "webkit": "n/a",
+     "vsReclub": null,
+     "why": null,
+     "level": "L6",
+     "pass": true
+    }
+   ]
+  },
+  {
+   "handed": [
+    {
+     "id": "C-root-layout.04",
+     "status": "NOT-VERIFIED",
+     "why": "STAFF-ADMIN-V1 (staff = engine moderator + administrator on SSO) was refused by the permission classifier before any file was written — nothing staged, nothing assigned; design + exact diff in lane-notes/fix-S4.md (11c)"
+    },
+    {
+     "id": "C-home.08 (FAB over the My activities tile)",
+     "status": "handed to SHELL-FAMILY",
+     "why": "floating buttons are lane SHELL-FAMILY's (coordinator 2026-09-25); my FAB-ZONE change was reverted before ship; measurement in after.fx.fabHandoff"
+    },
+    {
+     "id": "C-venue.01 (venue name clipped in the hero at 390 px)",
+     "status": "handed to fix-S6",
+     "why": "app-wide overflow owner"
+    }
+   ]
+  },
+  {
+   "plants": [
+    {
+     "name": "a code no club has (ZZZZZZ) shows NO club row (the K2 check can read absence)",
+     "fired": true
+    },
+    {
+     "name": "overlap() reports a real overlap",
+     "fired": true
+    },
+    {
+     "name": "a planted label is NOT found",
+     "fired": true
+    }
+   ],
+   "plantsOk": true
+  },
+  {
+   "hygiene": {
+    "leftover": "0/0/0/0",
+    "cleanupFailed": 0,
+    "webkitCleanupFailed": 0
+   }
+  },
+  {
+   "notes": [
+    "C-home.08 (pinned crest on return): the before run did not reach the network page (tile tap by text), so its before-failure is a weak plant; the after run navigated (network/index) and the crest appeared on return.",
+    "C-discover.18 before: the probe set registration 3 d + 1 h ahead (\"opens in 4 days\"); the after run uses 3 d - 1 h. The upcoming-matches count was absent in before (the real fault).",
+    "C-map-picker.02 and G2 are engine fixes (1488f138b3) shipped BEFORE the before run, so they pass in both; their before is the re-check itself (recheck.json) and the pre-ship curl (5 silkvo hits on the meet card).",
+    "WebKit: the operator PC ran at 100 % CPU (other lanes remote Chrome slots) — Taro/Stencil inputs hydrated late and screenshots came back 0 bytes; runs without hydration waits flipped (fix-S4.webkit.runs.json). The final run waits for hydration (up to 90 s) before every tap.",
+    "After-run K3/K13 re-proved in Chromium on the later bundle app.afd5e999.js (fix-S4.recheck.json) — other lanes deployed on top of 7d65034."
+   ]
+  },
+  {
+   "builds": {
+    "before": {
+     "engineRev": "9e788a089205bcc1bde81aa5949df6b7e0b452b8",
+     "appBundle": "app.c8d383a3.js"
+    },
+    "after": {
+     "engineRev": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+     "appBundle": "app.692ee51f.js"
+    }
+   }
+  },
+  {
+   "errors": {
+    "before": [],
+    "after": []
+   }
+  }
+ ]
+}

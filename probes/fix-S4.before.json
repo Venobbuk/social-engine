@@ -1,0 +1,536 @@
+{
+ "id": "fix-S4",
+ "mode": "before",
+ "at": "2026-09-24T18:44:15.783Z",
+ "run": "vs6jq",
+ "build": {
+  "engineRev": "9e788a089205bcc1bde81aa5949df6b7e0b452b8",
+  "appBundle": "app.c8d383a3.js"
+ },
+ "rows": {
+  "C-meet-filters.04": {
+   "id": "C-meet-filters.04",
+   "checks": 3,
+   "passed": 1,
+   "status": "still-open",
+   "evidence": [
+    "ok 5B/5C finger hit-test + >=24px: Clubs only chip :: {\"size\":{\"w\":100,\"h\":41},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}",
+    "NO mei owns UAT Paddle Club (channel_following rows: 0); Discover › Filters › Clubs only keeps \"[probe] fix-S4 club meet\" :: {\"after\":[],\"shot\":\"probes/fix-S4-shots/before/K1-clubs-only.png\"}",
+    "NO 5D reload-persist: after a reload the filter is still on and the club meet still listed :: {\"again\":[],\"filterOn\":true}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "the clubs I own / run / belong to, like Reclub userClubsOnly"
+   }
+  },
+  "C-discover.11": {
+   "id": "C-discover.11",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO letters-only code BVRLJU → row \"Open the club with code BVRLJU · Kowloon Dinkers\" → club page :: {\"code\":\"BVRLJU\",\"club\":\"Kowloon Dinkers\",\"url\":\"\",\"shot\":\"probes/fix-S4-shots/before/K2-code-row.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "better",
+    "why": "every real code opens; the row appears only when the club exists and names it (Reclub shows a row that can fail on tap)"
+   }
+  },
+  "C-select-venue.03": {
+   "id": "C-select-venue.03",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO before typing: \"Club venues · Kowloon Park Sports Centre\" above recent / nearby :: {\"picker\":\"To be determined | Set the venue later | Your recent venues | Kowloon Park Sports Centre | 22 Austin Road, Tsim Sha Tsui, Kowloon | Add venue | Not listed? Add it, then come straight back\",\"shot\":\"probes/fix-S4-shots/before/K3-picker.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "club venues, recent venues, nearby venues — Reclub loadClubVenues order"
+   }
+  },
+  "C-select-venue.04": {
+   "id": "C-select-venue.04",
+   "checks": 2,
+   "passed": 1,
+   "status": "still-open",
+   "evidence": [
+    "ok 5B/5C finger hit-test + >=24px: the Add venue row :: {\"size\":{\"w\":298,\"h\":56},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}",
+    "NO meet form › Add venue (?back=meet-create) › Create → back on meet-create, the typed name kept, the new venue selected :: {\"addUrl\":\"https://uat.gripbat.com/app/pages/venue-create/index?back=meet-create\",\"create\":200,\"url\":\"https://uat.gripbat.com/app/pages/venue/index?id=arjg4ly96vzh00l4\",\"vals\":[\"[probe] fix-S4 draft vs6jq\",\"\",\"\"],\"shot\":\"probes/fix-S4-shots/before/K4-back-in-form.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "Add venue → back to the form, selected, nothing typed is lost (Reclub)"
+   }
+  },
+  "C-discover.18": {
+   "id": "C-discover.18",
+   "checks": 2,
+   "passed": 1,
+   "status": "still-open",
+   "evidence": [
+    "ok 5B/5C finger hit-test + >=24px: the competition card :: {\"size\":{\"w\":358,\"h\":91},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}",
+    "NO R card: \"Registration opens in 3 days\" (a [probe] comp in that state); D card: \"3 upcoming matches\" from the draw, the state in words (no bare \"Open\" pill); 繁 \"3 場未開始的比賽\" :: {\"cR\":\"[probe] fix-S4 R vs6jq Mei Lam · 5 Oct · Registration opens in 4 days Registration opens in 4 days 0/8\",\"cD\":\"[probe] fix-S4 D vs6jq Mei Lam · 27 Sept · Starts in 2 days Entered 3/8\",\"bigPill\":[\"Registration is closed\",\"Registration opens in 4 days\"],\"shR\":\"probes/fix-S4-shots/before/K5-comps-en.png\",\"shZ\":\"probes/fix-S4-shots/before/K5-comps-zh.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "Reclub card anatomy: registration state in words + n upcoming matches; the status no longer squeezes the title (layout pass is fix-S6)"
+   }
+  },
+  "C-home.11": {
+   "id": "C-home.11",
+   "checks": 2,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO 5D reload-persist (Maybe still chosen after a reload) + the other party: host mei reads amy = maybe (engine) and her match page shows \"Maybe\" :: {\"on2\":[],\"hostSees\":false,\"hostPageHasMaybe\":false}",
+    "NO amy Home › Competitions: the comp card lists her matches (vs opponent) with Can go / Maybe / Can't go; Maybe → competitions/matches/availability 200 → the engine reads maybe; 繁 去得到 / 待定 / 去唔到 :: {\"rows\":[],\"req\":null,\"engineMaybe\":0,\"on\":[],\"zt\":[],\"sh\":\"probes/fix-S4-shots/before/K6-home-comp-matches.png\",\"sh2\":\"probes/fix-S4-shots/before/K6-home-maybe.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "better",
+    "why": "Reclub's matches RSVP under the card, plus the opponent named and a tap-again clear"
+   }
+  },
+  "C-home.13": {
+   "id": "C-home.13",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO [probe] persona with a network (1 player) and no upcoming friend meets: By friends → \"No upcoming meets from people you have played with.\" + See recent activities → network › Recent :: {\"url\":\"\",\"sh\":\"probes/fix-S4-shots/before/K7-by-friends.png\",\"sh2\":\"probes/fix-S4-shots/before/K7-recent.png\"}"
+   ],
+   "vsReclub": {
+    "before": "equal",
+    "after": "equal",
+    "why": "Reclub: \"Add friends to see their activities\" + See recent activities — same next step"
+   }
+  },
+  "C-home.08": {
+   "id": "C-home.08",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO pinned crest: an Under-review venue (under_review) pinned while Home sits below the stack shows as \"📍 [probe] fix-S4 court\" when Home returns (root cause: the bar was read once at mount) :: {\"away\":\"https://uat.gripbat.com/app/pages/home/index?lang=en\",\"crest\":[],\"status\":\"under_review\",\"sh3\":\"probes/fix-S4-shots/before/K8-crest-on-return.png\"}"
+   ],
+   "vsReclub": null
+  },
+  "C-venue.13": {
+   "id": "C-venue.13",
+   "checks": 2,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO venue-edit: exactly one header with one Back button at 390 px :: {\"backs\":2,\"heads\":2,\"sh\":\"probes/fix-S4-shots/before/K9-venue-edit.png\"}",
+    "NO venue-media: exactly one header with one Back button at 390 px :: {\"backs\":2,\"heads\":2,\"sh\":\"probes/fix-S4-shots/before/K9-venue-media.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "one header, one Back — Reclub anatomy"
+   }
+  },
+  "C-community-detail.01": {
+   "id": "C-community-detail.01",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO community-center: exactly one header with one Back button at 390 px :: {\"backs\":2,\"heads\":2,\"sh\":\"probes/fix-S4-shots/before/K9-community-center.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "one header, one Back — Reclub anatomy"
+   }
+  },
+  "C-discover.23": {
+   "id": "C-discover.23",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO 繁 Discover › Venues: \"1 個活動\" and \"n 個活動\" — one word, no \"活動紀錄\" :: {\"one\":0,\"many\":0,\"old\":3,\"sample\":[\"17 Aberdeen Reservoir Road, Aberdeen, HK Island · 1 活動紀錄 · 1 個球會\",\"Discovery Bay, Discovery Bay, Outlying Islands · 3 活動 · 1 個球會\",\"70 Hammer Hill Road, Diamond Hill, Kowloon · 4 活動 · 1 個球會\"],\"sh\":\"probes/fix-S4-shots/before/K10-venues-zh.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "consistent Chinese wording"
+   }
+  },
+  "C-map-picker.02": {
+   "id": "C-map-picker.02",
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok geo/reverse (the map picker's door) at the re-check point: one street number, \"50 Magazine Gap Road, Wan Chai District\" :: {\"line\":\"50 Magazine Gap Road, Wan Chai District\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "a clean address under the pin"
+   }
+  },
+  "E-onb-location.02": {
+   "id": "E-onb-location.02",
+   "checks": 3,
+   "passed": 1,
+   "status": "still-open",
+   "evidence": [
+    "NO 5B/5C finger hit-test + >=24px: the name field :: {\"size\":{\"w\":294,\"h\":22},\"rest\":true,\"end\":true,\"ok\":false}",
+    "ok typed then cleared: \"Please enter your name\" appears (a touched, empty field) :: {}",
+    "NO first onboarding step: no \"Please enter your name\" before anything is typed; it appears once Next is pressed with the name empty (the check sees it) :: {\"hasField\":true,\"nx\":true,\"sh\":\"probes/fix-S4-shots/before/K12-step0.png\",\"sh2\":\"probes/fix-S4-shots/before/K12-after-next.png\"}"
+   ],
+   "vsReclub": {
+    "before": "better",
+    "after": "better",
+    "why": "area chips + current location + search + map pin; no premature error"
+   }
+  },
+  "C-filter-dates.01": {
+   "id": "C-filter-dates.01",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO Filters › Dates is ONE range calendar: first day, last day, Confirm (2 taps incl. opening Filters and Show) → meets/list {from,to} 3 days → strip chip :: {\"taps\":2,\"sum\":\"\",\"span\":null,\"chip\":\"\",\"sh\":\"probes/fix-S4-shots/before/K13-calendar.png\",\"sh2\":\"probes/fix-S4-shots/before/K13-range-list.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "one range calendar + Confirm, as Reclub (was two wheel pickers)"
+   }
+  },
+  "G2": {
+   "id": "G2",
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok meet share card (crawler UA): og:image + og:url on uat.gripbat.com, image 200, no \"silkvo\" anywhere in the card :: {\"img\":\"https://uat.gripbat.com/app/static/boyau/img/spanish-armada-and-u-s-armed-forces-comp-2-card.jpg\",\"url\":\"https://uat.gripbat.com/app/pages/meet/index?id=arjg3ghl6vzh00k0\",\"imgStatus\":200,\"silkvo\":0}"
+   ],
+   "vsReclub": null
+  }
+ },
+ "checks": [
+  {
+   "row": "C-meet-filters.04",
+   "name": "5B/5C finger hit-test + >=24px: Clubs only chip",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":100,\"h\":41},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}"
+  },
+  {
+   "row": "C-meet-filters.04",
+   "name": "mei owns UAT Paddle Club (channel_following rows: 0); Discover › Filters › Clubs only keeps \"[probe] fix-S4 club meet\"",
+   "pass": false,
+   "ev": "{\"after\":[],\"shot\":\"probes/fix-S4-shots/before/K1-clubs-only.png\"}"
+  },
+  {
+   "row": "C-meet-filters.04",
+   "name": "5D reload-persist: after a reload the filter is still on and the club meet still listed",
+   "pass": false,
+   "ev": "{\"again\":[],\"filterOn\":true}"
+  },
+  {
+   "row": "C-discover.11",
+   "name": "letters-only code BVRLJU → row \"Open the club with code BVRLJU · Kowloon Dinkers\" → club page",
+   "pass": false,
+   "ev": "{\"code\":\"BVRLJU\",\"club\":\"Kowloon Dinkers\",\"url\":\"\",\"shot\":\"probes/fix-S4-shots/before/K2-code-row.png\"}"
+  },
+  {
+   "row": "C-select-venue.03",
+   "name": "before typing: \"Club venues · Kowloon Park Sports Centre\" above recent / nearby",
+   "pass": false,
+   "ev": "{\"picker\":\"To be determined | Set the venue later | Your recent venues | Kowloon Park Sports Centre | 22 Austin Road, Tsim Sha Tsui, Kowloon | Add venue | Not listed? Add it, then come straight back\",\"shot\":\"probes/fix-S4-shots/before/K3-picker.png\"}"
+  },
+  {
+   "row": "C-select-venue.04",
+   "name": "5B/5C finger hit-test + >=24px: the Add venue row",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":298,\"h\":56},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}"
+  },
+  {
+   "row": "C-select-venue.04",
+   "name": "meet form › Add venue (?back=meet-create) › Create → back on meet-create, the typed name kept, the new venue selected",
+   "pass": false,
+   "ev": "{\"addUrl\":\"https://uat.gripbat.com/app/pages/venue-create/index?back=meet-create\",\"create\":200,\"url\":\"https://uat.gripbat.com/app/pages/venue/index?id=arjg4ly96vzh00l4\",\"vals\":[\"[probe] fix-S4 draft vs6jq\",\"\",\"\"],\"shot\":\"probes/fix-S4-shots/before/K4-back-in-form.png\"}"
+  },
+  {
+   "row": "C-discover.18",
+   "name": "5B/5C finger hit-test + >=24px: the competition card",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":358,\"h\":91},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}"
+  },
+  {
+   "row": "C-discover.18",
+   "name": "R card: \"Registration opens in 3 days\" (a [probe] comp in that state); D card: \"3 upcoming matches\" from the draw, the state in words (no bare \"Open\" pill); 繁 \"3 場未開始的比賽\"",
+   "pass": false,
+   "ev": "{\"cR\":\"[probe] fix-S4 R vs6jq Mei Lam · 5 Oct · Registration opens in 4 days Registration opens in 4 days 0/8\",\"cD\":\"[probe] fix-S4 D vs6jq Mei Lam · 27 Sept · Starts in 2 days Entered 3/8\",\"bigPill\":[\"Registration is closed\",\"Registration opens in 4 days\"],\"shR\":\"probes/fix-S4-shots/before/K5-comps-en.png\",\"shZ\":\"probes/fix-S4-shots/before/K5-comps-zh.png\"}"
+  },
+  {
+   "row": "C-home.11",
+   "name": "5D reload-persist (Maybe still chosen after a reload) + the other party: host mei reads amy = maybe (engine) and her match page shows \"Maybe\"",
+   "pass": false,
+   "ev": "{\"on2\":[],\"hostSees\":false,\"hostPageHasMaybe\":false}"
+  },
+  {
+   "row": "C-home.11",
+   "name": "amy Home › Competitions: the comp card lists her matches (vs opponent) with Can go / Maybe / Can't go; Maybe → competitions/matches/availability 200 → the engine reads maybe; 繁 去得到 / 待定 / 去唔到",
+   "pass": false,
+   "ev": "{\"rows\":[],\"req\":null,\"engineMaybe\":0,\"on\":[],\"zt\":[],\"sh\":\"probes/fix-S4-shots/before/K6-home-comp-matches.png\",\"sh2\":\"probes/fix-S4-shots/before/K6-home-maybe.png\"}"
+  },
+  {
+   "row": "C-home.13",
+   "name": "[probe] persona with a network (1 player) and no upcoming friend meets: By friends → \"No upcoming meets from people you have played with.\" + See recent activities → network › Recent",
+   "pass": false,
+   "ev": "{\"url\":\"\",\"sh\":\"probes/fix-S4-shots/before/K7-by-friends.png\",\"sh2\":\"probes/fix-S4-shots/before/K7-recent.png\"}"
+  },
+  {
+   "row": "C-home.08",
+   "name": "pinned crest: an Under-review venue (under_review) pinned while Home sits below the stack shows as \"📍 [probe] fix-S4 court\" when Home returns (root cause: the bar was read once at mount)",
+   "pass": false,
+   "ev": "{\"away\":\"https://uat.gripbat.com/app/pages/home/index?lang=en\",\"crest\":[],\"status\":\"under_review\",\"sh3\":\"probes/fix-S4-shots/before/K8-crest-on-return.png\"}"
+  },
+  {
+   "row": "C-venue.13",
+   "name": "venue-edit: exactly one header with one Back button at 390 px",
+   "pass": false,
+   "ev": "{\"backs\":2,\"heads\":2,\"sh\":\"probes/fix-S4-shots/before/K9-venue-edit.png\"}"
+  },
+  {
+   "row": "C-venue.13",
+   "name": "venue-media: exactly one header with one Back button at 390 px",
+   "pass": false,
+   "ev": "{\"backs\":2,\"heads\":2,\"sh\":\"probes/fix-S4-shots/before/K9-venue-media.png\"}"
+  },
+  {
+   "row": "C-community-detail.01",
+   "name": "community-center: exactly one header with one Back button at 390 px",
+   "pass": false,
+   "ev": "{\"backs\":2,\"heads\":2,\"sh\":\"probes/fix-S4-shots/before/K9-community-center.png\"}"
+  },
+  {
+   "row": "C-discover.23",
+   "name": "繁 Discover › Venues: \"1 個活動\" and \"n 個活動\" — one word, no \"活動紀錄\"",
+   "pass": false,
+   "ev": "{\"one\":0,\"many\":0,\"old\":3,\"sample\":[\"17 Aberdeen Reservoir Road, Aberdeen, HK Island · 1 活動紀錄 · 1 個球會\",\"Discovery Bay, Discovery Bay, Outlying Islands · 3 活動 · 1 個球會\",\"70 Hammer Hill Road, Diamond Hill, Kowloon · 4 活動 · 1 個球會\"],\"sh\":\"probes/fix-S4-shots/before/K10-venues-zh.png\"}"
+  },
+  {
+   "row": "C-map-picker.02",
+   "name": "geo/reverse (the map picker's door) at the re-check point: one street number, \"50 Magazine Gap Road, Wan Chai District\"",
+   "pass": true,
+   "ev": "{\"line\":\"50 Magazine Gap Road, Wan Chai District\"}"
+  },
+  {
+   "row": "E-onb-location.02",
+   "name": "5B/5C finger hit-test + >=24px: the name field",
+   "pass": false,
+   "ev": "{\"size\":{\"w\":294,\"h\":22},\"rest\":true,\"end\":true,\"ok\":false}"
+  },
+  {
+   "row": "E-onb-location.02",
+   "name": "typed then cleared: \"Please enter your name\" appears (a touched, empty field)",
+   "pass": true,
+   "ev": "{}"
+  },
+  {
+   "row": "E-onb-location.02",
+   "name": "first onboarding step: no \"Please enter your name\" before anything is typed; it appears once Next is pressed with the name empty (the check sees it)",
+   "pass": false,
+   "ev": "{\"hasField\":true,\"nx\":true,\"sh\":\"probes/fix-S4-shots/before/K12-step0.png\",\"sh2\":\"probes/fix-S4-shots/before/K12-after-next.png\"}"
+  },
+  {
+   "row": "C-filter-dates.01",
+   "name": "Filters › Dates is ONE range calendar: first day, last day, Confirm (2 taps incl. opening Filters and Show) → meets/list {from,to} 3 days → strip chip",
+   "pass": false,
+   "ev": "{\"taps\":2,\"sum\":\"\",\"span\":null,\"chip\":\"\",\"sh\":\"probes/fix-S4-shots/before/K13-calendar.png\",\"sh2\":\"probes/fix-S4-shots/before/K13-range-list.png\"}"
+  },
+  {
+   "row": "G2",
+   "name": "meet share card (crawler UA): og:image + og:url on uat.gripbat.com, image 200, no \"silkvo\" anywhere in the card",
+   "pass": true,
+   "ev": "{\"img\":\"https://uat.gripbat.com/app/static/boyau/img/spanish-armada-and-u-s-armed-forces-comp-2-card.jpg\",\"url\":\"https://uat.gripbat.com/app/pages/meet/index?id=arjg3ghl6vzh00k0\",\"imgStatus\":200,\"silkvo\":0}"
+  }
+ ],
+ "plants": [
+  {
+   "name": "a code no club has (ZZZZZZ) shows NO club row (the K2 check can read absence)",
+   "fired": true
+  },
+  {
+   "name": "overlap() reports a real overlap",
+   "fired": true
+  },
+  {
+   "name": "a planted label is NOT found",
+   "fired": true
+  }
+ ],
+ "fx": {
+  "clubs": [],
+  "meets": [
+   "arjg3ghl6vzh00k0",
+   "arjg5ojd6vzh00mg"
+  ],
+  "comps": [
+   "arjg4psk6vzh00l5",
+   "arjg4pxy6vzh00l7"
+  ],
+  "venues": [
+   "arjg4ly96vzh00l4"
+  ],
+  "accts": [
+   {
+    "i": 1,
+    "username": "fs4vs6jqp1",
+    "password": "Fs4-06105a658ba7d6a4",
+    "email": "fs4-vs6jq-1@example.invalid",
+    "token": "CQE1ujkD8IqzS7hF",
+    "userId": "arjg5nx36vzh00ly"
+   },
+   {
+    "i": 2,
+    "username": "fs4vs6jqp2",
+    "password": "Fs4-fd054ee14481212d",
+    "email": "fs4-vs6jq-2@example.invalid",
+    "token": "pfhw5iKDJQrOGO0A",
+    "userId": "arjg5o7d6vzh00m5"
+   },
+   {
+    "i": 3,
+    "username": "fs4vs6jqp3",
+    "password": "Fs4-a9bfdd994cdcf23b",
+    "email": "fs4-vs6jq-3@example.invalid",
+    "token": "EdkLa8cJOml0t4Od",
+    "userId": "arjg6loc6vzh00mq"
+   }
+  ],
+  "F": "ari4he5s3hac000m",
+  "venueIds0": [],
+  "venuesSet": true,
+  "meiFollowsF": "0",
+  "venueK4": "arjg4ly96vzh00l4",
+  "CD": "arjg4pxy6vzh00l7",
+  "upcoming": 3,
+  "meetOwner": {
+   "arjg5ojd6vzh00mg": {
+    "i": 1,
+    "username": "fs4vs6jqp1",
+    "password": "Fs4-06105a658ba7d6a4",
+    "email": "fs4-vs6jq-1@example.invalid",
+    "token": "CQE1ujkD8IqzS7hF",
+    "userId": "arjg5nx36vzh00ly"
+   }
+  },
+  "fabHandoff": {
+   "tile": null,
+   "fab": null,
+   "overlaps": false,
+   "sh": "probes/fix-S4-shots/before/K8-top.png"
+  },
+  "pinned": true
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "unpin": 200
+  },
+  {
+   "comp": "arjg4psk6vzh00l5",
+   "s": 200
+  },
+  {
+   "comp": "arjg4pxy6vzh00l7",
+   "s": 400
+  },
+  {
+   "meet": "arjg3ghl6vzh00k0",
+   "cancel": 200
+  },
+  {
+   "meet": "arjg5ojd6vzh00mg",
+   "cancel": 200
+  },
+  {
+   "meetRows": "arjg3ghl6vzh00k0",
+   "del": "1"
+  },
+  {
+   "meetRows": "arjg5ojd6vzh00mg",
+   "del": "1"
+  },
+  {
+   "venue": "arjg4ly96vzh00l4",
+   "s": 403
+  },
+  {
+   "venuesByName": "1"
+  },
+  {
+   "clubVenuesRestored": 200,
+   "to": []
+  },
+  {
+   "acct": "fs4vs6jqp1",
+   "deleted": 204
+  },
+  {
+   "acct": "fs4vs6jqp2",
+   "deleted": 204
+  },
+  {
+   "acct": "fs4vs6jqp3",
+   "deleted": 204
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "leftover": "0/0/0/1",
+ "cleanupFailed": 2,
+ "summary": {
+  "closed": [
+   "C-map-picker.02",
+   "G2"
+  ],
+  "open": [
+   "C-meet-filters.04",
+   "C-discover.11",
+   "C-select-venue.03",
+   "C-select-venue.04",
+   "C-discover.18",
+   "C-home.11",
+   "C-home.13",
+   "C-home.08",
+   "C-venue.13",
+   "C-community-detail.01",
+   "C-discover.23",
+   "E-onb-location.02",
+   "C-filter-dates.01"
+  ],
+  "plants": [
+   {
+    "name": "a code no club has (ZZZZZZ) shows NO club row (the K2 check can read absence)",
+    "fired": true
+   },
+   {
+    "name": "overlap() reports a real overlap",
+    "fired": true
+   },
+   {
+    "name": "a planted label is NOT found",
+    "fired": true
+   }
+  ],
+  "leftover": "0/0/0/1",
+  "cleanupFailed": 2,
+  "errors": 0
+ }
+}

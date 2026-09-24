@@ -1,0 +1,137 @@
+{
+ "id": "fix-S4",
+ "mode": "recheck",
+ "at": "2026-09-24T21:22:32.446Z",
+ "run": "1fq7x",
+ "build": {
+  "engineRev": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+  "appBundle": "app.afd5e999.js"
+ },
+ "rows": {
+  "C-select-venue.03": {
+   "id": "C-select-venue.03",
+   "checks": 3,
+   "passed": 3,
+   "status": "closed",
+   "evidence": [
+    "ok before typing: \"Club venues · Kowloon Park Sports Centre\" above recent / nearby :: {\"picker\":\"To be determined | Set the venue later | Club venues | Kowloon Park Sports Centre | Tsim Sha Tsui · 22 Austin Road, Tsim Sha Tsui, Kowloon | Add venue | Not listed? Add it, then come straight back\",\"shot\":\"probes/fix-S4-shots/recheck/K3-picker.png\"}",
+    "ok 5B/5C finger hit-test + >=24px: the club venue row :: {\"size\":{\"w\":298,\"h\":74},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}",
+    "ok a tap on the club venue picks it into the form :: {\"value\":\"Kowloon Park Sports Centre\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "club venues, recent venues, nearby venues — Reclub loadClubVenues order"
+   }
+  },
+  "C-filter-dates.01": {
+   "id": "C-filter-dates.01",
+   "checks": 4,
+   "passed": 4,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test + >=24px: the Dates chip :: {\"size\":{\"w\":90,\"h\":38},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}",
+    "ok 5B/5C finger hit-test + >=24px: a day of the range calendar :: {\"size\":{\"w\":51,\"h\":40},\"rest\":true,\"end\":true,\"ok\":true}",
+    "ok 5B/5C finger hit-test + >=24px: Confirm in the range calendar :: {\"size\":{\"w\":70,\"h\":32},\"rest\":true,\"end\":true,\"ok\":true}",
+    "ok Filters › Dates is ONE range calendar: first day, last day, Confirm (6 taps incl. opening Filters and Show) → meets/list {from,to} 3 days → strip chip :: {\"taps\":6,\"sum\":\"26 Sept – 28 Sept\",\"span\":3,\"chip\":\"26 Sept – 28 Sept ×\",\"sh\":\"probes/fix-S4-shots/recheck/K13-calendar.png\",\"sh2\":\"probes/fix-S4-shots/recheck/K13-range-list.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "one range calendar + Confirm, as Reclub (was two wheel pickers)"
+   }
+  }
+ },
+ "checks": [
+  {
+   "row": "C-select-venue.03",
+   "name": "before typing: \"Club venues · Kowloon Park Sports Centre\" above recent / nearby",
+   "pass": true,
+   "ev": "{\"picker\":\"To be determined | Set the venue later | Club venues | Kowloon Park Sports Centre | Tsim Sha Tsui · 22 Austin Road, Tsim Sha Tsui, Kowloon | Add venue | Not listed? Add it, then come straight back\",\"shot\":\"probes/fix-S4-shots/recheck/K3-picker.png\"}"
+  },
+  {
+   "row": "C-select-venue.03",
+   "name": "5B/5C finger hit-test + >=24px: the club venue row",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":298,\"h\":74},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}"
+  },
+  {
+   "row": "C-select-venue.03",
+   "name": "a tap on the club venue picks it into the form",
+   "pass": true,
+   "ev": "{\"value\":\"Kowloon Park Sports Centre\"}"
+  },
+  {
+   "row": "C-filter-dates.01",
+   "name": "5B/5C finger hit-test + >=24px: the Dates chip",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":90,\"h\":38},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}"
+  },
+  {
+   "row": "C-filter-dates.01",
+   "name": "5B/5C finger hit-test + >=24px: a day of the range calendar",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":51,\"h\":40},\"rest\":true,\"end\":true,\"ok\":true}"
+  },
+  {
+   "row": "C-filter-dates.01",
+   "name": "5B/5C finger hit-test + >=24px: Confirm in the range calendar",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":70,\"h\":32},\"rest\":true,\"end\":true,\"ok\":true}"
+  },
+  {
+   "row": "C-filter-dates.01",
+   "name": "Filters › Dates is ONE range calendar: first day, last day, Confirm (6 taps incl. opening Filters and Show) → meets/list {from,to} 3 days → strip chip",
+   "pass": true,
+   "ev": "{\"taps\":6,\"sum\":\"26 Sept – 28 Sept\",\"span\":3,\"chip\":\"26 Sept – 28 Sept ×\",\"sh\":\"probes/fix-S4-shots/recheck/K13-calendar.png\",\"sh2\":\"probes/fix-S4-shots/recheck/K13-range-list.png\"}"
+  }
+ ],
+ "plants": [],
+ "fx": {
+  "clubs": [],
+  "meets": [
+   "arjlr08sfril02vu"
+  ],
+  "comps": [],
+  "venues": [],
+  "accts": [],
+  "F": "ari4he5s3hac000m",
+  "venueIds0": [],
+  "venuesSet": true,
+  "meiFollowsF": "0"
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "meet": "arjlr08sfril02vu",
+   "cancel": 200
+  },
+  {
+   "meetRows": "arjlr08sfril02vu",
+   "del": "1"
+  },
+  {
+   "venuesByName": "0"
+  },
+  {
+   "clubVenuesRestored": 200,
+   "to": []
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "leftover": "0/0/0/0",
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": [
+   "C-select-venue.03",
+   "C-filter-dates.01"
+  ],
+  "open": [],
+  "plants": [],
+  "leftover": "0/0/0/0",
+  "cleanupFailed": 0,
+  "errors": 0
+ }
+}
