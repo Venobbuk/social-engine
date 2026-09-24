@@ -43,7 +43,7 @@ const TEXTED = `(text LIKE '%[probe%' OR text ~ '^(probe|dbg) [a-z0-9]+$')`;
  * every meet-name rule above is blind to it. */
 const GUEST = `("displayName" LIKE '[probe%' OR "displayName" ~* '^probe (guest|player|user)')`;
 
-const minAgeMs = Number(process.env.SWEEP_MIN_AGE_MIN ?? 45) * 60000;
+const minAgeMs = Number(process.env.SWEEP_MIN_AGE_MIN ?? 180) * 60000;   // SWEEP-AGE-V3 (2026-09-24): 45 -> 180 min — L6 re-checks run up to 2 h and their own fixtures were swept mid-run
 const cutoff = Math.max(0, Date.now() - minAgeMs - 946684800000).toString(36).padStart(8, '0');
 if (!/^[0-9a-z]{8}$/.test(cutoff)) throw new Error('_sweep: bad age cutoff ' + cutoff);
 const OLD = (col = 'id') => `${col} collate "C" < '${cutoff}'`;
