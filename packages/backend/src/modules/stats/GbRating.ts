@@ -16,8 +16,34 @@ import { logVisible } from './MatchHistory.js';
  * The pair record is read through MatchHistory.logVisible (the rule pair-summary already applies): a match counts
  * only while it and its meet / competition are live AND the viewer may see where it was played — a private meet's
  * games never reach a stranger's numbers (G15.5). */
-export const chemFor = (edge: number, viewerId: string | null, a: string, b: string): number =>
-	edge < 0 && !(viewerId != null && (viewerId === a || viewerId === b)) ? 0 : edge;
+/* SEC-CHEM-V3 (2026-09-24, G15.3 addendum (b)): "positive shown, negative neutral" still told an outsider which pairs
+ * were negative — with two matches or more, "not shown as positive" almost always meant negative (an exact 0 is rare).
+ * So to anyone but the pair, positive chemistry is shown only when it is CLEAR — at least CLEAR_MIN_MATCHES matches
+ * together AND at least CLEAR_MIN_EDGE (+5 percentage points) above expected. Everything else — negative, small,
+ * short-lived — reads neutral, in the same shape. The two players themselves see their true value. */
+export const CLEAR_MIN_MATCHES = 3;
+export const CLEAR_MIN_EDGE = 0.05;
+export const chemFor = (edge: number, n: number, viewerId: string | null, a: string, b: string): number => {
+	if (viewerId != null && (viewerId === a || viewerId === b)) return edge;
+	return n >= CLEAR_MIN_MATCHES && edge >= CLEAR_MIN_EDGE ? edge : 0;
+};
+
+/* SEC-RATING-VIEW-V1 (2026-09-24, G15.3 addendum (c)): a GripBat rating AS THE VIEWER MAY KNOW IT — the newest post of
+ * the rating rows the viewer may see (MatchHistory.logVisible: live, and played where the viewer may look), and how many
+ * there are. A private meet's game therefore never moves a number a stranger sees on its own; its effect only shows
+ * folded into the player's next VISIBLE match (the rating is one chain — that residue is stated, not hidden). For the
+ * player themselves this is every live row (the RATINGS-LIVE-V1 rule of lane account-rest: newest live post, live count).
+ * Returns only players with at least one visible row. */
+export async function viewerRatings(db: DataSource, userIds: string[], sport: string, viewerId: string | null): Promise<Map<string, { rating: number; matches: number }>> {
+	const out = new Map<string, { rating: number; matches: number }>();
+	if (!userIds.length) return out;
+	const rows = await db.query(
+		`SELECT l."userId", count(*)::int AS matches, (array_agg(l.post ORDER BY l."playedAt" DESC, l."createdAt" DESC))[1] AS rating
+		 FROM gb_rating_log l WHERE l."userId" = ANY($1) AND l.sport = $2 AND NOT l.skipped AND ${logVisible('l', '$3')} GROUP BY l."userId"`,
+		[userIds, sport, viewerId ?? '']) as { userId: string; matches: number; rating: string }[];
+	for (const r of rows) out.set(r.userId, { rating: Number(r.rating), matches: Number(r.matches) });
+	return out;
+}
 
 /** SEC-CHEM-V2: a pair's record together (a's rows with partner b) as the viewer may know it. */
 async function pairRecord(db: DataSource, a: string, b: string, sport: string, viewerId: string | null): Promise<{ n: number; w: number; e: number }> {
@@ -124,6 +150,16 @@ async function currentRating(db: DataSource, userId: string, sport: string): Pro
 	return { rating: clamp(seed, 1.5, 8), matches: 0 };
 }
 
+/** SEC-RATING-VIEW-V1: the rating a viewer may know (viewerRatings), else the player's seed (their level row, else 3.0) —
+ *  currentRating() with the stored running total replaced by what the viewer may see. */
+async function ratingForViewer(db: DataSource, userId: string, sport: string, viewerId: string | null): Promise<number> {
+	const v = (await viewerRatings(db, [userId], sport, viewerId)).get(userId);
+	if (v) return v.rating;
+	const l = (await db.query('SELECT "duprDoubles", "selfLevel" FROM meet_player_level WHERE "userId" = $1 AND sport = $2', [userId, sport]))[0];
+	const seed = l && l.duprDoubles != null ? Number(l.duprDoubles) : l && l.selfLevel != null ? Number(l.selfLevel) : 3.0;
+	return clamp(seed, 1.5, 8);
+}
+
 /** Rates up to `limit` unrated matches in play order. Returns how many were rated / skipped (a guest or no winner). */
 export async function processRatings(db: DataSource, limit = 200): Promise<{ rated: number; skipped: number }> {
 	const ms = await pendingMatches(db, limit);
@@ -183,34 +219,37 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 	 *
 	 * The counter is asked with the SAME condition rather than read off gb_player_rating, because that column is a
 	 * running total and would keep reporting matches this query has just excluded — which is the contradiction. */
-	const GUARD = liveLog('gb_rating_log');   // ACCOUNT-BUGS-V1: meets AND competitions, and an orphaned row (match gone) of either
+	/* SEC-RATING-VIEW-V1 (G15.3 addendum (a) + (c)): on anyone else's Edge EVERY figure — rating, matches, clutch, form,
+	 * upsets, partners — comes only from the rows the viewer may see (MatchHistory.logVisible: live, and played where the
+	 * viewer may look), so a private meet's game never feeds a stranger's number; and the per-match rating series
+	 * (history) and the rating change (trend30) are the player's own business — shown to the player only. */
+	const isSubject = viewerId != null && viewerId === userId;
+	const GUARD = isSubject ? liveLog('gb_rating_log') : logVisible('gb_rating_log', '$3');   // ACCOUNT-BUGS-V1 liveness; SEC-RATING-VIEW-V1 visibility
 	const rows = (await db.query(
-		`SELECT "matchId", source, "partnerId", "opponentIds", pre, post, "teamRating", "oppRating", expected, won, games, "playedAt",
-		        ${logVisible('gb_rating_log', '$3')} AS vis
-		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD} ORDER BY "playedAt" DESC LIMIT 300`, [userId, sport, viewerId ?? '']) as LogRow[])
+		`SELECT "matchId", source, "partnerId", "opponentIds", pre, post, "teamRating", "oppRating", expected, won, games, "playedAt", true AS vis
+		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD} ORDER BY "playedAt" DESC LIMIT 300`, isSubject ? [userId, sport] : [userId, sport, viewerId ?? '']) as LogRow[])
 		.map((r) => ({ ...r, pre: Number(r.pre), post: Number(r.post), teamRating: Number(r.teamRating), oppRating: Number(r.oppRating), expected: Number(r.expected) }));
-	const rt = (await db.query('SELECT rating, matches FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [userId, sport]))[0];
 	const counted = Number(((await db.query(
-		`SELECT count(*)::int AS n FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD}`, [userId, sport]))[0] ?? { n: 0 }).n);
+		`SELECT count(*)::int AS n FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD}`, isSubject ? [userId, sport] : [userId, sport, viewerId ?? '']))[0] ?? { n: 0 }).n);
 	// No countable match means no rating to state: printing the stored number beside "No rated matches yet" is the
-	// contradiction this whole change exists to remove.
-	const rating = counted && rt ? Number(rt.rating) : null;
+	// contradiction this whole change exists to remove. The number is the viewer's view of it (viewerRatings).
+	const vr = counted ? (await viewerRatings(db, [userId], sport, viewerId)).get(userId) : undefined;
+	const rating = vr ? vr.rating : null;
 	if (!rows.length) return { userId, sport, rating: null, matches: 0, provisional: true, empty: true };
-	// rating trend: last 30 days vs the rating before them
+	// rating trend: last 30 days vs the rating before them — the player's own (G15.3 addendum (a))
 	const monthAgo = Date.now() - 30 * 86400e3;
 	const older = rows.find((r) => new Date(r.playedAt).getTime() < monthAgo);
-	const trend30 = rating != null ? rating - (older ? older.post : rows[rows.length - 1].pre) : null;
-	// partner chemistry — SEC-CHEM-V2: someone else's Edge counts only the matches the viewer may see (G15.5), and a
-	// negative partner is DROPPED before the sort and the top-8 cut unless the viewer is one of that pair (G15.3).
-	const isSubject = viewerId != null && viewerId === userId;
+	const trend30 = isSubject && rating != null ? rating - (older ? older.post : rows[rows.length - 1].pre) : null;
+	// partner chemistry — SEC-CHEM-V2/V3: only what the viewer may see (rows above), and a partner is DROPPED before the
+	// sort and the top-8 cut unless its chemistry is clear-positive or the viewer is one of that pair (chemFor, G15.3).
 	const byP = new Map<string, { partnerId: string; matches: number; wins: number; expected: number }>();
 	for (const r of rows) {
-		if (!r.partnerId || !(isSubject || r.vis)) continue;
+		if (!r.partnerId) continue;
 		const o = byP.get(r.partnerId) ?? { partnerId: r.partnerId, matches: 0, wins: 0, expected: 0 };
 		o.matches++; if (r.won) o.wins++; o.expected += r.expected; byP.set(r.partnerId, o);
 	}
 	const partners = [...byP.values()].filter((o) => o.matches >= 2).map((o) => ({ ...o, winRate: o.wins / o.matches, expectedRate: o.expected / o.matches, edge: (o.wins - o.expected) / o.matches }))
-		.filter((o) => chemFor(o.edge, viewerId, userId, o.partnerId) === o.edge)
+		.filter((o) => chemFor(o.edge, o.matches, viewerId, userId, o.partnerId) === o.edge && (o.edge !== 0 || isSubject || viewerId === o.partnerId))
 		.sort((a, b) => b.edge - a.edge).slice(0, 8);
 	// clutch
 	let close = 0, closeWon = 0, dec = 0, decWon = 0;
@@ -229,7 +268,7 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 	const upLost = rows.filter((r) => !r.won && r.teamRating - r.oppRating >= 0.25).length;
 	return {
 		userId, sport, rating, matches: counted, provisional: counted < 10, trend30,
-		history: rows.slice(0, 30).map((r) => ({ at: r.playedAt, rating: r.post })).reverse(),
+		history: isSubject ? rows.slice(0, 30).map((r) => ({ at: r.playedAt, rating: r.post })).reverse() : [],   // (a): per-match ratings, own only
 		partners,
 		clutch: { closeGames: close, closeWon, closeRate: close ? closeWon / close : null, deciders: dec, decidersWon: decWon, deciderRate: dec ? decWon / dec : null },
 		form: { matches: recent.length, wins, expectedWins: Math.round(exp * 100) / 100, gap, label: gap == null ? null : gap >= 0.15 ? 'hot' : gap <= -0.15 ? 'cold' : 'steady', streak: { won: rows[0].won, n: streak } },
@@ -239,15 +278,16 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 
 /** Fairest doubles pairing of four players on GripBat ratings, nudged by their GripBat partner chemistry. */
 export async function fairTeamsOf(db: DataSource, userIds: string[], sport = 'pickleball', viewerId: string | null = null): Promise<{ teamA: string[]; teamB: string[]; teamAWinPct: number; fairness: number }[]> {
-	const r = await Promise.all(userIds.map((u) => currentRating(db, u, sport).then((x) => x.rating)));
+	// SEC-RATING-VIEW-V1 (c): the four ratings as the viewer may know them (a private game never moves a stranger's split)
+	const r = await Promise.all(userIds.map((u) => ratingForViewer(db, u, sport, viewerId)));
 	const chem = async (a: string, b: string): Promise<number> => {
 		const x = await pairRecord(db, a, b, sport, viewerId);   // SEC-CHEM-V2: live AND visible to the viewer
 		const c = x.n >= 2 ? (x.w - x.e) / x.n : 0;
 		// SEC-ANON-CHEM-V1 (2026-09-21, permission-sweep hole 5): a NEGATIVE chemistry score is private to the two
 		// players it is about, and it is recoverable from teamAWinPct by comparing the three splits against the
-		// ratings. So a caller who is not one of the pair sees the pair's chemistry only when it is positive — the
-		// same rule gb-edge and gb-pairs apply (SEC-CHEM-V2: the one chemFor). Balancing still works.
-		return chemFor(c, viewerId, a, b);
+		// ratings. So a caller who is not one of the pair sees the pair's chemistry only when it is CLEARLY positive —
+		// the same rule gb-edge and gb-pairs apply (SEC-CHEM-V3: the one chemFor). Balancing still works.
+		return chemFor(c, x.n, viewerId, a, b);
 	};
 	const pairs: [number[], number[]][] = [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]];
 	const out = [];
@@ -259,25 +299,27 @@ export async function fairTeamsOf(db: DataSource, userIds: string[], sport = 'pi
 	return out.sort((a, b) => b.fairness - a.fairness);
 }
 
-/** Current GripBat ratings for a batch of users (for chips / roster). */
-export async function ratingsOf(db: DataSource, userIds: string[], sport = 'pickleball'): Promise<{ userId: string; rating: number; matches: number; provisional: boolean }[]> {
-	if (!userIds.length) return [];
-	const rows = await db.query('SELECT "userId", rating, matches FROM gb_player_rating WHERE "userId" = ANY($1) AND sport = $2', [userIds, sport]) as { userId: string; rating: string; matches: number }[];
-	return rows.map((x) => ({ userId: x.userId, rating: Number(x.rating), matches: Number(x.matches), provisional: Number(x.matches) < 10 }));
+/** Current GripBat ratings for a batch of users (for chips / roster).
+ *  SEC-RATING-VIEW-V1: as the viewer may know them (viewerRatings — live rows, and only those the viewer may see); this
+ *  subsumes RATINGS-LIVE-V1 (lane account-rest: newest live post, live count). A player with no such row has no chip. */
+export async function ratingsOf(db: DataSource, userIds: string[], sport = 'pickleball', viewerId: string | null = null): Promise<{ userId: string; rating: number; matches: number; provisional: boolean }[]> {
+	const m = await viewerRatings(db, userIds, sport, viewerId);
+	return [...m.entries()].map(([userId, x]) => ({ userId, rating: x.rating, matches: x.matches, provisional: x.matches < 10 }));
 }
 
-/** Rising players: the biggest 30-day GripBat rating gains (≥ 5 rated matches in the window) — the "upset radar". */
-export async function risingOf(db: DataSource, sport = 'pickleball', limit = 20): Promise<{ userId: string; rating: number; gain: number; matches: number; upsets: number }[]> {
+/** Rising players: the biggest 30-day GripBat rating gains (≥ 5 rated matches in the window) — the "upset radar".
+ *  SEC-RATING-VIEW-V1 (c): counted over the rows the viewer may see only. */
+export async function risingOf(db: DataSource, sport = 'pickleball', limit = 20, viewerId: string | null = null): Promise<{ userId: string; rating: number; gain: number; matches: number; upsets: number }[]> {
 	const rows = await db.query(
 		`WITH w AS (
 		   SELECT "userId", count(*)::int AS n,
 		          (array_agg(pre ORDER BY "playedAt" ASC))[1] AS first_pre,
 		          (array_agg(post ORDER BY "playedAt" DESC))[1] AS last_post,
 		          sum(CASE WHEN won AND "oppRating" - "teamRating" >= 0.25 THEN 1 ELSE 0 END)::int AS upsets
-		   FROM gb_rating_log WHERE sport = $1 AND NOT skipped AND "playedAt" > now() - interval '30 days' AND ${liveLog('gb_rating_log')}
+		   FROM gb_rating_log WHERE sport = $1 AND NOT skipped AND "playedAt" > now() - interval '30 days' AND ${logVisible('gb_rating_log', '$3')}
 		   GROUP BY "userId")
 		 SELECT "userId", last_post AS rating, (last_post - first_pre) AS gain, n AS matches, upsets FROM w
-		 WHERE n >= 5 AND last_post > first_pre ORDER BY gain DESC LIMIT $2`, [sport, limit]) as { userId: string; rating: string; gain: string; matches: number; upsets: number }[];
+		 WHERE n >= 5 AND last_post > first_pre ORDER BY gain DESC LIMIT $2`, [sport, limit, viewerId ?? '']) as { userId: string; rating: string; gain: string; matches: number; upsets: number }[];
 	return rows.map((r) => ({ userId: r.userId, rating: Number(r.rating), gain: Number(r.gain), matches: Number(r.matches), upsets: Number(r.upsets) }));
 }
 
@@ -291,7 +333,8 @@ export async function pairsOf(db: DataSource, pairs: [string, string][], sport =
 	for (const [a, b] of pairs.slice(0, 40)) {
 		const x = await pairRecord(db, a, b, sport, viewerId);
 		const edge = x.n > 0 ? (x.w - x.e) / x.n : 0;
-		const expected = chemFor(edge, viewerId, a, b) === edge ? Math.round(x.e * 100) / 100 : x.w;
+		// SEC-CHEM-V3: to an outsider anything but CLEAR positive chemistry reads neutral (expected = wins), same shape
+		const expected = chemFor(edge, x.n, viewerId, a, b) === edge ? Math.round(x.e * 100) / 100 : x.w;
 		out.push({ a, b, matches: x.n, wins: x.w, expected });
 	}
 	return out;

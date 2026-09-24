@@ -18,6 +18,7 @@ import { IdService } from '@/core/IdService.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { bindThis } from '@/decorators.js';
+import { viewerRatings } from '@/modules/stats/GbRating.js';   // SEC-RATING-VIEW-V1
 import { COACHING_V1_MARK, GROUP_PRICE_V1_MARK, normalisePriceTiers, normaliseCancellation, normaliseCurrency, priceForGroup, bookingBand, groupFloor, type PriceTiers, type CancellationPolicy, type PriceBand } from '@/modules/coaches/coach-pricing.js';
 
 // venue-local time: the schedule's timezone fixes the wall clock; occurrences are stored/returned in UTC (research #5).
@@ -413,10 +414,12 @@ export class CoachScheduleService {
 	}
 
 	// ---------------------------------------------------------------------------------------- dashboards
-	private async gbRating(userId: string, sport: string): Promise<{ rating: number; matches: number } | null> {
+	// SEC-RATING-VIEW-V1 (G15.3 addendum (c), lane sec-chemistry): the student's rating as the COACH may know it — a
+	// private game the coach did not see never moves it (GbRating.viewerRatings, the one rule).
+	private async gbRating(userId: string, sport: string, viewerId: string): Promise<{ rating: number; matches: number } | null> {
 		try {
-			const r = (await this.db.query(`SELECT rating, matches FROM "gb_player_rating" WHERE "userId" = $1 AND sport = $2`, [userId, sport]))[0] as { rating: number; matches: number } | undefined;
-			return r ? { rating: Number(r.rating), matches: Number(r.matches) } : null;
+			const r = (await viewerRatings(this.db, [userId], sport, viewerId)).get(userId);
+			return r ? { rating: r.rating, matches: r.matches } : null;
 		} catch { return null; }
 	}
 
@@ -449,7 +452,7 @@ export class CoachScheduleService {
 						participantId: p.id, userId: p.userId, name: u?.name ?? u?.username ?? null, username: u?.username ?? null,
 						status: p.status, agreedPrice: p.agreedPrice, agreedCurrency: p.agreedCurrency,
 						paid, prepaid, paidClaim: (p.tags ?? []).includes('paidClaim'),
-						gbRating: await this.gbRating(p.userId, m.sport),
+						gbRating: await this.gbRating(p.userId, m.sport, coach.id),
 					});
 				}
 				lessons.push({

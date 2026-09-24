@@ -35,7 +35,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const rows = await risingOf(this.db, ps.sport, ps.limit);
+			const rows = await risingOf(this.db, ps.sport, ps.limit, me?.id ?? null);   // SEC-RATING-VIEW-V1 (c)
 			const out = [];
 			for (const r of rows) out.push({ ...r, user: await this.userEntityService.pack(r.userId, me, { schema: 'UserLite' }).catch(() => null) });
 			return out;

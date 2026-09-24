@@ -104,8 +104,10 @@ export async function historyPage(db: DataSource, o: { userId: string; viewerId:
 	const pmap = new Map<string, PlayerRef>();
 	if (pids.length) for (const x of await db.query('SELECT id, "userId", "displayName" FROM meet_participant WHERE id = ANY($1)', [pids]) as { id: string; userId: string | null; displayName: string | null }[]) pmap.set(x.id, { userId: x.userId, name: x.displayName });
 	// rating movement of the player in these matches (GB-RATING-V1 log), page only
+	// SEC-RATING-VIEW-V1 (G15.3 addendum (a)): a per-match rating change is the player's own business — with public results
+	// anyone could compute a pair's chemistry from it. Another viewer gets ratingDelta null on every row (Reclub shows none).
 	const deltas = new Map<string, number>();
-	for (const x of await db.query('SELECT source, "matchId", pre, post FROM gb_rating_log WHERE "userId" = $1 AND NOT skipped AND "matchId" = ANY($2)', [o.userId, raw.map((r) => r.matchId)]) as { source: string; matchId: string; pre: string; post: string }[]) {
+	if (o.viewerId != null && o.viewerId === o.userId) for (const x of await db.query('SELECT source, "matchId", pre, post FROM gb_rating_log WHERE "userId" = $1 AND NOT skipped AND "matchId" = ANY($2)', [o.userId, raw.map((r) => r.matchId)]) as { source: string; matchId: string; pre: string; post: string }[]) {
 		if (x.pre != null && x.post != null) deltas.set(x.source + ':' + x.matchId, Math.round((Number(x.post) - Number(x.pre)) * 1000) / 1000);
 	}
 	const ref = (u: string | null): PlayerRef => ({ userId: u, name: null });
@@ -165,7 +167,8 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 	const viewer = viewerId ?? '';
 	const logs = new Map<string, { pre: number | null; post: number | null; side: number | null }>();
 	const loadLogs = async () => { for (const x of await db.query('SELECT "userId", pre, post, side FROM gb_rating_log WHERE source = $1 AND "matchId" = $2 AND NOT skipped', [source, matchId]) as { userId: string; pre: string | null; post: string | null; side: number | null }[]) logs.set(x.userId, { pre: x.pre == null ? null : Number(x.pre), post: x.post == null ? null : Number(x.post), side: x.side }); };
-	const withRating = (p: PlayerRef) => { const l = p.userId ? logs.get(p.userId) : undefined; return { ...p, ratingPre: l ? l.pre : null, ratingPost: l ? l.post : null }; };
+	// SEC-RATING-VIEW-V1 (G15.3 addendum (a)): ratingPre / ratingPost only on the VIEWER's own row; every other player's is null
+	const withRating = (p: PlayerRef) => { const l = p.userId && viewer !== '' && p.userId === viewer ? logs.get(p.userId) : undefined; return { ...p, ratingPre: l ? l.pre : null, ratingPost: l ? l.post : null }; };
 	if (source === 'meet') {
 		const r = (await db.query(
 			`SELECT mm.id, mm.round, mm."courtIndex", mm."team1Ids", mm."team2Ids", mm.scores, mm."forfeitTeam", mm."duprStatus", mm."duprSubmittedById", mm."duprSubmittedAt", mm."duprRef", mm."duprError",
@@ -286,10 +289,14 @@ WITH base AS (
 ),
 agg AS (SELECT "userId", count(*)::int AS matches, sum(CASE WHEN won THEN 1 ELSE 0 END)::int AS wins FROM base GROUP BY "userId"),
 opp AS (SELECT b."userId", count(DISTINCT o)::int AS opponents FROM base b CROSS JOIN LATERAL unnest(b."opponentIds") o GROUP BY b."userId"),
+-- SEC-RATING-VIEW-V1 (G15.3 addendum (c)): the rating a player is ranked on is the VIEWER's view of it — the newest post of
+-- the rows this viewer may see (GbRating.viewerRatings, the same rule) — never the running total a private game moved.
+rt AS (SELECT l."userId", count(*)::int AS matches, (array_agg(l.post ORDER BY l."playedAt" DESC, l."createdAt" DESC))[1] AS rating
+       FROM gb_rating_log l WHERE l.sport = $1 AND NOT l.skipped AND l."userId" IN (SELECT "userId" FROM agg) AND ${logVisible('l', '$4')} GROUP BY l."userId"),
 ranked AS (
 	SELECT a."userId", r.rating::float AS rating, r.matches::int AS total, a.matches, a.wins, COALESCE(opp.opponents, 0) AS opponents,
 	       rank() OVER (ORDER BY r.rating DESC) AS rank
-	FROM agg a JOIN gb_player_rating r ON r."userId" = a."userId" AND r.sport = $1
+	FROM agg a JOIN rt r ON r."userId" = a."userId"
 	LEFT JOIN opp ON opp."userId" = a."userId"
 	LEFT JOIN meet_player_level pl ON pl."userId" = a."userId" AND pl.sport = $1
 	WHERE ($3::varchar IS NULL OR pl.gender = $3)
