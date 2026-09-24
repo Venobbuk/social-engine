@@ -542,7 +542,9 @@ export class CompetitionService {
 			const order = Array.from(new Set(opts.seedOrder));
 			if (order.length !== opts.seedOrder.length || order.some((x) => !ok.has(x))) throw this.err('no_such_entry', 'Every seeded entry must be a confirmed entry, once.');
 			if (order.length < 2) throw this.err('not_enough_entries', 'At least 2 entries advance to the playoffs.');
-			if (c.format === 'poolPlayKnockout' && (opts.reset || !(await this.standings(c)).stageComplete)) throw this.err('stage_incomplete', 'Every pool match must be completed before the playoffs.');
+			// COMP-FIXES-B (D-comp-manage-seeds.03): the POOLS must be complete — standings().stageComplete answers for the deciding
+			// stage once a playoff exists (false until its final is played), which refused every re-arrangement of an existing bracket
+			if (c.format === 'poolPlayKnockout') { const reg = (await this.matches(c)).filter((m) => m.stage === 'regular'); if (opts.reset || !reg.length || !reg.every((m) => m.status === 'completed' || m.status === 'cancelled')) throw this.err('stage_incomplete', 'Every pool match must be completed before the playoffs.'); }
 			manualOrder = order;
 		}
 		if (opts.reset) {
