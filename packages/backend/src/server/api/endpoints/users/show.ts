@@ -16,6 +16,8 @@ import { RoleService } from '@/core/RoleService.js';
 import { ApiError } from '../../error.js';
 import { ApiLoggerService } from '../../ApiLoggerService.js';
 import type { FindOptionsWhere } from 'typeorm';
+import type { DataSource } from 'typeorm';
+import { deletionOf } from '@/modules/account/deletion.js';   // USER-GONE-V2 (mop-up, E-player.02)
 
 export const meta = {
 	tags: ['users'],
@@ -124,6 +126,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
 
+		@Inject(DI.db)
+		private db: DataSource,
+
 		private userEntityService: UserEntityService,
 		private remoteUserResolveService: RemoteUserResolveService,
 		private roleService: RoleService,
@@ -190,6 +195,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				}
 				if (!isModerator && user.isSuspended) throw new ApiError(meta.errors.userSuspended);   // USER-GONE-V1
 				if (!isModerator && user.isDeleted) throw new ApiError(meta.errors.userDeleted);       // USER-GONE-V1
+				// USER-GONE-V2 (mop-up, E-player.02): an account in its deletion grace is closed at once (modules/account/deletion.ts —
+				// signed out everywhere, hidden from search), so to everyone but its owner and staff it reads as deleted. Measured
+				// 2026-09-24: after the grace Misskey's own job removes a local user row (DeleteAccountProcessorService, soft: false),
+				// so the grace is the one window in which the engine can still say "deleted" rather than "no such user".
+				if (!isModerator && user.host == null && (me == null || me.id !== user.id) && (await deletionOf(this.db, user.id)).pending) throw new ApiError(meta.errors.userDeleted);
 
 				if (this.serverSettings.ugcVisibilityForVisitor === 'local' && user.host != null && me == null) {
 					throw new ApiError(meta.errors.noSuchUser);
