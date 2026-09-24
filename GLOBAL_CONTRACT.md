@@ -182,6 +182,12 @@ So coverage is now derived and enforced:
    fails if the suite misses any of the three.
 
 
+**BETTER-THAN-RECLUB (operator 2026-09-24: "our rule is we need to be better than Reclub").** Reclub is the FLOOR, never
+the target. Every screen does at least what Reclub's does (function AND anatomy, G15.0) — and is judged against it:
+`better | equal | worse`. `worse` is a defect even when the function works (more taps, a slower menu, a confusing order,
+clipped or wrong text, a missing confirm, a dead end). Never copy Reclub's mistakes (its grammar slips, its missing
+confirms, its dead ends): match the function, beat the execution. Every L6 row carries its vs-Reclub judgement.
+
 ## G15 — Product decisions (operator-signed; do not re-litigate)
 These are settled. A change that contradicts one is not finished, however well it works.
 
