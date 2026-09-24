@@ -42,7 +42,7 @@ import { readFileSync } from 'node:fs';
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { UsersRepository, AccessTokensRepository, RolesRepository, RoleAssignmentsRepository, RegistryItemsRepository, MiRole } from '@/models/_.js';
+import type { UsersRepository, AccessTokensRepository, RolesRepository, RoleAssignmentsRepository, RegistryItemsRepository, UserProfilesRepository, MiRole } from '@/models/_.js';
 import { SSO_HANDLE_KEY } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 import { RoleService } from '@/core/RoleService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
@@ -81,6 +81,10 @@ export const meta = {
 			lang: { type: 'string', optional: false, nullable: true },
 			ratingSynced: { type: 'boolean', optional: false, nullable: false },
 			staff: { type: 'boolean', optional: false, nullable: true }, // STAFF-ROLE-V1: true/false when this sign-in decided it, null when it said nothing
+			// G15.15-SSO: the account's NATIVE token when the caller asked for it (native: true — the GripBat app, whose account doors
+			// such as change-password are Misskey 'secure' ones), and whether this sign-in LINKED an existing account by its email
+			i: { type: 'string', optional: true, nullable: false },
+			linked: { type: 'boolean', optional: true, nullable: false },
 		},
 	},
 } as const;
@@ -89,6 +93,7 @@ export const paramDef = {
 	type: 'object',
 	properties: {
 		jwt: { type: 'string', minLength: 20, maxLength: 8192 },
+		native: { type: 'boolean' }, // G15.15-SSO: answer with the account's native token (GripBat app)
 	},
 	required: ['jwt'],
 } as const;
@@ -130,7 +135,7 @@ function b64urlToBuf(s: string): Buffer {
 	return Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
 }
 
-type Claims = { iss: string; aud: string; sub: string; exp: number; iat?: number; jti?: string; row?: string; tenant?: string; name?: string | null; avatar?: string | null; role?: string | null; dupr_id?: string | null; dupr_rating?: number | null; home_club_id?: number | null; lang?: string; purpose?: string };
+type Claims = { iss: string; aud: string; sub: string; exp: number; iat?: number; jti?: string; row?: string; tenant?: string; name?: string | null; avatar?: string | null; role?: string | null; dupr_id?: string | null; dupr_rating?: number | null; home_club_id?: number | null; lang?: string; purpose?: string; email?: string | null; email_verified?: boolean };   // G15.15-SSO: email only when hkpl verified it
 
 // SEC-ACCOUNT-DELETE-REAUTH-V1: exported so adapter/account/delete can demand a FRESH hkpl-signed proof (same
 // verification: signature, audience, mandatory iat, ≤ 5-min TTL, mandatory jti) before it destroys an account.
@@ -191,6 +196,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 		@Inject(DI.registryItemsRepository)
 		private registryItemsRepository: RegistryItemsRepository,
+
+		@Inject(DI.userProfilesRepository)
+		private userProfilesRepository: UserProfilesRepository,
 
 		@Inject(DI.rolesRepository)
 		private rolesRepository: RolesRepository,
@@ -264,6 +272,22 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 			// GRIPBAT-ACCOUNTS-V1 (E-auth-login.05, measured by account-rest): a suspended account was handed a credential here,
 			// then every call answered 403 and the app showed Home signed in. It is refused with a code the app words.
+			/* G15.15-SSO (operator 2026-09-24) — ONE PERSON, ONE ACCOUNT. A member of any hkpl tenant signs in with "Continue with your
+			 * HKPL account". No account for this hkpl person yet, and hkpl says the address is VERIFIED (claims.email, sent only then):
+			 * a GripBat account that already holds the SAME address, verified on GripBat, is that person — it is LINKED (the seam
+			 * handle becomes its alias, so every later sign-in lands on it) instead of a second account being made. Both sides must
+			 * have verified the address; an unverified one on either side never links (it would hand an account to whoever typed it). */
+			const ssoEmail = claims.email_verified === true && typeof claims.email === 'string' && /^[^@\s]+@[^@\s]+$/.test(claims.email) ? claims.email.trim().toLowerCase() : null;
+			let linked = false;
+			if (!existing && ssoEmail) {
+				const prof = await this.userProfilesRepository.createQueryBuilder('p').where('p.emailVerified = true').andWhere('LOWER(p.email) = :e', { e: ssoEmail }).getOne();
+				const owner = prof ? await this.usersRepository.findOneBy({ id: prof.userId, host: null as never }) : null;
+				if (owner && !owner.isDeleted) {
+					await this.registryItemsRepository.insert({ id: this.idService.gen(), updatedAt: new Date(), userId: owner.id, key: SSO_HANDLE_KEY, scope: ['gripbat'], domain: null, value: username as never });
+					existing = owner; linked = true;
+					this.logger.info(`SSO sign-in LINKED to the GripBat account holding the same verified address: user=${owner.id} iss=${claims.iss} tenant=${String(claims.tenant)}`);
+				}
+			}
 			if (existing && existing.isSuspended) throw new ApiError(meta.errors.suspended);
 			if (existing) {
 				/* ACCOUNT-BUGS-V1 (2026-09-23) — WHICH NAME WINS: THE PERSON'S OWN GRIPBAT NAME.
@@ -278,7 +302,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const ratingSynced = await this.syncLevel(existing.id, claims);
 				const staff = await this.syncStaffRole(existing.id, claims);
 				const token = await this.issueCredential(existing.id, claims);
-				return { token, userId: existing.id, username: existing.username, created: false, lang, ratingSynced, staff };
+				return { token, userId: existing.id, username: existing.username, created: false, lang, ratingSynced, staff, linked, ...(ps.native ? { i: await this.nativeToken(existing.id) } : {}) };
 			}
 
 			// first sign-in from this host: create the account with a password nobody knows (host-only entry).
@@ -292,10 +316,17 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// 'mutual' (both must follow) made every first message 'recipient is cannot chat'; a person can still narrow it
 			// in i/update. Existing accounts were moved to 'everyone' by SQL on 2026-09-17.
 			await this.usersRepository.update(account.id, { chatScope: 'everyone', ...(seedName ? { name: seedName } : {}) });
+			// G15.15-SSO: the new account carries hkpl's VERIFIED address (unless another GripBat account already verified it), so
+			// the person can also sign in natively later (Forgot your password?) — one account either way. GripBat mails only about
+			// the account itself.
+			if (ssoEmail) {
+				const taken = await this.userProfilesRepository.createQueryBuilder('p').where('p.emailVerified = true').andWhere('LOWER(p.email) = :e', { e: ssoEmail }).getCount();
+				if (taken === 0) await this.userProfilesRepository.update({ userId: account.id }, { email: ssoEmail, emailVerified: true, emailVerifyCode: null, emailNotificationTypes: [] });
+			}
 			const ratingSynced = await this.syncLevel(account.id, claims);
 			const staff = await this.syncStaffRole(account.id, claims);
 			const token = await this.issueCredential(account.id, claims);
-			return { token, userId: account.id, username: account.username, created: true, lang, ratingSynced, staff };
+			return { token, userId: account.id, username: account.username, created: true, lang, ratingSynced, staff, linked: false, ...(ps.native ? { i: await this.nativeToken(account.id) } : {}) };
 		});
 
 		this.logger = this.loggerService.getLogger('adapter:sso');
@@ -303,6 +334,12 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 	// S4 — a per-login, named, first-party-scoped, revocable credential instead of the account master token.
 	// Matched by AuthenticateService on `token` (the miauth path); `session` records which handoff issued it.
+	/** G15.15-SSO: the account's native token (what a native GripBat sign-in answers with). */
+	private async nativeToken(userId: string): Promise<string> {
+		const u = await this.usersRepository.findOneByOrFail({ id: userId });
+		return u.token!;
+	}
+
 	private async issueCredential(userId: string, claims: Claims): Promise<string> {
 		const now = new Date();
 		const accessToken = secureRndstr(32);
