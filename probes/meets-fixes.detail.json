@@ -1,0 +1,68 @@
+{
+ "meta": {
+  "at": "2026-09-24T05:43:41.676Z",
+  "bundle": "js/app.cc51c119.js",
+  "t1": "ar89kz29mnr7001o",
+  "t2": "ar7jww4yjhqz003s",
+  "amy": "ari4hb3c3hac0001",
+  "mei": "ari4hcj63hac0006"
+ },
+ "error:p11": "Error: clickText: not found \"Save changes\" on https://uat.gripbat.com/app/pages/meet-create/index?id=ario7sm97ay200m0&lang=en\n    at Object.clickText (/root/gen/meets-fixes/mf-lib.cjs:79:18)\n    at async /root/social-engine/probes/meets-fixes.probe.cjs:60:26\n    at async step (/root/social-engine/probes/meets-fixes.probe.cjs:33:88)\n    at async /root/social-engine/probes/meets-fixes.probe.cjs:47:5",
+ "joinar7jww4yjhqz003s": 200,
+ "joinari4hb3c3hac0001": 200,
+ "meiFollow": 204,
+ "clubMeet": "ario8vfz7ay200mc",
+ "amySchedule": "Back | [PROBE] MEETS-FIXES CLUB | [probe] meets-fixes sched | Share | Details | Meets | Every Tuesday · 19:00 | 2 hour(s) | Meet auto created 1 week before start time | To be determined | 8 players · Public · All levels | Free | NEXT MEET | Tuesday, 29 Sept 07:00 pm | Created · 1/8 Going | You are automatically joining as a player of this recurring meet schedule. | Leave schedule | Home | Discover | Community | Inbox | See more",
+ "schedMeets": {
+  "before": [
+   "arioa24t7ay200nf"
+  ],
+  "created": [
+   "arioadun7ay200nu"
+  ]
+ },
+ "schedMeetCopy": {
+  "cancellationFreezeHours": 4,
+  "duprAccountGate": "strict"
+ },
+ "friendsLineBefore": {
+  "text": "Back | MON, 28 SEPT, 07:00 PM | [probe] meets-fixes friends | Share | More | Details | Participants | Matches | Chat | VENUE | To be determined | WHEN | Monday, 28 Sept · 07:00 pm – 08:30 pm | 1.5 h | Add to calendar | GAME | Pickleball · Managed | All levels | HOST | 波友測試 1 | › | CONTACT HOSTS | 波友測試 1 | Message | JOIN CODE | 3blg45wp | Type it in Discover to open this meet | Copy | FEE | Free | Going · 3/8 | See all | 波1 | 波友測試 1 | ML | Mei Lam | AC | Amy Chan | Mei Lam is joining | Photos | Add photo | No photos have been added yet. Share your best moments. | You are confirmed to play. Please be on time. | Request +1 | See matches | Leave | Home | Discover | Community | Inbox | See more",
+  "mei": "confirmed",
+  "shot": "probes/meets-fixes-shots/friends_line_before.png"
+ },
+ "s5nv": {
+  "venueId": "ar7iv19gjhqz0009",
+  "seriesId": null
+ },
+ "joinLabel": "Join",
+ "cleanup": [
+  "restored",
+  "untag 200",
+  "unfollow 200",
+  "unfollow 200",
+  "schedule delete 200",
+  "schedule delete 200",
+  "meet deleted",
+  "meet cancel 200",
+  "meet cancel 200",
+  "meet cancel 200",
+  "meet cancel 200",
+  "meet cancel 200",
+  "meet deleted",
+  "meet cancel 200",
+  "meet cancel 200",
+  "meet cancel 200",
+  "meet deleted",
+  "meet deleted",
+  "meet deleted",
+  "meet cancel 200",
+  "meet cancel 200",
+  "meet deleted",
+  "meet cancel 200",
+  "sweep cancel 200",
+  "club unfollow 204",
+  "club leave 200",
+  "club leave 200",
+  "club archive 200"
+ ]
+}

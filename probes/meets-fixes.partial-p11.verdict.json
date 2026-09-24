@@ -1,0 +1,44 @@
+{
+ "id": "meets-fixes",
+ "at": "2026-09-24T05:56:56.544Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "stepErrors": [],
+ "closed": 1,
+ "open": 0,
+ "evidence": [
+  {
+   "id": "P1.1 cold-open edit",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/p11_form.png",
+    "formChips": {
+     "vis": [
+      "Private"
+     ],
+     "dur": [
+      "1.5 h"
+     ]
+    },
+    "saveSentExpect": [
+     true
+    ],
+    "readBack": "private",
+    "planted": "no-expect update flipped private->public",
+    "guard": "409 MEET_STALE_FORM"
+   }
+  }
+ ],
+ "cleanup": [
+  "meet deleted"
+ ],
+ "meta": {
+  "at": "2026-09-24T05:56:47.347Z",
+  "bundle": "js/app.db866344.js",
+  "t1": "ar89kz29mnr7001o",
+  "t2": "ar7jww4yjhqz003s",
+  "amy": "ari4hb3c3hac0001",
+  "mei": "ari4hcj63hac0006"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "meta": {
+  "at": "2026-09-24T05:56:47.347Z",
+  "bundle": "js/app.db866344.js",
+  "t1": "ar89kz29mnr7001o",
+  "t2": "ar7jww4yjhqz003s",
+  "amy": "ari4hb3c3hac0001",
+  "mei": "ari4hcj63hac0006"
+ },
+ "p11": {
+  "planted": 200,
+  "flipped": "public",
+  "guard": 409,
+  "guardCode": "MEET_STALE_FORM",
+  "afterGuard": "private",
+  "vis": [
+   "Private"
+  ],
+  "dur": [
+   "1.5 h"
+  ],
+  "upd": [
+   true
+  ],
+  "back": {
+   "visibility": "private",
+   "durationMinutes": 90
+  }
+ },
+ "cleanup": [
+  "meet deleted"
+ ]
+}

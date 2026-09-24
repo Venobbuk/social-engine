@@ -1,0 +1,20 @@
+{
+ "at": "2026-09-24T04:59:41.021Z",
+ "join": 200,
+ "adminGated": {
+  "status": 400,
+  "code": "CLUB_NOT_ADMIN"
+ },
+ "shot": "probes/meets-fixes-shots/club_member_gated.png",
+ "setting": true,
+ "memberGated": {
+  "status": 200
+ },
+ "memberSeesRequests": 200,
+ "pass": true,
+ "cleanup": [
+  "invite cancel 200",
+  "amy leave 200",
+  "archive 200"
+ ]
+}

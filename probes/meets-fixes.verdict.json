@@ -1,0 +1,698 @@
+{
+ "id": "meets-fixes",
+ "at": "2026-09-24T06:04:11.274Z",
+ "condition_fired": true,
+ "verdict": "fail",
+ "closed": 55,
+ "stillOpen": [
+  "A-meet-detail.45",
+  "A-meet-detail.47 (Swap)",
+  "A-promote-meet.06",
+  "A-meet-listings-popup.01",
+  "E-player.02 (deleted variant)"
+ ],
+ "moved": [
+  "A-promote-meet.04",
+  "A-short-links.01"
+ ],
+ "engine": "869f54dfc0 (+36c4701593) on web + web-uat",
+ "app": [
+  "344b014",
+  "7fa12ba",
+  "18fa198"
+ ],
+ "evidence": [
+  {
+   "id": "P1.2 gender/age clear",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/p12_after.png",
+    "sent": [
+     "{\"sport\":\"pickleball\",\"gender\":\"none\",\"ageGroup\":\"none\",\"i\":\"…\"}"
+    ],
+    "readBack": {
+     "gender": null,
+     "ageGroup": null
+    },
+    "plantNullStill": 400
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "P1.4 verified badge readable",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/p14_verified.png",
+    "computed": {
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(11, 25, 44)",
+     "text": "✓ Verified"
+    },
+    "family": "scanner found 3 same-colour pairs (yp-badge-verified, cm-annpill, fd-annpill) -> 3 fixed"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-club-activity-picker.02",
+   "status": "closed",
+   "level": "L6 (chips+meta seen; invite door read back)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/clubpicker_all.png",
+    "meta": "Invite club members | Members of your club will automatically be invited and notified. | All | All members | Members and followers · 3 members · 1 followers · All levels",
+    "invited": {
+     "eligible": 3,
+     "invited": 3
+    },
+    "followerMeiInvited": true,
+    "memberAmyInvited": true
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.41",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/invited_clubs.png",
+    "clubsAfterCancel": 0,
+    "meiInviteGone": true
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.43",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "same": "Invited clubs section shown + Cancel invitation (see A-meet-detail.41)",
+    "shot": "probes/meets-fixes-shots/invited_clubs.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.50",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/add_participant.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "D-select-player.01",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/picker_filter_empty.png",
+    "reuse": "PeopleSearch (Search tab), friendLists / savedPlayers / myNetwork"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "D-select-player.03",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "plant": "saved player listed with an empty filter: true",
+    "noMatchLine": true,
+    "shot": "probes/meets-fixes-shots/picker_saved_filter_nomatch.png",
+    "note": "run5 accepted the list-empty line — a check that could not fail (G16); replaced by this check"
+   },
+   "run": "filter 2026-09-24T06:02:14.156Z"
+  },
+  {
+   "id": "A-roles-action.12",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/club_member_sheet.png",
+    "sheet": "波友測試 2 | 波2 | 波友測試 2 | 3.39 · DUPR · Confirmed to play | View profile | Message | No show history | View club member profile | ROLES | Co-host | Coach | Referee | Payment collector | STATUS | Confirm | Put in waitlist | On hold | Remove | ASSIGN A TEAM | ASSIGN A COURT | 1 | 2 | 3 | 4 | 5 | 6 | 7 | "
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "B-group-user.02",
+   "status": "closed",
+   "level": "L6 (seen; engine meets/list scope channel + memberId)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/club_member_sheet.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-hosts-picker.03",
+   "status": "closed",
+   "level": "L6 (discard prompt + invite-on-no-match seen; the at-least-1-host guard is structurally met — the creator is always host, code at HostPicker done())",
+   "evidence": {
+    "shotDiscard": "probes/meets-fixes-shots/picker_discard.png",
+    "shotNoMatch": "probes/meets-fixes-shots/picker_nomatch_invite.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-upsert-schedule.09",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "readBack": 4,
+    "shot": "probes/meets-fixes-shots/schedule_confirm.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-upsert-schedule.06",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "readBack": {
+     "type": "managed",
+     "duprAccountGate": "strict"
+    },
+    "form": {
+     "feature": true,
+     "dupr": true,
+     "freeze": true,
+     "parts": true
+    }
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-upsert-schedule.11",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "readBack": [
+     {
+      "userId": "ar7jww4yjhqz003s",
+      "role": "coach",
+      "name": "波友測試 2",
+      "username": "hkpl_e437a4150a97",
+      "avatarUrl": null
+     }
+    ],
+    "stripSeen": true,
+    "roles": "Host | Player | Coach | Payment collector"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-confirm-schedule-meets.01 (create list)",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/schedule_confirm.png",
+    "dialog": "Confirm schedule | Tue, 29 Sept 07:00 pm · [probe] meets-fixes sched · Published now | Tue, 6 Oct 07:00 pm · [probe] meets-fixes sched · Created 1 week before | Tue, 13 Oct 07:00 pm · [probe] meets-fixes sched · Created 1 week before | Tue, 20 Oct 07:00 pm · [probe] meets-fixes sched · Created 1 wee"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-schedule-participants.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "meet": "arioadun7ay200nu",
+    "tester2": {
+     "status": "invited",
+     "isCoach": true
+    }
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-schedule-detail.02",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/schedule_coach_note.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-schedule-detail.04",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/schedule_left.png",
+    "optedOut": true,
+    "amyInvitedToCreatedMeet": false,
+    "meetsCreated": 1
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "P1.3 schedule update counts",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shotResult": "probes/meets-fixes-shots/sched_result.png",
+    "result": "Your schedule has been updated. | 1 meets updated 1 meets published | Except these meets: | Thu, 24 Sept 02:10 pm · [probe] meets-fixes past — left unchanged: the new time would be in the past | See schedule | See club activities",
+    "before": {
+     "arioadxz7ay200o1": "2026-09-24T06:10:00.000Z",
+     "arioadyv7ay200o6": "2026-10-01T06:10:00.000Z"
+    },
+    "after": {
+     "arioadxz7ay200o1": "2026-09-24T06:10:00.000Z",
+     "arioadyv7ay200o6": "2026-10-01T05:15:00.000Z"
+    }
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-becomes-past.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "same": "P1.3",
+    "shot": "probes/meets-fixes-shots/sched_result.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-confirm-schedule-meets.01",
+   "status": "closed",
+   "level": "L6 (update review seen; nothing written before Confirm)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/sched_review.png",
+    "review": "Confirm schedule | These meets will be updated: | Thu, 1 Oct 01:15 pm · [probe] meets-fixes past | These meets will be published now: | Thu, 8 Oct 01:15 pm · [probe] meets-fixes past | Except these meets: | Thu, 24 Sept 02:10 pm · [probe] meets-fixes past — left unchanged: the new time would be in the past | Cancel | Confirm and update"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-form.15",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/form_name_duration.png",
+    "typed": 120,
+    "inputHeld": 100,
+    "counter": "100/100",
+    "savedNameLength": 100
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-form.06",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/form_name_duration.png",
+    "readBack": 4320
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.21",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/pay_split_collector.png",
+    "confirmed": 3,
+    "expected": "HKD 400 in total · currently HKD 134 per player"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.55",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/pay_split_collector.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-no-show-history.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/noshow_history.png",
+    "api": {
+     "count30d": 1,
+     "rows": 1
+    }
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-roles-action.03",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "sheet": "波友測試 2 | 波2 | 波友測試 2 | 3.39 · DUPR · Confirmed to play | View profile | Message | No showed 1 times in 30 days | 波友測試 2 didn't show up in this meet | ROLES | Co-host | Coach | Referee | Payment collector | STATUS | Confirm | Put in waitlist | On hold | Remove | ASSIGN A TEAM | ASSIGN A COURT | 1 | 2"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.47",
+   "status": "closed",
+   "level": "L6 (seen: \"{n} no show\" on the cell; Swap still open)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/roster_cells.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "S5 bug: raw tag keys",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/roster_cells.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-generate-teams.04",
+   "status": "closed",
+   "level": "L5 (bib stored + drawn on the cell; set through participants/update — the sheet field is the same door)",
+   "evidence": {
+    "bib": "7"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-notes.03",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/score_sheet_extra.png",
+    "readBack": "[probe] note"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "D-meet-score-sheet.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "readBack": {
+     "round": 1,
+     "courtIndex": 2
+    }
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "D-meet-score-sheet.03",
+   "status": "closed",
+   "level": "L6 (seen on the sheet)",
+   "evidence": {
+    "sheet": "Enter score | Game 1 | · | + Game | 波友測試 1 | – | 波友測試 2 | – | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | ⌫ | 0 | → | Round | − | 1 | + | COURT | No court | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | Edit | Delete | Can"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "S5 bug: listing Join/+1",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/listing_footer.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-listings-popup.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "savedListedInMine": true,
+    "shot": "probes/meets-fixes-shots/listing_footer.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "S5 bug: wrong denial reason",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/female_only_male.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "S5 bug: +1 stepper for players who cannot join",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/female_only_male.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.25",
+   "status": "closed",
+   "level": "L6 (seen — amy has no gender on file)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/profile_gate_amy.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.28",
+   "status": "closed",
+   "level": "L6 (seen; host not named — G15.5)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/private_not_invited.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.38",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/started_leave.png",
+    "dialog": "This meet has already started | You can no longer leave a meet that has started. Please contact the host. | Dismiss | Contact host"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.13",
+   "status": "closed",
+   "level": "L6 (seen; chatScope restored)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/contact_blocked.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.12",
+   "status": "closed",
+   "level": "L6 (seen: \"Mei Lam is joining\")",
+   "evidence": {},
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "E-network.06",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "kebab": "Hide my activities | Unfriend | Block player",
+    "readBack": {
+     "iHideFrom": [
+      "ari4hb3c3hac0001"
+     ],
+     "hidingFromMe": []
+    }
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "E-network.04",
+   "status": "closed",
+   "level": "L6 (seen; \"Played N activities together\" when rosters are shared)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/network_cant_see.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "ACTIVITY-SCOPE enforced",
+   "status": "closed",
+   "level": "L6 (friends line hidden after the switch)",
+   "evidence": {
+    "friendsOnlyListHasMeet": false
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "E-player.07",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "sheet": "Show my activities | Unfriend",
+    "readBack": {
+     "iHideFrom": [],
+     "hidingFromMe": []
+    }
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "E-player.05",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/player_gender_age.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "E-player.02",
+   "status": "closed",
+   "level": "L6 banned (UAT has a suspended probe user); deleted variant L2 — no deleted account exists to show",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/player_banned.png",
+    "api": "USER_SUSPENDED",
+    "bid": ""
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.17",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/venue_menu.png",
+    "venueId": "ar7iv19gjhqz0009"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-meet-detail.15",
+   "status": "closed",
+   "level": "L6 (seen)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/see_schedule.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "A-join-deeplink.02",
+   "status": "closed",
+   "level": "L6 (seen; answered Not now)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/join_club_too.png"
+   },
+   "run": "run5 2026-09-24T05:53:18.761Z"
+  },
+  {
+   "id": "P1.1 cold-open edit",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/p11_form.png",
+    "formChips": {
+     "vis": [
+      "Private"
+     ],
+     "dur": [
+      "1.5 h"
+     ]
+    },
+    "saveSentExpect": [
+     true
+    ],
+    "readBack": "private",
+    "planted": "no-expect update flipped private->public",
+    "guard": "409 MEET_STALE_FORM"
+   },
+   "run": "p11 rerun 2026-09-24T05:56:56.544Z"
+  },
+  {
+   "id": "B-set-privacy.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "plantAdminGated": {
+     "status": 400,
+     "code": "CLUB_NOT_ADMIN"
+    },
+    "afterMemberGatedTapped": {
+     "status": 200
+    },
+    "memberSeesRequests": 200,
+    "shot": "probes/meets-fixes-shots/club_member_gated.png"
+   },
+   "run": "gated 2026-09-24T04:59:41.021Z"
+  },
+  {
+   "id": "A-meet-detail.27",
+   "status": "closed",
+   "level": "L6 (seen; unblocked after)",
+   "evidence": {
+    "shot": "probes/meets-fixes-shots/host_blocked_me.png",
+    "unblockedAfter": true
+   },
+   "run": "extra 2026-09-24T05:13:49.583Z"
+  },
+  {
+   "id": "D-meet-score-sheet.04",
+   "status": "closed",
+   "level": "L6 (duprStatus SEEDED in se_sbx — no DUPR submit pressed, G15.1)",
+   "evidence": {
+    "dialog": "Submitted to DUPR\nThese matches have already been submitted to DUPR and can no longer be edited.\nOK",
+    "shot": "probes/meets-fixes-shots/dupr_submitted_readonly.png"
+   },
+   "run": "extra-dupr 2026-09-24T05:16:18.578Z"
+  },
+  {
+   "id": "A-meet-detail.45",
+   "status": "still-open",
+   "level": "L2",
+   "evidence": {
+    "why": "Host-wide roster Show persisted on the meet: not built. t3-clubs-meets recorded a G15.0 choice (per-viewer Show) — needs the operator/orchestrator to overrule before this lane builds it."
+   }
+  },
+  {
+   "id": "A-meet-detail.47 (Swap)",
+   "status": "still-open",
+   "level": "L0",
+   "evidence": {
+    "why": "\"Swap — replace me with a community member\" needs an engine swap door; the no-show count half is closed (run5 A-meet-detail.47)."
+   }
+  },
+  {
+   "id": "A-promote-meet.06",
+   "status": "still-open",
+   "level": "L3",
+   "evidence": {
+    "why": "Promote was not pressed: it notifies real UAT users. Code + string in the served bundle."
+   }
+  },
+  {
+   "id": "A-meet-listings-popup.01",
+   "status": "still-open",
+   "level": "L3",
+   "evidence": {
+    "why": "Discover card chip popup deployed (string in /var/www/boyau-uat-app/js/*.js); not walked — needs a listing inside the reader's Discover radius."
+   }
+  },
+  {
+   "id": "E-player.02 (deleted variant)",
+   "status": "still-open",
+   "level": "L2",
+   "evidence": {
+    "why": "users/show USER_DELETED + \"no longer available on GripBat\" are in code; UAT holds no deleted account to show. The banned variant is L6 (run5)."
+   }
+  },
+  {
+   "id": "A-promote-meet.04",
+   "status": "moved",
+   "level": "-",
+   "evidence": {
+    "why": "split to lane club-posts-links (orchestrator 2026-09-23)"
+   }
+  },
+  {
+   "id": "A-short-links.01",
+   "status": "moved",
+   "level": "-",
+   "evidence": {
+    "why": "split to lane club-posts-links"
+   }
+  }
+ ]
+}

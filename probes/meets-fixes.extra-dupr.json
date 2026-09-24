@@ -1,0 +1,14 @@
+{
+ "at": "2026-09-24T05:16:18.578Z",
+ "match": "200 ",
+ "ids": [
+  "arin8enzdfd5001q",
+  "arin8gnadfd5001r"
+ ],
+ "shotDupr": "probes/meets-fixes-shots/dupr_submitted_readonly.png",
+ "D-meet-score-sheet.04": true,
+ "duprDialog": "Submitted to DUPR\nThese matches have already been submitted to DUPR and can no longer be edited.\nOK",
+ "matchesText": "",
+ "cleanup arin8engdfd5001o": "cancel 200",
+ "relAfter": false
+}
