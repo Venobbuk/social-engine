@@ -39,10 +39,12 @@ export const meta = {
 export const paramDef = {
 	type: 'object',
 	properties: {
-		meetId: { type: 'string', format: 'misskey:id' },
+		meetId: { type: 'string', format: 'misskey:id', nullable: true },
+		// KUDOS-CHAT-V1: the same roll-up for an ended competition (Reclub Competition Results → Kudos pane)
+		competitionId: { type: 'string', format: 'misskey:id', nullable: true },
 		limit: { type: 'integer', minimum: 1, maximum: 100, default: 30 },
 	},
-	required: ['meetId'],
+	required: [],
 } as const;
 
 type Row = { authorId: string; targetUserId: string; body: string | null };
@@ -57,17 +59,31 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const meet = await this.meetsRepository.findOneBy({ id: ps.meetId });
-			if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
+			// KUDOS-CHAT-V1: a competition's kudos (competitionId) or a meet's; one of the two
+			let ref: { col: 'meetId' | 'competitionId'; id: string };
+			if (ps.competitionId) {
+				// G15.5: a private competition's kudos name its people — readable only by its host and its entrants (the
+				// CompetitionService.assertVisible rule, without the invite-token / referee doors: stricter, never wider)
+				const c = await this.db.query(
+					`SELECT c.id FROM "competition" c WHERE c.id = $1 AND (c.visibility = 'public' OR c."hostId" = $2
+					   OR EXISTS (SELECT 1 FROM "competition_entry" e WHERE e."competitionId" = c.id AND $2 = ANY(e."userIds")))`,
+					[ps.competitionId, me ? me.id : '']) as { id: string }[];
+				if (!c.length) throw new ApiError(meta.errors.noSuchMeet);
+				ref = { col: 'competitionId', id: c[0].id };
+			} else {
+				const meet = ps.meetId ? await this.meetsRepository.findOneBy({ id: ps.meetId }) : null;
+				if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
+				ref = { col: 'meetId', id: meet.id };
+			}
 
 			// kudos-by-activity.ts:60 — endorsements only, archived excluded, one live query.
 			const rows = await this.db.query(
 				`SELECT r."authorId", r."targetUserId", r.body
 				 FROM meet_review r
-				 WHERE r."meetId" = $1 AND r.type = 'endorsement' AND r."archivedAt" IS NULL`,
-				[meet.id]) as Row[];
+				 WHERE r."${ref.col}" = $1 AND r.type = 'endorsement' AND r."archivedAt" IS NULL`,
+				[ref.id]) as Row[];
 
-			const cats = new Map<string, { count: number; recipients: Set<string>; givers: Set<string> }>();
+			const cats = new Map<string, { count: number; recipients: Set<string>; givers: Set<string>; byGiver: Map<string, number>; byRecipient: Map<string, number> }>();
 			const people = new Set<string>();
 			const myReceived: string[] = [];
 			const myGiven = new Map<string, string[]>();
@@ -79,8 +95,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (me && r.targetUserId === me.id) for (const d of dims) myReceived.push(d);
 				if (me && r.authorId === me.id) myGiven.set(r.targetUserId, dims);
 				for (const d of dims) {
-					const c = cats.get(d) ?? { count: 0, recipients: new Set<string>(), givers: new Set<string>() };
+					const c = cats.get(d) ?? { count: 0, recipients: new Set<string>(), givers: new Set<string>(), byGiver: new Map<string, number>(), byRecipient: new Map<string, number>() };
 					c.count++; c.recipients.add(r.targetUserId); c.givers.add(r.authorId);
+					c.byGiver.set(r.authorId, (c.byGiver.get(r.authorId) ?? 0) + 1); c.byRecipient.set(r.targetUserId, (c.byRecipient.get(r.targetUserId) ?? 0) + 1);
 					cats.set(d, c);
 				}
 			}
@@ -93,11 +110,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			};
 			const dims = [];
 			for (const [dimension, c] of [...cats.entries()].sort((x, y) => y[1].count - x[1].count).slice(0, ps.limit)) {
-				dims.push({ dimension, count: c.count, recipients: await pack(c.recipients), givers: await pack(c.givers) });
+				// KUDOS-CHAT-V1 (A-kudo-detail.01): Reclub's tap-a-dimension list — each giver / recipient with their ×count
+				const counted = async (m: Map<string, number>) => { const out = []; for (const [id, n] of [...m.entries()].sort((x, y) => y[1] - x[1]).slice(0, 50)) out.push({ user: await this.userEntityService.pack(id, me, { schema: 'UserLite' }).catch(() => null), count: n }); return out; };
+				dims.push({ dimension, count: c.count, recipients: await pack(c.recipients), givers: await pack(c.givers), givenBy: await counted(c.byGiver), receivedBy: await counted(c.byRecipient) });
 			}
 
 			return {
-				meetId: meet.id,
+				meetId: ref.col === 'meetId' ? ref.id : null,
+				competitionId: ref.col === 'competitionId' ? ref.id : null,
 				total,
 				people: people.size,
 				dims,

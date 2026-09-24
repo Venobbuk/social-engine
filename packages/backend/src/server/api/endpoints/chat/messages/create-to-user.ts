@@ -10,7 +10,8 @@ import { GetterService } from '@/server/api/GetterService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '@/server/api/error.js';
 import { ChatService } from '@/core/ChatService.js';
-import type { DriveFilesRepository, MeetsRepository, MiUser, UsersRepository } from '@/models/_.js';
+import type { ChatMessagesRepository, DriveFilesRepository, MeetsRepository, MiUser, UsersRepository } from '@/models/_.js';
+import { csatAskAttachment, csatAnswer, isSupport, CsatError } from '@/core/ChatCsat.js';   // CHAT-CSAT-V1
 import { replyAttachment } from '@/core/ChatReply.js';
 
 export const meta = {
@@ -70,6 +71,11 @@ export const meta = {
 			id: '25587321-b0e6-449c-9239-f8925092942c',
 		},
 
+		// CHAT-CSAT-V1
+		csatRefused: { message: 'This survey cannot be sent or answered.', code: 'CSAT_REFUSED', id: 'a7c4e9b1-2d3f-4e5a-8b6c-0000000000f1' },
+		csatExpired: { message: 'This survey has expired.', code: 'CSAT_EXPIRED', id: 'a7c4e9b1-2d3f-4e5a-8b6c-0000000000f2' },
+		csatAnswered: { message: 'This survey has been submitted.', code: 'CSAT_ANSWERED', id: 'a7c4e9b1-2d3f-4e5a-8b6c-0000000000f3' },
+
 		youHaveBeenBlocked: {
 			message: 'You cannot send a message because you have been blocked by this user.',
 			code: 'YOU_HAVE_BEEN_BLOCKED',
@@ -88,6 +94,10 @@ export const paramDef = {
 		/** CHAT-REPLY-V1: reply to a message of this thread — the message carries its quote (attachment.kind = 'reply'); not with meetId */
 		replyId: { type: 'string', format: 'misskey:id' },
 		toUserId: { type: 'string', format: 'misskey:id' },
+		/** CHAT-CSAT-V1: the GripBat Team closes the conversation with a survey bubble (support account only) */
+		csatAsk: { type: 'boolean' },
+		/** CHAT-CSAT-V1: the player's answer to a survey bubble (to the support account, once, before it expires) */
+		csat: { type: 'object', properties: { askId: { type: 'string', format: 'misskey:id' }, score: { type: 'integer', minimum: 1, maximum: 5 }, comment: { type: 'string', nullable: true, maxLength: 500 } }, required: ['askId', 'score'] },
 	},
 	required: ['toUserId'],
 } as const;
@@ -103,6 +113,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
+
+		@Inject(DI.chatMessagesRepository)   // CHAT-CSAT-V1
+		private chatMessagesRepository: ChatMessagesRepository,
 
 		private getterService: GetterService,
 		private chatService: ChatService,
@@ -136,6 +149,24 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				attachment = await replyAttachment(this.chatService, this.usersRepository, ps.replyId, { meId: me.id, otherId: ps.toUserId });
 				if (attachment == null) throw new ApiError(meta.errors.noSuchReply);
 				if (ps.text == null && file == null) throw new ApiError(meta.errors.contentRequired);
+			}
+
+			// CHAT-CSAT-V1: the survey bubble and its answer (never with a meet card or a quote)
+			if (ps.csatAsk || ps.csat) {
+				if (attachment != null || file != null) throw new ApiError(meta.errors.csatRefused);
+				const to = await this.usersRepository.findOneBy({ id: ps.toUserId });
+				if (to == null) throw new ApiError(meta.errors.noSuchUser);
+				if (ps.csatAsk) {
+					if (!isSupport(me)) throw new ApiError(meta.errors.csatRefused);
+					attachment = csatAskAttachment();
+				} else if (ps.csat) {
+					try {
+						attachment = await csatAnswer(this.chatMessagesRepository, me, to, ps.csat);
+					} catch (e) {
+						if (e instanceof CsatError) throw new ApiError(e.code === 'expired' ? meta.errors.csatExpired : e.code === 'answered' ? meta.errors.csatAnswered : meta.errors.csatRefused);
+						throw e;
+					}
+				}
 			}
 
 			// テキストが無いかつ添付ファイルも無かったらエラー

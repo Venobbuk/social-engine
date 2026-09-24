@@ -19,7 +19,7 @@ export async function replyAttachment(
 	thread: { roomId: string } | { meId: string; otherId: string },
 ): Promise<Record<string, any> | null> {
 	const m = await chatService.findMessageById(replyId);
-	if (m == null || m.system != null) return null;
+	if (m == null || m.system != null || m.deletedAt != null) return null;   // CHAT-SOFTDELETE-V1: no quoting a deleted message
 	if ('roomId' in thread) {
 		if (m.toRoomId !== thread.roomId) return null;
 	} else {

@@ -62,7 +62,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (message.fromUserId !== me.id && !(message.toRoomId && await runsRoom(this.db, message.toRoomId, me.id))) {
 				throw new ApiError(meta.errors.noSuchMessage);
 			}
-			await this.chatService.deleteMessage(message);
+			// CHAT-SOFTDELETE-V1: who deleted it decides the placeholder (self = "unsent", a moderator = "removed by an admin") and who may undelete
+			if (message.deletedAt != null) return;
+			await this.chatService.deleteMessage(message, me.id);
 		});
 	}
 }

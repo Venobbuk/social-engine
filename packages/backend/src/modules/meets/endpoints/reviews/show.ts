@@ -19,7 +19,12 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { userId: { type: 'string', format: 'misskey:id' } },
+	properties: {
+		userId: { type: 'string', format: 'misskey:id' },
+		// KUDOS-CHAT-V1: the activity the card is about — `mine.endorsement` is the kudos I gave in it
+		meetId: { type: 'string', format: 'misskey:id', nullable: true },
+		competitionId: { type: 'string', format: 'misskey:id', nullable: true },
+	},
 	required: ['userId'],
 } as const;
 
@@ -27,7 +32,7 @@ export const paramDef = {
 export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-disable-line import/no-default-export
 	constructor(private meetService: MeetService, private userEntityService: UserEntityService) {
 		super(meta, paramDef, async (ps, me) => {
-			return await this.meetService.packReviews(ps.userId, me ? me.id : null, this.userEntityService);
+			return await this.meetService.packReviews(ps.userId, me ? me.id : null, this.userEntityService, { meetId: ps.meetId ?? null, competitionId: ps.competitionId ?? null });
 		});
 	}
 }

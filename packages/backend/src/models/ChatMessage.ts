@@ -94,4 +94,16 @@ export class MiChatMessage {
 		nullable: true,
 	})
 	public system: Record<string, any> | null;
+
+	/** CHAT-SOFTDELETE-V1 (KUDOS-CHAT-V1): Reclub "Message unsent" / "removed by an admin" + Undelete — the row stays,
+	 *  the packers blank it for everyone, the deleter may bring it back (chat/messages/undelete). */
+	@Column('timestamp with time zone', {
+		nullable: true,
+	})
+	public deletedAt: Date | null;
+
+	@Column('varchar', {
+		length: 32, nullable: true,
+	})
+	public deletedById: MiUser['id'] | null;
 }

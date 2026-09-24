@@ -4,7 +4,7 @@
  */
 
 import { Inject, Injectable } from '@nestjs/common';
-import { DataSource, EntityManager, In, LessThan, MoreThan } from 'typeorm';
+import { DataSource, EntityManager, In, IsNull, LessThan, MoreThan } from 'typeorm';
 import { DI } from '@/di-symbols.js';
 import type { MeetsRepository, MeetParticipantsRepository, MeetGroupsRepository, MeetReviewsRepository, BlockingsRepository, UsersRepository } from '@/models/_.js';
 import type { MiMeet } from '@/modules/meets/models/Meet.js';
@@ -782,14 +782,21 @@ export class MeetService {
 	// ------------------------------------------------------------------------------------- reviews
 	/** endorsement / feedback / warning. One per (author, target, type); a repeat updates the body. */
 	@bindThis
-	public async review(author: MiUser, targetUserId: MiUser['id'], type: MiMeetReview['type'], body: string | null, meetId: MiMeet['id'] | null): Promise<MiMeetReview> {
+	public async review(author: MiUser, targetUserId: MiUser['id'], type: MiMeetReview['type'], body: string | null, meetId: MiMeet['id'] | null, opts: { competitionId?: string | null; note?: string | null } = {}): Promise<MiMeetReview> {
 		if (author.id === targetUserId) throw this.err('invalid_transition', 'You cannot review yourself.');
-		const existing = await this.meetReviewsRepository.findOneBy({ authorId: author.id, targetUserId, type });
+		// KUDOS-CHAT-V1: an endorsement (kudos) is one per pair PER ACTIVITY (Reclub KudoReferenceType meet | competition);
+		// feedback / warning stay one per pair. The migration's partial unique indexes hold the same rule.
+		const competitionId = opts.competitionId ?? null;
+		const where = type === 'endorsement'
+			? { authorId: author.id, targetUserId, type, meetId: competitionId ? IsNull() : (meetId ?? IsNull()), competitionId: competitionId ?? IsNull() }
+			: { authorId: author.id, targetUserId, type };
+		const existing = await this.meetReviewsRepository.findOneBy(where);
+		const note = type === 'endorsement' ? (opts.note ?? null) : null;
 		if (existing) {
-			await this.meetReviewsRepository.update(existing.id, { body, meetId }); // W2-F: keeps archivedAt — the reviewed player's archive stands
+			await this.meetReviewsRepository.update(existing.id, type === 'endorsement' ? { body, note } : { body, meetId }); // W2-F: keeps archivedAt — the reviewed player's archive stands
 			return await this.meetReviewsRepository.findOneByOrFail({ id: existing.id });
 		}
-		return await this.meetReviewsRepository.insertOne({ id: this.idService.gen(), authorId: author.id, targetUserId, type, body, meetId, createdAt: new Date() });
+		return await this.meetReviewsRepository.insertOne({ id: this.idService.gen(), authorId: author.id, targetUserId, type, body, meetId: competitionId ? null : meetId, competitionId, note, createdAt: new Date() });
 	}
 
 	/**
@@ -823,7 +830,7 @@ export class MeetService {
 
 	/** SAFETY-V1: the packed view of a person's reviews for a viewer (see reviewsVisibleTo) + no-shows + kudos tally. */
 	@bindThis
-	public async packReviews(targetUserId: MiUser['id'], viewerId: MiUser['id'] | null, users: UserEntityService): Promise<Packed<'PlayerReviews'>> {
+	public async packReviews(targetUserId: MiUser['id'], viewerId: MiUser['id'] | null, users: UserEntityService, ref: { meetId?: string | null; competitionId?: string | null } = {}): Promise<Packed<'PlayerReviews'>> {
 		const { reviews: visible, warningCount, warningsPublic } = await this.reviewsVisibleTo(targetUserId, viewerId);
 		const reviews = visible.filter(r => !r.archivedAt); // W2-F: an archived review leaves the tallies, the person's own view too
 		// SEC-WARN-ANON-V1 (2026-09-21, permission-sweep hole 4): a WARNING's author was packed like any other review,
@@ -836,14 +843,25 @@ export class MeetService {
 				? null
 				: await users.pack(r.authorId, null, { schema: 'UserLite' as const }).catch(() => null),
 			body: r.body,
+			note: r.type === 'endorsement' ? r.note : null,   // KUDOS-CHAT-V1: the endorsement's note is public with it
 			createdAt: r.createdAt.toISOString(),
 		});
 		const by = async (t: MiMeetReview['type']) => Promise.all(reviews.filter(r => r.type === t).map(packRow));
 		const kudos: Record<string, number> = {};
 		for (const r of reviews) if (r.type === 'endorsement' && r.body) for (const k of r.body.split(',').map(x => x.trim()).filter(Boolean)) kudos[k] = (kudos[k] ?? 0) + 1;
 		const mine: Record<string, string | null> = {};
-		if (viewerId) for (const r of await this.meetReviewsRepository.findBy({ authorId: viewerId, targetUserId })) mine[r.type] = r.body;
-		return { userId: targetUserId, endorsements: await by('endorsement'), feedback: await by('feedback'), warnings: await by('warning'), warningCount, warningsPublic, noShows30d: await this.noShowCount(targetUserId), kudos, mine } as Packed<'PlayerReviews'>;
+		// KUDOS-CHAT-V1: several endorsements per pair (one per activity) — `mine.endorsement` is the one of the activity
+		// asked about (ref), else the newest; mineIds / mineNote let the card update or delete exactly that row
+		const mineIds: Record<string, string> = {}; let mineNote: string | null = null;
+		if (viewerId) {
+			const my = await this.meetReviewsRepository.find({ where: { authorId: viewerId, targetUserId }, order: { createdAt: 'ASC' } });
+			const refd = ref.competitionId ? (r: MiMeetReview) => r.competitionId === ref.competitionId : ref.meetId ? (r: MiMeetReview) => r.meetId === ref.meetId && !r.competitionId : null;
+			for (const r of my) {
+				if (r.type === 'endorsement' && refd && !refd(r)) continue;
+				mine[r.type] = r.body; mineIds[r.type] = r.id; if (r.type === 'endorsement') mineNote = r.note;
+			}
+		}
+		return { userId: targetUserId, endorsements: await by('endorsement'), feedback: await by('feedback'), warnings: await by('warning'), warningCount, warningsPublic, noShows30d: await this.noShowCount(targetUserId), kudos, mine, mineIds, mineNote } as Packed<'PlayerReviews'>;
 	}
 
 	/** "No showed {{count}} times in 30 days" — derived, never stored against the person. */

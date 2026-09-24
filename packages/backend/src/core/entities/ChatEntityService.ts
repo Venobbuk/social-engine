@@ -16,6 +16,15 @@ import { UserEntityService } from './UserEntityService.js';
 import { DriveFileEntityService } from './DriveFileEntityService.js';
 import { In } from 'typeorm';
 
+
+/** CHAT-SOFTDELETE-V1 (KUDOS-CHAT-V1): a soft-deleted message packs as a placeholder — no text, file or reactions, and
+ *  attachment { kind: 'deleted', by: 'self' (the author unsent it) | 'admin' (a room moderator removed it), deletedById }
+ *  so the client draws Reclub's "Message unsent" / "{name} unsent a message." / "Message removed by an admin" and offers
+ *  Undelete to deletedById only. `attachment` is already an open object in the packed schema — no schema change. */
+function deletedMark(m: MiChatMessage): Record<string, unknown> | null {
+	if (!m.deletedAt) return null;
+	return { kind: 'deleted', by: m.deletedById && m.deletedById !== m.fromUserId ? 'admin' : 'self', deletedById: m.deletedById ?? m.fromUserId };
+}
 @Injectable()
 export class ChatEntityService {
 	constructor(
@@ -72,17 +81,17 @@ export class ChatEntityService {
 		return {
 			id: message.id,
 			createdAt: this.idService.parse(message.id).date.toISOString(),
-			text: message.text,
+			text: message.deletedAt ? null : message.text,   // CHAT-SOFTDELETE-V1
 			fromUserId: message.fromUserId,
 			fromUser: packedUsers?.get(message.fromUserId) ?? (await this.userEntityService.pack(message.fromUser ?? message.fromUserId, me)),
 			toUserId: message.toUserId,
 			toUser: message.toUserId ? (packedUsers?.get(message.toUserId) ?? (await this.userEntityService.pack(message.toUser ?? message.toUserId, me))) : undefined,
 			toRoomId: message.toRoomId,
 			toRoom: message.toRoomId ? (packedRooms?.get(message.toRoomId) ?? (await this.packRoom(message.toRoom ?? message.toRoomId, me))) : undefined,
-			fileId: message.fileId,
-			file: message.fileId ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
-			reactions: reactions.filter((r): r is { user: Packed<'UserLite'>; reaction: string; } => r.user != null),
-			attachment: message.attachment ?? null,
+			fileId: message.deletedAt ? null : message.fileId,
+			file: message.fileId && !message.deletedAt ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
+			reactions: message.deletedAt ? [] : reactions.filter((r): r is { user: Packed<'UserLite'>; reaction: string; } => r.user != null),
+			attachment: deletedMark(message) ?? message.attachment ?? null,
 			system: message.system ?? null,
 		};
 	}
@@ -155,13 +164,13 @@ export class ChatEntityService {
 		return {
 			id: message.id,
 			createdAt: this.idService.parse(message.id).date.toISOString(),
-			text: message.text,
+			text: message.deletedAt ? null : message.text,   // CHAT-SOFTDELETE-V1
 			fromUserId: message.fromUserId,
 			toUserId: message.toUserId!,
-			fileId: message.fileId,
-			file: message.fileId ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
-			reactions,
-			attachment: message.attachment ?? null,
+			fileId: message.deletedAt ? null : message.fileId,
+			file: message.fileId && !message.deletedAt ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
+			reactions: message.deletedAt ? [] : reactions,
+			attachment: deletedMark(message) ?? message.attachment ?? null,
 			system: message.system ?? null,
 		};
 	}
@@ -209,14 +218,14 @@ export class ChatEntityService {
 		return {
 			id: message.id,
 			createdAt: this.idService.parse(message.id).date.toISOString(),
-			text: message.text,
+			text: message.deletedAt ? null : message.text,   // CHAT-SOFTDELETE-V1
 			fromUserId: message.fromUserId,
 			fromUser: packedUsers?.get(message.fromUserId) ?? (await this.userEntityService.pack(message.fromUser ?? message.fromUserId)),
 			toRoomId: message.toRoomId!,
-			fileId: message.fileId,
-			file: message.fileId ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
-			reactions: reactions.filter((r): r is { user: Packed<'UserLite'>; reaction: string; } => r.user != null),
-			attachment: message.attachment ?? null,
+			fileId: message.deletedAt ? null : message.fileId,
+			file: message.fileId && !message.deletedAt ? (packedFiles?.get(message.fileId) ?? (await this.driveFileEntityService.pack(message.file ?? message.fileId))) : null,
+			reactions: message.deletedAt ? [] : reactions.filter((r): r is { user: Packed<'UserLite'>; reaction: string; } => r.user != null),
+			attachment: deletedMark(message) ?? message.attachment ?? null,
 			system: message.system ?? null,
 		};
 	}

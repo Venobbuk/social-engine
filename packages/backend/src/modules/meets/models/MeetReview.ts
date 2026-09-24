@@ -17,8 +17,13 @@ export const WARNING_PUBLIC_THRESHOLD = 5;
  * warning = private to the author until WARNING_PUBLIC_THRESHOLD distinct people have issued one, then public.
  * One row per (author, target, type) — a person's warning counts once, which is what "given by at least 5 others" means.
  */
+/** KUDOS-CHAT-V1: an endorsement (GripBat's kudos) carries at most this many dimensions (Reclub "Select up to 3"). */
+export const MAX_KUDOS_PER_REVIEW = 3;
+
+// KUDOS-CHAT-V1 (migration 1789098800000): feedback / warning stay one per pair; an ENDORSEMENT (kudos) is one per pair
+// per activity — meetId or competitionId (Reclub KudoReferenceType) — see the partial unique indexes in the migration.
 @Entity('meet_review')
-@Index(['authorId', 'targetUserId', 'type'], { unique: true })
+@Index(['authorId', 'targetUserId', 'type'], { unique: true, where: '"type" <> \'endorsement\'' })
 export class MiMeetReview {
 	@PrimaryColumn(id())
 	public id: string;
@@ -46,6 +51,15 @@ export class MiMeetReview {
 	@ManyToOne(() => MiMeet, { onDelete: 'SET NULL' })
 	@JoinColumn()
 	public meet: MiMeet | null;
+
+	/** KUDOS-CHAT-V1: the competition an endorsement (kudos) was given in (null = a meet, or legacy). */
+	@Index()
+	@Column('varchar', { length: 32, nullable: true })
+	public competitionId: string | null;
+
+	/** KUDOS-CHAT-V1: the endorsement's "Any additional notes?" (public with it). */
+	@Column('varchar', { length: 512, nullable: true })
+	public note: string | null;
 
 	@Column('varchar', { length: 16 })
 	public type: typeof meetReviewTypes[number];

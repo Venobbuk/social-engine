@@ -13,6 +13,7 @@ import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import { WARNING_PUBLIC_THRESHOLD } from '@/modules/meets/models/MeetReview.js';
 import type { MiMeetReview } from '@/modules/meets/models/MeetReview.js';
+import { reviewWindow } from '@/modules/stats/_shared.js';   // KUDOS-CHAT-V1
 
 // REVIEWS-LIST-V1 (W2-F, Reclub view-player-review 6.8: "Your Reviews" / "{{whose}}'s Reviews", Community + By you tabs).
 // received: the reviews OF `userId` the viewer may see — the same rule as meets/reviews/show (MeetService.reviewsVisibleTo:
@@ -46,6 +47,9 @@ export const paramDef = {
 		archived: { type: 'boolean', default: false },
 		limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
 		offset: { type: 'integer', minimum: 0, default: 0 },
+		// KUDOS-CHAT-V1 (A-user-kudos-summary.02): Reclub's timeframe on a player's kudos — a stats timeframe or a month 'YYYY-MM'
+		timeframe: { type: 'string', nullable: true, maxLength: 16 },
+		competitionId: { type: 'string', format: 'misskey:id', nullable: true },   // KUDOS-CHAT-V1: the kudos of ONE competition
 	},
 	required: [],
 } as const;
@@ -70,6 +74,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				return { userId, direction: ps.direction, total: 0, counts: { endorsement: 0, feedback: 0, warning: 0 }, dims: {}, warningCount: 0, warningsPublic: false, warningThreshold: WARNING_PUBLIC_THRESHOLD, rows: [] };
 			}
 
+			const win = ps.timeframe ? reviewWindow(ps.timeframe) : null;   // KUDOS-CHAT-V1: null = all time
 			let rows: MiMeetReview[];
 			let warningCount = 0; let warningsPublic = false;
 			const counts = { endorsement: 0, feedback: 0, warning: 0 };
@@ -79,6 +84,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				// tab counts stay what they were - one grouped query over all of them, not over the page.
 				const qb = this.meetReviewsRepository.createQueryBuilder('r').where('r.authorId = :u', { u: userId });
 				if (ps.meetId) qb.andWhere('r.meetId = :m', { m: ps.meetId });   // MEET-KUDOS-V1
+				if (ps.competitionId) qb.andWhere('r.competitionId = :c', { c: ps.competitionId });   // KUDOS-CHAT-V1
+				if (win) qb.andWhere('r.createdAt >= :f AND r.createdAt < :t', { f: win[0], t: win[1] });
 				for (const c of await qb.clone().select('r.type', 'type').addSelect('count(*)', 'n').groupBy('r.type').getRawMany() as { type: 'endorsement' | 'feedback' | 'warning'; n: string }[]) counts[c.type] = Number(c.n);
 				if (ps.type) qb.andWhere('r.type = :t', { t: ps.type });
 				givenTotal = await qb.getCount();
@@ -87,6 +94,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const v = await this.meetService.reviewsVisibleTo(userId, me ? me.id : null);
 				rows = v.reviews.filter(r => ps.archived ? self && r.archivedAt != null : r.archivedAt == null);
 				if (ps.meetId) rows = rows.filter(r => r.meetId === ps.meetId);   // MEET-KUDOS-V1: narrows, never widens
+				if (ps.competitionId) rows = rows.filter(r => r.competitionId === ps.competitionId);   // KUDOS-CHAT-V1
+				if (win) rows = rows.filter(r => r.createdAt >= win[0] && r.createdAt < win[1]);   // KUDOS-CHAT-V1
 				warningCount = v.warningCount; warningsPublic = v.warningsPublic;
 			}
 			// the dimension totals are over the visible, unarchived endorsements (before the type filter and the page)
@@ -110,6 +119,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const meetIds = Array.from(new Set(page.map(r => r.meetId).filter((x): x is string => !!x)));
 			const meets = meetIds.length ? await this.meetsRepository.find({ where: { id: In(meetIds) }, select: { id: true, name: true, startAt: true } }) : [];
 			const meetById = new Map(meets.map(m => [m.id, m]));
+			// KUDOS-CHAT-V1: the competition a kudos came from (name + id), shown under the same 'known' rule as the meet
+			const compIds = Array.from(new Set(page.map(r => r.competitionId).filter((x): x is string => !!x)));
+			const comps = compIds.length ? await this.meetsRepository.manager.query('SELECT id, name, "startAt" FROM "competition" WHERE id = ANY($1)', [compIds]) as { id: string; name: string; startAt: Date | null }[] : [];
+			const compById = new Map(comps.map(c => [c.id, c]));
 			// a target's own warning count (for the author's "visible to you only until N" hint on the By-you tab)
 			const targetWarn = new Map<string, number>();
 			if (given) {
@@ -147,12 +160,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					// Reclub shows the givers to Supporters; GripBat's free equivalent is "to the player themself")
 					user: known ? packedUsers.get(other) ?? null : null,
 					meet: known && m ? { id: m.id, name: m.name, startAt: new Date(m.startAt).toISOString() } : null,
+					competition: known && r.competitionId && compById.get(r.competitionId) ? { id: r.competitionId, name: compById.get(r.competitionId)!.name } : null,   // KUDOS-CHAT-V1
+					note: r.type === 'endorsement' ? r.note : null,   // KUDOS-CHAT-V1: public with the endorsement
 					canDelete: !!me && r.authorId === me.id,
 					canArchive: !!me && r.targetUserId === me.id && r.type !== 'warning',
 				});
 			}
 			// the count of warnings is known before the threshold only to the person themself
-			return { userId, direction: ps.direction, total, counts, dims, warningCount: warningsPublic || self ? warningCount : 0, warningsPublic, warningThreshold: WARNING_PUBLIC_THRESHOLD, rows: out };
+			return { userId, direction: ps.direction, timeframe: ps.timeframe ?? null, total, counts, dims, warningCount: warningsPublic || self ? warningCount : 0, warningsPublic, warningThreshold: WARNING_PUBLIC_THRESHOLD, rows: out };
 		});
 	}
 }

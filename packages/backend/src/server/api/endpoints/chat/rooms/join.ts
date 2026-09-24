@@ -42,6 +42,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			await this.chatService.checkChatAvailability(me.id, 'write');
 
 			await this.chatService.joinToRoom(me.id, ps.roomId);
+			// KUDOS-CHAT-V1 (E-chat-room.13): Reclub channels:gating.joined "{name} has joined the conversation." in a group room
+			// (a meet / club room gets its own line from its roster; they join through their services, not this door)
+			await this.chatService.createSystemMessageToRoom(ps.roomId, { key: 'joined', userId: me.id, name: me.name ?? me.username }).catch(() => null);
 		});
 	}
 }

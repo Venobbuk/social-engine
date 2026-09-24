@@ -413,9 +413,14 @@ export class ChatService {
 		}
 	}
 
+	/* CHAT-SOFTDELETE-V1 (KUDOS-CHAT-V1, EXTENDED from native delete): Reclub keeps a deleted message's place in the
+	 * thread ("Message unsent" / "{name} unsent a message." / "Message removed by an admin") and lets the person who
+	 * deleted it Undelete. So the row stays with deletedAt / deletedById; the packers (ChatEntityService) blank its text,
+	 * file, attachment and reactions for every reader; search skips it. A room's deletion still removes rows for real
+	 * (FK cascade), as does the probe sweep. */
 	@bindThis
-	public async deleteMessage(message: MiChatMessage) {
-		await this.chatMessagesRepository.delete(message.id);
+	public async deleteMessage(message: MiChatMessage, deleterId?: MiUser['id'] | null) {
+		await this.chatMessagesRepository.update(message.id, { deletedAt: new Date(), deletedById: deleterId ?? message.fromUserId });
 		// CHAT-REPLY-V1: replies keep a snapshot of the text they quote — blank it, so removed words do not live on in a quote
 		// (batch-1 review fix: scoped to the message's own thread, so the scan uses the room / user-pair indexes)
 		if (message.toRoomId) {
@@ -439,6 +444,21 @@ export class ChatService {
 			}
 		} else if (message.toRoomId) {
 			this.globalEventService.publishChatRoomStream(message.toRoomId, 'deleted', message.id);
+		}
+	}
+
+	/** CHAT-SOFTDELETE-V1: Reclub "Undelete" — only whoever deleted it; the quotes of it get their text back. */
+	@bindThis
+	public async undeleteMessage(message: MiChatMessage): Promise<void> {
+		await this.chatMessagesRepository.update(message.id, { deletedAt: null, deletedById: null });
+		const text = message.text ? message.text.slice(0, 200) : null;
+		if (message.toRoomId) {
+			await this.chatMessagesRepository.query(`UPDATE "chat_message" SET "attachment" = ("attachment" - 'deleted') || jsonb_build_object('text', $3::text) WHERE "toRoomId" = $2 AND "attachment"->>'kind' = 'reply' AND "attachment"->>'replyId' = $1`, [message.id, message.toRoomId, text]);
+			this.globalEventService.publishChatRoomStream(message.toRoomId, 'deleted', message.id);   // clients re-read the thread on this event
+		} else if (message.toUserId) {
+			await this.chatMessagesRepository.query(`UPDATE "chat_message" SET "attachment" = ("attachment" - 'deleted') || jsonb_build_object('text', $4::text) WHERE (("fromUserId" = $2 AND "toUserId" = $3) OR ("fromUserId" = $3 AND "toUserId" = $2)) AND "attachment"->>'kind' = 'reply' AND "attachment"->>'replyId' = $1`, [message.id, message.fromUserId, message.toUserId, text]);
+			this.globalEventService.publishChatUserStream(message.fromUserId, message.toUserId, 'deleted', message.id);
+			this.globalEventService.publishChatUserStream(message.toUserId, message.fromUserId, 'deleted', message.id);
 		}
 	}
 
@@ -817,6 +837,10 @@ export class ChatService {
 	public async leaveRoom(userId: MiUser['id'], roomId: MiChatRoom['id']) {
 		const membership = await this.chatRoomMembershipsRepository.findOneByOrFail({ roomId, userId });
 		await this.chatRoomMembershipsRepository.delete(membership.id);
+		// KUDOS-CHAT-V1 (E-chat-room.13): Reclub channels:gating.left "{name} has left the conversation." — every room kind
+		// (group, meet, club, competition) leaves through here; best-effort, a chat hiccup never fails the leave
+		const leaver = await this.usersRepository.findOneBy({ id: userId }).catch(() => null);
+		await this.createSystemMessageToRoom(roomId, { key: 'left', userId, name: leaver ? (leaver.name ?? leaver.username) : null }).catch(() => null);
 
 		// 未読フラグを消す (「既読にする」というわけでもないのでreadメソッドは使わないでおく)
 		const redisPipeline = this.redisClient.pipeline();
@@ -926,6 +950,7 @@ export class ChatService {
 			q.setParameters(ownedRoomsQuery.getParameters());
 		}
 
+		q.andWhere('message.deletedAt IS NULL');   // CHAT-SOFTDELETE-V1: a deleted message is never found
 		q.andWhere('LOWER(message.text) LIKE :q', { q: `%${ sqlLikeEscape(query.toLowerCase()) }%` });
 
 		q.leftJoinAndSelect('message.file', 'file');
@@ -962,6 +987,7 @@ export class ChatService {
 
 		// CHAT-V2: reacting to your own message is allowed (Reclub / every messenger); the same reaction twice is a no-op
 		if (message.reactions.includes(`${userId}/${reaction}`)) return;
+		if (message.deletedAt != null) throw new Error('cannot react to a deleted message');   // CHAT-SOFTDELETE-V1
 
 		if (message.toRoomId === null && message.toUserId !== userId && message.fromUserId !== userId) {
 			throw new Error('cannot react to others message');

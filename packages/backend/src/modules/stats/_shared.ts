@@ -24,6 +24,28 @@ export function timeframeWindow(tf: string): [Date, Date] {
 }
 export const TIMEFRAMES = ['CURRENT_MONTH', 'LAST_MONTH', 'LAST_3_MONTHS', 'LAST_6_MONTHS', 'YTD', 'YEAR', 'LAST_YEAR', 'ALL_TIME'] as const;
 
+/* KUDOS-CHAT-V1 (D-street-cred-leaderboard.02, Reclub timeframe chips "YTD" + "MMM YYYY"): one calendar MONTH as a
+ * window. Months are Hong Kong months (UTC+8, GripBat's only market today), so "Sep 2026" is the month a Hong Kong
+ * player lived, whatever the container's clock zone. */
+export const MONTH_RX = /^(\d{4})-(0[1-9]|1[0-2])$/;
+const HK_OFFSET_MS = 8 * 3600 * 1000;
+export function monthWindow(month: string): [Date, Date] | null {
+	const m = MONTH_RX.exec(month); if (!m) return null;
+	const y = Number(m[1]), mo = Number(m[2]) - 1;
+	return [new Date(Date.UTC(y, mo, 1) - HK_OFFSET_MS), new Date(Date.UTC(y, mo + 1, 1) - HK_OFFSET_MS)];
+}
+/** 'YYYY-MM' of a date, in Hong Kong time. */
+export function monthKey(d: Date): string {
+	const h = new Date(d.getTime() + HK_OFFSET_MS);
+	return h.getUTCFullYear() + '-' + String(h.getUTCMonth() + 1).padStart(2, '0');
+}
+/** A stats timeframe or a month 'YYYY-MM' → a window; ALL_TIME / unknown → null (no filter). */
+export function reviewWindow(tf: string): [Date, Date] | null {
+	if (MONTH_RX.test(tf)) return monthWindow(tf);
+	if (tf === 'ALL_TIME' || !(TIMEFRAMES as readonly string[]).includes(tf)) return null;
+	return timeframeWindow(tf);
+}
+
 export interface ScoredMatch { id: string; meetId: string; meetName: string; startAt: Date; round: number | null; courtIndex: number | null; team1Ids: string[]; team2Ids: string[]; scores: [number, number][]; winnerTeam: 1 | 2 | null }
 
 /** Winner by games won — the same rule as MeetEntityService.packMatch. */

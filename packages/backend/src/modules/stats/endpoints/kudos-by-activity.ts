@@ -8,7 +8,7 @@ import type { DataSource } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
-import { TIMEFRAMES, timeframeWindow } from '../_shared.js';
+import { TIMEFRAMES, timeframeWindow, monthWindow } from '../_shared.js';
 
 // DISCOVER-V3 (stats): Reclub Street Cred "By activity" (§8.7: the activities I received kudos in — name, date, kudo
 // chips × count) and "By category" (GET /kudos/by-user: per dimension the count, "{n} kudos given by {m} people" and
@@ -19,9 +19,11 @@ export const meta = {
 	kind: 'read:meets',
 	res: { type: 'object', optional: false, nullable: false, properties: {
 		timeframe: { type: 'string', optional: false, nullable: false },
+		activitiesTotal: { type: 'number', optional: true, nullable: false },   // KUDOS-CHAT-V1: for Load more
 		total: { type: 'number', optional: false, nullable: false },
 		activities: { type: 'array', optional: false, nullable: false, items: { type: 'object', optional: false, nullable: false, properties: {
 			meetId: { type: 'string', optional: false, nullable: true },
+			competitionId: { type: 'string', optional: true, nullable: true },   // KUDOS-CHAT-V1
 			meetName: { type: 'string', optional: false, nullable: true },
 			startAt: { type: 'string', optional: false, nullable: true },
 			count: { type: 'number', optional: false, nullable: false },
@@ -42,6 +44,8 @@ export const paramDef = {
 	properties: {
 		timeframe: { type: 'string', enum: TIMEFRAMES, default: 'LAST_3_MONTHS' },
 		limit: { type: 'integer', minimum: 1, maximum: 100, default: 30 },
+		offset: { type: 'integer', minimum: 0, default: 0 },   // KUDOS-CHAT-V1 (D-street-cred-by-activity.02): Load more
+		month: { type: 'string', nullable: true, pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$' },   // KUDOS-CHAT-V1
 	},
 	required: [],
 } as const;
@@ -54,30 +58,31 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private userEntityService: UserEntityService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
-			const [from, to] = timeframeWindow(ps.timeframe);
+			const [from, to] = (ps.month ? monthWindow(ps.month) : null) ?? timeframeWindow(ps.timeframe);
 			const rows = await this.db.query(
-				`SELECT r."meetId", r."authorId", r.body, r."createdAt", m.name AS "meetName", m."startAt"
-				 FROM meet_review r LEFT JOIN meet m ON m.id = r."meetId"
+				`SELECT r."meetId", r."competitionId", r."authorId", r.body, r."createdAt", coalesce(m.name, c.name) AS "meetName", coalesce(m."startAt", c."startAt") AS "startAt"
+				 FROM meet_review r LEFT JOIN meet m ON m.id = r."meetId" LEFT JOIN competition c ON c.id = r."competitionId"
 				 WHERE r."targetUserId" = $1 AND r.type = 'endorsement' AND r."archivedAt" IS NULL AND r."createdAt" >= $2 AND r."createdAt" < $3
-				 ORDER BY r."createdAt" DESC`, [me.id, from, to]) as { meetId: string | null; authorId: string; body: string | null; createdAt: Date; meetName: string | null; startAt: Date | null }[];
-			const acts = new Map<string, { meetId: string | null; meetName: string | null; startAt: Date | null; count: number; dims: Record<string, number>; givers: Set<string> }>();
+				 ORDER BY r."createdAt" DESC`, [me.id, from, to]) as { meetId: string | null; competitionId: string | null; authorId: string; body: string | null; createdAt: Date; meetName: string | null; startAt: Date | null }[];
+			const acts = new Map<string, { meetId: string | null; competitionId: string | null; meetName: string | null; startAt: Date | null; count: number; dims: Record<string, number>; givers: Set<string> }>();
 			const cats = new Map<string, { count: number; givers: Set<string> }>();
 			let total = 0;
 			for (const r of rows) {
 				const dims = (r.body ?? '').split(',').map(x => x.trim()).filter(Boolean);
 				const n = Math.max(1, dims.length); total += n;
-				const k = r.meetId ?? 'none';
-				const a = acts.get(k) ?? { meetId: r.meetId, meetName: r.meetName, startAt: r.startAt ? new Date(r.startAt) : null, count: 0, dims: {}, givers: new Set<string>() };
+				const k = r.competitionId ? 'c:' + r.competitionId : (r.meetId ?? 'none');
+				const a = acts.get(k) ?? { meetId: r.meetId, competitionId: r.competitionId, meetName: r.meetName, startAt: r.startAt ? new Date(r.startAt) : null, count: 0, dims: {}, givers: new Set<string>() };
 				a.count += n; a.givers.add(r.authorId);
 				for (const d of dims) { a.dims[d] = (a.dims[d] ?? 0) + 1; const c = cats.get(d) ?? { count: 0, givers: new Set<string>() }; c.count++; c.givers.add(r.authorId); cats.set(d, c); }
 				acts.set(k, a);
 			}
 			const pack = async (ids: Set<string>) => { const out = []; for (const id of [...ids].slice(0, 12)) out.push(await this.userEntityService.pack(id, me, { schema: 'UserLite' }).catch(() => null)); return out; };
 			const activities = [];
-			for (const a of [...acts.values()].sort((x, y) => (y.startAt?.getTime() ?? 0) - (x.startAt?.getTime() ?? 0)).slice(0, ps.limit)) activities.push({ meetId: a.meetId, meetName: a.meetName, startAt: a.startAt ? a.startAt.toISOString() : null, count: a.count, dims: a.dims, givers: await pack(a.givers) });
+			const sortedActs = [...acts.values()].sort((x, y) => (y.startAt?.getTime() ?? 0) - (x.startAt?.getTime() ?? 0));
+			for (const a of sortedActs.slice(ps.offset, ps.offset + ps.limit)) activities.push({ meetId: a.meetId, competitionId: a.competitionId, meetName: a.meetName, startAt: a.startAt ? a.startAt.toISOString() : null, count: a.count, dims: a.dims, givers: await pack(a.givers) });
 			const categories = [];
 			for (const [dimension, c] of [...cats.entries()].sort((x, y) => y[1].count - x[1].count)) categories.push({ dimension, count: c.count, people: c.givers.size, givers: await pack(c.givers) });
-			return { timeframe: ps.timeframe, total, activities, categories };
+			return { timeframe: ps.timeframe, activitiesTotal: sortedActs.length, total, activities, categories };
 		});
 	}
 }

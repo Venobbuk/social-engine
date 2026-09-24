@@ -167,6 +167,7 @@ export * as 'meets/reviews/list' from '@/modules/meets/endpoints/reviews/list.js
 export * as 'meets/reviews/meet-summary' from '@/modules/meets/endpoints/reviews/meet-summary.js';   // MEET-KUDOS-V1
 export * as 'meets/reviews/delete' from '@/modules/meets/endpoints/reviews/delete.js'; // REVIEWS-LIST-V1 (W2-F)
 export * as 'meets/reviews/archive' from '@/modules/meets/endpoints/reviews/archive.js'; // REVIEWS-LIST-V1 (W2-F)
+export * as 'meets/reviews/eligibility' from '@/modules/meets/endpoints/reviews/eligibility.js'; // KUDOS-CHAT-V1
 // MEET-EXTRAS-V1
 export * as 'meets/promote' from '@/modules/meets/endpoints/promote.js';
 export * as 'meets/summary' from '@/modules/meets/endpoints/summary.js';
@@ -215,6 +216,8 @@ export * as 'stats/gb-rising' from '@/modules/stats/endpoints/gb-rising.js'; // 
 export * as 'stats/gb-pairs' from '@/modules/stats/endpoints/gb-pairs.js'; // GB-RATING-V1
 export * as 'stats/gb-suggest' from '@/modules/stats/endpoints/gb-suggest.js'; // GB-FRIEND-SUGGEST-V1
 export * as 'stats/kudos-by-activity' from '@/modules/stats/endpoints/kudos-by-activity.js';
+export * as 'stats/kudos-awards' from '@/modules/stats/endpoints/kudos-awards.js'; // KUDOS-CHAT-V1
+export * as 'stats/kudos-awards/seen' from '@/modules/stats/endpoints/kudos-awards-seen.js'; // KUDOS-CHAT-V1
 export * as 'stats/matches' from '@/modules/stats/endpoints/matches.js'; // STATS-HISTORY-V1
 export * as 'stats/match-summary' from '@/modules/stats/endpoints/match-summary.js'; // STATS-HISTORY-V1
 export * as 'stats/activities' from '@/modules/stats/endpoints/activities.js'; // STATS-HISTORY-V1
@@ -618,6 +621,8 @@ export * as 'verify-email' from './endpoints/verify-email.js';
 export * as 'chat/messages/create-to-user' from './endpoints/chat/messages/create-to-user.js';
 export * as 'chat/messages/create-to-room' from './endpoints/chat/messages/create-to-room.js';
 export * as 'chat/messages/delete' from './endpoints/chat/messages/delete.js';
+export * as 'chat/messages/undelete' from './endpoints/chat/messages/undelete.js'; // KUDOS-CHAT-V1 CHAT-SOFTDELETE-V1
+export * as 'chat/messages/translate' from './endpoints/chat/messages/translate.js'; // KUDOS-CHAT-V1
 export * as 'chat/messages/show' from './endpoints/chat/messages/show.js';
 export * as 'chat/messages/react' from './endpoints/chat/messages/react.js';
 export * as 'chat/messages/unreact' from './endpoints/chat/messages/unreact.js';
