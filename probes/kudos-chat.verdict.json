@@ -1,0 +1,1350 @@
+{
+ "id": "kudos-chat",
+ "at": "2026-09-24T06:46:31.783Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "summary": {
+  "rows": 64,
+  "closed": 57,
+  "partly": 4,
+  "open": 2,
+  "outOfScope": 1,
+  "liveRun": "33/33",
+  "extraRun": "6/6"
+ },
+ "shipped": {
+  "engine": "origin/master 55f79a0b9d + 1e34481d4a (KUDOS-CHAT-V1, migration KudosChatV11789098800000) — running rev b862cec790 on web and web-uat",
+  "app": "604e68a + 182006a + 424344f (L6 fix: one give-kudos sheet) + f7659f7 (L6 fix: review a started meet) + c2c06a4 (KUDOS_CHAT_V1 + W2_F_HOME_KUDOS ON), deployed 2026-09-24 14:23 HKT via tools/deploy-boyau.sh from a clean worktree, preflight KUDOS_CHAT_V1 11 endpoints x 2 hosts OK"
+ },
+ "plants": {
+  "readOnlyControl": {
+   "readOnly": {
+    "composerBeforeArchive": true
+   },
+   "anon": {
+    "positiveControl": true
+   }
+  },
+  "anon": {
+   "positiveControl": true,
+   "strangerRefused": true
+  },
+  "refusals": {
+   "fourKudos": {
+    "upsert2": 200,
+    "rowsForPair": "2",
+    "fourDims": "400 {\"error\":{\"message\":\"Pick up to 3 kudos.\",\"code\":\"TOO_MANY_KUDOS\",\"id\":\"c2d0a6f1"
+   },
+   "undeleteByNonDeleter": {
+    "restoredInDb": "true",
+    "notTheDeleter": 400,
+    "shot": "/root/gen/kudos-chat/shots/post-undeleted-t2.png"
+   },
+   "csatAskByNonSupport": {
+    "ask": 200,
+    "askByNonSupport": 400,
+    "stored": {
+     "kind": "csat",
+     "askId": "ariq0r8ynsrn00bi",
+     "score": 4,
+     "comment": "[probe] kudos-chat csat comment"
+    },
+    "secondAnswer": 400,
+    "shot": "/root/gen/kudos-chat/shots/post-csat-done.png"
+   },
+   "compNotEnded": "400 COMPETITION_NOT_ENDED"
+  }
+ },
+ "g15_4": {
+  "warningWritten": 200,
+  "leaks": {
+   "meets/reviews/show": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": true,
+    "dimsHaveWarning": false
+   },
+   "meets/reviews/show meetId": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": true,
+    "dimsHaveWarning": false
+   },
+   "meets/reviews/list received": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": true,
+    "dimsHaveWarning": false
+   },
+   "meets/reviews/list type=warning": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   },
+   "meets/reviews/list timeframe": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": true,
+    "dimsHaveWarning": false
+   },
+   "meets/reviews/list competitionId": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   },
+   "meets/reviews/meet-summary meet": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   },
+   "meets/reviews/meet-summary competition": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   },
+   "meets/reviews/eligibility": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   },
+   "stats/kudos-awards": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   },
+   "stats/kudos-by-activity": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   },
+   "stats/street-cred summary": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   },
+   "i/notifications": {
+    "status": 200,
+    "warnLeak": false,
+    "reasonNearAuthor": false,
+    "dimsHaveWarning": false
+   }
+  },
+  "authorControlSeesOwn": true,
+  "strangerPrivateCompSummary": 400,
+  "screenLeak": false,
+  "notifMentionsAuthorWithWarn": false
+ },
+ "cleanup": {
+  "live": [
+   "review delete t1 warning -> 204",
+   "review delete t1 endorsement -> 204",
+   "review delete t1 endorsement -> 204",
+   "award fixture review: 2",
+   "award rows of 2026-08 removed (recomputed without the fixture on the next read): 3",
+   "meets/delete -> 200",
+   "meets/delete -> 200",
+   "competitions/delete -> 200",
+   "rooms/delete -> 204",
+   "rooms/delete -> 204",
+   "club archive -> 200",
+   "support DMs removed: 2",
+   "se_sbx leftovers: meet 0 · room 0 · comp 0 · club 0 · review 0"
+  ],
+  "extra": [
+   "review delete -> 204",
+   "meets/delete -> 200"
+  ]
+ },
+ "rows": [
+  {
+   "id": "A-give-meet-kudos.01",
+   "status": "out-of-scope",
+   "level": "L6 (verifier)",
+   "reason": "Excluded by GRIPBAT_BACKLOG.md:59 (§5 \"Kudos expires in countdown ... deliberately not built\")."
+  },
+  {
+   "id": "A-give-meet-kudos.02",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-give-meet-kudos.02",
+     "pass": true,
+     "evidence": {
+      "cells": [
+       "波友測試 2"
+      ],
+      "shot": "/root/gen/kudos-chat/shots/post-grid.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-give-meet-kudos.03",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-give-meet-kudos.03",
+     "pass": true,
+     "evidence": {
+      "chips": 18,
+      "on": [
+       "Heart",
+       "Dinking",
+       "Serving"
+      ],
+      "shot": "/root/gen/kudos-chat/shots/post-pick.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-give-meet-kudos.04",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-give-meet-kudos.04",
+     "pass": true,
+     "evidence": {
+      "stored": {
+       "dims": [
+        "Dinking",
+        "Heart",
+        "Serving"
+       ],
+       "note": "[probe] kudos-chat note"
+      },
+      "shots": [
+       "/root/gen/kudos-chat/shots/post-confirm.png",
+       "/root/gen/kudos-chat/shots/post-highfive.png"
+      ]
+     }
+    },
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-give-meet-kudos.04 discard",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/post-discard.png",
+      "storedAfter": [
+       "Dinking",
+       "Heart",
+       "Serving"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-kudo-detail.01",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-kudo-detail.01",
+     "pass": true,
+     "evidence": {
+      "tail": "\nYou\n×1\nReceived by\n波友測試 2\n×1",
+      "shot": "/root/gen/kudos-chat/shots/post-dim-givers.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-review-player.01",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-review-player.01",
+     "pass": true,
+     "evidence": {
+      "capAt3": [
+       "Heart",
+       "Dinking",
+       "Serving"
+      ],
+      "noteStored": "[probe] kudos-chat note",
+      "note": "kudos (Reclub dimensions, cap 3) + the public note on the one endorsement row (T3 kept kudos and endorsement merged)"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-review-player.03",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "A-review-player.03",
+     "pass": true,
+     "evidence": {
+      "reasonInput": true,
+      "stored": {
+       "type": "warning",
+       "body": "[probe] kudos-chat warning reason",
+       "dims": []
+      },
+      "shot": "/root/gen/kudos-chat/shots/now-review-filled.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-review-player.04",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-review-player.04",
+     "pass": true,
+     "evidence": {
+      "url": "https://uat.gripbat.com/app/pages/meet/index?id=aripv3o6nsrn0043&review=ar7jww4yjhqz003s",
+      "eligibility": {
+       "eligible": true,
+       "meet": {
+        "id": "aripv3o6nsrn0043",
+        "name": "[probe] kudos-chat meet 2",
+        "startAt": "2026-09-24T05:59:56.872Z"
+       },
+       "playedTogether": 2
+      },
+      "shot": "/root/gen/kudos-chat/shots/post-review-from-profile.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-user-kudos-summary.01",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "A-user-kudos-summary.01",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/now-player-self-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-user-kudos-summary.02",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-user-kudos-summary.02",
+     "pass": true,
+     "evidence": {
+      "lastMonthDims": {
+       "Dinking": {
+        "count": 1,
+        "people": 1
+       },
+       "Heart": {
+        "count": 1,
+        "people": 1
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-user-kudos-summary.03",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-player.14",
+     "pass": true,
+     "evidence": {}
+    },
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-reviews.01",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/now-reviews-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-user-kudos-summary.04",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "A-user-kudos-summary.04",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/post-kudos-empty-dim.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "C-home.03",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "C-home.03",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/post-home-thanks-t1.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "C-home.04",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "C-home.04",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/post-home-kudos-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "D-award-showcase.01",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "D-award-showcase.01",
+     "pass": true,
+     "evidence": {
+      "awardsForT2": 3,
+      "popup": true,
+      "seenMarked": "3",
+      "shot": "/root/gen/kudos-chat/shots/post-player-awards-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "D-comp-detail.59",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "D-comp-detail.59",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/post-comp-awards-after.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "D-give-comp-kudos.01",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "D-give-comp-kudos.01",
+     "pass": true,
+     "evidence": {
+      "stored": {
+       "dims": [
+        "Sportsmanship"
+       ],
+       "competition": {
+        "id": "aripv3u7nsrn004a",
+        "name": "[probe] kudos-chat competition"
+       }
+      },
+      "shot": "/root/gen/kudos-chat/shots/post-comp-grid.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "D-kudo-ranking.02",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "D-kudo-ranking.02",
+     "pass": true,
+     "evidence": {
+      "learnMore": false,
+      "shot": "/root/gen/kudos-chat/shots/now-cred-board.png"
+     }
+    },
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "D-kudo-ranking.02",
+     "pass": true,
+     "evidence": {
+      "url": "https://uat.gripbat.com/app/pages/faq/index"
+     }
+    }
+   ]
+  },
+  {
+   "id": "D-street-cred-by-activity.02",
+   "class_before": "PARTIAL",
+   "status": "partly closed",
+   "level": "L6 door / L2 button",
+   "open": "Paging proven on the door (offset, activitiesTotal); the Load more button itself shows only past 30 activities, which no tester has (L2 for the button).",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "D-street-cred-by-activity.02",
+     "pass": true,
+     "evidence": {
+      "total": 4,
+      "page0": "[probe] kudos-chat competition",
+      "page1": "[probe] kudos-chat meet 2",
+      "note": "paging proven on the door (L5/L6 API); the Load more button appears only past 30 activities, which no tester has"
+     }
+    }
+   ]
+  },
+  {
+   "id": "D-street-cred-by-category.01",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE extra (c2c06a4)",
+     "check": "D-street-cred-by-category.01",
+     "pass": true,
+     "evidence": {
+      "tail": "derboards\nRising\nSee which players the community voted as the best, based on certain skills.\nLeaderboard\nBy activity\nBy category\nLast 3 months\nThis year\nAll time\nSep 2026\nAug 2026\nJul 2026\nJun 2026\nMay 2026\nApr 2026\nDinking · #1\n1 kudos given by 1 people\n波友測試 1\nHome\nDiscover\nCommunity\nInbox\nSee more",
+      "shot": "/root/gen/kudos-chat/shots/x-cred-bycat-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "D-street-cred-leaderboard.01",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "D-street-cred-leaderboard.01",
+     "pass": true,
+     "evidence": {
+      "dims": [
+       "Dinking:1",
+       "Heart:1",
+       "Serving:1",
+       "Sportsmanship:1",
+       "On time:1"
+      ],
+      "shot": "/root/gen/kudos-chat/shots/post-cred-summary.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "D-street-cred-leaderboard.02",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "D-street-cred-leaderboard.02",
+     "pass": true,
+     "evidence": {
+      "month": "2026-08",
+      "rows": 1,
+      "shot": "/root/gen/kudos-chat/shots/post-cred-month.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-own-profile.09",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-own-profile.09",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/now-profile-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-player.14",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-player.14",
+     "pass": true,
+     "evidence": {}
+    }
+   ]
+  },
+  {
+   "id": "E-reviews.01",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-reviews.01",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/now-reviews-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-reviews.02",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-reviews.02",
+     "pass": true,
+     "evidence": {}
+    }
+   ]
+  },
+  {
+   "id": "E-reviews.03",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-reviews.03",
+     "pass": true,
+     "evidence": {}
+    }
+   ]
+  },
+  {
+   "id": "E-reviews.04",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-reviews.04",
+     "pass": true,
+     "corrected": "tester2 has a real review it gave, so By you lists it (not the empty line)",
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/now-reviews-t2-byyou.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-reviews.05",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-reviews.05",
+     "pass": true,
+     "evidence": {
+      "rowsAfter": 0,
+      "shot": "/root/gen/kudos-chat/shots/post-card-delete.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-reviews.06",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-reviews.06",
+     "pass": true,
+     "evidence": {}
+    }
+   ]
+  },
+  {
+   "id": "E-reviews.08",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE extra (c2c06a4)",
+     "check": "E-reviews.08",
+     "pass": true,
+     "evidence": {
+      "url": "https://uat.gripbat.com/app/pages/chat/index?user=aqxxu5a0sfmc000j",
+      "shot": "/root/gen/kudos-chat/shots/x-reviews-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-settings-hub.10",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-settings-hub.10",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/now-settings-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-meet-detail.66",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "P1-3/A-meet-detail.66",
+     "pass": true,
+     "evidence": {
+      "composerBefore": true,
+      "fixtureArchived": "t",
+      "composerAfter": false,
+      "readOnlyLine": true,
+      "engineSendStatus": 403,
+      "shot": "/root/gen/kudos-chat/shots/now-meetchat-archived-t2.png"
+     }
+    },
+    {
+     "run": "LIVE extra (c2c06a4)",
+     "check": "A-meet-detail.66 visitor",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/x-meetchat-visitor.png"
+     }
+    },
+    {
+     "run": "LIVE extra (c2c06a4)",
+     "check": "A-meet-detail.66 archive notice",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/x-meetchat-host.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "A-share-activity.01",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "A-share-activity.01",
+     "pass": true,
+     "evidence": {
+      "clicked": true,
+      "tail": "\nNo upcoming activities to share.\nSend",
+      "shot": "/root/gen/kudos-chat/shots/now-share-activity.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-by-participants.02",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-by-participants.02",
+     "pass": true,
+     "evidence": {
+      "url": "https://uat.gripbat.com/app/pages/chat/index?room=aripv42ansrn004h",
+      "newRoomsMade": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-create.04",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-create.04",
+     "pass": true,
+     "evidence": {
+      "searchField": true,
+      "tail": "ns\n24 Sept\n波友測試 2\nYou: [probe] kudos-chat direct hello\n⋯\nChat options\n24 Sept\nHome\nDiscover\nCommunity\nInbox\nSee more\nNew group\nGroup name\nPlayers\nWe're not able to find \"zzqxnomatch\"\nCreate group\nBack",
+      "shot": "/root/gen/kudos-chat/shots/now-newgroup-noresult.png",
+      "note": "keyword echo only; the recent-activity list is a separate check"
+     }
+    },
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-create.04 recent",
+     "pass": true,
+     "evidence": {
+      "tail": "\n波友測試 2\nPlayed together 2 times",
+      "shot": "/root/gen/kudos-chat/shots/post-newmessage.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-msg-menu.03",
+   "status": "closed (already built)",
+   "level": "L6 (verifier)",
+   "evidence": {
+    "screen_url": "https://uat.gripbat.com/app/pages/chat/index?room=<probe room>",
+    "screenshot": "/root/gen/l6-scope/S8-kudos-chat/shots/p3b-replybar.png",
+    "seen": "Menu: reactions · Copy · Reply · Delete · Report; real click on Reply → \"Replying to 波友測試 2\"; real send → quote drawn",
+    "code": "components/ChatThread.tsx:277 (W1_B3_CHAT_REPLY)",
+    "door": "chat/messages/room-timeline: attachment {kind:\"reply\", replyId:\"arhbdkn1oslc0100\"}"
+   }
+  },
+  {
+   "id": "E-chat-msg-menu.05",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-msg-menu.05",
+     "pass": true,
+     "evidence": {
+      "restoredInDb": "true",
+      "notTheDeleter": 400,
+      "shot": "/root/gen/kudos-chat/shots/post-undeleted-t2.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-msg-menu.06",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "P1-1/E-chat-msg-menu.06/E-chat-room.10",
+     "pass": true,
+     "evidence": {
+      "failedShown": true,
+      "reachedWhileOff": false,
+      "retryClicked": true,
+      "reachedAfterRetry": true,
+      "failedGoneAfter": true,
+      "shot": "/root/gen/kudos-chat/shots/now-offline-retried.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-reactions.01",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-reactions.01",
+     "pass": true,
+     "evidence": {
+      "clicked": true,
+      "sheetTail": "\n❤️\n1\n波友測試 2",
+      "shot": "/root/gen/kudos-chat/shots/now-reactors.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.01",
+   "class_before": "MISSING",
+   "status": "partly closed",
+   "level": "L6",
+   "open": "Presence is Misskey's bucket (\"Active now\" / \"Active in the last few days\"); Reclub's \"Active 2h ago\" timestamp is not exposed by the engine (privacy choice, kept).",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-room.01",
+     "pass": true,
+     "corrected": "presence line is uppercased by CSS; textContent shows \"Active in the last few days\" (G12 case trap)",
+     "evidence": {
+      "headSub": "BackActive in the last few days波友測試 2ProfileChat settings",
+      "shot": "/root/gen/kudos-chat/shots/now-dm-t1.png",
+      "note": "bucket only (Misskey onlineStatus); no \"2h ago\" timestamp"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.02",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-room.02",
+     "pass": true,
+     "evidence": {
+      "shot": "/root/gen/kudos-chat/shots/now-support-night.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.03",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-room.03",
+     "pass": true,
+     "evidence": {
+      "acts": [
+       "See club",
+       "Chat settings"
+      ],
+      "url": "https://uat.gripbat.com/app/pages/community/index?id=aripv44vnsrn004p"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.08",
+   "class_before": "MISSING",
+   "status": "partly closed",
+   "level": "L6",
+   "open": "Links + @mention suggestions are live (T3); the mention NOTIFICATION to the person mentioned is not built.",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-room.08",
+     "pass": true,
+     "evidence": {
+      "links": [
+       "https://gripbat.com",
+       "test@example.com"
+      ],
+      "shot": "/root/gen/kudos-chat/shots/now-room-t1.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.09",
+   "class_before": "MISSING",
+   "status": "partly closed",
+   "level": "L6",
+   "open": "Translate is built (engine chat/messages/translate reusing the native DeepL config) and correctly DARK: no DeepL key on either database, meta.translatorAvailable=false, the menu does not offer it, the door answers 400 UNAVAILABLE. Needs a DeepL key from the operator.",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-room.09 dark",
+     "pass": true,
+     "evidence": {
+      "translatorAvailable": false,
+      "door": "400 UNAVAILABLE"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.10",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "P1-1/E-chat-msg-menu.06/E-chat-room.10",
+     "pass": true,
+     "evidence": {
+      "failedShown": true,
+      "reachedWhileOff": false,
+      "retryClicked": true,
+      "reachedAfterRetry": true,
+      "failedGoneAfter": true,
+      "shot": "/root/gen/kudos-chat/shots/now-offline-retried.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.12",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-room.12",
+     "pass": true,
+     "evidence": {
+      "dbDeleted": "true",
+      "shot": "/root/gen/kudos-chat/shots/post-unsent-t2.png"
+     }
+    },
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-room.12 admin",
+     "pass": true,
+     "evidence": {
+      "dbRow": "true:ar89kz29mnr7001o"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.13",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-room.13",
+     "pass": true,
+     "evidence": {
+      "systemKeys": [
+       "left",
+       "joined"
+      ],
+      "shot": "/root/gen/kudos-chat/shots/post-room-left.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.14",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-room.14",
+     "pass": true,
+     "evidence": {
+      "ask": 200,
+      "askByNonSupport": 400,
+      "stored": {
+       "kind": "csat",
+       "askId": "ariq0r8ynsrn00bi",
+       "score": 4,
+       "comment": "[probe] kudos-chat csat comment"
+      },
+      "secondAnswer": 400,
+      "shot": "/root/gen/kudos-chat/shots/post-csat-done.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.16",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE extra (c2c06a4)",
+     "check": "E-chat-room.16",
+     "pass": true,
+     "evidence": {
+      "chooser": true,
+      "multiple": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-room.17",
+   "status": "still-open",
+   "level": "none",
+   "reason": "GIF search not built: needs a Giphy / Tenor API key (external account) from the operator."
+  },
+  {
+   "id": "E-chat-room.19",
+   "status": "closed with A-share-activity.01",
+   "duplicate_of": "A-share-activity.01"
+  },
+  {
+   "id": "E-chat-room.20",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-room.20",
+     "pass": true,
+     "evidence": {
+      "attachTail": "\nPhoto\nUp to 4 at once\nShare an activity\nShare a player\nShare a club"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-settings.01",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-settings.01",
+     "pass": true,
+     "evidence": {
+      "clicked": true,
+      "nameAfter": "[probe] kudos-chat renamed"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-settings.04",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-settings.04",
+     "pass": true,
+     "evidence": {
+      "tail": "\nNotifications\nMembers · 2\n波友測試 1\nHost\n波友測試 2\nRemove\nArchive chat\nChange chat name\n[probe] kudos-chat room\nAdd people\nInvite more players into this group\nReport this chat\nObjectionable content goes to the GripBat moderators\nCommunity Standards\nDelete chat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-settings.07",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-chat-settings.07",
+     "pass": true,
+     "evidence": {
+      "blockedAfterBlock": true,
+      "blockedAfterUnblock": false,
+      "shot": "/root/gen/kudos-chat/shots/post-member-blocked.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-chat-settings.08",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-settings.08",
+     "pass": true,
+     "evidence": {}
+    }
+   ]
+  },
+  {
+   "id": "E-chat-settings.10",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-chat-settings.10",
+     "pass": true,
+     "evidence": {}
+    }
+   ]
+  },
+  {
+   "id": "E-giphy.01",
+   "status": "still-open",
+   "duplicate_of": "E-chat-room.17",
+   "reason": "Part of the GIF build (E-chat-room.17)."
+  },
+  {
+   "id": "E-inbox.06",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-inbox.06",
+     "pass": true,
+     "evidence": {
+      "rowInfo": {
+       "muted": true,
+       "more": true
+      },
+      "shot": "/root/gen/kudos-chat/shots/now-inbox.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-inbox.07",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "current build 2026-09-24 11:5x (432d552, before the flip)",
+     "check": "E-inbox.07",
+     "pass": true,
+     "evidence": {
+      "tail": " you for playing!\n⋯\nChat options\n24 Sept\n波友測試 2\nYou: [probe] kudos-chat direct hello\n⋯\nChat options\n24 Sept\nHome\nDiscover\nCommunity\nInbox\nSee more\n[probe] kudos-chat renamed\nArchive chat\nUnmute\nCancel",
+      "shot": "/root/gen/kudos-chat/shots/now-inbox-rowmenu.png"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-inbox.08",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE extra (c2c06a4)",
+     "check": "E-inbox.08",
+     "pass": true,
+     "evidence": {
+      "empties": {
+       "Direct": "No direct messages yet",
+       "Activity": "(has rows)",
+       "Clubs": "Club chats show up here",
+       "Archived": "No archived chats"
+      },
+      "note": "a filter with rows shows rows, not its empty line"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-network.03",
+   "class_before": "MISSING",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-network.03",
+     "pass": true,
+     "evidence": {
+      "subs": [
+       "波友測試 2● Active in the last few days · 2 meets together · 24 SeptAdd friend"
+      ],
+      "shot": "/root/gen/kudos-chat/shots/post-network-t1.png",
+      "note": "Misskey presence bucket (Active now / last few days); no minute-level last seen by design"
+     }
+    }
+   ]
+  },
+  {
+   "id": "E-player-sport.08",
+   "class_before": "PARTIAL",
+   "status": "closed",
+   "level": "L6",
+   "checks": [
+    {
+     "run": "LIVE after the flip (c2c06a4, KC_LIVE=1)",
+     "check": "E-player-sport.08",
+     "pass": true,
+     "evidence": {
+      "menuTail": " 1 · 11–9, 11–9, 11–7\nW\n+0.00\nHosting\nNo upcoming meets hosted by this player.\nPosts\nNothing posted yet.\nHome\nDiscover\nCommunity\nInbox\nSee more\nSave\nBlock\nMute\nReport player\nInvite to a club\nInvite to an activity\nReview\nShare in chat\nCancel"
+     }
+    }
+   ]
+  }
+ ]
+}
