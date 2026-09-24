@@ -66,6 +66,7 @@ export class CompetitionEntityService {
 			ineligibleUserIds: el ? el.ineligibleUserIds : [], eligibilityReasons: el && why ? el.reasons : {}, eligibilityOverrides: why ? (e.eligibility ?? {}) : {},
 			spectator: e.status === 'spectator',
 			reserved: e.reserved ?? null, positions: e.positions ?? {},   // COMP-FIXES-A
+			reservedPlaces: (e.reservedPlaces ?? []).map((p) => ({ id: p.id, name: p.name, gender: p.gender ?? null, ageGroup: p.ageGroup ?? null, level: p.level ?? null })),   // MOP-UP-COMP
 			id: e.id, competitionId: e.competitionId, name: e.name, captainId: e.captainId, userIds: e.userIds,
 			users: await this.usersLite(e.userIds, me),
 			invitedUserIds: invited, invitedUsers: await this.usersLite(invited, me),
@@ -205,9 +206,9 @@ export class CompetitionEntityService {
 			const e = es[i];
 			const gs = e.userIds.map((u) => genders.get(u) ?? null);
 			const genderMix = !gs.length || gs.some((g) => g == null) ? null : gs.every((g) => g === 'female') ? 'female' : gs.every((g) => g === 'male') ? 'male' : 'mixed';
-			const out: Record<string, unknown> = { ...p, genderMix, rosterCount: e.userIds.length };
+			const out: Record<string, unknown> = { ...p, genderMix, rosterCount: e.userIds.length + (e.reservedPlaces ?? []).length };   // MOP-UP-COMP: a reserved place is a member
 			if (c.hideRoster && !insider && !(me && e.userIds.includes(me.id)) && c.participantType !== 'singles') {
-				Object.assign(out, { users: [], userIds: [], invitedUsers: [], invitedUserIds: [], requestedUsers: [], requestedUserIds: [], positions: {}, rosterHidden: true, ineligibleUserIds: [] });
+				Object.assign(out, { users: [], userIds: [], invitedUsers: [], invitedUserIds: [], requestedUsers: [], requestedUserIds: [], positions: {}, rosterHidden: true, ineligibleUserIds: [], reservedPlaces: [] });
 			}
 			return out;
 		});

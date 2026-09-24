@@ -460,6 +460,7 @@ export class CompetitionService {
 			if (drawn) throw this.err('draw_exists', 'The draw is generated — the roster is fixed.');
 			// the entry's own members may stay; the check excludes this entry
 			const ids = Array.from(new Set(patch.userIds));
+			if (ids.length + (e.reservedPlaces ?? []).length > c.teamMaxSize) throw this.err('team_full', 'This team has no place left.');   // MOP-UP-COMP
 			await this.entriesRepository.update(e.id, { userIds: [] });
 			try { if (ids.length) await this.assertTeam(c, ids); } catch (err) { await this.entriesRepository.update(e.id, { userIds: e.userIds }); throw err; }
 			upd.userIds = ids; upd.captainId = ids[0] ?? null;
@@ -1079,7 +1080,7 @@ export class CompetitionService {
 	public isComplete(c: MiCompetition, e: MiCompetitionEntry): boolean {
 		if (e.status === 'freeAgent') return false;
 		if (!e.captainId && e.userIds.length === 0) return true;
-		return e.userIds.length >= c.teamMinSize;
+		return e.userIds.length + (e.reservedPlaces ?? []).length >= c.teamMinSize;   // MOP-UP-COMP: a reserved place is a member (Reclub)
 	}
 
 	/** Places still open in a team: max size minus accepted players and open invitations. */
@@ -1087,7 +1088,7 @@ export class CompetitionService {
 	public openSlots(c: MiCompetition, e: MiCompetitionEntry): number {
 		if (e.status !== 'confirmed' && e.status !== 'pending') return 0;
 		if (!e.captainId) return 0;
-		return Math.max(0, c.teamMaxSize - e.userIds.length - (e.invitedUserIds ?? []).length);
+		return Math.max(0, c.teamMaxSize - e.userIds.length - (e.invitedUserIds ?? []).length - (e.reservedPlaces ?? []).length);   // MOP-UP-COMP
 	}
 
 	/** Invited to, asking to join, or a free agent in this competition (sees a private competition, no seat yet). */
@@ -1212,7 +1213,7 @@ export class CompetitionService {
 		let invited = (e.invitedUserIds ?? []).filter((x) => !(data.cancel ?? []).includes(x));
 		const add = Array.from(new Set((data.invite ?? []).filter((x) => !e.userIds.includes(x) && !invited.includes(x))));
 		if (add.length) {
-			if (e.userIds.length + invited.length + add.length > c.teamMaxSize) throw this.err('team_full', 'This team has no place left.');
+			if (e.userIds.length + invited.length + add.length + (e.reservedPlaces ?? []).length > c.teamMaxSize) throw this.err('team_full', 'This team has no place left.');   // MOP-UP-COMP: reserved places hold theirs
 			if ((await this.usersRepository.countBy({ id: In(add) })) !== add.length) throw this.err('bad_team', 'A player does not exist.');
 			if (!this.isHost(c, actor.id)) await this.assertMayJoin(c, add);   // COMP-T3-V1: a captain invites club members only
 			await this.assertNoBlocks([...e.userIds, ...add]);
@@ -1687,6 +1688,77 @@ export class CompetitionService {
 			if (e.status === 'confirmed') await this.joinChat(c, [uid]);
 			if (uid !== host.id) this.notify(uid, c, 'You are entered', `${host.name ?? host.username} placed you in ${name} for ${c.name}.` + (c.teamMinSize > 1 ? ' Invite your partners to complete the team.' : ''));
 			return await this.entriesRepository.findOneBy({ id: e.id });
+		}
+		throw this.err('no_such_entry', 'Nothing to change.');
+	}
+
+	// ================================================================================ MOP-UP-COMP (2026-09-24)
+	/**
+	 * Reserve ONE empty place on a team — Reclub CompetitionParticipant referenceType Reserved inside a team (team detail
+	 * EmptySlotOptions "Reserve a spot" → UpsertReservedSpot {name, gender, age group, skill level}; the reserved tile's
+	 * RemoveReservedOptions: Edit reserved info · Remove reserved spot · Swap from community = competitions.swapParticipant).
+	 * The captain or a manager, while the roster may change (open / closed — the partner door's rule, setPartners):
+	 *   reserve (no placeId)  hold one open place under a name; it counts toward the team's size (openSlots) and its
+	 *                         completeness at the start (isComplete), like Reclub's approved Reserved participant
+	 *   reserve (placeId)     Edit reserved info of that place
+	 *   release               Remove reserved spot — the team has an open place again
+	 *   swap                  a real player takes the place: a MANAGER seats them at once (swapParticipant; the host's
+	 *                         Assign player rule, seat()); a CAPTAIN invites them (T1 consent — the invitation holds the
+	 *                         place until they answer, respondInvitation seats them)
+	 */
+	@bindThis
+	public async reservedPlace(c: MiCompetition, actor: MiUser, entryId: string, a: { reserve?: { placeId?: string | null; name?: string | null; gender?: string | null; ageGroup?: string | null; level?: number | null } | null; release?: string | null; swap?: { placeId: string; userId: string } | null }): Promise<MiCompetitionEntry> {
+		const e = await this.entryOrFail(c, entryId);
+		const manager = this.isHost(c, actor.id);
+		if (e.captainId !== actor.id && !manager) throw this.err('forbidden', 'Only the captain can reserve a place.');
+		if (c.status !== 'open' && c.status !== 'closed') throw this.err('started', 'The competition has started.');
+		if (!e.captainId || !['pending', 'confirmed'].includes(e.status)) throw this.err('no_such_entry', 'Only a team in the competition has places to reserve.');
+		const places = [...(e.reservedPlaces ?? [])];
+		const find = (pid: string) => { const i = places.findIndex((p) => p.id === pid); if (i < 0) throw this.err('no_such_entry', 'No such reserved place.'); return i; };
+		if (a.reserve) {
+			const r = a.reserve;
+			const info = {
+				name: (r.name ?? '').trim().slice(0, 64) || 'Reserved spot',
+				gender: r.gender === 'male' || r.gender === 'female' ? r.gender : null,
+				ageGroup: r.ageGroup === 'junior' || r.ageGroup === 'adult' || r.ageGroup === 'senior' ? r.ageGroup : null,
+				level: typeof r.level === 'number' && r.level >= 0 && r.level <= 10 ? Math.round(r.level * 10) / 10 : null,
+			};
+			if (r.placeId) { const i = find(r.placeId); places[i] = { ...places[i], ...info }; } else {
+				if (this.openSlots(c, e) <= 0) throw this.err('team_full', 'This team has no place left.');
+				places.push({ id: this.idService.gen(), ...info, byId: actor.id, at: new Date().toISOString() });
+			}
+			await this.entriesRepository.update(e.id, { reservedPlaces: places });
+			return (await this.entriesRepository.findOneBy({ id: e.id }))!;
+		}
+		if (a.release) {
+			find(a.release);
+			await this.entriesRepository.update(e.id, { reservedPlaces: places.filter((p) => p.id !== a.release) });
+			return (await this.entriesRepository.findOneBy({ id: e.id }))!;
+		}
+		if (a.swap) {
+			const place = places[find(a.swap.placeId)];
+			const uid = a.swap.userId;
+			if (!(await this.usersRepository.existsBy({ id: uid }))) throw this.err('bad_team', 'A player does not exist.');
+			if (e.userIds.includes(uid) || (e.invitedUserIds ?? []).includes(uid)) throw this.err('already_entered', 'This player is already in this team.');
+			if (await this.acceptedEntryOf(c, uid, e.id)) throw this.err('already_entered', 'A player already plays in another team of this competition.');
+			if (!manager) await this.assertMayJoin(c, [uid]);   // a captain brings club members only (setPartners rule)
+			await this.assertNoBlocks([...e.userIds, uid]);
+			const rest = places.filter((p) => p.id !== place.id);
+			if (manager) {
+				await this.entriesRepository.update(e.id, { reservedPlaces: rest });
+				// the player's invitation / spectator rows in this competition close (the assignCaptainId rule)
+				await this.entriesRepository.update({ competitionId: c.id, status: In(['spectator', 'spectatorPending', 'invited']), captainId: uid }, { status: 'withdrawn', statusChangedAt: new Date() });
+				const seated = await this.seat(c, { ...e, reservedPlaces: rest }, uid);
+				// the two sentences the app already translates (lib/social.ts notification patterns = assignFreeAgent's lines)
+				const pu = await this.usersRepository.findOneBy({ id: uid });
+				if (uid !== actor.id) this.notify(uid, c, 'You have a team', `The host placed you in ${e.name} for ${c.name}.`);
+				if (e.captainId && e.captainId !== actor.id && e.captainId !== uid) this.notify(e.captainId, c, 'New teammate', `The host added ${pu ? (pu.name ?? pu.username) : place.name} to ${e.name} in ${c.name}.`);
+				return seated;
+			}
+			await this.entriesRepository.update(e.id, { reservedPlaces: rest, invitedUserIds: [...(e.invitedUserIds ?? []), uid] });
+			const after = (await this.entriesRepository.findOneBy({ id: e.id }))!;
+			this.notifyInvites(c, after, actor, [uid]);
+			return after;
 		}
 		throw this.err('no_such_entry', 'Nothing to change.');
 	}

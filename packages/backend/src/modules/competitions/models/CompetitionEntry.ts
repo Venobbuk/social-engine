@@ -19,6 +19,9 @@ import { MiCompetition } from './Competition.js';
 // general chat, sees a private competition. Free agents without a team become spectators at the start (Reclub copy).
 // COMP-FIXES-A: 'invited' = a host invitation to the competition (one user, no seat, answered Join as a player / Decline);
 // 'spectatorPending' = a spectator request waiting for the host (Spectators Auto approve off).
+/** MOP-UP-COMP: one reserved place in a team (a name-only placeholder for a player). */
+export type CompetitionReservedPlace = { id: string; name: string; gender: string | null; ageGroup: string | null; level: number | null; byId: string | null; at: string };
+
 export const competitionEntryStatuses = ['pending', 'confirmed', 'withdrawn', 'forfeit', 'freeAgent', 'spectator', 'invited', 'spectatorPending'] as const;
 
 @Entity('competition_entry')
@@ -79,6 +82,12 @@ export class MiCompetitionEntry {
 	// COMP-FIXES-A: reserved spot info (Reclub Edit reserved info), positions (Reclub Assign positions), the team chat
 	@Column('jsonb', { nullable: true, comment: 'Reserved spot { gender, ageGroup, level } (null = none).' })
 	public reserved: { gender?: string | null; ageGroup?: string | null; level?: number | null } | null;
+
+	// MOP-UP-COMP (2026-09-24): Reclub CompetitionParticipant referenceType Reserved INSIDE a team — one empty place held
+	// under a name (team detail "Reserve a spot"); it counts toward the team's size and completeness until a real player
+	// takes it (Swap from community) or it is released.
+	@Column('jsonb', { default: [], comment: 'Reserved places in the team [{ id, name, gender, ageGroup, level, byId, at }].' })
+	public reservedPlaces: CompetitionReservedPlace[];
 
 	@Column('jsonb', { default: {}, comment: 'Positions { userId: position }.' })
 	public positions: Record<string, string>;
