@@ -280,7 +280,14 @@ async function main() {
 		}
 		// reviews/meet-summary (the kudos roll-up): givers follow the same rule; a PRIVATE meet's roll-up is its roster's
 		const giverIds = (j) => ((j && j.dims) || []).flatMap((d) => (d.givers || []).filter(Boolean).map((u) => u.id));
-		for (const [who, tok] of [['anonymous', ANON], ['stranger', P['clubowner-mei'].token], ['staff', STAFF]]) {
+		// the staff persona is E, the GIVER on g1 (sec-chem-fixture) — so it is the author here, not an outsider: it must see
+		// itself (feature), and the outsider legs are anonymous, mei and tom. (2026-09-24 13:3x: the first after-run counted
+		// staff as an outsider and read its own name back as a "leak" — a probe error, recorded, not an engine one.)
+		{
+			const own = await T('meets/reviews/meet-summary', { meetId: CH.g.g1.meetId }, STAFF);
+			feat('H4.meetsummary.AUTHOR-sees-own-giving', 4, 'the giver (staff persona)', own.status === 200 && giverIds(own.json).length === 1 && giverIds(own.json)[0] === F.staff.id, { status: own.status, givers: giverIds(own.json) });
+		}
+		for (const [who, tok] of [['anonymous', ANON], ['stranger', P['clubowner-mei'].token], ['positive-pair member', P[F.owner.slug].token]]) {
 			const pub = await T('meets/reviews/meet-summary', { meetId: CH.g.g1.meetId }, tok);   // public g1: E endorsed A
 			leak('H4.meetsummary.public-meet.givers-hidden.' + who, 4, who, pub.status === 200 && giverIds(pub.json).length === 0, { status: pub.status, givers: giverIds(pub.json), dims: ((pub.json && pub.json.dims) || []).length });
 		}

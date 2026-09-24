@@ -1,0 +1,76 @@
+{
+ "id": "sec-chemistry",
+ "at": "2026-09-24T05:26:00.913Z",
+ "phase": "after",
+ "condition_fired": true,
+ "verdict": "pass",
+ "sweep_output": "/root/gen/sec-chemistry-after.json",
+ "prod": [
+  {
+   "id": "gb-pairs.signed-out.negative-pair-reads-neutral",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "row": {
+     "a": "aqxxu5bosfmc000k",
+     "b": "aqxxu57esfmc000i",
+     "matches": 2,
+     "wins": 0,
+     "expected": 0
+    },
+    "db": {
+     "n": 2,
+     "w": 0,
+     "e": 1.789
+    }
+   }
+  },
+  {
+   "id": "gb-edge.signed-out.no-negative-partner",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "partners": []
+   }
+  },
+  {
+   "id": "reviews/show.signed-out.endorser-hidden",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "endorsements": 1,
+    "authorIdInBody": false
+   }
+  },
+  {
+   "id": "reviews/list.signed-out.endorser-hidden",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "authorIdInBody": false
+   }
+  },
+  {
+   "id": "reviews/meet-summary.signed-out.givers-hidden",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "dims": 1,
+    "authorIdInBody": false
+   }
+  }
+ ],
+ "evidence": [
+  "INFO phase=after target=http://127.0.0.1:3961 (web-uat) + https://social.silkvo.com signed-out",
+  "INFO engines — web sha256:9ca16ae297e9c46c906c1d4a78193779fad4b317505c5c46f3dbdeff0e06f2fb b862cec7908332f5f11da63306784d49cb91c684 · web-uat sha256:9ca16ae297e9c46c906c1d4a78193779fad4b317505c5c46f3dbdeff0e06f2fb b862cec7908332f5f11da63306784d49cb91c684",
+  "INFO fixture [probe] SPX-f37qmi — negative pair edge -0.197, positive pair edge 0.885 (read back through the doors' rule); gb-fair predictions {\"member\":10,\"outsider\":20,\"bare\":64}",
+  "PASS cleanup — exit 0, live [probe] SPX meets 0, chemistry rating rows left 0",
+  "PASS PROD gb-pairs.signed-out.negative-pair-reads-neutral — {\"status\":200,\"row\":{\"a\":\"aqxxu5bosfmc000k\",\"b\":\"aqxxu57esfmc000i\",\"matches\":2,\"wins\":0,\"expected\":0},\"db\":{\"n\":2,\"w\":0,\"e\":1.789}}",
+  "PASS PROD gb-edge.signed-out.no-negative-partner — {\"status\":200,\"partners\":[]}",
+  "PASS PROD reviews/show.signed-out.endorser-hidden — {\"status\":200,\"endorsements\":1,\"authorIdInBody\":false}",
+  "PASS PROD reviews/list.signed-out.endorser-hidden — {\"status\":200,\"authorIdInBody\":false}",
+  "PASS PROD reviews/meet-summary.signed-out.givers-hidden — {\"status\":200,\"dims\":1,\"authorIdInBody\":false}",
+  "INFO sweep: 104 assertions, leaks 0, broken 0",
+  "INFO chemistry + review families: 55 assertions, 0 failing"
+ ]
+}

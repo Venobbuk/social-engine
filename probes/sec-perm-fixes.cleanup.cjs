@@ -50,6 +50,19 @@ if (F) {
 }
 console.log('  clubs archived ' + sql(`UPDATE channel SET "isArchived" = true WHERE name LIKE '[probe] SPX-%' AND "isArchived" = false;`));
 console.log('  meets cancelled ' + sql(`UPDATE meet SET status = 'cancelled', "cancelledAt" = now() WHERE name LIKE '[probe] SPX-%' AND status <> 'cancelled';`));
+// SEC-CHEM-V2: OUR OWN rooms / participants / matches — the shared sweep leaves anything younger than 45 min
+// (SWEEP-AGE-V2) to its owner's finally, and this is that finally. Only '[probe] SPX-%', only cancelled meets.
+const spx = `(SELECT id FROM meet WHERE name LIKE '[probe] SPX-%' AND status = 'cancelled')`;
+const rooms = `(SELECT id FROM chat_room WHERE name LIKE '[probe] SPX-%')`;
+sql(`DELETE FROM chat_message WHERE "toRoomId" IN ${rooms};`);
+sql(`DELETE FROM chat_room_membership WHERE "roomId" IN ${rooms};`);
+sql(`DELETE FROM chat_room_invitation WHERE "roomId" IN ${rooms};`);
+console.log('  chat rooms ' + sql(`DELETE FROM chat_room WHERE name LIKE '[probe] SPX-%';`));
+console.log('  gb_rating_log of SPX meets (after retire, must be 0) ' + sql(`DELETE FROM gb_rating_log l USING meet_match mm WHERE l.source = 'meet' AND l."matchId" = mm.id AND mm."meetId" IN ${spx};`));
+console.log('  reviews ' + sql(`DELETE FROM meet_review WHERE "meetId" IN ${spx};`));
+sql(`DELETE FROM meet_match WHERE "meetId" IN ${spx};`);
+console.log('  participants ' + sql(`DELETE FROM meet_participant WHERE "meetId" IN ${spx};`));
+sql(`DELETE FROM meet_group WHERE "meetId" IN ${spx};`);
 
 console.log('\n— the throwaway engines this run started (prod and web-uat are NOT touched)');
 for (const c of ['se-before', 'se-jsonb']) console.log('  ' + c + ': ' + run('docker', ['rm', '-f', c]).trim());
