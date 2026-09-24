@@ -1,0 +1,99 @@
+{
+ "id": "sec-chemistry.planted",
+ "at": "2026-09-24T05:08:16.495Z",
+ "phase": "planted",
+ "condition_fired": true,
+ "verdict": "fail",
+ "sweep_output": "/root/gen/sec-chemistry-planted.json",
+ "prod": [
+  {
+   "id": "gb-pairs.signed-out.negative-pair-reads-neutral",
+   "ok": false,
+   "got": {
+    "status": 200,
+    "row": {
+     "a": "aqxxu5bosfmc000k",
+     "b": "aqxxu57esfmc000i",
+     "matches": 2,
+     "wins": null,
+     "expected": null,
+     "chemistryHidden": true
+    },
+    "db": {
+     "n": 2,
+     "w": 0,
+     "e": 1.789
+    }
+   }
+  },
+  {
+   "id": "gb-edge.signed-out.no-negative-partner",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "partners": []
+   }
+  },
+  {
+   "id": "reviews/show.signed-out.endorser-hidden",
+   "ok": false,
+   "got": {
+    "status": 200,
+    "endorsements": 1,
+    "authorIdInBody": true
+   }
+  },
+  {
+   "id": "reviews/list.signed-out.endorser-hidden",
+   "ok": true,
+   "got": {
+    "status": 200,
+    "authorIdInBody": false
+   }
+  },
+  {
+   "id": "reviews/meet-summary.signed-out.givers-hidden",
+   "ok": false,
+   "got": {
+    "status": 200,
+    "dims": 1,
+    "authorIdInBody": true
+   }
+  }
+ ],
+ "evidence": [
+  "INFO phase=planted target=http://127.0.0.1:3961 (web-uat) + https://social.silkvo.com signed-out",
+  "INFO engines — web sha256:08229992e2ad97d11adf58a77bbb09beb96c16c9f8492d70c45128b4767f2767 1c9359bbf7c22aea9407c255150f00ed45af861f · web-uat sha256:08229992e2ad97d11adf58a77bbb09beb96c16c9f8492d70c45128b4767f2767 1c9359bbf7c22aea9407c255150f00ed45af861f",
+  "INFO fixture [probe] SPX-f2l265 — negative pair edge -0.190, positive pair edge 0.876 (read back through the doors' rule); gb-fair predictions {\"member\":5,\"outsider\":14,\"bare\":58}",
+  "PASS cleanup — exit 0, live [probe] SPX meets 0, chemistry rating rows left 0",
+  "FAIL PROD gb-pairs.signed-out.negative-pair-reads-neutral — {\"status\":200,\"row\":{\"a\":\"aqxxu5bosfmc000k\",\"b\":\"aqxxu57esfmc000i\",\"matches\":2,\"wins\":null,\"expected\":null,\"chemistryHidden\":true},\"db\":{\"n\":2,\"w\":0,\"e\":1.789}}",
+  "PASS PROD gb-edge.signed-out.no-negative-partner — {\"status\":200,\"partners\":[]}",
+  "FAIL PROD reviews/show.signed-out.endorser-hidden — {\"status\":200,\"endorsements\":1,\"authorIdInBody\":true}",
+  "PASS PROD reviews/list.signed-out.endorser-hidden — {\"status\":200,\"authorIdInBody\":false}",
+  "FAIL PROD reviews/meet-summary.signed-out.givers-hidden — {\"status\":200,\"dims\":1,\"authorIdInBody\":true}",
+  "INFO sweep: 103 assertions, leaks 18, broken 3",
+  "LEAK H3.gbpairs.NEG-pair.anonymous {\"status\":200,\"row\":{\"a\":\"ari4hb3c3hac0001\",\"b\":\"ari4hbuh3hac0003\",\"matches\":2,\"wins\":null,\"expected\":null,\"chemistryHidden\":true},\"recomputed_edge\":null,\"db_edge\":-0.19}",
+  "LEAK H3.gbpairs.SWEEP-original.anonymous {\"status\":200,\"row\":{\"a\":\"ar7uzhlxs64a00qs\",\"b\":\"ar7uzi4vs64a00r6\",\"matches\":2,\"wins\":null,\"expected\":null,\"chemistryHidden\":true},\"recomputed_edge\":null}",
+  "LEAK H3.gbpairs.PRIVATE-game-uncounted.anonymous {\"status\":200,\"row\":{\"a\":\"ari4hb3c3hac0001\",\"b\":\"ari4hcj63hac0006\",\"matches\":1,\"wins\":1,\"expected\":0.37}}",
+  "LEAK H3.gbpairs.NEG-pair.stranger {\"status\":200,\"row\":{\"a\":\"ari4hb3c3hac0001\",\"b\":\"ari4hbuh3hac0003\",\"matches\":2,\"wins\":null,\"expected\":null,\"chemistryHidden\":true},\"recomputed_edge\":null,\"db_edge\":-0.19}",
+  "LEAK H3.gbpairs.SWEEP-original.stranger {\"status\":200,\"row\":{\"a\":\"ar7uzhlxs64a00qs\",\"b\":\"ar7uzi4vs64a00r6\",\"matches\":2,\"wins\":null,\"expected\":null,\"chemistryHidden\":true},\"recomputed_edge\":null}",
+  "LEAK H3.gbpairs.NEG-pair.staff {\"status\":200,\"row\":{\"a\":\"ari4hb3c3hac0001\",\"b\":\"ari4hbuh3hac0003\",\"matches\":2,\"wins\":null,\"expected\":null,\"chemistryHidden\":true},\"recomputed_edge\":null,\"db_edge\":-0.19}",
+  "LEAK H3.gbpairs.SWEEP-original.staff {\"status\":200,\"row\":{\"a\":\"ar7uzhlxs64a00qs\",\"b\":\"ar7uzi4vs64a00r6\",\"matches\":2,\"wins\":null,\"expected\":null,\"chemistryHidden\":true},\"recomputed_edge\":null}",
+  "LEAK H3.gbpairs.PRIVATE-game-uncounted.staff {\"status\":200,\"row\":{\"a\":\"ari4hb3c3hac0001\",\"b\":\"ari4hcj63hac0006\",\"matches\":1,\"wins\":1,\"expected\":0.37}}",
+  "LEAK H3.gbpairs.NEG-pair.positive-pair-member {\"status\":200,\"row\":{\"a\":\"ari4hb3c3hac0001\",\"b\":\"ari4hbuh3hac0003\",\"matches\":2,\"wins\":null,\"expected\":null,\"chemistryHidden\":true}}",
+  "LEAK H4.endorsement.show.author-hidden.anonymous {\"status\":200,\"found\":true,\"author\":\"ari4hbuh3hac0003\"}",
+  "LEAK H4.endorsement.show.author-hidden.stranger {\"status\":200,\"found\":true,\"author\":\"ari4hbuh3hac0003\"}",
+  "LEAK H4.endorsement.show.author-hidden.staff {\"status\":200,\"found\":true,\"author\":\"ari4hbuh3hac0003\"}",
+  "LEAK H4.meetsummary.public-meet.givers-hidden.anonymous {\"status\":200,\"givers\":[\"ari4hdzd3hac000c\"],\"dims\":1}",
+  "LEAK H4.meetsummary.public-meet.givers-hidden.stranger {\"status\":200,\"givers\":[\"ari4hdzd3hac000c\"],\"dims\":1}",
+  "LEAK H4.meetsummary.public-meet.givers-hidden.staff {\"status\":200,\"givers\":[\"ari4hdzd3hac000c\"],\"dims\":1}",
+  "LEAK H4.meetsummary.private-meet.refused.anonymous {\"status\":200,\"code\":null,\"givers\":[\"ari4hbuh3hac0003\"]}",
+  "LEAK H4.meetsummary.private-meet.refused.staff {\"status\":200,\"code\":null,\"givers\":[\"ari4hbuh3hac0003\"]}",
+  "LEAK H4.meetsummary.private-meet.refused.stranger {\"status\":200,\"code\":null,\"givers\":[\"ari4hbuh3hac0003\"]}",
+  "BROKEN H3.gbpairs.SCOUTING-keeps-matches {\"status\":200,\"matches\":2,\"wins\":null}",
+  "BROKEN H3.gbpairs.ONE-SHAPE-for-every-row {\"shapes\":[\"a,b,expected,matches,wins\",\"a,b,chemistryHidden,expected,matches,wins\"]}",
+  "BROKEN H3E.gbedge.partner-sees-own-pair {\"status\":200,\"partners\":[]}",
+  "INFO chemistry + review families: 54 assertions, 21 failing",
+  "FAIL production signed-out reads (see PROD lines)"
+ ]
+}
