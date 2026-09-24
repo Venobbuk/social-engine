@@ -13,6 +13,9 @@ import { MiUser } from './User.js';
  *   scope 'user'     targetId = the other user id — a 1-on-1 thread
  *   scope 'club' | 'chat' | 'promoted' | 'updates'   targetId = ''  — the settings page toggles
  *   scope 'meets'    targetId = ''  — ACCOUNT-BUGS-V1: Settings › Meet updates (modules/meets/meet-updates-mute.ts)
+ *   scope 'social'   targetId = ''  — SOCIAL-NOTIF-V1: Settings › Social (kudos, feedback, awards; modules/account/social-mute.ts)
+ *   scope 'promotedClub' targetId = '' — SOCIAL-NOTIF-V1: Settings › Promoted club meets (meets/promote audience 'club');
+ *                    'promoted' is now Promoted community meets (audience 'all' / 'proximity')
  *   scope 'clubMeets' targetId = the club (channel id) — CLUB-TIERS-V1: "tell me about new meets" of one club, for a
  *                    follower and a member alike (the row belongs to the person, so joining keeps it)
  *  A row present = muted. No row = notifications on (the default).
@@ -21,7 +24,7 @@ import { MiUser } from './User.js';
  *  reads notification mutes looks at these two scopes (they match only 'room' / 'user' / the toggles by name).
  *   scope 'archiveRoom'  targetId = chat room id
  *   scope 'archiveUser'  targetId = the other user id */
-export const notificationMuteScopes = ['room', 'user', 'club', 'chat', 'promoted', 'updates', 'archiveRoom', 'archiveUser', 'clubMeets', 'meets'] as const;
+export const notificationMuteScopes = ['room', 'user', 'club', 'chat', 'promoted', 'updates', 'archiveRoom', 'archiveUser', 'clubMeets', 'meets', 'social', 'promotedClub'] as const;
 export type NotificationMuteScope = typeof notificationMuteScopes[number];
 
 @Entity('notification_mute')

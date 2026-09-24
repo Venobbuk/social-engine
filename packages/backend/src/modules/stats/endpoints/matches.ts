@@ -8,7 +8,7 @@ import type { DataSource } from 'typeorm';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
-import { historyPage, userIdsOf } from '../MatchHistory.js';
+import { historyPage, communityPage, userIdsOf } from '../MatchHistory.js';
 
 // STATS-HISTORY-V1 (W2-S): Reclub My history › Matches / Statistics › Match history / Player sport › Matches — one page
 // of a player's scored matches (meets, casual games, competitions, open play), newest first, paged in SQL.
@@ -31,6 +31,9 @@ export const paramDef = {
 		opponentIds: { type: 'array', nullable: true, maxItems: 2, items: { type: 'string', format: 'misskey:id' } },
 		limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
 		offset: { type: 'integer', minimum: 0, maximum: 5000, default: 0 },
+		// COMMUNITY-MATCHES-V1 (Reclub Statistics › Match history › Community matches): the community's newest scored
+		// matches instead of one player's (userId / contextId / partnerId / opponentIds are ignored). No key = mine.
+		scope: { type: 'string', enum: ['mine', 'community'] },
 	},
 	required: [],
 } as const;
@@ -44,8 +47,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const userId = ps.userId ?? me?.id;
-			if (!userId) return [];
-			const rows = await historyPage(this.db, { userId, viewerId: me?.id ?? null, sport: ps.sport, limit: ps.limit, offset: ps.offset, contextId: ps.contextId ?? null, partnerId: ps.partnerId ?? null, opponentIds: ps.opponentIds ?? null });
+			if (ps.scope !== 'community' && !userId) return [];
+			const rows = ps.scope === 'community' ? await communityPage(this.db, { viewerId: me?.id ?? null, sport: ps.sport, limit: ps.limit, offset: ps.offset }) : await historyPage(this.db, { userId: userId!, viewerId: me?.id ?? null, sport: ps.sport, limit: ps.limit, offset: ps.offset, contextId: ps.contextId ?? null, partnerId: ps.partnerId ?? null, opponentIds: ps.opponentIds ?? null });
 			const ids = userIdsOf(rows);
 			const users = new Map<string, unknown>();
 			if (ids.length) for (const u of await this.userEntityService.packMany(ids, me, { schema: 'UserLite' })) users.set(u.id, u);

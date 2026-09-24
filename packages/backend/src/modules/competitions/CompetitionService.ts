@@ -14,6 +14,7 @@ import type { MiUser } from '@/models/User.js';
 import { IdService } from '@/core/IdService.js';
 import { ChatService } from '@/core/ChatService.js';
 import { NotificationService } from '@/core/NotificationService.js';
+import { socialMuted } from '@/modules/account/social-mute.js';   // SOCIAL-NOTIF-V1
 import { bindThis } from '@/decorators.js';
 import { secureRndstr, L_CHARS } from '@/misc/secure-rndstr.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
@@ -1811,6 +1812,8 @@ export class CompetitionService {
 	}
 
 	private notify(userId: string, c: MiCompetition, header: string, body: string): void {
+		// SOCIAL-NOTIF-V1: an award is a Social notice (Settings › Social can switch it off); everything else is unchanged
+		if (header === 'Award') { void socialMuted(this.db, userId).then((m) => { if (!m) this.notificationService.createNotification(userId, 'app', { customHeader: header, customBody: body, customIcon: null, appAccessTokenId: null, customLink: 'competition:' + c.id }); }); return; }
 		this.notificationService.createNotification(userId, 'app', { customHeader: header, customBody: body, customIcon: null, appAccessTokenId: null, customLink: 'competition:' + c.id });
 	}
 }

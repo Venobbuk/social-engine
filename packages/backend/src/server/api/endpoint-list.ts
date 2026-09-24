@@ -18,6 +18,10 @@ export * as 'admin/abuse-report/notification-recipient/update' from './endpoints
 export * as 'admin/abuse-user-reports' from './endpoints/admin/abuse-user-reports.js';
 export * as 'adapter/sso' from './endpoints/adapter/sso.js';
 export * as 'adapter/account/delete' from './endpoints/adapter/account-delete.js';
+export * as 'adapter/account/deletion' from './endpoints/adapter/account-deletion.js';   // ACCOUNT-GRACE-V1
+export * as 'adapter/account/restore' from './endpoints/adapter/account-restore.js';   // ACCOUNT-GRACE-V1
+export * as 'gb/status' from './endpoints/gb/status.js';   // GB-MAINTENANCE-V1 (public)
+export * as 'gb/maintenance' from './endpoints/gb/maintenance.js';   // GB-MAINTENANCE-V1 (GripBat staff)
 export * as 'admin/accounts/create' from './endpoints/admin/accounts/create.js';
 export * as 'admin/accounts/delete' from './endpoints/admin/accounts/delete.js';
 export * as 'admin/accounts/find-by-email' from './endpoints/admin/accounts/find-by-email.js';

@@ -14,6 +14,8 @@ import { ApiError } from '@/server/api/error.js';
 import { meetErrors, toApiError } from '@/modules/meets/endpoints/_shared.js';
 import { MAX_KUDOS_PER_REVIEW } from '@/modules/meets/models/MeetReview.js';
 import { competedTogether } from '@/modules/meets/kudos-ref.js';
+import { NotificationService } from '@/core/NotificationService.js';
+import { socialMuted } from '@/modules/account/social-mute.js';   // SOCIAL-NOTIF-V1 (account-rest)
 
 // SAFETY-V1 (W3.7): Reclub's player review in one door — endorsement (public kudos), feedback (private to the person),
 // warning (private until 5 distinct people have warned). Written by a confirmed participant of the meet about
@@ -59,8 +61,23 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private meetsRepository: MeetsRepository,
 		private meetService: MeetService,
 		private userEntityService: UserEntityService,
+		private notificationService: NotificationService,   // SOCIAL-NOTIF-V1
 	) {
 		super(meta, paramDef, async (ps, me) => {
+			/* SOCIAL-NOTIF-V1 (lane account-rest, Reclub E-notif-settings.04): a NEW kudos / feedback tells the person unless
+			 * Settings › Social is off; an edit of an existing one does not ping again (MeetService.review keeps the row's
+			 * createdAt); a warning never notifies — its author is anonymous to the person warned (G15.4). */
+			const t0 = Date.now();
+			const tell = (row: { createdAt: Date }, target: string, type: string, where: string) => {
+				if (type === 'warning' || new Date(row.createdAt).getTime() < t0 - 1000) return;
+				const who = me.name ?? me.username;
+				void socialMuted(this.db, target).then((muted) => {
+					if (muted) return;
+					this.notificationService.createNotification(target, 'app', type === 'endorsement'
+						? { customHeader: 'Kudos', customBody: `${who} gave you kudos after ${where}.`, customIcon: null, appAccessTokenId: null, customLink: 'reviews:' + target }
+						: { customHeader: 'Feedback', customBody: `${who} left you feedback after ${where}.`, customIcon: null, appAccessTokenId: null, customLink: 'reviews:' + target }, me.id);
+				});
+			};
 			if (ps.type === 'endorsement' && ps.body && ps.body.split(',').map(x => x.trim()).filter(Boolean).length > MAX_KUDOS_PER_REVIEW) throw new ApiError(meta.errors.tooManyKudos);
 			const note = ps.type === 'endorsement' && ps.note && ps.note.trim() ? ps.note.trim() : null;
 			if (ps.competitionId) {
@@ -70,7 +87,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const ok = await competedTogether(this.db, ps.competitionId, me.id, ps.targetUserId);
 				if (!ok.ok) throw new ApiError(ok.code === 'no_such_competition' ? meta.errors.noSuchCompetition : ok.code === 'not_ended' ? meta.errors.competitionNotEnded : meta.errors.notParticipant);
 				try {
-					await this.meetService.review(me, ps.targetUserId, 'endorsement', ps.body ?? null, null, { competitionId: ps.competitionId, note });
+					const rv = await this.meetService.review(me, ps.targetUserId, 'endorsement', ps.body ?? null, null, { competitionId: ps.competitionId, note });
+					const cn = (await this.db.query('SELECT name FROM "competition" WHERE id = $1', [ps.competitionId]) as { name: string }[])[0];
+					tell(rv, ps.targetUserId, 'endorsement', cn ? cn.name : 'a competition');
 					return await this.meetService.packReviews(ps.targetUserId, me.id, this.userEntityService, { competitionId: ps.competitionId });
 				} catch (e) {
 					return toApiError(e);
@@ -81,7 +100,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (meet == null) throw new ApiError(meta.errors.noSuchMeet);
 			try {
 				await this.meetService.assertPlayedTogether(meet, me.id, ps.targetUserId);
-				await this.meetService.review(me, ps.targetUserId, ps.type, ps.body ?? null, meet.id, { note });
+				const rv = await this.meetService.review(me, ps.targetUserId, ps.type, ps.body ?? null, meet.id, { note });
+				tell(rv, ps.targetUserId, ps.type, meet.name);
 				return await this.meetService.packReviews(ps.targetUserId, me.id, this.userEntityService, { meetId: meet.id });
 			} catch (e) {
 				return toApiError(e);

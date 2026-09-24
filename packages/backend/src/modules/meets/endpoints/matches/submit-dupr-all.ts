@@ -38,7 +38,11 @@ export const meta = {
 
 export const paramDef = {
 	type: 'object',
-	properties: { meetId: { type: 'string', format: 'misskey:id' } },
+	properties: {
+		meetId: { type: 'string', format: 'misskey:id' },
+		basis: { type: 'string', enum: ['matches', 'sets'] },   // DUPR-OPTIONS-V1 (Reclub Submission basis)
+		scoringType: { type: 'string', enum: ['sideout', 'rally'] },   // DUPR-OPTIONS-V1 (Reclub Scoring type)
+	},
 	required: ['meetId'],
 } as const;
 
@@ -63,7 +67,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					if (m.scores.length === 0 || m.duprStatus === 'submitted' || m.duprStatus === 'queued') { counts.skipped++; results.push({ matchId: m.id, duprStatus: m.duprStatus, duprError: m.duprError }); continue; }
 					// SEC-CASUAL-CONSENT-V1: a casual game with an unconfirmed player is skipped (submitDupr would refuse it)
 					if ((await this.meetMatchService.casualPending(meet, m)).length > 0) { counts.skipped++; results.push({ matchId: m.id, duprStatus: m.duprStatus, duprError: 'casual_unconfirmed' }); continue; }
-					const r = await this.meetMatchService.submitDupr(meet, m, me);
+					const r = await this.meetMatchService.submitDupr(meet, m, me, { basis: ps.basis ?? null, scoring: ps.scoringType ?? null });
 					if (r.duprStatus === 'submitted') counts.submitted++;
 					else if (r.duprStatus === 'queued') counts.queued++;
 					else if (r.duprStatus === 'ineligible') counts.ineligible++;

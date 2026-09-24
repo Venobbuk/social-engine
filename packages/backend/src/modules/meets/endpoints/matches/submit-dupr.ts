@@ -28,6 +28,8 @@ export const paramDef = {
 	properties: {
 		meetId: { type: 'string', format: 'misskey:id' },
 		matchId: { type: 'string', format: 'misskey:id' },
+		basis: { type: 'string', enum: ['matches', 'sets'] },   // DUPR-OPTIONS-V1 (Reclub Submission basis)
+		scoringType: { type: 'string', enum: ['sideout', 'rally'] },   // DUPR-OPTIONS-V1 (Reclub Scoring type)
 	},
 	required: ['meetId', 'matchId'],
 } as const;
@@ -50,7 +52,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (!(await this.meetMatchService.isHost(meet, me))) throw new ApiError(meta.errors.notHost);
 			if (match.duprStatus === 'submitted') throw new ApiError(meta.errors.duprLocked);
 			try {
-				const m = await this.meetMatchService.submitDupr(meet, match, me);
+				const m = await this.meetMatchService.submitDupr(meet, match, me, { basis: ps.basis ?? null, scoring: ps.scoringType ?? null });
 				return await this.meetEntityService.packMatch(m, meet, me, { eligibility: true });
 			} catch (e) {
 				return toApiError(e);

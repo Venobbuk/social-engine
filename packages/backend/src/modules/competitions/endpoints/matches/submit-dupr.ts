@@ -36,6 +36,8 @@ export const paramDef = {
 		competitionId: { type: 'string', format: 'misskey:id' },
 		matchId: { type: 'string', format: 'misskey:id' },
 		confirm: { type: 'boolean', nullable: true },
+		basis: { type: 'string', enum: ['matches', 'sets'] },   // DUPR-OPTIONS-V1 (Reclub Submission basis)
+		scoringType: { type: 'string', enum: ['sideout', 'rally'] },   // DUPR-OPTIONS-V1 (Reclub Scoring type)
 	},
 	required: ['competitionId', 'matchId'],
 } as const;
@@ -59,8 +61,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				// COMP-FIXES-B: a removed match is no result (409), and only a finalized match is sent (a provisional score is not)
 				if (match.status === 'cancelled') throw new ApiError(meta.errors.matchRemoved);
 				if (ps.confirm === true && match.status !== 'completed') throw new ApiError({ ...meta.errors.invalidTransition, message: 'Finalize the match before sending it to DUPR.' });
-				if (ps.confirm !== true) return await this.competitionDuprService.preview(c, match);
-				const m = await this.competitionDuprService.submitDupr(c, match, me);
+				if (ps.confirm !== true) return await this.competitionDuprService.preview(c, match, { basis: ps.basis ?? null, scoring: ps.scoringType ?? null });
+				const m = await this.competitionDuprService.submitDupr(c, match, me, { basis: ps.basis ?? null, scoring: ps.scoringType ?? null });
 				return { confirmed: true, match: await this.competitionEntityService.packMatch(m, c, me) };
 			} catch (e) {
 				return toApiError(e);
