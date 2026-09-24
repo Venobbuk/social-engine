@@ -1,0 +1,661 @@
+{
+ "id": "comp-fixes-b",
+ "at": "2026-09-24T04:14:44.812Z",
+ "condition_fired": true,
+ "checks": [
+  {
+   "item": "setup.signin",
+   "what": "tester1 (host), tester2, amy, mei, tom, ken, admin signed in through the UAT QA door",
+   "pass": true,
+   "evidence": {
+    "tester1": true,
+    "tester2": true,
+    "amy": true,
+    "mei": true,
+    "tom": true,
+    "ken": true,
+    "admin": true
+   }
+  },
+  {
+   "item": "setup.C1",
+   "what": "fixture is real: started team round robin, 3 generated matches, engine carries the batch (fb === 1)",
+   "pass": true,
+   "evidence": {
+    "status": "inProgress",
+    "matches": 3,
+    "fb": 1
+   }
+  },
+  {
+   "item": "D-match-format.13",
+   "what": "named sets + Tiebreaker stored as the competition's default sets (read back by a player)",
+   "pass": true,
+   "evidence": [
+    {
+     "name": "Opener",
+     "type": "standard"
+    },
+    {
+     "name": "Decider",
+     "type": "tiebreaker"
+    }
+   ]
+  },
+  {
+   "item": "D-comp-add-match.01.create",
+   "what": "host creates a match with a NAME (stored)",
+   "pass": true,
+   "evidence": {
+    "status": 200,
+    "name": "Exhibition"
+   }
+  },
+  {
+   "item": "D-comp-add-match.01.edit",
+   "what": "Edit match: the name and the two teams change (row read back)",
+   "pass": true,
+   "evidence": {
+    "status": 200,
+    "row": "Rematch|aril18zp8cnz00ex|aril190l8cnz00f4"
+   }
+  },
+  {
+   "item": "D-comp-add-match.01.plant",
+   "what": "PLANT: a side that is not an entry of this competition is refused (NO_SUCH_ENTRY), row unchanged",
+   "pass": true,
+   "evidence": {
+    "code": "NO_SUCH_ENTRY"
+   }
+  },
+  {
+   "item": "D-comp-add-match.01.scored",
+   "what": "a match with games keeps its sides (409 COMPETITION_MATCH_HAS_SCORES)",
+   "pass": true,
+   "evidence": {
+    "status": 409,
+    "code": "COMPETITION_MATCH_HAS_SCORES"
+   }
+  },
+  {
+   "item": "D-comp-add-match.01.role",
+   "what": "a player may not rename the match (name ignored for a non-host: stored name unchanged)",
+   "pass": true,
+   "evidence": {
+    "status": 200
+   }
+  },
+  {
+   "item": "D-comp-match-detail.09.engine",
+   "what": "host score, player score and availability on a REMOVED match -> 409 COMPETITION_MATCH_REMOVED; row unchanged (still cancelled)",
+   "pass": true,
+   "evidence": {
+    "host": [
+     409,
+     "COMPETITION_MATCH_REMOVED"
+    ],
+    "player": [
+     409,
+     "COMPETITION_MATCH_REMOVED"
+    ],
+    "avail": [
+     409,
+     "COMPETITION_MATCH_REMOVED"
+    ],
+    "after": "cancelled|[{\"t1\": 5, \"t2\": 3, \"type\": \"standard\"}]"
+   }
+  },
+  {
+   "item": "D-comp-match-detail.09.pack",
+   "what": "the removed match packs canScore false for its own player",
+   "pass": true,
+   "evidence": {
+    "canScore": false
+   }
+  },
+  {
+   "item": "D-comp-match-detail.09.control",
+   "what": "CONTROL: the same player call on a live match is accepted (200) — the refusal is the removed state, not the caller",
+   "pass": true,
+   "evidence": {
+    "status": 200
+   }
+  },
+  {
+   "item": "D-assign-players.01.write",
+   "what": "host assigns team A game 1, captain tom assigns his own side (both stored)",
+   "pass": true,
+   "evidence": {
+    "p1": [
+     "ari4hb3c3hac0001",
+     "ari4hcj63hac0006"
+    ],
+    "p2": [
+     "ari4hd793hac0009",
+     "ari4hbuh3hac0003"
+    ]
+   }
+  },
+  {
+   "item": "D-assign-players.01.refuse",
+   "what": "captain tom on the OTHER side, non-captain mei, and a player not on the team -> refused; stored line-up unchanged",
+   "pass": true,
+   "evidence": {
+    "tomOther": "COMPETITION_FORBIDDEN",
+    "mei": "COMPETITION_FORBIDDEN",
+    "foreign": "COMPETITION_BAD_LINEUP"
+   }
+  },
+  {
+   "item": "D-assign-players.01.preserve",
+   "what": "a player's re-score keeps the line-ups (hkpl PRESERVE-LINEUP-V1) and the new score",
+   "pass": true,
+   "evidence": {
+    "g1": {
+     "p1": [
+      "ari4hd793hac0009",
+      "ari4hbuh3hac0003"
+     ],
+     "p2": [
+      "ari4hb3c3hac0001",
+      "ari4hcj63hac0006"
+     ],
+     "t1": 11,
+     "t2": 6,
+     "type": "standard"
+    }
+   }
+  },
+  {
+   "item": "D-comp-score.06.clear-own",
+   "what": "Clear all assignment by captain tom clears HIS side only",
+   "pass": true,
+   "evidence": {
+    "g1": {
+     "p2": [
+      "ari4hb3c3hac0001",
+      "ari4hcj63hac0006"
+     ],
+     "t1": 11,
+     "t2": 6,
+     "type": "standard"
+    }
+   }
+  },
+  {
+   "item": "D-assign-players.01.dupr",
+   "what": "DUPR preview (nothing sent): a 3-player team without line-ups -> lineup_missing; line-ups that change between games -> lineup_varies; one line-up -> DOUBLES with exactly the line-up's players",
+   "pass": true,
+   "evidence": {
+    "partial": [
+     "lineup_incomplete",
+     "not_connected"
+    ],
+    "none": [
+     "lineup_missing",
+     "not_connected"
+    ],
+    "varies": [
+     "lineup_varies",
+     "not_connected"
+    ],
+    "ok": [
+     "not_connected"
+    ],
+    "format": "DOUBLES",
+    "confirmed": false
+   }
+  },
+  {
+   "item": "D-assign-players.01.nosend",
+   "what": "the preview sent nothing (row duprStatus still null)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-score.03.engine",
+   "what": "a player of the match marks who serves game 1 (PBT2S1 stored); a stranger is refused; an unknown tag is refused (400)",
+   "pass": true,
+   "evidence": {
+    "s1": 200,
+    "tag": "PBT2S1",
+    "stranger": "COMPETITION_FORBIDDEN",
+    "bad": 400
+   }
+  },
+  {
+   "item": "D-dupr.candidates",
+   "what": "Submit-all preview counts finalized results only (a provisional and a removed match with scores are not candidates)",
+   "pass": true,
+   "evidence": {
+    "candidates": 1,
+    "want": 1,
+    "provisional": 2,
+    "removed": 1
+   }
+  },
+  {
+   "item": "D-dupr-activity-manager.07.engine",
+   "what": "host: players (7 = every member of the 3 teams) + matches with state and reasons; a player is refused",
+   "pass": true,
+   "evidence": {
+    "players": 7,
+    "matches": 3,
+    "connected": 1,
+    "pending": 1,
+    "player": "COMPETITION_NOT_HOST"
+   }
+  },
+  {
+   "item": "D-comp-request-support.01.role",
+   "what": "a player may not recalculate (COMPETITION_NOT_HOST)",
+   "pass": true,
+   "evidence": {
+    "code": "COMPETITION_NOT_HOST"
+   }
+  },
+  {
+   "item": "D-comp-match-detail.06.engine",
+   "what": "packMatch carries duprSubmittedBy (the submitter as a user) — fixture receipt planted in se_sbx, nothing sent",
+   "pass": true,
+   "evidence": {
+    "by": "ar89kz29mnr7001o"
+   }
+  },
+  {
+   "item": "D-match-format.08.draw",
+   "what": "pool play + consolation: the playoff (2 winners -> 1 final) and a consolation bracket of the 4 others (3 matches) are drawn",
+   "pass": true,
+   "evidence": {
+    "status": 200,
+    "code": null,
+    "playoff": 1,
+    "consolation": 3
+   }
+  },
+  {
+   "item": "D-comp-manage-seeds.03",
+   "what": "Update seeds on an existing bracket: the playoff is drawn in the new order and the consolation in the host's consolation order",
+   "pass": true,
+   "evidence": {
+    "status": 200,
+    "code": null,
+    "final": [
+     "aril1amz8cnz00fx",
+     "aril1amz8cnz00fx"
+    ],
+    "cons1": [
+     "aril1aoe8cnz00g5",
+     "aril1aoe8cnz00g5"
+    ]
+   }
+  },
+  {
+   "item": "D-comp-manage-seeds.02.data",
+   "what": "the pool standings give every entry its place in its pool (the \"#n in pool m\" the sheet shows)",
+   "pass": true,
+   "evidence": {
+    "pools": [
+     [
+      1,
+      2,
+      3
+     ],
+     [
+      1,
+      2,
+      3
+     ]
+    ]
+   }
+  },
+  {
+   "item": "BUG.draw-hidden-copy",
+   "what": "a STARTED competition's Draw tab no longer says \"Only you can see the matchups until the start\"; it says everyone sees them",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-detail.45.ui",
+   "what": "format pane: Standings Calculation, Tiebreaker priority, Learn more links, Reset matches",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "BUG.score-values",
+   "what": "Score values modal in EN: no 取消 (one OK button), whole words (word-break normal), \"Draw: 1 point\" singular",
+   "pass": true,
+   "evidence": {
+    "text": "Score values\nStandard win: 3 points — a match won in its regular games.\nStandard loss: 0 points — a match lost in its regular games.\nTiebreaker win: 2 points — a match won in a game marked Tiebreaker.\nTiebreaker loss: 1 point — a match lost in a game marked Tiebreaker.\nDraw: 1 point — a round robin match with no winner.\nOK",
+    "buttons": [],
+    "wb": "normal"
+   }
+  },
+  {
+   "item": "D-match-format.17.ui",
+   "what": "Learn more about competition formats opens the formats help (Pool play / Consolation bracket explained)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "BUG.single-elim-copy",
+   "what": "single elimination: the seeding line says \"Automatic: by the seeds\", never \"by the pool standings\"",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-confirm-lock.02",
+   "what": "the FOOTER Lock confirm lists \"2 confirmed entries\" with both players (not the stale \"0\")",
+   "pass": true,
+   "evidence": {
+    "snippet": "2 confirmed entries\n1. Amy Chan — Confirmed\n2. Mei Lam — Confirmed\nCancel\nConfirm"
+   }
+  },
+  {
+   "item": "BUG.score-values.control",
+   "what": "PLANT/CONTROL: the same button detector reads the two-button Lock confirm as Cancel|Confirm (it is not blind)",
+   "pass": true,
+   "evidence": {
+    "tail": [
+     "Cancel",
+     "Confirm"
+    ]
+   }
+  },
+  {
+   "item": "D-comp-confirm-lock.02.nowrite",
+   "what": "Cancel leaves the competition open (row read back)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-request-support.01",
+   "what": "Request support offers Recalculate; pressed in the browser, the PLANTED wrong result is corrected in se_sbx and the modal says so",
+   "pass": true,
+   "evidence": {
+    "planted": "entry2",
+    "fixed": "entry1",
+    "right": "entry1"
+   }
+  },
+  {
+   "item": "D-dupr-activity-manager.07.ui",
+   "what": "the kebab opens the competition DUPR Manager (Player list · Matches, reasons in words, Recalculate eligibility); only its read door was called",
+   "pass": true,
+   "evidence": {
+    "calls": [
+     "competitions/show",
+     "competitions/entries",
+     "competitions/matches/list",
+     "competitions/standings",
+     "competitions/awards",
+     "competitions/recalculate",
+     "competitions/dupr-manager"
+    ]
+   }
+  },
+  {
+   "item": "D-comp-add-match.01.ui",
+   "what": "Add match opens Reclub's Create match sheet (Name, Team 1, Team 2, \"x\" matchup)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-match-detail.09.ui",
+   "what": "a removed match reads \"This match is no longer available.\" and offers no Input / Edit score",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-match-detail.01.title",
+   "what": "the header names the stage (\"Round robin · Round n\")",
+   "pass": true,
+   "evidence": {
+    "head": "Back\n[PROBE] COMP-FIXES-B 0PZ63 RR · IN PROGRESS\nRound robin · Round 3\nShare\nMore\n[probe] Team C\nUAT Admin / 波友測試 1\nvs\n⇅"
+   }
+  },
+  {
+   "item": "D-comp-match-detail.01.swap",
+   "what": "Swap sides flips the two teams on screen",
+   "pass": true,
+   "evidence": {
+    "o1": [
+     "[probe] Team C",
+     "[probe] Team B"
+    ],
+    "o2": [
+     "[probe] Team B",
+     "[probe] Team C"
+    ]
+   }
+  },
+  {
+   "item": "D-comp-match-detail.03.ui",
+   "what": "each game row shows who serves (from the engine: team B · server 1)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-match-detail.02",
+   "what": "the match kebab: Share image, Manage score sets, Assign players, Edit match, Set availability (+ Clear scores, Remove match)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-assign-players.01.ui",
+   "what": "Assign players pressed in the browser: game 1 of the first side stores the picked player (read back)",
+   "pass": true,
+   "evidence": {
+    "g1": {
+     "p1": [
+      "ari4hdzd3hac000c"
+     ]
+    }
+   }
+  },
+  {
+   "item": "D-score-board.02",
+   "what": "the score sheet links \"See stat definitions\"",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-score.03.ui",
+   "what": "the score sheet carries the serve indicator per side (\"Serving · server 1\" for team B)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-score.04",
+   "what": "the stopwatch runs (Start -> 00:02+) with a Timer tab beside it",
+   "pass": true,
+   "evidence": {
+    "clock": "00:03"
+   }
+  },
+  {
+   "item": "D-score-board.03",
+   "what": "the scoreboard's stopwatch / timer is the same strip (duplicate of D-comp-score.04)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-score-board.02.open",
+   "what": "See stat definitions opens the definitions (TB W/L, H2H, Score Diff …)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-score-sets.01",
+   "what": "Remove game on a game with a score asks first (\"This game has scores. Are you sure you want to remove it?\")",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-score-sets.01.nowrite",
+   "what": "cancelled: the stored games are unchanged (2 games on file)",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-score.03.press",
+   "what": "tapping the serve chip in the browser moves the serve to the next tag (PBT2S1 -> PBT2S2, read back)",
+   "pass": true,
+   "evidence": {
+    "before": "PBT2S1",
+    "after": "PBT2S2"
+   }
+  },
+  {
+   "item": "D-comp-match-detail.06.ui",
+   "what": "the DUPR row reads \"Submitted by <submitter>\" (planted receipt, Test only)",
+   "pass": true,
+   "evidence": {
+    "nm": "波友測試 1"
+   }
+  },
+  {
+   "item": "D-comp-sublocations.01.ui",
+   "what": "the team page's match row names the court label \"Centre\" (not \"Court 1\")",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-match-format.08.ui",
+   "what": "the Draw tab draws the consolation bracket as its own bracket",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-comp-manage-seeds.02",
+   "what": "Manage seeds on the existing bracket: \"#1 in pool n\" rows and the Playoffs / Consolation toggle",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "D-match-format.16.ui",
+   "what": "the wizard on a drawn competition says a format change resets matches and that the host is told which first; offers Consolation bracket + Score sets",
+   "pass": true,
+   "evidence": {}
+  },
+  {
+   "item": "i18n.zh_Hant",
+   "what": "繁 render of the format pane: 了解更多比賽賽制 · 重設比賽, and none of its English left (Tiebreaker priority / Learn more / Reset matches)",
+   "pass": true,
+   "evidence": {
+    "pane": "積分"
+   }
+  },
+  {
+   "item": "ui.errors",
+   "what": "no page errors in the host session",
+   "pass": true,
+   "evidence": []
+  },
+  {
+   "item": "D-match-format.16",
+   "what": "a playoff-only change: refused without resetMatches (DRAW_EXISTS); with resetMatches=playoff the host proceeds — playoff + consolation removed, the 6 pool matches kept, numContinue 2 stored",
+   "pass": true,
+   "evidence": {
+    "no": "COMPETITION_DRAW_EXISTS",
+    "yes": 200,
+    "left": "regular:6"
+   }
+  },
+  {
+   "item": "G13.cleanup",
+   "what": "every [probe] comp-fixes-b competition deleted (rows left in se_sbx = 0)",
+   "pass": true,
+   "evidence": {
+    "left": "0",
+    "cleanup": {
+     "aril18uz8cnz00el": 200,
+     "aril1akn8cnz00fn": 200,
+     "aril1awr8cnz00hl": 200
+    }
+   }
+  }
+ ],
+ "errors": [],
+ "cleanup": {
+  "aril18uz8cnz00el": 200,
+  "aril1akn8cnz00fn": 200,
+  "aril1awr8cnz00hl": 200
+ },
+ "extra": "aril19348cnz00fh",
+ "C2": "aril1akn8cnz00fn",
+ "c2Entries": [
+  "aril1alv8cnz00fp",
+  "aril1amg8cnz00ft",
+  "aril1amz8cnz00fx",
+  "aril1anm8cnz00g1",
+  "aril1aoe8cnz00g5",
+  "aril1ap08cnz00g9"
+ ],
+ "c2ConsFirst": "aril1avq8cnz00hc",
+ "C3": "aril1awr8cnz00hl",
+ "verdict": "pass",
+ "fails": 0,
+ "passes": 59,
+ "evidence": [
+  "pass setup.signin: tester1 (host), tester2, amy, mei, tom, ken, admin signed in through the UAT QA door",
+  "pass setup.C1: fixture is real: started team round robin, 3 generated matches, engine carries the batch (fb === 1)",
+  "pass D-match-format.13: named sets + Tiebreaker stored as the competition's default sets (read back by a player)",
+  "pass D-comp-add-match.01.create: host creates a match with a NAME (stored)",
+  "pass D-comp-add-match.01.edit: Edit match: the name and the two teams change (row read back)",
+  "pass D-comp-add-match.01.plant: PLANT: a side that is not an entry of this competition is refused (NO_SUCH_ENTRY), row unchanged",
+  "pass D-comp-add-match.01.scored: a match with games keeps its sides (409 COMPETITION_MATCH_HAS_SCORES)",
+  "pass D-comp-add-match.01.role: a player may not rename the match (name ignored for a non-host: stored name unchanged)",
+  "pass D-comp-match-detail.09.engine: host score, player score and availability on a REMOVED match -> 409 COMPETITION_MATCH_REMOVED; row unchanged (still cancelled)",
+  "pass D-comp-match-detail.09.pack: the removed match packs canScore false for its own player",
+  "pass D-comp-match-detail.09.control: CONTROL: the same player call on a live match is accepted (200) — the refusal is the removed state, not the caller",
+  "pass D-assign-players.01.write: host assigns team A game 1, captain tom assigns his own side (both stored)",
+  "pass D-assign-players.01.refuse: captain tom on the OTHER side, non-captain mei, and a player not on the team -> refused; stored line-up unchanged",
+  "pass D-assign-players.01.preserve: a player's re-score keeps the line-ups (hkpl PRESERVE-LINEUP-V1) and the new score",
+  "pass D-comp-score.06.clear-own: Clear all assignment by captain tom clears HIS side only",
+  "pass D-assign-players.01.dupr: DUPR preview (nothing sent): a 3-player team without line-ups -> lineup_missing; line-ups that change between games -> lineup_varies; one line-up -> DOUBLES with exactly the line-up's players",
+  "pass D-assign-players.01.nosend: the preview sent nothing (row duprStatus still null)",
+  "pass D-comp-score.03.engine: a player of the match marks who serves game 1 (PBT2S1 stored); a stranger is refused; an unknown tag is refused (400)",
+  "pass D-dupr.candidates: Submit-all preview counts finalized results only (a provisional and a removed match with scores are not candidates)",
+  "pass D-dupr-activity-manager.07.engine: host: players (7 = every member of the 3 teams) + matches with state and reasons; a player is refused",
+  "pass D-comp-request-support.01.role: a player may not recalculate (COMPETITION_NOT_HOST)",
+  "pass D-comp-match-detail.06.engine: packMatch carries duprSubmittedBy (the submitter as a user) — fixture receipt planted in se_sbx, nothing sent",
+  "pass D-match-format.08.draw: pool play + consolation: the playoff (2 winners -> 1 final) and a consolation bracket of the 4 others (3 matches) are drawn",
+  "pass D-comp-manage-seeds.03: Update seeds on an existing bracket: the playoff is drawn in the new order and the consolation in the host's consolation order",
+  "pass D-comp-manage-seeds.02.data: the pool standings give every entry its place in its pool (the \"#n in pool m\" the sheet shows)",
+  "pass BUG.draw-hidden-copy: a STARTED competition's Draw tab no longer says \"Only you can see the matchups until the start\"; it says everyone sees them",
+  "pass D-comp-detail.45.ui: format pane: Standings Calculation, Tiebreaker priority, Learn more links, Reset matches",
+  "pass BUG.score-values: Score values modal in EN: no 取消 (one OK button), whole words (word-break normal), \"Draw: 1 point\" singular",
+  "pass D-match-format.17.ui: Learn more about competition formats opens the formats help (Pool play / Consolation bracket explained)",
+  "pass BUG.single-elim-copy: single elimination: the seeding line says \"Automatic: by the seeds\", never \"by the pool standings\"",
+  "pass D-comp-confirm-lock.02: the FOOTER Lock confirm lists \"2 confirmed entries\" with both players (not the stale \"0\")",
+  "pass BUG.score-values.control: PLANT/CONTROL: the same button detector reads the two-button Lock confirm as Cancel|Confirm (it is not blind)",
+  "pass D-comp-confirm-lock.02.nowrite: Cancel leaves the competition open (row read back)",
+  "pass D-comp-request-support.01: Request support offers Recalculate; pressed in the browser, the PLANTED wrong result is corrected in se_sbx and the modal says so",
+  "pass D-dupr-activity-manager.07.ui: the kebab opens the competition DUPR Manager (Player list · Matches, reasons in words, Recalculate eligibility); only its read door was called",
+  "pass D-comp-add-match.01.ui: Add match opens Reclub's Create match sheet (Name, Team 1, Team 2, \"x\" matchup)",
+  "pass D-comp-match-detail.09.ui: a removed match reads \"This match is no longer available.\" and offers no Input / Edit score",
+  "pass D-comp-match-detail.01.title: the header names the stage (\"Round robin · Round n\")",
+  "pass D-comp-match-detail.01.swap: Swap sides flips the two teams on screen",
+  "pass D-comp-match-detail.03.ui: each game row shows who serves (from the engine: team B · server 1)",
+  "pass D-comp-match-detail.02: the match kebab: Share image, Manage score sets, Assign players, Edit match, Set availability (+ Clear scores, Remove match)",
+  "pass D-assign-players.01.ui: Assign players pressed in the browser: game 1 of the first side stores the picked player (read back)",
+  "pass D-score-board.02: the score sheet links \"See stat definitions\"",
+  "pass D-comp-score.03.ui: the score sheet carries the serve indicator per side (\"Serving · server 1\" for team B)",
+  "pass D-comp-score.04: the stopwatch runs (Start -> 00:02+) with a Timer tab beside it",
+  "pass D-score-board.03: the scoreboard's stopwatch / timer is the same strip (duplicate of D-comp-score.04)",
+  "pass D-score-board.02.open: See stat definitions opens the definitions (TB W/L, H2H, Score Diff …)",
+  "pass D-comp-score-sets.01: Remove game on a game with a score asks first (\"This game has scores. Are you sure you want to remove it?\")",
+  "pass D-comp-score-sets.01.nowrite: cancelled: the stored games are unchanged (2 games on file)",
+  "pass D-comp-score.03.press: tapping the serve chip in the browser moves the serve to the next tag (PBT2S1 -> PBT2S2, read back)",
+  "pass D-comp-match-detail.06.ui: the DUPR row reads \"Submitted by <submitter>\" (planted receipt, Test only)",
+  "pass D-comp-sublocations.01.ui: the team page's match row names the court label \"Centre\" (not \"Court 1\")",
+  "pass D-match-format.08.ui: the Draw tab draws the consolation bracket as its own bracket",
+  "pass D-comp-manage-seeds.02: Manage seeds on the existing bracket: \"#1 in pool n\" rows and the Playoffs / Consolation toggle",
+  "pass D-match-format.16.ui: the wizard on a drawn competition says a format change resets matches and that the host is told which first; offers Consolation bracket + Score sets",
+  "pass i18n.zh_Hant: 繁 render of the format pane: 了解更多比賽賽制 · 重設比賽, and none of its English left (Tiebreaker priority / Learn more / Reset matches)",
+  "pass ui.errors: no page errors in the host session",
+  "pass D-match-format.16: a playoff-only change: refused without resetMatches (DRAW_EXISTS); with resetMatches=playoff the host proceeds — playoff + consolation removed, the 6 pool matches kept, numContinue 2 stored",
+  "pass G13.cleanup: every [probe] comp-fixes-b competition deleted (rows left in se_sbx = 0)"
+ ]
+}
