@@ -255,7 +255,9 @@ user-friendly, or closer to what the user needs." So when a product choice comes
     proxy-host list `lib/platform-config.getProxyHosts` (the one the CSRF guard already uses). Measured 2026-09-23 on
     production: `curl -H 'X-Original-Host: evil.example' https://hkpl.com.hk/` was honoured; the staged magic-link fix
     would have emailed a working sign-in token on any host an attacker names — account takeover. Caught before ship.
-14. **hkpl is the production league system.** Restarts happen only in the 03:30–06:00 HKT window through
+14. **hkpl is the production league system.** *(HKPL-ANYTIME, operator 2026-09-24: "hkpl can restart anytime" — the
+    03:30–06:00 window is LIFTED; hkpl changes still go through `/root/gen/hkpl-batch.sh` (tests, rollback image,
+    health, memory watch), run with `FORCE=1` whenever ready.)* Restarts happen only in the 03:30–06:00 HKT window through
     `/root/gen/hkpl-batch.sh` (it refuses outside the window without `FORCE=1`, and FORCE is the operator's call).
 15. **GripBat owns its accounts (operator 2026-09-23; SUPERSEDES the 2026-09-17 shared-identity decision).** Sign-up,
     sign-in, password reset, email change, username and profile name live in the ENGINE (Misskey native auth — G11, reuse
@@ -264,6 +266,10 @@ user-friendly, or closer to what the user needs." So when a product choice comes
     keep their rows and get native logins; nobody uses prod yet, so no public migration is owed. A "link your league
     account" button may come later as an OPTIONAL link — never a requirement. Usernames are chosen by the user and never
     derived from an email address.
+    **Addendum (operator 2026-09-24, G15.15-SSO):** two separate account lists, joined by simple SSO — a league member
+    signs in to GripBat with "Continue with your HKPL account" and never signs up again (the engine's `adapter/sso` door
+    creates or links their GripBat account; it stays ON permanently as a sign-in option, next to native sign-up). Staff
+    pages (admin, reports) keep using the SAME hkpl admin accounts — the same people run both.
 
 ## G16 — Verification traps (each one fooled a check this week; every probe must avoid all of them)
 G12 says checks prove function. These are the specific ways a check lied to us, 2026-09-20..23 — five instruments
