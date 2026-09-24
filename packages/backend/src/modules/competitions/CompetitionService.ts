@@ -285,7 +285,9 @@ export class CompetitionService {
 				await this.matchesRepository.delete({ competitionId: c.id });
 				await this.awardsRepository.delete({ competitionId: c.id, type: In(['first', 'second', 'third', 'coThird', 'fourth']) });
 				await this.entriesRepository.update({ competitionId: c.id, status: 'forfeit' }, { status: 'confirmed', statusChangedAt: now });
-				await this.competitionsRepository.update(c.id, { status: c.status === 'inProgress' ? 'closed' : c.status, bracketData: null, startedAt: null, updatedAt: now });
+				// MOP-UP-COMP (Reclub confirm-reset-competition: "Registration open — Changes to teams will now be allowed.", module 6016):
+				// a reset reopens registration (was: a started competition went back to 'closed' and stayed locked, against the confirm's words)
+				await this.competitionsRepository.update(c.id, { status: 'open', lockRegistration: false, bracketData: null, startedAt: null, updatedAt: now });
 				break;
 		}
 		return await this.get(c.id);
