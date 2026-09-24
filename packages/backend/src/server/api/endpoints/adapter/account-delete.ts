@@ -7,8 +7,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
-import type { UsersRepository, UsedUsernamesRepository } from '@/models/_.js';
-import { DeleteAccountService } from '@/core/DeleteAccountService.js';
+import type { UsersRepository } from '@/models/_.js';
+import type { DataSource } from 'typeorm';
+import { GlobalEventService } from '@/core/GlobalEventService.js';
+import { scheduleDeletion } from '@/modules/account/deletion.js';   // ACCOUNT-GRACE-V1
 import { LoggerService } from '@/core/LoggerService.js';
 import type Logger from '@/logger.js';
 import { ApiError } from '@/server/api/error.js';
@@ -44,7 +46,13 @@ export const meta = {
 		reauthMismatch: { message: 'The re-authentication does not match this account.', code: 'REAUTH_MISMATCH', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f11' },
 		reauthReplayed: { message: 'This re-authentication has already been used.', code: 'REAUTH_REPLAYED', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f12' },
 	},
-	res: { type: 'object', optional: false, nullable: false, properties: { deleted: { type: 'boolean', optional: false, nullable: false } } },
+	// ACCOUNT-GRACE-V1: `deleted` stays true — the account is CLOSED now (signed out everywhere, hidden from search); the minute
+	// sweep purges it at `purgeAt` (7 days) unless the person signs in and restores it (adapter/account/restore).
+	res: { type: 'object', optional: false, nullable: false, properties: {
+		deleted: { type: 'boolean', optional: false, nullable: false },
+		scheduled: { type: 'boolean', optional: false, nullable: false },
+		purgeAt: { type: 'string', optional: false, nullable: true },
+	} },
 } as const;
 
 export const paramDef = {
@@ -64,14 +72,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private redisClient: Redis.Redis,
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
-		@Inject(DI.usedUsernamesRepository)
-		private usedUsernamesRepository: UsedUsernamesRepository,
-		private deleteAccountService: DeleteAccountService,
+		@Inject(DI.db)
+		private db: DataSource,
+		private globalEventService: GlobalEventService,
 		private loggerService: LoggerService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			const user = await this.usersRepository.findOneByOrFail({ id: me.id });
-			if (user.isDeleted) return { deleted: true };
+			if (user.isDeleted) return { deleted: true, scheduled: false, purgeAt: null };
 			if (!/^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username)) throw new Error('use i/delete-account');   // adapter/sso usernameFor(): <iss>_<12 hex>
 
 			// SEC-ACCOUNT-DELETE-REAUTH-V1: a purpose-bound, single-use, identity-matched re-auth proof — required only
@@ -100,17 +108,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.reauthRequired);
 			}
 
-			const uname = user.username;   // captured before the deletion job touches the row
-			this.logger.info(`account deletion user=${user.id} username=${uname} via ${how}`);
-			await this.deleteAccountService.deleteAccount(me);
-			// the row stays as a tombstone (federation), so free the deterministic SSO username: the person's NEXT sign-in
-			// mints a fresh account instead of colliding with the deleted one (found by probes/safety-v1 7b: remint 500)
-			const freed = uname + '_x' + Date.now().toString(36);
-			await this.usersRepository.update(user.id, { username: freed, usernameLower: freed.toLowerCase() });
-			// the deletion job also parks the name in used_username (no reuse by strangers); for a host-minted name the
-			// only possible re-user IS the same person, so release it
-			await this.usedUsernamesRepository.delete({ username: uname.toLowerCase() });
-			return { deleted: true };
+			// ACCOUNT-GRACE-V1 (was: DeleteAccountService.deleteAccount at once + free the SSO username — both now run at purge
+			// time, modules/account/deletion.ts purgeDue, from the minute sweep)
+			this.logger.info(`account deletion SCHEDULED user=${user.id} username=${user.username} via ${how}`);
+			const st = await scheduleDeletion(this.db, user.id, how, {
+				tokenRegenerated: (oldToken, newToken) => {
+					this.globalEventService.publishInternalEvent('userTokenRegenerated', { id: user.id, oldToken, newToken });
+					this.globalEventService.publishMainStream(user.id, 'myTokenRegenerated');
+				},
+			});
+			return { deleted: true, scheduled: true, purgeAt: st.purgeAt };
 		});
 
 		this.logger = this.loggerService.getLogger('adapter:account-delete');

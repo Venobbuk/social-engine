@@ -147,6 +147,56 @@ export async function historyPage(db: DataSource, o: { userId: string; viewerId:
 	});
 }
 
+/* COMMUNITY-MATCHES-V1 (lane account-rest, S7 D-statistics.06 — Reclub Statistics › Match history › Community matches):
+ * the newest scored matches of the whole community, one SQL page. The SAME visibility rule as every function here
+ * (meetVisible / compVisible for the viewer), the same liveness rule (not cancelled; a competition match completed),
+ * so nothing private and nothing retired leaks. Each row is told from team 1's side: partners = team 1, opponents =
+ * team 2, games team 1 first, won = team 1 won; `community: true` tells the list to draw 'A / B vs C / D'. */
+const COMMUNITY_SQL = `
+WITH h AS (
+	SELECT 'meet'::text AS source, mm.id AS "matchId", m.id AS "contextId", m.name AS "contextName", m."venueName" AS "venueName",
+	       m."startAt" AS "playedAt", mm.round, mm."courtIndex", mm.scores AS games, mm."forfeitTeam" AS "forfeitTeam",
+	       mm."team1Ids" AS t1, mm."team2Ids" AS t2, NULL::varchar[] AS u1, NULL::varchar[] AS u2, NULL::text AS result, NULL::text AS f1, NULL::text AS f2
+	FROM meet_match mm JOIN meet m ON m.id = mm."meetId"
+	WHERE m.sport = $1 AND m.status <> 'cancelled' AND jsonb_array_length(mm.scores) > 0 AND m."startAt" < now() AND ${meetVisible('m', '$2')}
+	UNION ALL
+	SELECT 'competition', cm.id, c.id, c.name, c."venueName", COALESCE(cm."startAt", cm."updatedAt"), cm.round, cm."courtIndex", cm.scores, NULL::int,
+	       NULL::varchar[], NULL::varchar[], e1."userIds", e2."userIds", cm.result::text, cm."entry1Status"::text, cm."entry2Status"::text
+	FROM competition_match cm JOIN competition c ON c.id = cm."competitionId"
+	LEFT JOIN competition_entry e1 ON e1.id = cm."entry1Id" LEFT JOIN competition_entry e2 ON e2.id = cm."entry2Id"
+	WHERE c.sport = $1 AND c.status <> 'cancelled' AND cm.status = 'completed' AND jsonb_array_length(cm.scores) > 0 AND ${compVisible('c', '$2')}
+)
+SELECT h.* FROM h ORDER BY h."playedAt" DESC, h."matchId" DESC LIMIT $3 OFFSET $4`;
+
+export async function communityPage(db: DataSource, o: { viewerId: string | null; sport: string; limit: number; offset: number }): Promise<(HistoryRow & { community: true })[]> {
+	const [limit, offset] = pageArgs(o.limit, o.offset);
+	const raw = await db.query(COMMUNITY_SQL, [o.sport, o.viewerId ?? '', limit, offset]) as RawHist[];
+	if (!raw.length) return [];
+	const pids = [...new Set(raw.flatMap((r) => [...(r.t1 ?? []), ...(r.t2 ?? [])]))];
+	const pmap = new Map<string, PlayerRef>();
+	if (pids.length) for (const x of await db.query('SELECT id, "userId", "displayName" FROM meet_participant WHERE id = ANY($1)', [pids]) as { id: string; userId: string | null; displayName: string | null }[]) pmap.set(x.id, { userId: x.userId, name: x.displayName });
+	const ref = (u: string | null): PlayerRef => ({ userId: u, name: null });
+	return raw.map((r) => {
+		let t1: PlayerRef[], t2: PlayerRef[], games: [number, number][], won: boolean | null, forfeit = false;
+		if (r.source === 'meet') {
+			t1 = (r.t1 ?? []).map((id) => pmap.get(id) ?? { userId: null, name: null }); t2 = (r.t2 ?? []).map((id) => pmap.get(id) ?? { userId: null, name: null });
+			games = meetGames(r.games);
+			if (r.forfeitTeam === 1 || r.forfeitTeam === 2) { forfeit = true; won = r.forfeitTeam !== 1; } else { const w = winnerOf(games); won = w == null ? null : w === 1; }
+		} else {
+			t1 = (r.u1 ?? []).map(ref); t2 = (r.u2 ?? []).map(ref);
+			games = compGames(r.games);
+			const ff1 = r.f1 === 'forfeit', ff2 = r.f2 === 'forfeit';
+			if (r.result === 'entry1' || r.result === 'entry2') won = r.result === 'entry1';
+			else if (ff1 !== ff2) won = ff2;
+			else { const w = winnerOf(games); won = w == null ? null : w === 1; }
+			forfeit = ff1 || ff2;
+		}
+		return { source: r.source, matchId: r.matchId, contextId: r.contextId, contextName: r.contextName, venueName: r.venueName,
+			playedAt: new Date(r.playedAt).toISOString(), round: r.round, courtIndex: r.courtIndex,
+			partners: t1, opponents: t2, games, won, forfeit, ratingDelta: null, community: true as const };
+	});
+}
+
 /** Every user id a page of rows mentions (for one UserLite packMany). */
 export function userIdsOf(rows: { partners: PlayerRef[]; opponents: PlayerRef[] }[]): string[] {
 	return [...new Set(rows.flatMap((r) => [...r.partners, ...r.opponents].map((p) => p.userId).filter((x): x is string => !!x)))];
@@ -194,6 +244,7 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 	if (source === 'competition') {
 		const r = (await db.query(
 			`SELECT cm.id, cm.round, cm."courtIndex", cm.stage, cm.pool, cm.scores, cm.result, cm."entry1Status", cm."entry2Status", COALESCE(cm."startAt", cm."updatedAt") AS "playedAt",
+			        cm."duprStatus", cm."duprSubmittedById", cm."duprSubmittedAt", cm."duprRef", cm."duprError", c."hostId",   -- DUPR-COMP-RECAP-V1
 			        c.id AS "compId", c.name, c."startAt", c."venueName", c.visibility, e1."userIds" AS u1, e2."userIds" AS u2, e1.name AS n1, e2.name AS n2
 			 FROM competition_match cm JOIN competition c ON c.id = cm."competitionId"
 			 LEFT JOIN competition_entry e1 ON e1.id = cm."entry1Id" LEFT JOIN competition_entry e2 ON e2.id = cm."entry2Id"
@@ -207,7 +258,9 @@ export async function matchSummary(db: DataSource, source: Source, matchId: stri
 		return {
 			source, matchId, context: { kind: 'competition', id: r.compId, name: r.name, startAt: r.startAt ? new Date(r.startAt).toISOString() : null, venueName: r.venueName, visibility: r.visibility },
 			playedAt: r.playedAt ? new Date(r.playedAt).toISOString() : null, round: r.round, courtIndex: r.courtIndex, stage: r.stage, pool: r.pool,
-			teams: [team(1, r.u1, f1), team(2, r.u2, f2)], games, dupr: null,
+			teams: [team(1, r.u1, f1), team(2, r.u2, f2)], games,
+			// DUPR-COMP-RECAP-V1 (lane account-rest, S7 D-match-summary.02): was `dupr: null` — the same receipt as a meet match
+			dupr: { status: r.duprStatus ?? null, submittedById: r.duprSubmittedById ?? null, submittedAt: r.duprSubmittedAt ? new Date(r.duprSubmittedAt).toISOString() : null, ref: r.duprRef ?? null, error: viewer && viewer === r.hostId ? r.duprError ?? null : null },
 		};
 	}
 	// openplay: the rating log is the record (one row per player, side 1 | 2, games from that player's side)

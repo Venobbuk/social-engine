@@ -8,6 +8,7 @@ import { DI } from '@/di-symbols.js';
 import type { Config } from '@/config.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { bindThis } from '@/decorators.js';
+import type { DataSource } from 'typeorm';
 
 /**
  * COMP-DUPR-V1 (2026-09-21) — THE ONE DOOR to DUPR, lifted out of MeetMatchService.submitDupr without a change of
@@ -71,7 +72,14 @@ export type DuprSubmission = {
 	location: string | null;
 	duprIds: [string[], string[]];
 	games: [number, number][];
+	/** DUPR-OPTIONS-V1 (Reclub DUPR confirm sheet): 'sets' = each set is sent as its own DUPR match. Absent = one match (today). */
+	basis?: DuprBasis | null;
+	/** DUPR-OPTIONS-V1: Sideout / Rally — DUPR's matchType SIDE_ONLY / RALLY. Absent = not stated (today). */
+	scoring?: DuprScoring | null;
 };
+export type DuprBasis = 'matches' | 'sets';
+export type DuprScoring = 'sideout' | 'rally';
+export type DuprOptions = { basis?: DuprBasis | null; scoring?: DuprScoring | null };
 
 /** The columns to write back. `stamp` = also record who sent it and when (exactly when the meet path did). */
 export type DuprPatch = { duprStatus: 'queued' | 'submitted' | 'failed'; duprRef?: string | null; duprError: string | null };
@@ -84,7 +92,26 @@ export class DuprSubmitService {
 		private config: Config,
 
 		private httpRequestService: HttpRequestService,
+
+		@Inject(DI.db)
+		private db: DataSource,   // DUPR-OPTIONS-V1: the host's choice is kept on the match row
 	) {
+	}
+
+	/**
+	 * DUPR-OPTIONS-V1 (lane account-rest, S7 D-dupr-confirm-submit.01/.02): what the host chose on the confirm sheet is written
+	 * to the match row ("duprBasis" / "duprScoring", migration 1789099300000) when given, and read back when not — so the
+	 * lazy retry and the auto-submit send exactly what the host confirmed. Raw SQL: the columns are not on the entities.
+	 */
+	@bindThis
+	public async rememberOptions(table: 'meet_match' | 'competition_match', matchId: string, given?: DuprOptions | null): Promise<DuprOptions> {
+		if (given && (given.basis || given.scoring)) {
+			await this.db.query(`UPDATE "${table}" SET "duprBasis" = COALESCE($2, "duprBasis"), "duprScoring" = COALESCE($3, "duprScoring") WHERE "id" = $1`, [matchId, given.basis ?? null, given.scoring ?? null]);
+		}
+		try {
+			const r = (await this.db.query(`SELECT "duprBasis", "duprScoring" FROM "${table}" WHERE "id" = $1`, [matchId]) as { duprBasis: string | null; duprScoring: string | null }[])[0];
+			return { basis: r?.duprBasis === 'sets' || r?.duprBasis === 'matches' ? r.duprBasis : null, scoring: r?.duprScoring === 'rally' || r?.duprScoring === 'sideout' ? r.duprScoring : null };
+		} catch { return { basis: given?.basis ?? null, scoring: given?.scoring ?? null }; }   // before the migration ran
 	}
 
 	@bindThis
@@ -127,6 +154,10 @@ export class DuprSubmitService {
 			event: s.event,
 			location: s.location,
 			teams: [team(s.duprIds[0], 0), team(s.duprIds[1], 1)],
+			// DUPR-OPTIONS-V1 — additive: a key is sent only when the host chose it, and today's hkpl ignores both (its
+			// validate() reads neither); the staged hkpl door (worktree hkpl-wt-account-rest) splits `sets` and passes matchType
+			...(s.basis ? { basis: s.basis } : {}),
+			...(s.scoring ? { match_type: s.scoring === 'rally' ? 'RALLY' : 'SIDE_ONLY' } : {}),
 		};
 	}
 

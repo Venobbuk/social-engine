@@ -30,6 +30,8 @@ export const paramDef = {
 	properties: {
 		competitionId: { type: 'string', format: 'misskey:id' },
 		confirm: { type: 'boolean', nullable: true },
+		basis: { type: 'string', enum: ['matches', 'sets'] },   // DUPR-OPTIONS-V1 (Reclub Submission basis)
+		scoringType: { type: 'string', enum: ['sideout', 'rally'] },   // DUPR-OPTIONS-V1 (Reclub Scoring type)
 	},
 	required: ['competitionId'],
 } as const;
@@ -52,7 +54,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 				if (ps.confirm !== true) {
 					const previews: CompetitionDuprPreview[] = [];
-					for (const m of sendable) previews.push(await this.competitionDuprService.preview(c, m));
+					for (const m of sendable) previews.push(await this.competitionDuprService.preview(c, m, { basis: ps.basis ?? null, scoring: ps.scoringType ?? null }));
 					return {
 						confirmed: false,
 						total: ms.length,
@@ -68,7 +70,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 					if (!isResult(m) || (m.scores ?? []).length === 0 || m.duprStatus === 'submitted' || m.duprStatus === 'queued') { counts.skipped++; results.push({ matchId: m.id, duprStatus: m.duprStatus, duprError: m.duprError }); continue; }
 					// consent: a match with an unconfirmed entrant is skipped (submitDupr would refuse it)
 					if ((await this.competitionDuprService.pendingConsent(c, m)).length > 0) { counts.skipped++; results.push({ matchId: m.id, duprStatus: m.duprStatus, duprError: 'entry_unconfirmed' }); continue; }
-					const r = await this.competitionDuprService.submitDupr(c, m, me);
+					const r = await this.competitionDuprService.submitDupr(c, m, me, { basis: ps.basis ?? null, scoring: ps.scoringType ?? null });
 					if (r.duprStatus === 'submitted') counts.submitted++;
 					else if (r.duprStatus === 'queued') counts.queued++;
 					else if (r.duprStatus === 'ineligible') counts.ineligible++;

@@ -29,7 +29,7 @@ export const meta = {
 export const paramDef = {
 	type: 'object',
 	properties: {
-		key: { type: 'string', enum: ['club', 'chat', 'promoted', 'updates', 'meets'] },   // ACCOUNT-BUGS-V1: + Meet updates
+		key: { type: 'string', enum: ['club', 'chat', 'promoted', 'updates', 'meets', 'social', 'promotedClub'] },   // SOCIAL-NOTIF-V1: + Social, Promoted club meets   // ACCOUNT-BUGS-V1: + Meet updates
 		on: { type: 'boolean' },
 	},
 	required: ['key', 'on'],

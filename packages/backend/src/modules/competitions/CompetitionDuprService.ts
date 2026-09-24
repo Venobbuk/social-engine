@@ -11,7 +11,7 @@ import type { MiUser } from '@/models/User.js';
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { bindThis } from '@/decorators.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
-import { DuprSubmitService } from '@/core/DuprSubmitService.js';
+import { DuprSubmitService, type DuprOptions } from '@/core/DuprSubmitService.js';
 import type { DuprEligibility } from '@/modules/meets/MeetMatchService.js';
 import type { MiCompetition } from './models/Competition.js';
 import type { MiCompetitionEntry } from './models/CompetitionEntry.js';
@@ -184,12 +184,12 @@ export class CompetitionDuprService {
 	 * having been shown, on this same data, exactly what leaves the engine.
 	 */
 	@bindThis
-	public async preview(c: MiCompetition, match: MiCompetitionMatch): Promise<CompetitionDuprPreview> {
+	public async preview(c: MiCompetition, match: MiCompetitionMatch, opts?: DuprOptions | null): Promise<CompetitionDuprPreview> {
 		const e = await this.eligibility(c, match);
 		const pending = await this.pendingConsent(c, match);
 		const games = this.games(match);
 		const body = (e.isEligible && pending.length === 0 && e.format != null)
-			? this.duprSubmitService.body({ matchId: match.id, format: e.format, playedAt: this.playedAt(c, match), event: c.name, location: c.venueName ?? null, duprIds: e.duprIds, games })
+			? this.duprSubmitService.body({ matchId: match.id, format: e.format, playedAt: this.playedAt(c, match), event: c.name, location: c.venueName ?? null, duprIds: e.duprIds, games, basis: opts?.basis ?? null, scoring: opts?.scoring ?? null })   // DUPR-OPTIONS-V1: the preview shows the choice, stores nothing
 			: null;
 		return {
 			confirmed: false,
@@ -214,7 +214,7 @@ export class CompetitionDuprService {
 	 * Copied from MeetMatchService.submitDupr: same consent refusal first, same eligibility gate, same marking.
 	 */
 	@bindThis
-	public async submitDupr(c: MiCompetition, match: MiCompetitionMatch, by: MiUser): Promise<MiCompetitionMatch> {
+	public async submitDupr(c: MiCompetition, match: MiCompetitionMatch, by: MiUser, opts?: DuprOptions | null): Promise<MiCompetitionMatch> {
 		// the ONE door: refuse while any player on this match is not a confirmed entrant
 		if ((await this.pendingConsent(c, match)).length > 0) throw this.err('invalid_transition', COMP_UNCONFIRMED);
 		const e = await this.eligibility(c, match);
@@ -224,6 +224,7 @@ export class CompetitionDuprService {
 		};
 		if (!e.isEligible || e.format == null) return await mark({ duprStatus: 'ineligible', duprError: e.errors.map(x => x.code).join(',') || 'not_singles_doubles' });
 
+		const o = await this.duprSubmitService.rememberOptions('competition_match', match.id, opts);   // DUPR-OPTIONS-V1
 		const r = await this.duprSubmitService.submit({
 			matchId: match.id,
 			format: e.format,
@@ -232,6 +233,7 @@ export class CompetitionDuprService {
 			location: c.venueName ?? null,
 			duprIds: e.duprIds,
 			games: this.games(match),
+			basis: o.basis, scoring: o.scoring,
 		});
 		return await mark({ ...r.patch, ...(r.stamp ? { duprSubmittedById: by.id, duprSubmittedAt: new Date() } : {}) });
 	}

@@ -105,7 +105,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// Reclub settings › "Promoted community meets": a 'promoted' notification mute leaves the player out (table may be another stream's, read defensively)
 			let muted = new Set<string>();
 			try {
-				const rows = await this.db.query(`SELECT "userId" FROM "notification_mute" WHERE "scope" = 'promoted'`) as { userId: string }[];
+				// SOCIAL-NOTIF-V1 (Reclub E-notif-settings.06): two switches — a CLUB audience asks 'promotedClub', the community one 'promoted'
+				const rows = await this.db.query(`SELECT "userId" FROM "notification_mute" WHERE "scope" = $1 AND "targetId" = ''`, [kind === 'club' ? 'promotedClub' : 'promoted']) as { userId: string }[];
 				muted = new Set(rows.map((r) => r.userId));
 			} catch { /* no such table yet */ }
 			const userIds = audience.userIds.filter((id) => !muted.has(id));

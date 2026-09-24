@@ -15,7 +15,7 @@ import { IdService } from '@/core/IdService.js';
 import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { MeetService } from '@/modules/meets/MeetService.js';
 import { MeetLevelService } from '@/modules/meets/MeetLevelService.js';
-import { DuprSubmitService } from '@/core/DuprSubmitService.js';   // COMP-DUPR-V1: the ONE submitter, shared with tournaments
+import { DuprSubmitService, type DuprOptions } from '@/core/DuprSubmitService.js';   // COMP-DUPR-V1: the ONE submitter, shared with tournaments
 import { IdentifiableError } from '@/misc/identifiable-error.js';
 import { bindThis } from '@/decorators.js';
 import { generate as runGenerator, type Scheme, type RankingCriteria, type PlayerStat } from '@/modules/meets/MeetMatchGenerator.js';
@@ -285,7 +285,7 @@ export class MeetMatchService {
 	 * (queued / submitted / failed / ineligible + duprError) so the pane can show it and the host can retry.
 	 */
 	@bindThis
-	public async submitDupr(meet: MiMeet, match: MiMeetMatch, by: MiUser): Promise<MiMeetMatch> {
+	public async submitDupr(meet: MiMeet, match: MiMeetMatch, by: MiUser, opts?: DuprOptions | null): Promise<MiMeetMatch> {
 		// SEC-CASUAL-CONSENT-V1: the ONE door to DUPR refuses a casual game while any account player on the match has
 		// not confirmed (invited / declined / anything else) — every caller (submit-dupr, submit-dupr-all, upsert,
 		// the deferred submit, the sweep, list() retries) goes through here.
@@ -300,6 +300,7 @@ export class MeetMatchService {
 
 		// COMP-DUPR-V1: the body, the POST, the retry and the fail-soft are core/DuprSubmitService now — the ONE
 		// submitter this path shares with a tournament match. Every status and every message is unchanged.
+		const o = await this.duprSubmitService.rememberOptions('meet_match', match.id, opts);   // DUPR-OPTIONS-V1
 		const r = await this.duprSubmitService.submit({
 			matchId: match.id,
 			format: e.format,
@@ -308,6 +309,7 @@ export class MeetMatchService {
 			location: meet.venueName ?? null,
 			duprIds: e.duprIds,
 			games: match.scores,
+			basis: o.basis, scoring: o.scoring,
 		});
 		return await mark({ ...r.patch, ...(r.stamp ? { duprSubmittedById: by.id, duprSubmittedAt: new Date() } : {}) });
 	}

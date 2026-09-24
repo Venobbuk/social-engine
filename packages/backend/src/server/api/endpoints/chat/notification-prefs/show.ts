@@ -25,6 +25,8 @@ export const meta = {
 			promoted: { type: 'boolean', optional: false, nullable: false },
 			updates: { type: 'boolean', optional: false, nullable: false },
 			meets: { type: 'boolean', optional: false, nullable: false },   // ACCOUNT-BUGS-V1: Settings › Meet updates
+			social: { type: 'boolean', optional: false, nullable: false },   // SOCIAL-NOTIF-V1: kudos, feedback, awards
+			promotedClub: { type: 'boolean', optional: false, nullable: false },   // SOCIAL-NOTIF-V1: promoted CLUB meets
 			mutedRoomIds: { type: 'array', optional: false, nullable: false, items: { type: 'string', optional: false, nullable: false } },
 			mutedUserIds: { type: 'array', optional: false, nullable: false, items: { type: 'string', optional: false, nullable: false } },
 		},
@@ -50,6 +52,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				promoted: !off('promoted'),
 				updates: !off('updates'),
 				meets: !off('meets'),   // ACCOUNT-BUGS-V1
+				social: !off('social'),   // SOCIAL-NOTIF-V1
+				promotedClub: !off('promotedClub'),   // SOCIAL-NOTIF-V1
 				mutedRoomIds: mutes.filter(m => m.scope === 'room').map(m => m.targetId),
 				mutedUserIds: mutes.filter(m => m.scope === 'user').map(m => m.targetId),
 			};
