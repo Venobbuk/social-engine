@@ -13,7 +13,7 @@
 // @claims route pages/feed/index :: mop-up-chat :: composer-admin
 // @claims route pages/my-stats/index :: mop-up-chat :: by-activity-paging
 'use strict';
-process.env.MU_SHOTS = process.env.MU_SHOTS || '/root/social-engine/probes/mop-up-chat-shots';
+process.env.MU_SHOTS = process.env.MU_SHOTS || require("path").join(__dirname, "mop-up-chat-shots");   // beside this file (never an untracked copy in the shared tree, AGENT_RULES 11b)
 const fs = require('fs');
 const { execFileSync } = require('child_process');
 const MU = require('/root/gen/mop-up/mu-lib.cjs');
@@ -25,7 +25,7 @@ const TAG = '[probe] mop-up-chat ' + TS;
 const CLUB = 'ari4he5s3hac000m';       // UAT Paddle Club — owner clubowner-mei (read only: the composer is opened, nothing posted)
 const LESSON = 'ari4jxdx3hac00ba';     // Beginners' Group Clinic — Mei's (read only)
 const LOGINS = JSON.parse(fs.readFileSync('/root/uat-native-logins.json', 'utf8'));
-const OUT = '/root/social-engine/probes/mop-up-chat' + (PHASE === 'after' ? '' : '.' + PHASE);
+const OUT = require("path").join(__dirname, "mop-up-chat") + (PHASE === 'after' ? '' : '.' + PHASE);
 const sleep = MU.sleep;
 const checks = []; const evidence = []; const cleanupLog = []; let cleanupFailed = false;
 function add(item, name, pass, ev) { checks.push({ item, name, pass: !!pass, evidence: ev }); console.log((pass ? 'PASS ' : 'FAIL ') + item + ' ' + name + ' — ' + JSON.stringify(ev).slice(0, 300)); }
