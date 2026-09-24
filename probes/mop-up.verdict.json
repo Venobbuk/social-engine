@@ -1,0 +1,658 @@
+{
+ "id": "mop-up",
+ "at": "2026-09-24T11:29:11.819Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "rows": [
+  {
+   "lane": "mop-up",
+   "item": "1 pull-to-refresh (every H5 page)",
+   "id": "pull.all-pages",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "pages": {
+     "meet": {
+      "refetched": 10,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/after-pull-meet.png"
+     },
+     "club": {
+      "refetched": 13,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/after-pull-club.png"
+     },
+     "player": {
+      "refetched": 17,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/after-pull-player.png"
+     },
+     "discover": {
+      "refetched": 8,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/after-pull-discover.png"
+     }
+    },
+    "sheetDragDoesNotReload": {
+     "stillOpen": true,
+     "reloads": 0,
+     "sameUrl": true
+    }
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "2 A-meet-detail.45 host-wide Show",
+   "id": "meet.45.show-host-wide",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "sent": [
+     "\"rosterVisibility\":[\"show_participant_tags\",\"show_level\",\"show_courts\",\"show_gender\"]",
+     "\"rosterVisibility\":[\"show_participant_tags\",\"show_courts\",\"show_gender\"]"
+    ],
+    "readBack": [
+     "show_participant_tags",
+     "show_courts",
+     "show_gender"
+    ],
+    "playerSeesShowControl": false,
+    "playerLevelChips": 0,
+    "hostShot": "probes/mop-up-shots/after-show-host-sheet.png",
+    "playerShot": "probes/mop-up-shots/after-show-player.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "7 DUPR Manager team names from Participants",
+   "id": "dupr.manager-team-names",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "rows": [
+     "Round 1 · [probe] mop-up b fdffax vs [probe] mop-up c fdffax"
+    ],
+    "shot": "probes/mop-up-shots/after-dupr-manager.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "2 A-meet-detail.47 Swap my spot",
+   "id": "meet.47.swap",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "refused": {
+     "noSeat": "MEET_NOT_PARTICIPANT",
+     "host": "MEET_INVALID_TRANSITION",
+     "takerHasSeat": "MEET_ALREADY_PARTICIPANT",
+     "privateStranger": "MEET_PRIVATE"
+    },
+    "dialog": "Give your spot to [probe] mop-up f fdffax?\nYou leave the meet and they are confirmed in your place.\nCancel\nConfirm",
+    "sent": [
+     "{\"meetId\":\"arixqrk9mpah00xk\",\"userId\":\"arixqragmpah00xa\",\"i\":\"…\"}"
+    ],
+    "seat": {
+     "sameRow": true,
+     "takerStatus": "confirmed",
+     "giverGone": true,
+     "confirmed": [
+      3,
+      3
+     ]
+    },
+    "takerNotified": {
+     "header": "Spot handed to you",
+     "body": "[probe] mop-up b fdffax gave you their spot in [probe] mop-up m1 fdffax. You are confirmed to play."
+    },
+    "hostNotified": true,
+    "shot": "probes/mop-up-shots/after-swap-after.png"
+   },
+   "before": "not run"
+  },
+  {
+   "lane": "mop-up",
+   "item": "2 A-promote-meet.06 promote ([probe] audience)",
+   "id": "promote.06",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "preview": {
+     "reach": 2,
+     "club": 2
+    },
+    "sent": [
+     "{\"meetId\":\"arixswvsmpah00z4\",\"audience\":\"club\",\"i\":\"…\"}"
+    ],
+    "received": {
+     "B": 1,
+     "C": 1,
+     "outsiderF": 0
+    },
+    "resultText": "Promoted",
+    "shot": "probes/mop-up-shots/after-promote-result.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "4 selected chip readable (Get more players audience)",
+   "id": "visual.chip-promote",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "contrast": {
+     "fg": "rgb(255, 255, 255)",
+     "bg": "rgb(11,25,44)",
+     "ratio": 17.65,
+     "text": "Club members"
+    }
+   },
+   "before": "not run"
+  },
+  {
+   "lane": "mop-up",
+   "item": "2 A-meet-listings-popup.01",
+   "id": "listing.popup.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "card": "ok",
+    "popup": "Listing\nThis listing contains only information. RSVP and actual availability not guaranteed.\nOK",
+    "stayedOnDiscover": true,
+    "shot": "probes/mop-up-shots/after-listing-popup.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "2 E-player.02 deleted-account message",
+   "id": "player.02.deleted",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "graceDoor": "200 {\"deleted\":true,\"scheduled\":true,\"purgeAt\":\"2026-10-01T10:12:34.108Z\"}",
+    "graceRow": "1",
+    "usersShow": "USER_DELETED",
+    "pageSays": "This player is no longer available on GripBat.",
+    "shot": "probes/mop-up-shots/after-player-deleted.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "4 selected chips readable (Discover filters, every pg-tab-on)",
+   "id": "visual.chips-discover",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "n": 5,
+    "worst": [
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Pickleball"
+     },
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Any"
+     },
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Any"
+     }
+    ],
+    "shot": "probes/mop-up-shots/after-discover-chips.png"
+   },
+   "before": "closed"
+  },
+  {
+   "lane": "mop-up",
+   "item": "4 People rows: no stray \" · \"",
+   "id": "visual.people-sep",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "rows": 24,
+    "bad": [],
+    "followerOnlyRows": 0,
+    "shot": "probes/mop-up-shots/after-people-rows.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "self-test: the pill check fails on the old markup (pill inside the nowrap name)",
+   "id": "selftest.pill-plant",
+   "status": "closed",
+   "level": "L6 (planted in the page)",
+   "evidence": {
+    "planted": {
+     "pillEndSeen": false
+    }
+   },
+   "before": "not run"
+  },
+  {
+   "lane": "mop-up",
+   "item": "4 feed announcement pill not clipped (G5)",
+   "id": "visual.feed-pill",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "pill": {
+     "pill": "ANNOUNCEMENT",
+     "pillRight": 291,
+     "cardRight": 374,
+     "vw": 390,
+     "width": 123,
+     "pillSeen": true,
+     "pillEndSeen": true,
+     "nameSeen": true,
+     "clipped": false
+    },
+    "shot": "probes/mop-up-shots/after-feed-pill.png"
+   },
+   "before": "closed"
+  },
+  {
+   "lane": "mop-up",
+   "item": "4 \"Generate now\" clear of \"Edit\" (coach tab)",
+   "id": "visual.generate-edit",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "gap": {
+     "gen": "Generate now",
+     "val": "Edit",
+     "gapPx": 10,
+     "sameLine": true,
+     "rowRight": 374,
+     "valRight": 374
+    },
+    "shot": "probes/mop-up-shots/after-coach-row.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "4 \"Buy a pack of 8 lessons\" (article)",
+   "id": "visual.pack-article",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "found": "Buy a pack of 8 lessons",
+    "shot": "probes/mop-up-shots/after-lesson-pack.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "4 \"Together null–1\" (round-robin Matches)",
+   "id": "visual.together-null",
+   "status": "closed",
+   "level": "L5 engine + L2 app guard (TOGETHER-NULL-V1, pages/meet/index.tsx pairLine)",
+   "evidence": {
+    "gbPairsAsStranger": [
+     {
+      "a": "arixqqu8mpah00wy",
+      "b": "arixqr22mpah00x4",
+      "matches": 0,
+      "wins": 0,
+      "expected": 0
+     }
+    ],
+    "note": "no pair with a shared rated history exists among this run's fresh accounts, so the line is not drawn on screen"
+   },
+   "before": "closed"
+  },
+  {
+   "lane": "mop-up",
+   "item": "self-test: the report-button check sees it covered under the old stacking",
+   "id": "selftest.fab-plant",
+   "status": "closed",
+   "level": "L6 (planted in the page)",
+   "evidence": {
+    "planted": {
+     "fabOnTop": false
+    }
+   },
+   "before": "not run"
+  },
+  {
+   "lane": "mop-up",
+   "item": "5 gate above page prompts; report button above the gate",
+   "id": "overlay.stacking",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "gateSeen": 8,
+    "dialogOverGate": 0,
+    "fabCovered": 0,
+    "afterAgree": [
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     }
+    ],
+    "shots": [
+     "probes/mop-up-shots/after-overlay-gate.png",
+     "probes/mop-up-shots/after-overlay-after-agree.png"
+    ]
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up",
+   "item": "6 G15.15 wording (league / HKPL)",
+   "id": "wording.g15-15",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "routes": [
+     "more/index",
+     "meets/index?pane=venues",
+     "meet-create/index",
+     "my-stats/index",
+     "charter/index",
+     "help/index",
+     "venue/index?id=ari4ig3e3hac007s"
+    ],
+    "langs": [
+     "en",
+     "zh",
+     "cn"
+    ],
+    "hits": {},
+    "shot": "probes/mop-up-shots/after-wording-last.png"
+   },
+   "before": "still-open"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "item1 reserve one place on a competition team (engine + app)",
+   "id": "item1 reserve one place on a competition team (engine + app)",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "captain + host in the browser at 390 px, engine refusals per role, start keeps a team completed by a place, EN/繁/简 · checks: I1.setup, I1.engine.plant-incomplete, I1.engine.captain-reserve, I1.engine.refuse-stranger, I1.engine.full, I1.engine.release, I1.engine.captain-swap, I1.engine.no-such-place, I1.ui.captain-reserve, I1.ui.before, I1.ui.reserve, I1.ui.edit, I1.ui.release, I1.ui.swap, I1.ui.swap-notified, I1.i18n.zh_Hant, I1.i18n.zh_Hans, I1.start, I1.started-refused"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-comp-detail.45",
+   "id": "D-comp-detail.45",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "Reset matches pressed: matches 0, registration open (engine fix MOP-UP-COMP 8b4a62fa94) · checks: D-comp-detail.45.pane, D-comp-detail.45"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-comp-manage-seeds.02",
+   "id": "D-comp-manage-seeds.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "seed moved + Update seeds, final redrawn (read back) · checks: D-comp-manage-seeds.02"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-comp-match-detail.01",
+   "id": "D-comp-match-detail.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "stage header + Swap sides before/after · checks: D-comp-match-detail.01"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-comp-match-detail.02",
+   "id": "D-comp-match-detail.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "Edit match / Set availability / Clear all assignment pressed, rows read back · checks: D-comp-match-detail.02"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-comp-match-detail.06",
+   "id": "D-comp-match-detail.06",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "Submitted by <name> before/after a PLANTED sandbox receipt (no DUPR submit pressed, rule 9) · checks: D-comp-match-detail.06"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-comp-score-sets.01",
+   "id": "D-comp-score-sets.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "Remove game confirm: Cancel keeps 2, Remove + Save stores 1 · checks: D-comp-score-sets.01"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-comp-score.04",
+   "id": "D-comp-score.04",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "stopwatch up, 5-min timer down · checks: D-comp-score.04"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-score-board.02",
+   "id": "D-score-board.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "See stat definitions opens the definitions · checks: D-score-board.02"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-comp-sublocations.01",
+   "id": "D-comp-sublocations.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "court renamed in the wizard, stored, team page follows · checks: D-comp-sublocations.01"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-match-format.13",
+   "id": "D-match-format.13",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "fresh match sheet opens on Opener / Decider (Tiebreaker) · checks: D-match-format.13"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-match-format.16",
+   "id": "D-match-format.16",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "wizard change on a drawn competition: stage warning, Reset and save, playoff+consolation removed, pools kept · checks: D-match-format.16"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-match-format.17",
+   "id": "D-match-format.17",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "both Learn more links pressed, help opens · checks: D-match-format.17.formats, D-match-format.17.calculation"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "D-match-share-image.02",
+   "id": "D-match-share-image.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "PNG generated: 1080x1080, file(1) reads it · checks: D-match-share-image.02"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "BUG Score values modal copy",
+   "id": "BUG Score values modal copy",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "one OK, singular \"1 point\", word-break normal; detector control reads Cancel+Confirm · checks: BUG.score-values, BUG.score-values.control"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "BUG Draw tab hidden-matchups copy (started)",
+   "id": "BUG Draw tab hidden-matchups copy (started)",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "started competition copy · checks: BUG.draw-hidden-copy"
+  },
+  {
+   "lane": "mop-up-comp",
+   "item": "BUG single elimination seeding copy",
+   "id": "BUG single elimination seeding copy",
+   "status": "closed",
+   "level": "L6",
+   "evidence": "\"Automatic: by the seeds\" · checks: BUG.single-elim-copy"
+  },
+  {
+   "lane": "mop-up-chat",
+   "item": "E-chat-room.08",
+   "id": "E-chat-room.08",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS fixture real: [probe] room owned by Tom, Mei + Ken members, Amy not (read back from chat_room_membership)",
+    "PASS API: Mei writes \"@ken @amy @mei\" in the room -> Ken gets exactly one app notification, header \"Mei Lam mentioned you in [probe] mop-up-chat muffwtjm room\", link chat:<room>, notifier = Mei",
+    "PASS API: a non-member @mention does not leak (Amy: 0 notifications carrying the tag)",
+    "PASS API: a self-mention does not notify (Mei: 0)",
+    "PASS API: a mention by squashed display name (\"@MeiLam\") notifies Mei once",
+    "PASS self-test: a mention of a name nobody in the room carries notifies nobody (the counter can read 0)",
+    "PASS API: in a MEET room the mention links meetchat:<meet> (the meet's Chat tab)",
+    "PASS L6 UI (Mei, 390 px): \"@\" + 2 letters offers Ken, the pick writes \"@KenWong\", Enter sends it, and Ken is notified (read back as Ken)",
+    "PASS L6 UI (Ken, 390 px, en): the Notifications row reads \"Mei Lam mentioned you in [probe] mop-up-chat muffwtjm room\" and the tap opens /pages/chat/index?room=<room>",
+    "PASS L6 UI (Ken, 390 px, zh_Hant): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat muffwtjm room」提及了你\"",
+    "PASS L6 UI (Ken, 390 px, zh_Hans): the Notifications row reads \"Mei Lam 在「[probe] mop-up-chat muffwtjm room」提到了你\""
+   ]
+  },
+  {
+   "lane": "mop-up-chat",
+   "item": "D-street-cred-by-activity.02",
+   "id": "D-street-cred-by-activity.02",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS fixture real: 33 [probe] activities with a kudos for Ken; the engine pages them (offset 0 -> 30 rows, offset 30 -> the rest, no overlap)",
+    "PASS L6 UI (Ken, 390 px): By activity shows the first page with \"Load more\"; a (double) tap sends ONE request with offset = rows on screen, appends the rest, 0 duplicates, and the button goes away"
+   ]
+  },
+  {
+   "lane": "mop-up-chat",
+   "item": "lesson-after-signin",
+   "id": "lesson-after-signin",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS F1 coaches/schedules/show 503 once -> ok",
+    "PASS F2 the coaching gate (endpoint coaches/schedules/of-user) 503 once -> ok",
+    "PASS F3 adapter-style 429 on the whoami (i) twice -> ok",
+    "PASS F4 coaches/schedules/show 503 every time, then released and Retry pressed -> error->ok",
+    "PASS F5 hkpl down for the whole visit (v1/tenant, public/homepage, public/tenant-brand 502 — as at 16:28 during an hkpl restart) -> ok",
+    "PASS F5 the tab bar is GripBat's (Discover / Inbox), not the league's (Schedule / Standings)",
+    "PASS unforced: 10 fresh sign-ins straight to the lesson page all load it; adapter/sso is never called (the door that 429d is gone from /app/)"
+   ]
+  },
+  {
+   "lane": "mop-up-chat",
+   "item": "owner-composer-announcement",
+   "id": "owner-composer-announcement",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS G1 the whoami (i) 502 twice — as at 2026-09-24 14:28:12 -> Announcement offered",
+    "PASS G2 clubs/settings/show 503 once -> Announcement offered",
+    "PASS unforced: 10 fresh opens of the owner's composer all offer Announcement"
+   ]
+  },
+  {
+   "lane": "mop-up-chat",
+   "item": "longpress-menus",
+   "id": "longpress-menus",
+   "status": "closed",
+   "level": "L6",
+   "evidence": [
+    "PASS L6 (Ken, 390 px): a long-press on each of 16 bubbles opens the menu and the release selects nothing (no write request, no state change, menu still open)",
+    "PASS L6: after the release, a deliberate tap on the ✌️ reaction still works (one chat/messages/react, stored on the message — read back as Ken)",
+    "PASS L6 (Mei, 390 px, Home): a long-press on the club crest opens the club menu and the release selects nothing (no clubs/me/update, no navigation, menu open)"
+   ]
+  }
+ ],
+ "evidence": [
+  {
+   "lane": "mop-up-comp",
+   "verdict": "pass",
+   "at": "2026-09-24T08:21:51.789Z"
+  },
+  {
+   "lane": "mop-up-chat",
+   "verdict": "pass",
+   "at": "2026-09-24T11:24:40.546Z"
+  },
+  {
+   "plant": "MODE=before on the old app",
+   "mustFail": [
+    "pull.all-pages",
+    "meet.45.show-host-wide",
+    "dupr.manager-team-names",
+    "meet.47.swap",
+    "visual.generate-edit",
+    "visual.pack-article",
+    "visual.people-sep",
+    "overlay.stacking",
+    "wording.g15-15",
+    "player.02.deleted"
+   ],
+   "passedAnyway": [],
+   "beforeAt": "2026-09-24T08:19:43.861Z",
+   "afterAt": "2026-09-24T10:10:27.513Z",
+   "afterBundle": "js/app.6de01df6.js"
+  },
+  {
+   "cleanupFailed": 0,
+   "afterErrors": []
+  }
+ ]
+}
