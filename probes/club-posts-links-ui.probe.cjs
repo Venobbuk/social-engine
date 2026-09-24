@@ -214,7 +214,10 @@ let mei, amy, tom, ken, browser;
       const promoted = (await se('meets/show', { meetId: pm.id }, mei.token)).json;
       ok('U11c', 'nothing was sent (Promote never pressed): meet not promoted', promoted && !promoted.promotedAt, { promotedAt: promoted && promoted.promotedAt });
       // announcement type (admin)
-      await open(page, '/pages/feed/index?club=' + C.id + '&compose=1'); const ta = await text(page);
+      await open(page, '/pages/feed/index?club=' + C.id + '&compose=1');
+      // the Announcement chip appears once the composer's own clubs/settings/show (isAdmin) answers — wait for it (≤ 12 s)
+      const t0 = Date.now(); await page.waitForFunction(() => /Announcement/.test(document.body.innerText), { timeout: 12000 }).catch(() => undefined);
+      const ta = await text(page); await shot(page, 'u12-owner-composer'); console.log('announcement chip after ms', Date.now() - t0);
       ok('U12a', 'the owner\'s composer offers Announcement', /Announcement/.test(ta), {});
       await click(page, /^Announcement$/, '.pc-compose'); await typeInto(page, '.pc-compose textarea', 0, TAG + ' ANNOUNCED'); await click(page, /^Post announcement$/, '.pc-send'); await sleep(3000);
       const aid = latestBy(mei, C.id); const pins = (await se('clubs/settings/show', { channelId: C.id }, mei.token)).json.pinnedNoteIds || [];
@@ -234,9 +237,24 @@ let mei, amy, tom, ken, browser;
       ok('U14b', 'pages/link?club=<handle> opens the club (B-link-club.02, app half)', u2.includes('/pages/community/index?id=' + C.id), { url: u2 });
       await open(page, '/pages/link/index?m=zzzz0000'); const tb = await text(page); await shot(page, 'u14-link-bad');
       ok('U14c', 'a wrong code shows Reclub\'s "Swing and a miss!"', /Swing and a miss/.test(tb), {});
+      // the REAL short links, typed as a visitor would (nginx 302 → pages/link, whose query ends in a bare "&" when there are no args)
+      const ROOT = APP.replace(/\/app$/, '');
+      try { await page.goto(ROOT + '/m/' + other.referenceCode, { waitUntil: 'networkidle2', timeout: 45000 }); } catch (e) {}
+      await sleep(4000); const u3 = page.url(); const t3 = await text(page); await shot(page, 'u14-real-m-link');
+      ok('U14e', 'typing https://uat.gripbat.com/m/<code> lands on that meet (A-short-links.01)', u3.includes('/pages/meet/index?id=' + other.id) && t3.includes('other meet'), { url: u3 });
+      try { await page.goto(ROOT + '/clubs/@' + handle, { waitUntil: 'networkidle2', timeout: 45000 }); } catch (e) {}
+      await sleep(4000); const u4 = page.url(); await shot(page, 'u14-real-club-link');
+      ok('U14f', 'typing https://uat.gripbat.com/clubs/@<handle> lands on the club (B-link-club.02)', u4.includes('/pages/community/index?id=' + C.id), { url: u4 });
+      // the share sheet now hands out the short link
+      await open(page, '/pages/meet/index?id=' + other.id);
+      const acts = await page.$$('.ah-act'); if (acts[0]) { await acts[0].click(); await sleep(1500); }
+      const shareUrl = await page.$eval('.sh2-url', (e) => (e.textContent || '').trim()).catch(() => ''); await shot(page, 'u14-share-sheet');
+      ok('U14g', 'the meet share sheet shows the /m/<code> short link', shareUrl === HOST + '/m/' + other.referenceCode, { shareUrl });
       await ctx.close(); }
     const sl = await fetch(APP.replace('/app', '') + '/m/' + other.referenceCode, { redirect: 'manual' });
-    ok('U14d', 'https://uat.gripbat.com/m/<code> → 302 to the link page (nginx; STAGED by the orchestrator)', sl.status === 302, { status: sl.status, location: sl.headers.get('location') });
+    ok('U14d', 'https://uat.gripbat.com/m/<code> → 302 to /app/pages/link/index?m=<code> (nginx SHORT-LINKS-V1)', sl.status === 302 && String(sl.headers.get('location') || '').includes('/app/pages/link/index?m=' + other.referenceCode), { status: sl.status, location: sl.headers.get('location') });
+    const sc = await fetch(APP.replace('/app', '') + '/clubs/@' + handle, { redirect: 'manual' });
+    ok('U14h', 'https://uat.gripbat.com/clubs/@<handle> → 302 to /app/pages/link/index?club=<handle>', sc.status === 302 && String(sc.headers.get('location') || '').includes('/app/pages/link/index?club=' + handle), { status: sc.status, location: sc.headers.get('location') });
   } catch (e) {
     ok('Z', 'probe ran to the end', false, { error: String(e && e.stack || e).slice(0, 500) });
   } finally {

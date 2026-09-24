@@ -1,12 +1,13 @@
 {
  "id": "club-posts-links",
- "at": "2026-09-24T06:02:43.505Z",
+ "at": "2026-09-24T06:41:50.116Z",
  "condition_fired": true,
- "verdict": "fail",
- "summary": "engine probe 49/50, L6 UI walk 40/41 at 390 px on https://uat.gripbat.com/app; failing: api:S2, ui:U14d",
+ "verdict": "pass",
+ "summary": "engine probe 50/50, L6 UI walk 45/45 at 390 px on https://uat.gripbat.com/app; failing: none",
  "running": {
   "engine": "image rev b862cec790 (carries 739d7fc0b7), web + web-uat equal",
-  "app": "70fe204 (13:26 deploy)"
+  "app": "70fe204 (13:26 deploy) + 90c5265 SHORT-LINK-SHARE (14:13 deploy)",
+  "nginx": "SHORT-LINKS-V1 live 13:5x HKT (orchestrator)"
  },
  "planted": {
   "engine_before_ship": "probes/club-posts-links.before.json 14/50 on the pre-ship engine",
@@ -163,8 +164,8 @@
   },
   {
    "id": "A-short-links.01",
-   "status": "still-open",
-   "level": "L4",
+   "status": "closed",
+   "level": "L6",
    "evidence": {
     "api": [
      "S1",
@@ -173,34 +174,32 @@
     "ui": [
      "U14a",
      "U14c",
-     "U14d"
+     "U14d",
+     "U14e",
+     "U14g"
     ],
-    "failing": [
-     "S2",
-     "U14d"
-    ]
+    "failing": []
    },
-   "reuse": "REUSED meets/show {referenceCode}; NEW pages/link resolver",
-   "note": "app half L6 (pages/link?m= → meet); the nginx /m/ rewrite is STAGED by the orchestrator, so https://uat.gripbat.com/m/<code> still answers 200 (the app shell)"
+   "reuse": "REUSED meets/show {referenceCode}; NEW pages/link resolver + nginx SHORT-LINKS-V1 (orchestrator)",
+   "note": "typed /m/<code> lands on the meet; the share sheet hands out /m/<code>"
   },
   {
    "id": "B-link-club.02",
-   "status": "still-open",
-   "level": "L5",
+   "status": "closed",
+   "level": "L6",
    "evidence": {
     "api": [
      "H3"
     ],
     "ui": [
      "U14b",
-     "U14d"
+     "U14f",
+     "U14h"
     ],
-    "failing": [
-     "U14d"
-    ]
+    "failing": []
    },
-   "reuse": "EXTENDED clubs/by-code {handle}",
-   "note": "app half L6 (pages/link?club=); the nginx /clubs/@ rewrite is STAGED"
+   "reuse": "EXTENDED clubs/by-code {handle}; nginx SHORT-LINKS-V1",
+   "note": "typed /clubs/@handle lands on the club"
   },
   {
    "id": "B-set-profile.03",
@@ -390,10 +389,14 @@
    "/root/walk/cpl-u11-promote-filters.png",
    "/root/walk/cpl-u11-promote-male-off.png",
    "/root/walk/cpl-u11-promote-female-off.png",
+   "/root/walk/cpl-u12-owner-composer.png",
    "/root/walk/cpl-u13-composer-zhHant.png",
    "/root/walk/cpl-u14-link-meet.png",
    "/root/walk/cpl-u14-link-club.png",
-   "/root/walk/cpl-u14-link-bad.png"
+   "/root/walk/cpl-u14-link-bad.png",
+   "/root/walk/cpl-u14-real-m-link.png",
+   "/root/walk/cpl-u14-real-club-link.png",
+   "/root/walk/cpl-u14-share-sheet.png"
   ]
  }
 }

@@ -1,10 +1,10 @@
 {
  "id": "club-posts-links.ui",
- "at": "2026-09-24T06:00:05.671Z",
+ "at": "2026-09-24T06:41:07.265Z",
  "app": "https://uat.gripbat.com/app",
  "viewport": "390x844",
- "pass": 40,
- "fail": 1,
+ "pass": 45,
+ "fail": 0,
  "checks": [
   {
    "id": "U0",
@@ -31,7 +31,7 @@
    "name": "MFM drawn: bold / italic / link text without the markup (B-content-editor.03)",
    "pass": true,
    "detail": {
-    "line": "[probe] club-posts-links ui muf4df5v Bring water and smile the rules"
+    "line": "[probe] club-posts-links ui muf5teg2 Bring water and smile the rules"
    }
   },
   {
@@ -133,7 +133,7 @@
    "name": "real Post → engine: the note has cw \"Members only title\" and visibility followers (L6 of .02 + .07)",
    "pass": true,
    "detail": {
-    "id": "ariopbhxb3nb001i",
+    "id": "ariq5kednsrn00eq",
     "cw": "Members only title",
     "vis": "followers"
    }
@@ -144,7 +144,7 @@
    "pass": true,
    "detail": {
     "picked": true,
-    "text": "[probe] club-posts-links ui muf4df5v REVIEW-WITH-CLUB\nhttps://uat.gripbat.com/app/pages/community/index?id=ariooougb3nb000s\n\n#review",
+    "text": "[probe] club-posts-links ui muf5teg2 REVIEW-WITH-CLUB\nhttps://uat.gripbat.com/app/pages/community/index?id=ariq4ocmnsrn00du\n\n#review",
     "tags": [
      "review"
     ]
@@ -161,7 +161,7 @@
    "name": "real \"My feed\" post → engine: a note with NO club (B-select-channel.02)",
    "pass": true,
    "detail": {
-    "id": "ariopxttb3nb001t"
+    "id": "ariq684jnsrn00f1"
    }
   },
   {
@@ -169,9 +169,9 @@
    "name": "club kebab has \"Post question\" → opens the composer with Question selected",
    "pass": true,
    "detail": {
-    "url": "https://uat.gripbat.com/app/pages/feed/index?club=ariooougb3nb000s&compose=1&type=question",
+    "url": "https://uat.gripbat.com/app/pages/feed/index?club=ariq4ocmnsrn00du&compose=1&type=question",
     "onChips": [
-     "[probe] club-posts-links ui muf4df5v club",
+     "[probe] club-posts-links ui muf5teg2 club",
      "Question"
     ]
    }
@@ -237,7 +237,7 @@
    "name": "real Save → engine: the club's handle read back",
    "pass": true,
    "detail": {
-    "handle": "cpl_ui_muf4dfr8"
+    "handle": "cpl_ui_muf5tgi6"
    }
   },
   {
@@ -299,9 +299,9 @@
    "name": "real Announcement post → engine: pinned on the club (clubs/posts/announce)",
    "pass": true,
    "detail": {
-    "aid": "ariort6rb3nb005y",
+    "aid": "ariq82a3nsrn00fq",
     "pins": [
-     "ariort6rb3nb005y"
+     "ariq82a3nsrn00fq"
     ]
    }
   },
@@ -318,7 +318,7 @@
    "name": "pages/link?m=<code> replaces itself with the meet page (A-short-links.01, app half)",
    "pass": true,
    "detail": {
-    "url": "https://uat.gripbat.com/app/pages/meet/index?id=arioooxib3nb000v"
+    "url": "https://uat.gripbat.com/app/pages/meet/index?id=ariq4oiqnsrn00dx"
    }
   },
   {
@@ -326,7 +326,7 @@
    "name": "pages/link?club=<handle> opens the club (B-link-club.02, app half)",
    "pass": true,
    "detail": {
-    "url": "https://uat.gripbat.com/app/pages/community/index?id=ariooougb3nb000s"
+    "url": "https://uat.gripbat.com/app/pages/community/index?id=ariq4ocmnsrn00du"
    }
   },
   {
@@ -336,12 +336,45 @@
    "detail": {}
   },
   {
-   "id": "U14d",
-   "name": "https://uat.gripbat.com/m/<code> → 302 to the link page (nginx; STAGED by the orchestrator)",
-   "pass": false,
+   "id": "U14e",
+   "name": "typing https://uat.gripbat.com/m/<code> lands on that meet (A-short-links.01)",
+   "pass": true,
    "detail": {
-    "status": 200,
-    "location": null
+    "url": "https://uat.gripbat.com/app/pages/meet/index?id=ariq4oiqnsrn00dx"
+   }
+  },
+  {
+   "id": "U14f",
+   "name": "typing https://uat.gripbat.com/clubs/@<handle> lands on the club (B-link-club.02)",
+   "pass": true,
+   "detail": {
+    "url": "https://uat.gripbat.com/app/pages/community/index?id=ariq4ocmnsrn00du"
+   }
+  },
+  {
+   "id": "U14g",
+   "name": "the meet share sheet shows the /m/<code> short link",
+   "pass": true,
+   "detail": {
+    "shareUrl": "uat.gripbat.com/m/8c0ipm9p"
+   }
+  },
+  {
+   "id": "U14d",
+   "name": "https://uat.gripbat.com/m/<code> → 302 to /app/pages/link/index?m=<code> (nginx SHORT-LINKS-V1)",
+   "pass": true,
+   "detail": {
+    "status": 302,
+    "location": "https://uat.gripbat.com/app/pages/link/index?m=8c0ipm9p&"
+   }
+  },
+  {
+   "id": "U14h",
+   "name": "https://uat.gripbat.com/clubs/@<handle> → 302 to /app/pages/link/index?club=<handle>",
+   "pass": true,
+   "detail": {
+    "status": 302,
+    "location": "https://uat.gripbat.com/app/pages/link/index?club=cpl_ui_muf5tgi6"
    }
   },
   {
@@ -373,9 +406,13 @@
   "/root/walk/cpl-u11-promote-filters.png",
   "/root/walk/cpl-u11-promote-male-off.png",
   "/root/walk/cpl-u11-promote-female-off.png",
+  "/root/walk/cpl-u12-owner-composer.png",
   "/root/walk/cpl-u13-composer-zhHant.png",
   "/root/walk/cpl-u14-link-meet.png",
   "/root/walk/cpl-u14-link-club.png",
-  "/root/walk/cpl-u14-link-bad.png"
+  "/root/walk/cpl-u14-link-bad.png",
+  "/root/walk/cpl-u14-real-m-link.png",
+  "/root/walk/cpl-u14-real-club-link.png",
+  "/root/walk/cpl-u14-share-sheet.png"
  ]
 }

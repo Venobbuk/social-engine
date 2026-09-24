@@ -1,11 +1,11 @@
 {
  "id": "club-posts-links",
- "at": "2026-09-24T05:33:23.580Z",
+ "at": "2026-09-24T06:15:13.618Z",
  "base": "https://uat.social.silkvo.com",
  "condition_fired": true,
- "verdict": "fail",
- "pass": 49,
- "fail": 1,
+ "verdict": "pass",
+ "pass": 50,
+ "fail": 0,
  "evidence": [
   {
    "id": "E0",
@@ -143,7 +143,7 @@
    "name": "the /m/<code> short link of it → OUTSIDE_LINK_BLOCKED",
    "pass": true,
    "detail": {
-    "code": "67jtzmfq",
+    "code": "ximqf7nc",
     "status": 400,
     "err": "OUTSIDE_LINK_BLOCKED"
    }
@@ -227,7 +227,7 @@
    "detail": {
     "status": 200,
     "body": {
-     "handle": "pcl_muf3io0p",
+     "handle": "pcl_muf50g6z",
      "available": true,
      "reason": null
     }
@@ -239,7 +239,7 @@
    "pass": true,
    "detail": {
     "status": 200,
-    "read": "pcl_muf3io0p"
+    "read": "pcl_muf50g6z"
    }
   },
   {
@@ -248,7 +248,7 @@
    "pass": true,
    "detail": {
     "status": 200,
-    "id": "arintu9d7ay200fh"
+    "id": "aripbor8hajz002i"
    }
   },
   {
@@ -257,7 +257,7 @@
    "pass": true,
    "detail": {
     "body": {
-     "handle": "pcl_muf3io0p",
+     "handle": "pcl_muf50g6z",
      "available": false,
      "reason": "taken"
     }
@@ -530,10 +530,10 @@
   {
    "id": "S2",
    "name": "https://uat.gripbat.com/m/<code> answers a 302 to /app/pages/link/index?m=<code> (nginx)",
-   "pass": false,
+   "pass": true,
    "detail": {
-    "status": 200,
-    "location": null
+    "status": 302,
+    "location": "https://uat.gripbat.com/app/pages/link/index?m=ximqf7nc&"
    }
   },
   {
