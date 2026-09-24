@@ -88,7 +88,9 @@ the qa / test-plan / fixed scripts read it — no page decides the language agai
 the 繁 text.
 
 **G7 — one shared site header.** Every site page shows exactly one header — logo → `/`, How it works → `/how.html`,
-In depth → `/depth.html`, Try it → `/app/` — and every page except `/` exactly one breadcrumb. Both are rendered by
+Try it → `/app/` — and every page except `/` exactly one breadcrumb. (G7-NO-DEPTH, 2026-09-24: the In depth link
+is gone — operator: internal/status pages are not for testers, and `/depth.html` is 404 on the brand domains per the
+G2 addendum.) Both are rendered by
 `/uat/nav.js` from ONE registry (styles `/uat/nav.css`); a page only declares itself:
 `<script src="/uat/nav.js" data-page="demo" data-langui="langbar"></script>`. No page carries its own header or
 breadcrumb markup (the probe requires `data-gbnav` / `data-gbcrumb`, which only nav.js sets). A new site page = one
