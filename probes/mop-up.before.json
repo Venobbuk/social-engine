@@ -1,0 +1,450 @@
+{
+ "id": "mop-up",
+ "mode": "before",
+ "at": "2026-09-24T08:19:43.861Z",
+ "run": "f9h111",
+ "rows": {
+  "pull.all-pages": {
+   "item": "1 pull-to-refresh (every H5 page)",
+   "id": "pull.all-pages",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "pages": {
+     "meet": {
+      "refetched": 0,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/before-pull-meet.png"
+     },
+     "club": {
+      "refetched": 0,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/before-pull-club.png"
+     },
+     "player": {
+      "refetched": 0,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/before-pull-player.png"
+     },
+     "discover": {
+      "refetched": 0,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/before-pull-discover.png"
+     }
+    },
+    "sheetDragDoesNotReload": {
+     "stillOpen": true,
+     "reloads": 0,
+     "sameUrl": true
+    }
+   }
+  },
+  "meet.45.show-host-wide": {
+   "item": "2 A-meet-detail.45 host-wide Show",
+   "id": "meet.45.show-host-wide",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "sent": [],
+    "readBack": [],
+    "playerSeesShowControl": true,
+    "playerLevelChips": 4,
+    "hostShot": "probes/mop-up-shots/before-show-host-sheet.png",
+    "playerShot": "probes/mop-up-shots/before-show-player.png"
+   }
+  },
+  "dupr.manager-team-names": {
+   "item": "7 DUPR Manager team names from Participants",
+   "id": "dupr.manager-team-names",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "rows": [
+     "Round 1 ·"
+    ],
+    "shot": "probes/mop-up-shots/before-dupr-manager.png"
+   }
+  },
+  "promote.06": {
+   "item": "2 A-promote-meet.06",
+   "id": "promote.06",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "refusedToPress": "preview audience is not exactly the two [probe] members",
+    "preview": {
+     "audience": "club",
+     "gate": "too_early",
+     "windowHours": 36,
+     "radiusKm": 20,
+     "promotedAt": null,
+     "reach": 0,
+     "followers": 0,
+     "nearby": 0,
+     "club": 0,
+     "sent": false
+    }
+   }
+  },
+  "listing.popup.01": {
+   "item": "2 A-meet-listings-popup.01",
+   "id": "listing.popup.01",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "card": null,
+    "popup": "",
+    "stayedOnDiscover": true,
+    "shot": "probes/mop-up-shots/before-listing-popup.png"
+   }
+  },
+  "player.02.deleted": {
+   "item": "2 E-player.02 deleted-account message",
+   "id": "player.02.deleted",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "graceDoor": "200 {\"deleted\":true,\"scheduled\":true,\"purgeAt\":\"2026-10-01T08:21:28.322Z\"}",
+    "graceRow": "1",
+    "usersShow": "NO_SUCH_USER",
+    "pageSays": "",
+    "shot": "probes/mop-up-shots/before-player-deleted.png"
+   }
+  },
+  "visual.chips-discover": {
+   "item": "4 selected chips readable (Discover filters, every pg-tab-on)",
+   "id": "visual.chips-discover",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "n": 5,
+    "worst": [
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Pickleball"
+     },
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Any"
+     },
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Any"
+     }
+    ],
+    "shot": "probes/mop-up-shots/before-discover-chips.png"
+   }
+  },
+  "visual.people-sep": {
+   "item": "4 People rows: no stray \" · \"",
+   "id": "visual.people-sep",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "rows": 24,
+    "bad": [
+     "· 11 followers",
+     "· 10 followers",
+     "· 9 followers",
+     "· 6 followers",
+     "· 6 followers"
+    ],
+    "followerOnlyRows": 0,
+    "shot": "probes/mop-up-shots/before-people-rows.png"
+   }
+  },
+  "visual.feed-pill": {
+   "item": "4 feed announcement pill not clipped (G5)",
+   "id": "visual.feed-pill",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "pill": {
+     "pill": "ANNOUNCEMENT",
+     "pillRight": 291,
+     "cardRight": 374,
+     "vw": 390,
+     "width": 123,
+     "clipped": false
+    },
+    "shot": "probes/mop-up-shots/before-feed-pill.png"
+   }
+  },
+  "visual.generate-edit": {
+   "item": "4 \"Generate now\" clear of \"Edit\" (coach tab)",
+   "id": "visual.generate-edit",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "gap": {
+     "gen": "Generate now",
+     "val": "Edit",
+     "gapPx": 0,
+     "sameLine": true,
+     "rowRight": 374,
+     "valRight": 374
+    },
+    "shot": "probes/mop-up-shots/before-coach-row.png"
+   }
+  },
+  "visual.pack-article": {
+   "item": "4 \"Buy a pack of 8 lessons\" (article)",
+   "id": "visual.pack-article",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "found": "Buy a 8-lesson pack",
+    "shot": "probes/mop-up-shots/before-lesson-pack.png"
+   }
+  },
+  "visual.together-null": {
+   "item": "4 \"Together null–1\" (round-robin Matches)",
+   "id": "visual.together-null",
+   "status": "closed",
+   "level": "L5 engine + L2 app guard (TOGETHER-NULL-V1, pages/meet/index.tsx pairLine)",
+   "evidence": {
+    "gbPairsAsStranger": [
+     {
+      "a": "aritsb6tohyd002c",
+      "b": "aritsbb6ohyd002i",
+      "matches": 0,
+      "wins": 0,
+      "expected": 0
+     }
+    ],
+    "note": "no pair with a shared rated history exists among this run's fresh accounts, so the line is not drawn on screen"
+   }
+  },
+  "overlay.stacking": {
+   "item": "5 gate above page prompts; report button above the gate",
+   "id": "overlay.stacking",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "gateSeen": 8,
+    "dialogOverGate": 8,
+    "fabCovered": 8,
+    "afterAgree": [
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     }
+    ],
+    "shots": [
+     "probes/mop-up-shots/before-overlay-gate.png",
+     "probes/mop-up-shots/before-overlay-after-agree.png"
+    ]
+   }
+  },
+  "wording.g15-15": {
+   "item": "6 G15.15 wording (league / HKPL)",
+   "id": "wording.g15-15",
+   "status": "still-open",
+   "level": "L6 (not met)",
+   "evidence": {
+    "routes": [
+     "more/index",
+     "meets/index?pane=venues",
+     "meet-create/index",
+     "my-stats/index",
+     "charter/index",
+     "help/index",
+     "venue/index?id=ari4ig3e3hac007s"
+    ],
+    "langs": [
+     "en",
+     "zh",
+     "cn"
+    ],
+    "hits": {
+     "en more/index": [
+      "Brackets, pools and playoffs run by the league"
+     ],
+     "en meets/index?pane=venues": [
+      "Venue data is added by players and checked by the league. New venues are Under Review but can be used at once."
+     ],
+     "en meet-create/index": [
+      "Scored matches go to DUPR through the league"
+     ],
+     "en charter/index": [
+      "Built with the league",
+      "GripBat runs beside the Hong Kong Pickleball League: one sign-in, your DUPR rating, the league calendar and the club you already belong to."
+     ],
+     "en venue/index?id=ari4ig3e3hac007s": [
+      "Added by a player — under review by the league. It can be used for meets right away."
+     ],
+     "zh more/index": [
+      "聯賽主辦的淘汰賽、小組賽及季後賽"
+     ],
+     "zh meets/index?pane=venues": [
+      "場地資料由球友新增、由聯賽核實。新場地會標示為「審核中」，但可以即時使用。"
+     ],
+     "zh meet-create/index": [
+      "有比分的比賽經聯賽提交至 DUPR"
+     ],
+     "zh charter/index": [
+      "與聯賽並肩打造",
+      "GripBat 與香港匹克球聯賽並行：同一個登入、你的 DUPR 評分、聯賽賽程，以及你已加入的球會。"
+     ],
+     "zh venue/index?id=ari4ig3e3hac007s": [
+      "由球友新增 — 聯賽審核中。可以即時用於約戰。"
+     ],
+     "cn more/index": [
+      "Brackets, pools and playoffs run by the league"
+     ],
+     "cn meets/index?pane=venues": [
+      "Venue data is added by players and checked by the league. New venues are Under Review but can be used at once."
+     ],
+     "cn meet-create/index": [
+      "Scored matches go to DUPR through the league"
+     ],
+     "cn charter/index": [
+      "Built with the league",
+      "GripBat runs beside the Hong Kong Pickleball League: one sign-in, your DUPR rating, the league calendar and the club you already belong to."
+     ],
+     "cn venue/index?id=ari4ig3e3hac007s": [
+      "Added by a player — under review by the league. It can be used for meets right away."
+     ]
+    },
+    "shot": "probes/mop-up-shots/before-wording-last.png"
+   }
+  }
+ },
+ "detail": {
+  "bundle": "js/app.cde3e818.js",
+  "fixtures": {
+   "A": "aritsazvohyd0026",
+   "B": "aritsb6tohyd002c",
+   "C": "aritsbb6ohyd002i",
+   "F": "aritsbh1ohyd002o",
+   "club": "aritsbj4ohyd002t",
+   "m1": "aritsblbohyd002y"
+  },
+  "error:swap": "Error: clickText: not found \"Swap my spot\" on https://uat.gripbat.com/app/pages/meet/index?id=aritsblbohyd002y&lang=en\n    at Object.clickText (/root/gen/meets-fixes/mf-lib.cjs:79:18)\n    at async /root/gen/mop-up/mop-up.probe.cjs:149:7\n    at async step (/root/gen/mop-up/mop-up.probe.cjs:25:88)\n    at async /root/gen/mop-up/mop-up.probe.cjs:138:5",
+  "promotePreview": {
+   "audience": "club",
+   "gate": "too_early",
+   "windowHours": 36,
+   "radiusKm": 20,
+   "promotedAt": null,
+   "reach": 0,
+   "followers": 0,
+   "nearby": 0,
+   "club": 0,
+   "sent": false
+  },
+  "schedule": "200 {\"id\":\"aritzfvuohyd006i\",\"ownerUserId\":\"aritsazvohyd0026\",\"channelId\":\"aritsbj4ohyd002t\",\"owner\":{\"userId\":\"aritsazvohyd0026\",\"name\":\"[probe] mop-up a f9h111\",\"username\":\"muf9h111a\"},\"name\":\"[probe] m"
+ },
+ "cleanup": [
+  {
+   "schedule": "aritzfvuohyd006i",
+   "s": 200
+  },
+  {
+   "meet": "aritsblbohyd002y",
+   "cancel": 200,
+   "del": 400
+  },
+  {
+   "meet": "aritu5whohyd003y",
+   "cancel": 200,
+   "del": 400
+  },
+  {
+   "meet": "arituay8ohyd0045",
+   "cancel": 200,
+   "del": 200
+  },
+  {
+   "meet": "aritub14ohyd004a",
+   "cancel": 200,
+   "del": 200
+  },
+  {
+   "club": "aritsbj4ohyd002t",
+   "archived": 200
+  },
+  {
+   "acct": "a",
+   "deleted": 204
+  },
+  {
+   "acct": "b",
+   "deleted": 204
+  },
+  {
+   "acct": "c",
+   "deleted": 204
+  },
+  {
+   "acct": "f",
+   "deleted": 204
+  },
+  {
+   "acct": "e",
+   "deleted": 204
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": 3,
+  "open": [
+   "pull.all-pages",
+   "meet.45.show-host-wide",
+   "dupr.manager-team-names",
+   "promote.06",
+   "listing.popup.01",
+   "player.02.deleted",
+   "visual.people-sep",
+   "visual.generate-edit",
+   "visual.pack-article",
+   "overlay.stacking",
+   "wording.g15-15"
+  ]
+ }
+}

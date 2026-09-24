@@ -1,0 +1,493 @@
+{
+ "id": "mop-up",
+ "mode": "after",
+ "at": "2026-09-24T10:10:27.513Z",
+ "run": "fdffax",
+ "rows": {
+  "pull.all-pages": {
+   "item": "1 pull-to-refresh (every H5 page)",
+   "id": "pull.all-pages",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "pages": {
+     "meet": {
+      "refetched": 10,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/after-pull-meet.png"
+     },
+     "club": {
+      "refetched": 13,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/after-pull-club.png"
+     },
+     "player": {
+      "refetched": 17,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/after-pull-player.png"
+     },
+     "discover": {
+      "refetched": 8,
+      "sameRoute": true,
+      "contentBack": true,
+      "shot": "probes/mop-up-shots/after-pull-discover.png"
+     }
+    },
+    "sheetDragDoesNotReload": {
+     "stillOpen": true,
+     "reloads": 0,
+     "sameUrl": true
+    }
+   }
+  },
+  "meet.45.show-host-wide": {
+   "item": "2 A-meet-detail.45 host-wide Show",
+   "id": "meet.45.show-host-wide",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "sent": [
+     "\"rosterVisibility\":[\"show_participant_tags\",\"show_level\",\"show_courts\",\"show_gender\"]",
+     "\"rosterVisibility\":[\"show_participant_tags\",\"show_courts\",\"show_gender\"]"
+    ],
+    "readBack": [
+     "show_participant_tags",
+     "show_courts",
+     "show_gender"
+    ],
+    "playerSeesShowControl": false,
+    "playerLevelChips": 0,
+    "hostShot": "probes/mop-up-shots/after-show-host-sheet.png",
+    "playerShot": "probes/mop-up-shots/after-show-player.png"
+   }
+  },
+  "dupr.manager-team-names": {
+   "item": "7 DUPR Manager team names from Participants",
+   "id": "dupr.manager-team-names",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "rows": [
+     "Round 1 · [probe] mop-up b fdffax vs [probe] mop-up c fdffax"
+    ],
+    "shot": "probes/mop-up-shots/after-dupr-manager.png"
+   }
+  },
+  "meet.47.swap": {
+   "item": "2 A-meet-detail.47 Swap my spot",
+   "id": "meet.47.swap",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "refused": {
+     "noSeat": "MEET_NOT_PARTICIPANT",
+     "host": "MEET_INVALID_TRANSITION",
+     "takerHasSeat": "MEET_ALREADY_PARTICIPANT",
+     "privateStranger": "MEET_PRIVATE"
+    },
+    "dialog": "Give your spot to [probe] mop-up f fdffax?\nYou leave the meet and they are confirmed in your place.\nCancel\nConfirm",
+    "sent": [
+     "{\"meetId\":\"arixqrk9mpah00xk\",\"userId\":\"arixqragmpah00xa\",\"i\":\"…\"}"
+    ],
+    "seat": {
+     "sameRow": true,
+     "takerStatus": "confirmed",
+     "giverGone": true,
+     "confirmed": [
+      3,
+      3
+     ]
+    },
+    "takerNotified": {
+     "header": "Spot handed to you",
+     "body": "[probe] mop-up b fdffax gave you their spot in [probe] mop-up m1 fdffax. You are confirmed to play."
+    },
+    "hostNotified": true,
+    "shot": "probes/mop-up-shots/after-swap-after.png"
+   }
+  },
+  "promote.06": {
+   "item": "2 A-promote-meet.06 promote ([probe] audience)",
+   "id": "promote.06",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "preview": {
+     "reach": 2,
+     "club": 2
+    },
+    "sent": [
+     "{\"meetId\":\"arixswvsmpah00z4\",\"audience\":\"club\",\"i\":\"…\"}"
+    ],
+    "received": {
+     "B": 1,
+     "C": 1,
+     "outsiderF": 0
+    },
+    "resultText": "Promoted",
+    "shot": "probes/mop-up-shots/after-promote-result.png"
+   }
+  },
+  "visual.chip-promote": {
+   "item": "4 selected chip readable (Get more players audience)",
+   "id": "visual.chip-promote",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "contrast": {
+     "fg": "rgb(255, 255, 255)",
+     "bg": "rgb(11,25,44)",
+     "ratio": 17.65,
+     "text": "Club members"
+    }
+   }
+  },
+  "listing.popup.01": {
+   "item": "2 A-meet-listings-popup.01",
+   "id": "listing.popup.01",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "card": "ok",
+    "popup": "Listing\nThis listing contains only information. RSVP and actual availability not guaranteed.\nOK",
+    "stayedOnDiscover": true,
+    "shot": "probes/mop-up-shots/after-listing-popup.png"
+   }
+  },
+  "player.02.deleted": {
+   "item": "2 E-player.02 deleted-account message",
+   "id": "player.02.deleted",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "graceDoor": "200 {\"deleted\":true,\"scheduled\":true,\"purgeAt\":\"2026-10-01T10:12:34.108Z\"}",
+    "graceRow": "1",
+    "usersShow": "USER_DELETED",
+    "pageSays": "This player is no longer available on GripBat.",
+    "shot": "probes/mop-up-shots/after-player-deleted.png"
+   }
+  },
+  "visual.chips-discover": {
+   "item": "4 selected chips readable (Discover filters, every pg-tab-on)",
+   "id": "visual.chips-discover",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "n": 5,
+    "worst": [
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Pickleball"
+     },
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Any"
+     },
+     {
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(11,25,44)",
+      "ratio": 17.65,
+      "text": "Any"
+     }
+    ],
+    "shot": "probes/mop-up-shots/after-discover-chips.png"
+   }
+  },
+  "visual.people-sep": {
+   "item": "4 People rows: no stray \" · \"",
+   "id": "visual.people-sep",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "rows": 24,
+    "bad": [],
+    "followerOnlyRows": 0,
+    "shot": "probes/mop-up-shots/after-people-rows.png"
+   }
+  },
+  "selftest.pill-plant": {
+   "item": "self-test: the pill check fails on the old markup (pill inside the nowrap name)",
+   "id": "selftest.pill-plant",
+   "status": "closed",
+   "level": "L6 (planted in the page)",
+   "evidence": {
+    "planted": {
+     "pillEndSeen": false
+    }
+   }
+  },
+  "visual.feed-pill": {
+   "item": "4 feed announcement pill not clipped (G5)",
+   "id": "visual.feed-pill",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "pill": {
+     "pill": "ANNOUNCEMENT",
+     "pillRight": 291,
+     "cardRight": 374,
+     "vw": 390,
+     "width": 123,
+     "pillSeen": true,
+     "pillEndSeen": true,
+     "nameSeen": true,
+     "clipped": false
+    },
+    "shot": "probes/mop-up-shots/after-feed-pill.png"
+   }
+  },
+  "visual.generate-edit": {
+   "item": "4 \"Generate now\" clear of \"Edit\" (coach tab)",
+   "id": "visual.generate-edit",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "gap": {
+     "gen": "Generate now",
+     "val": "Edit",
+     "gapPx": 10,
+     "sameLine": true,
+     "rowRight": 374,
+     "valRight": 374
+    },
+    "shot": "probes/mop-up-shots/after-coach-row.png"
+   }
+  },
+  "visual.pack-article": {
+   "item": "4 \"Buy a pack of 8 lessons\" (article)",
+   "id": "visual.pack-article",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "found": "Buy a pack of 8 lessons",
+    "shot": "probes/mop-up-shots/after-lesson-pack.png"
+   }
+  },
+  "visual.together-null": {
+   "item": "4 \"Together null–1\" (round-robin Matches)",
+   "id": "visual.together-null",
+   "status": "closed",
+   "level": "L5 engine + L2 app guard (TOGETHER-NULL-V1, pages/meet/index.tsx pairLine)",
+   "evidence": {
+    "gbPairsAsStranger": [
+     {
+      "a": "arixqqu8mpah00wy",
+      "b": "arixqr22mpah00x4",
+      "matches": 0,
+      "wins": 0,
+      "expected": 0
+     }
+    ],
+    "note": "no pair with a shared rated history exists among this run's fresh accounts, so the line is not drawn on screen"
+   }
+  },
+  "selftest.fab-plant": {
+   "item": "self-test: the report-button check sees it covered under the old stacking",
+   "id": "selftest.fab-plant",
+   "status": "closed",
+   "level": "L6 (planted in the page)",
+   "evidence": {
+    "planted": {
+     "fabOnTop": false
+    }
+   }
+  },
+  "overlay.stacking": {
+   "item": "5 gate above page prompts; report button above the gate",
+   "id": "overlay.stacking",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "gateSeen": 8,
+    "dialogOverGate": 0,
+    "fabCovered": 0,
+    "afterAgree": [
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     },
+     {
+      "path": "/app/pages/onboard/index",
+      "gate": true,
+      "dialog": false,
+      "dialogText": ""
+     }
+    ],
+    "shots": [
+     "probes/mop-up-shots/after-overlay-gate.png",
+     "probes/mop-up-shots/after-overlay-after-agree.png"
+    ]
+   }
+  },
+  "wording.g15-15": {
+   "item": "6 G15.15 wording (league / HKPL)",
+   "id": "wording.g15-15",
+   "status": "closed",
+   "level": "L6",
+   "evidence": {
+    "routes": [
+     "more/index",
+     "meets/index?pane=venues",
+     "meet-create/index",
+     "my-stats/index",
+     "charter/index",
+     "help/index",
+     "venue/index?id=ari4ig3e3hac007s"
+    ],
+    "langs": [
+     "en",
+     "zh",
+     "cn"
+    ],
+    "hits": {},
+    "shot": "probes/mop-up-shots/after-wording-last.png"
+   }
+  }
+ },
+ "detail": {
+  "bundle": "js/app.6de01df6.js",
+  "clubOpen": 200,
+  "joins": [
+   {
+    "status": "member"
+   },
+   {
+    "status": "member"
+   }
+  ],
+  "fixtures": {
+   "A": "arixqqhpmpah00ws",
+   "B": "arixqqu8mpah00wy",
+   "C": "arixqr22mpah00x4",
+   "F": "arixqragmpah00xa",
+   "club": "arixqre2mpah00xf",
+   "m1": "arixqrk9mpah00xk"
+  },
+  "swapUI": {
+   "url": "/app/pages/meet/index?id=arixqrk9mpah00xk&lang=en",
+   "sheets": [
+    "nut-popup nut-popup-round nut-popup-bottom ui-sheet :: <!----><taro-view-core class=\"nut-popup-title\"><!----><taro-view-core class=\"nut-popup-title-wrapper\"><!----><taro-view-core class=\"nut-popup-title-title\"><!---->Swap my spot</taro-view-core></taro-view-core><taro-view-core aria-role=\"button\" aria-label=\"Close\" class=\"nut-popup-title-right nut-popup-title-right-top-right\"><!----><i class=\" nut-icon nut-icon-Close \" style=\"background-color: currentcolor; mask: url(&quot;data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCA0OCA0OCI+PGcgc3R5bGU9Im1peC1ibGVuZC1tb2RlOnBhc3MtdGhyb3VnaDtvcGFjaXR5OjEiPjxwYXRoIGZpbGw9IiMxNzFhMjYiIGZpbGwtcnVsZT0iTk9OWkVSTyIgZD0iTTE1LjE0NiAxNy4yNjggMjcuODggMzBhMSAxIDAgMCAwIDEuNDE0IDBsLjcwNy0uNzA3YTEgMSAwIDAgMCAwLTEuNDE0TDE3LjI2OCAxNS4xNDYgMzAgMi40MTRBMSAxIDAgMCAwIDMwIDFsLS43MDctLjcwN2ExIDEgMCAwIDAtMS40MTQgMEwxNS4xNDYgMTMuMDI1IDIuNDE0LjI5M0ExIDEgMCAwIDAgMSAuMjkzTC4yOTMgMWExIDEgMCAwIDAgMCAxLjQxNGwxMi43MzIgMTIuNzMyTC4yOTMgMjcuODhhMSAxIDAgMCAwIDAgMS40MTRMMSAzMGExIDEgMCAwIDAgMS40MTQgMHoiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTpub3JtYWwiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDguODU0IDguODU0KSIvPjwvZz48L3N2Zz4=&quot;) 0px 0px / 100% 100% no-repeat;\"></i></taro-view-core></taro-view-core><taro-text-core class=\"pg-note\"><!---->Give your spot to another player. They are confirmed in your place and you leave the meet.</taro-text-core><taro-view-core class=\"ip-picker\"><!----><taro-view-core class=\"\"><!----><taro-view-core class=\"\"><!----><taro-view-core class=\"ui-search\"><!----><taro-view-core class=\"nut-searchbar\" style=\"--nutui-black-5: var(--hk-muted-soft); --nutui-color-primary: var(--hk-brand-fg);\"><!----><taro-view-core class=\"nut-searchbar-content nut-searchbar-round\"><!----><taro-view-core class=\"nut-searchbar-leftin nut-searchbar-icon\"><!----><i class=\" nut-ico"
+   ],
+   "text": "Back\nSUN, 27 SEPT, 07:00 PM\n[probe] mop-up m1 fdffax\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nVENUE\nTo be determined\nCLUB\n[probe] mop-up club with a deliberately long name for the pill fdffax\nYou are a member\n›\nWHEN\nSunday, 27 Sept · 07:00 pm – 08:30 pm\n1.5 h\nAdd to calendar\nGAME\nPickleball · Managed\nAll levels\nHOST\n[probe] mop-up a fdffax\n›\nCONTACT HOSTS\n[probe] mop-up a fdffax\nMessage\nJOIN CODE\ns9d55l2c\nType it in Discover to open this meet\nCopy\nFEE\nFree\nDUPR\nMatches will be submitted to DUPR\nGoing · 3/8\nSee all\n[M\n[probe] mop-up a fdffax\n[M\n[probe] mop-up b fdffax\n[M\n[probe] mop-up c fdffax\nPhotos\nAdd photo\nNo photos have been added yet. Share your best moments.\nYou are confirmed to play. Please be on time.\nRequest +1\nSee matches\nSwap my spot\nLeave\nHome\nDiscover\nCommunity\nInbox\nSee more\nSwap my spot\nGive your spot to another player. They are confirmed in your place and you leave the meet.\nFriends\nSaved\nRecent activity\nMeets\nFree agents\nSpectators\nClub tags\nYou have no friends yet."
+  },
+  "promotePreview": {
+   "audience": "club",
+   "gate": "ok",
+   "windowHours": 36,
+   "radiusKm": 20,
+   "promotedAt": null,
+   "reach": 2,
+   "followers": 0,
+   "nearby": 0,
+   "club": 2,
+   "sent": false
+  },
+  "promoteUI": {
+   "url": "/app/pages/meet/index?id=arixswvsmpah00z4&tab=participants&lang=en",
+   "sheets": [],
+   "text": "Back\nFRI, 25 SEPT, 07:00 PM\n[probe] mop-up promote fdffax\nShare\nMore\nDetails\nParticipants\nMatches\nChat\nPayments\nAuto-approve\nORGANIZERS • 1\n[M\n[probe] mop-up a fdffax\nUnrated\nCONFIRMED • 1/8\nOptions\nSort: Last confirmed ▾\nShow: Tags, Level, Courts ▾\n[M\n[probe] mop-up a fdffax\nUnrated\nGet more players\nSend a notification to ask players to join your meet\nChoose your audience\nClub members\nNearby\nFollowers & nearby\nFilters\nAll selected\nChoose skill levels\n2.0\n2.5\n3.0\n3.5\n4.0\n4.5\n5.0+\nChoose genders\nFemale\nMale\nChoose age groups\nJunior\nAdult\nSenior\nThere are no players matching your filters to promote to.\nHome\nDiscover\nCommunity\nInbox\nSee more"
+  },
+  "listingInList": "ok",
+  "listingMeet": {
+   "type": "listing",
+   "lat": 22.2819,
+   "startAt": "2026-09-24T14:00:00.000Z",
+   "visibility": "public"
+  },
+  "selftestPill": {
+   "pillEndSeen": false
+  },
+  "schedule": "200 {\"id\":\"arixu860mpah00zo\",\"ownerUserId\":\"arixqqhpmpah00ws\",\"channelId\":\"arixqre2mpah00xf\",\"owner\":{\"userId\":\"arixqqhpmpah00ws\",\"name\":\"[probe] mop-up a fdffax\",\"username\":\"mufdffaxa\"},\"name\":\"[probe] m"
+ },
+ "cleanup": [
+  {
+   "schedule": "arixu860mpah00zo",
+   "s": 200
+  },
+  {
+   "meet": "arixqrk9mpah00xk",
+   "cancel": 200,
+   "del": 400
+  },
+  {
+   "meet": "arixsjozmpah00yr",
+   "cancel": 200,
+   "del": 400
+  },
+  {
+   "meet": "arixswvsmpah00z4",
+   "cancel": 200,
+   "del": 200
+  },
+  {
+   "meet": "arixt895mpah00zb",
+   "cancel": 200,
+   "del": 200
+  },
+  {
+   "club": "arixqre2mpah00xf",
+   "archived": 200
+  },
+  {
+   "acct": "a",
+   "deleted": 204
+  },
+  {
+   "acct": "b",
+   "deleted": 204
+  },
+  {
+   "acct": "c",
+   "deleted": 204
+  },
+  {
+   "acct": "f",
+   "deleted": 204
+  },
+  {
+   "acct": "e",
+   "deleted": 204
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": 18,
+  "open": []
+ }
+}
