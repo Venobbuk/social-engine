@@ -7,7 +7,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
-import type { UsersRepository } from '@/models/_.js';
+import type { UsersRepository, UserProfilesRepository } from '@/models/_.js';
+import bcrypt from 'bcryptjs';   // GRIPBAT-ACCOUNTS-V1: a native account confirms with its password
 import type { DataSource } from 'typeorm';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { scheduleDeletion } from '@/modules/account/deletion.js';   // ACCOUNT-GRACE-V1
@@ -42,6 +43,7 @@ export const meta = {
 	// SEC-ACCOUNT-DELETE-REAUTH-V1: rate-limit — a handful of attempts a minute is ample for a real deletion
 	limit: { duration: 60 * 1000, max: 5 },
 	errors: {
+		incorrectPassword: { message: 'That password is not right.', code: 'INCORRECT_PASSWORD', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f13' },   // GRIPBAT-ACCOUNTS-V1
 		reauthRequired: { message: 'A fresh sign-in is required to delete your account.', code: 'REAUTH_REQUIRED', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f10' },
 		reauthMismatch: { message: 'The re-authentication does not match this account.', code: 'REAUTH_MISMATCH', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f11' },
 		reauthReplayed: { message: 'This re-authentication has already been used.', code: 'REAUTH_REPLAYED', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f12' },
@@ -59,7 +61,12 @@ export const paramDef = {
 	type: 'object',
 	// SEC-ACCOUNT-DELETE-REAUTH-V1: `proof` is a purpose-bound hkpl re-auth JWT. Optional in the schema so today's app
 	// (which sends {}) keeps working; REQUIRED at run time only when ADAPTER_ACCOUNT_DELETE_REQUIRE_PROOF=1.
-	properties: { proof: { type: 'string', minLength: 20, maxLength: 8192, nullable: true } },
+	properties: {
+		proof: { type: 'string', minLength: 20, maxLength: 8192, nullable: true },
+		// GRIPBAT-ACCOUNTS-V1 (G15.15): a GripBat (native) account confirms its deletion with its own password; it then gets the
+		// same 7-day grace as a host-minted one (ACCOUNT-GRACE-V1) — i/delete-account would delete it at once, with no way back.
+		password: { type: 'string', minLength: 1, maxLength: 256 },
+	},
 	required: [],
 } as const;
 
@@ -72,6 +79,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private redisClient: Redis.Redis,
 		@Inject(DI.usersRepository)
 		private usersRepository: UsersRepository,
+
+		@Inject(DI.userProfilesRepository)
+		private userProfilesRepository: UserProfilesRepository,
 		@Inject(DI.db)
 		private db: DataSource,
 		private globalEventService: GlobalEventService,
@@ -80,12 +90,20 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		super(meta, paramDef, async (ps, me) => {
 			const user = await this.usersRepository.findOneByOrFail({ id: me.id });
 			if (user.isDeleted) return { deleted: true, scheduled: false, purgeAt: null };
-			if (!/^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username)) throw new Error('use i/delete-account');   // adapter/sso usernameFor(): <iss>_<12 hex>
+			// GRIPBAT-ACCOUNTS-V1: with a password, ANY local account (a native GripBat one) schedules its deletion here
+			let nativeHow: string | null = null;
+			if (typeof ps.password === 'string') {
+				const prof = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
+				if (!prof.password || !(await bcrypt.compare(ps.password, prof.password))) throw new ApiError(meta.errors.incorrectPassword);
+				nativeHow = 'account password';
+			} else if (!/^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username)) throw new Error('use i/delete-account');   // adapter/sso usernameFor(): <iss>_<12 hex>
 
 			// SEC-ACCOUNT-DELETE-REAUTH-V1: a purpose-bound, single-use, identity-matched re-auth proof — required only
 			// when the rollout switch is on; verified whenever one is sent.
 			let how = 'app credential (proof not required: ADAPTER_ACCOUNT_DELETE_REQUIRE_PROOF off)';
-			if (ps.proof) {
+			if (nativeHow) {
+				how = nativeHow;
+			} else if (ps.proof) {
 				let claims;
 				try {
 					claims = verifyJwt(ps.proof);
