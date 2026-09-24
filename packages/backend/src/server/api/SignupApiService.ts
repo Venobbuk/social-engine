@@ -19,6 +19,12 @@ import { FastifyReplyError } from '@/misc/fastify-reply-error.js';
 import { bindThis } from '@/decorators.js';
 import { L_CHARS, secureRndstr } from '@/misc/secure-rndstr.js';
 import { getIpHash } from '@/misc/get-ip-hash.js';
+
+/* PROBE-RL-EXEMPT-V1 (2026-09-24): every probe on the box reaches the engine from ONE address, so the per-IP sign-in /
+ * sign-up limits (10/hour) throttled every lane's proof. GB_RATE_LIMIT_EXEMPT_IPS (set on web-uat ONLY, compose.uat.yml)
+ * lists addresses exempt from these two limiters. request.ip is not client-settable here: trustProxy only trusts
+ * private ranges and takes the nearest untrusted hop (measured: a spoofed X-Forwarded-For stayed limited). Prod: unset. */
+const GB_RL_EXEMPT = new Set((process.env.GB_RATE_LIMIT_EXEMPT_IPS ?? '').split(',').map(x => x.trim()).filter(Boolean));
 import { PASSWORD_MIN, appLink, mailCopy, normalizeEmail, placeholderUsername, sandboxReveal, usernameProblem } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
 import { SigninService } from './SigninService.js';
 import { RateLimiterService } from './RateLimiterService.js';
@@ -125,7 +131,7 @@ export class SignupApiService {
 		 *  - password >= PASSWORD_MIN; the address is normalised (one address = one account, any letter case);
 		 *  - refusals carry a code (EMAIL_INVALID / EMAIL_TAKEN / PASSWORD_TOO_SHORT / USERNAME_* / REGISTRATION_CLOSED);
 		 *  - 10 sign-ups an hour per IP (Misskey had no limit on this route; RateLimiterService is the native limiter). */
-		if (process.env.NODE_ENV !== 'test') {
+		if (process.env.NODE_ENV !== 'test' && !GB_RL_EXEMPT.has(request.ip)) {
 			const rl = await this.rateLimiterService.limit({ key: 'gb-signup', duration: 60 * 60 * 1000, max: 10 }, getIpHash(request.ip));
 			if (rl != null) return this.refuse(reply, 429, 'RATE_LIMITED', 'Too many sign-ups from this network. Try again later.');
 		}

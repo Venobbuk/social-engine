@@ -18,6 +18,12 @@ import type {
 import type Logger from '@/logger.js';
 import type { Config } from '@/config.js';
 import { getIpHash } from '@/misc/get-ip-hash.js';
+
+/* PROBE-RL-EXEMPT-V1 (2026-09-24): every probe on the box reaches the engine from ONE address, so the per-IP sign-in /
+ * sign-up limits (10/hour) throttled every lane's proof. GB_RATE_LIMIT_EXEMPT_IPS (set on web-uat ONLY, compose.uat.yml)
+ * lists addresses exempt from these two limiters. request.ip is not client-settable here: trustProxy only trusts
+ * private ranges and takes the nearest untrusted hop (measured: a spoofed X-Forwarded-For stayed limited). Prod: unset. */
+const GB_RL_EXEMPT = new Set((process.env.GB_RATE_LIMIT_EXEMPT_IPS ?? '').split(',').map(x => x.trim()).filter(Boolean));
 import type { MiLocalUser } from '@/models/User.js';
 import { IdService } from '@/core/IdService.js';
 import { bindThis } from '@/decorators.js';
@@ -101,7 +107,7 @@ export class SigninApiService {
 			if (process.env.NODE_ENV === 'production' && (request.ip === '::1' || request.ip === '127.0.0.1')) {
 				this.logger.warn('Recieved signin request from localhost IP address for rate limiting in production environment. This is likely due to an improper trustProxy setting in the config file.');
 			}
-			const rateLimit = await this.rateLimiterService.limit({ key: 'signin', duration: 60 * 60 * 1000, max: 10, minInterval: 1000 }, getIpHash(request.ip));
+			const rateLimit = GB_RL_EXEMPT.has(request.ip) ? null : await this.rateLimiterService.limit({ key: 'signin', duration: 60 * 60 * 1000, max: 10, minInterval: 1000 }, getIpHash(request.ip));
 			if (rateLimit != null) {
 				reply.code(429);
 				return {

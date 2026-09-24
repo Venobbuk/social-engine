@@ -22,6 +22,7 @@ services:
       - ./.config-uat:/misskey/.config:ro
     environment:
       NODE_ENV: production
+      GB_RATE_LIMIT_EXEMPT_IPS: "47.243.226.46"   # PROBE-RL-EXEMPT-V1: the box's own public address (probes); web-uat ONLY, never prod
       DUPR_SUBMIT_SANDBOX: "1"   # UAT-DUPR-CAGE-V1: the UAT engine never calls hkpl's DUPR door (core/DuprSubmitService cageMode); web has no such env
       # GRIPBAT-ACCOUNTS-V1 (G15.15): mailed links open the UAT app; GB_SANDBOX_MAIL=1 (web-uat ONLY, like the DUPR cage) returns
       # the code for a reserved test address (.test / .invalid / example.*) so testers and probes finish sign-up with no inbox.
