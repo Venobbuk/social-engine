@@ -148,9 +148,19 @@ export class SigninApiService {
 		}
 
 		if (user.isSuspended) {
-			return error(403, {
-				id: 'e03a5f46-d309-4865-9b69-56282d94e1eb',
-			});
+			/* GRIPBAT-ACCOUNTS-V1 (E-auth-login.05, measured by account-rest 2026-09-24): a suspended account is refused WITH A
+			 * CODE the app words (Reclub: "This account has been blocked."), instead of a bare id — and only to someone who
+			 * holds its password: Misskey said "suspended" to anyone who typed the username, which made suspension an oracle.
+			 * No password yet (the flow's first step) → the ordinary next step; a wrong password → the ordinary refusal. */
+			if (password == null) {
+				reply.code(200);
+				return { finished: false, next: 'captcha' };
+			}
+			const suspendedProfile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
+			const known = typeof password === 'string' && suspendedProfile.password != null && await bcrypt.compare(password, suspendedProfile.password);
+			if (!known) return error(403, { id: '932c904e-9460-45b7-9ce6-7ed33be7eb2c' });
+			reply.code(403);
+			return { error: { id: 'e03a5f46-d309-4865-9b69-56282d94e1eb', code: 'ACCOUNT_SUSPENDED', message: 'This account has been blocked.' } };
 		}
 
 		const profile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
