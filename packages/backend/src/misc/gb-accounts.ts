@@ -105,6 +105,15 @@ export function usernameProblem(u: unknown, preserved: string[]): UsernameProble
 	return null;
 }
 
+/** SSO-ONE-TAP (G15.15-SSO): a handle made from the person's hkpl display NAME — never the email. Latin letters and digits
+ *  of the name joined by "_" (accents folded), 3–16 long; a name with too few of them (e.g. a Chinese name), or one the
+ *  username rules refuse (the brand, a machine prefix, a preserved word), falls back to "player". The caller adds a
+ *  numeric suffix while the handle is taken. */
+export function handleFromName(name: unknown, preserved: string[]): string {
+	const base = String(name ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase().slice(0, 16).replace(/_+$/, '');
+	return base.length >= 3 && usernameProblem(base, preserved) == null ? base : 'player';
+}
+
 // ------------------------------------------------------------------------------------------------------------- mail copy
 export type MailLang = 'en' | 'zh_Hant' | 'zh_Hans';
 export function mailLang(lang: unknown): MailLang {

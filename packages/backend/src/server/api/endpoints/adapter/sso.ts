@@ -42,8 +42,8 @@ import { readFileSync } from 'node:fs';
 import { Inject, Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import type { UsersRepository, AccessTokensRepository, RolesRepository, RoleAssignmentsRepository, RegistryItemsRepository, UserProfilesRepository, MiRole } from '@/models/_.js';
-import { SSO_HANDLE_KEY } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1
+import type { UsersRepository, AccessTokensRepository, RolesRepository, RoleAssignmentsRepository, RegistryItemsRepository, UserProfilesRepository, UsedUsernamesRepository, MiMeta, MiRole } from '@/models/_.js';
+import { SSO_HANDLE_KEY, handleFromName, isPlaceholderUsername, usernameProblem } from '@/misc/gb-accounts.js'; // GRIPBAT-ACCOUNTS-V1 + SSO-ONE-TAP
 import { RoleService } from '@/core/RoleService.js';
 import { GlobalEventService } from '@/core/GlobalEventService.js';
 import { isDuplicateKeyValueError } from '@/misc/is-duplicate-key-value-error.js';
@@ -135,7 +135,7 @@ function b64urlToBuf(s: string): Buffer {
 	return Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
 }
 
-type Claims = { iss: string; aud: string; sub: string; exp: number; iat?: number; jti?: string; row?: string; tenant?: string; name?: string | null; avatar?: string | null; role?: string | null; dupr_id?: string | null; dupr_rating?: number | null; home_club_id?: number | null; lang?: string; purpose?: string; email?: string | null; email_verified?: boolean };   // G15.15-SSO: email only when hkpl verified it
+type Claims = { iss: string; aud: string; sub: string; exp: number; iat?: number; jti?: string; row?: string; tenant?: string; name?: string | null; avatar?: string | null; role?: string | null; dupr_id?: string | null; dupr_rating?: number | null; home_club_id?: number | null; lang?: string; purpose?: string; email?: string | null; email_verified?: boolean; dupr_consented?: boolean };   // SSO-ONE-TAP: the DUPR link came through DUPR consent   // G15.15-SSO: email only when hkpl verified it
 
 // SEC-ACCOUNT-DELETE-REAUTH-V1: exported so adapter/account/delete can demand a FRESH hkpl-signed proof (same
 // verification: signature, audience, mandatory iat, ≤ 5-min TTL, mandatory jti) before it destroys an account.
@@ -199,6 +199,12 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 		@Inject(DI.userProfilesRepository)
 		private userProfilesRepository: UserProfilesRepository,
+
+		@Inject(DI.usedUsernamesRepository)
+		private usedUsernamesRepository: UsedUsernamesRepository,
+
+		@Inject(DI.meta)
+		private serverMeta: MiMeta,
 
 		@Inject(DI.rolesRepository)
 		private rolesRepository: RolesRepository,
@@ -299,6 +305,10 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (seedName && !hasOwnName(existing.name)) {
 					await this.usersRepository.update(existing.id, { name: seedName });
 				}
+				// SSO-ONE-TAP: an account still on a machine handle (made by this seam before, or a sign-up placeholder) gets its handle
+				// from the hkpl name now — the person is never stopped on a username step (they can change it in Settings).
+				if (isPlaceholderUsername(existing.username)) existing = await this.giveHandle(existing, claims.name ?? null, username);
+				await this.skipOnboarding(existing.id);
 				const ratingSynced = await this.syncLevel(existing.id, claims);
 				const staff = await this.syncStaffRole(existing.id, claims);
 				const token = await this.issueCredential(existing.id, claims);
@@ -323,10 +333,14 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const taken = await this.userProfilesRepository.createQueryBuilder('p').where('p.emailVerified = true').andWhere('LOWER(p.email) = :e', { e: ssoEmail }).getCount();
 				if (taken === 0) await this.userProfilesRepository.update({ userId: account.id }, { email: ssoEmail, emailVerified: true, emailVerifyCode: null, emailNotificationTypes: [] });
 			}
+			// SSO-ONE-TAP: one tap → Home. The handle comes from the hkpl name (the seam handle stays the lookup alias), and the
+			// onboarding questions are skipped (hkpl already knows the person; they can answer them later in Settings).
+			const named = await this.giveHandle(account, claims.name ?? null, username);
+			await this.skipOnboarding(account.id);
 			const ratingSynced = await this.syncLevel(account.id, claims);
 			const staff = await this.syncStaffRole(account.id, claims);
 			const token = await this.issueCredential(account.id, claims);
-			return { token, userId: account.id, username: account.username, created: true, lang, ratingSynced, staff, linked: false, ...(ps.native ? { i: await this.nativeToken(account.id) } : {}) };
+			return { token, userId: account.id, username: named.username, created: true, lang, ratingSynced, staff, linked: false, ...(ps.native ? { i: await this.nativeToken(account.id) } : {}) };
 		});
 
 		this.logger = this.loggerService.getLogger('adapter:sso');
@@ -334,6 +348,31 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 
 	// S4 — a per-login, named, first-party-scoped, revocable credential instead of the account master token.
 	// Matched by AuthenticateService on `token` (the miauth path); `session` records which handoff issued it.
+	/** SSO-ONE-TAP: a handle from the hkpl name (never the email), with a numeric suffix while taken; the seam handle is kept
+	 *  as the lookup alias. Returns the account as it now is. */
+	private async giveHandle<U extends { id: string; username: string }>(user: U, name: string | null, seamHandle: string): Promise<U> {
+		const base = handleFromName(name, this.serverMeta.preservedUsernames);
+		let pick: string | null = null;
+		for (let n = 0; n < 60 && !pick; n++) {
+			const cand = n === 0 && base !== 'player' ? base : (base.slice(0, 20 - String(n + 1).length) + String(n === 0 ? 1 : n + 1));
+			if (usernameProblem(cand, this.serverMeta.preservedUsernames)) continue;
+			const taken = await this.usersRepository.exists({ where: { usernameLower: cand.toLowerCase(), host: null as never } }) || await this.usedUsernamesRepository.exists({ where: { username: cand.toLowerCase() } });
+			if (!taken) pick = cand;
+		}
+		if (!pick) return user;   // leave the machine handle; the app still lets the person choose one
+		const has = await this.registryItemsRepository.exists({ where: { userId: user.id, key: SSO_HANDLE_KEY, domain: null as never } });
+		if (!has && /^hkpl_[0-9a-f]{12}$/.test(seamHandle)) await this.registryItemsRepository.insert({ id: this.idService.gen(), updatedAt: new Date(), userId: user.id, key: SSO_HANDLE_KEY, scope: ['gripbat'], domain: null, value: seamHandle as never });
+		try { await this.usersRepository.update(user.id, { username: pick, usernameLower: pick.toLowerCase() }); } catch (e) { return user; }
+		this.globalEventService.publishInternalEvent('localUserUpdated', { id: user.id });
+		return { ...user, username: pick };
+	}
+
+	/** SSO-ONE-TAP: hkpl already knows this person — the onboarding questions are not put in front of them. */
+	private async skipOnboarding(userId: string): Promise<void> {
+		const lv = await this.meetLevelService.getLevel(userId, 'pickleball').catch(() => null);
+		if (lv?.onboardedAt == null) await this.meetLevelService.upsertLevel(userId, 'pickleball', { onboardedAt: new Date() }).catch(() => undefined);
+	}
+
 	/** G15.15-SSO: the account's native token (what a native GripBat sign-in answers with). */
 	private async nativeToken(userId: string): Promise<string> {
 		const u = await this.usersRepository.findOneByOrFail({ id: userId });
@@ -405,10 +444,19 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	private async syncLevel(userId: string, claims: Claims): Promise<boolean> {
 		if (claims.dupr_rating == null && claims.dupr_id == null) return true; // nothing to sync is not a failure
 		try {
+			/* SSO-ONE-TAP (operator 2026-09-24): a member who connected DUPR through hkpl arrives ALREADY LINKED — no second
+			 * approval. A link hkpl made through DUPR's own consent (claims.dupr_consented) is recorded as a verified link
+			 * (source 'dupr-partner', the same as gb/dupr/connect); any other hkpl link keeps source 'hkpl'. One DUPR player, one
+			 * GripBat account: an id another account already holds is not copied, and an account's own different link is kept. */
+			const want = claims.dupr_id != null ? String(claims.dupr_id).trim().toUpperCase() : null;
+			const mine = await this.meetLevelService.getLevel(userId, 'pickleball');
+			const held = want ? await this.userProfilesRepository.manager.query(`SELECT 1 FROM "meet_player_level" WHERE "sport" = 'pickleball' AND UPPER("duprId") = $1 AND "userId" <> $2 LIMIT 1`, [want, userId]) as unknown[] : [];
+			const takeId = want != null && held.length === 0 && (mine?.duprId == null || String(mine.duprId).toUpperCase() === want);
+			if (want != null && !takeId) { this.logger.info(`DUPR id from ${claims.iss} not copied for user ${userId} (${held.length ? 'held by another account' : 'the account has its own link'})`); return true; }
 			await this.meetLevelService.upsertLevel(userId, 'pickleball', {
 				...(claims.dupr_rating != null ? { duprDoubles: Number(claims.dupr_rating) } : {}),
-				...(claims.dupr_id != null ? { duprId: String(claims.dupr_id) } : {}),
-				source: claims.iss,
+				...(takeId ? { duprId: want! } : {}),
+				source: claims.dupr_consented === true ? 'dupr-partner' : claims.iss,
 			});
 			return true;
 		} catch (e) {
