@@ -205,6 +205,12 @@ meet, run a club, book a lesson, post lessons as a coach, enter a competition, s
 kudos, message a player, pay & mark paid, sign up / sign in, …) measured side by side on the 6 axes. The demo's
 "better than Reclub" claims come ONLY from this table.
 
+**SCOPE-FREEZE (operator 2026-09-24: "close everything first rather than adding more and more features").** Until the
+tester gate passes, NO new features: only (1) close every open gap and every `worse`-than-Reclub row at L6, (2) the top-20
+task benchmark re-run, (3) the demo.html / sub-pages / screenshots / video rewrite, (4) the stranger walk. Every new idea
+goes on the AFTER-GATE list (`/root/gen/l6-scope/AFTER_GATE.md`), not into the build. AFTER-GATE, in order: Airwallex
+marketplace payments (G15.6-AIRWALLEX); chat GIFs + Translate (operator keys); then the rest of the list.
+
 ## G15 — Product decisions (operator-signed; do not re-litigate)
 These are settled. A change that contradicts one is not finished, however well it works.
 
@@ -252,7 +258,7 @@ user-friendly, or closer to what the user needs." So when a product choice comes
 5. **Private means private.** A private club/meet — its existence, name, members, counts, schedule, location — is
    readable only by owner, admins, members, and invite-token holders (`ClubService.mayReadClub`). Every sibling door
    that reads a club goes through that one guard.
-6. *(G15.6-AIRWALLEX, operator 2026-09-24: "the payment is coming — local Hong Kong payment methods, Airwallex". An OPTIONAL "Pay now" route through Airwallex — local HK methods (FPS, PayMe, AlipayHK, WeChat Pay HK, Octopus, cards, as enabled on the operator's Airwallex account) — beside the manual method below, which stays. Hosts/coaches choose. Built and proven against Airwallex SANDBOX only; no live money path until the operator supplies live keys and arms it (contract-kit rule H). Payment credentials are handled by the operator, never typed by an agent. Not started yet — scheduled after the gap-closing round.)* **No payment gateway in v1.** Payment = the host/coach's own payment info shown to members, the player marks paid
+6. *(G15.6-AIRWALLEX, operator 2026-09-24: "the payment is coming — local Hong Kong payment methods, Airwallex". An OPTIONAL "Pay now" route through Airwallex — local HK methods (FPS, PayMe, AlipayHK, WeChat Pay HK, Octopus, cards, as enabled on the operator's Airwallex account) — beside the manual method below, which stays. Hosts/coaches choose. Built and proven against Airwallex SANDBOX only; no live money path until the operator supplies live keys and arms it (contract-kit rule H). Payment credentials are handled by the operator, never typed by an agent. Uses Airwallex's MARKETPLACE (platform) API: each host/coach a connected account, the player pays through GripBat, funds route to the host with any platform fee split off. Not started yet — scheduled after the tester gate (SCOPE-FREEZE).)* **No payment gateway in v1.** Payment = the host/coach's own payment info shown to members, the player marks paid
    and uploads proof, the host confirms. Collecting money on behalf (a gateway) is an optional convenience later,
    never compulsory.
 7. **Coaching:** any club owner/admin may post lessons — GripBat never verifies or judges credentials; a coach
