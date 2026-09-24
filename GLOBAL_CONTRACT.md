@@ -266,8 +266,8 @@ user-friendly, or closer to what the user needs." So when a product choice comes
     keep their rows and get native logins; nobody uses prod yet, so no public migration is owed. A "link your league
     account" button may come later as an OPTIONAL link — never a requirement. Usernames are chosen by the user and never
     derived from an email address.
-    **Addendum (operator 2026-09-24, G15.15-SSO):** two separate account lists, joined by simple SSO — a league member
-    signs in to GripBat with "Continue with your HKPL account" and never signs up again (the engine's `adapter/sso` door
+    **Addendum (operator 2026-09-24, G15.15-SSO):** two separate account lists, joined by simple SSO — a member of ANY of
+    our hkpl tenants (the league and every other tenant) signs in to GripBat with "Continue with your HKPL account" and never signs up again (the engine's `adapter/sso` door
     creates or links their GripBat account; it stays ON permanently as a sign-in option, next to native sign-up). Staff
     pages (admin, reports) keep using the SAME hkpl admin accounts — the same people run both.
 
