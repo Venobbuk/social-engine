@@ -41,12 +41,16 @@ function findings(c) {
   // 5C
   const k = c.c5;
   if (k) {
+    for (const x of k.toastBlocks || []) add('5B', 'toast-catches-taps|' + lastSeg(x.el), 'S2', { el: x.el, label: x.text, detail: x.caught + '/5 points under the toast land in it (' + x.w + 'x' + x.h + ')' });
+    for (const x of k.switchWide || []) add('5C', 'switch-wide|' + lastSeg(x.el), 'S3', { el: x.el, detail: x.w + 'x' + x.h + ' (a switch is at most 64 px wide)' });
     for (const t of k.targets || []) add('5C', 'target-' + t.rule + '|' + norm(t.control), t.rule === 'lt24' ? 'S3' : 'S4', { el: t.path, label: t.label, detail: t.w + 'x' + t.h + (t.why ? ' ' + t.why : '') });
     if (k.hscroll && k.hscroll.scrollable) add('5C', 'hscroll|' + norm(k.hscroll.widest && lastSeg(k.hscroll.widest.el)), c.w <= 320 ? 'S2' : 'S3', { detail: JSON.stringify(k.hscroll) });
     if (k.hscroll && k.hscroll.clippedOverflow && k.hscroll.widest) add('5C', 'overflow-clipped|' + lastSeg(k.hscroll.widest.el), 'S3', { el: k.hscroll.widest.el, detail: 'content ' + (k.hscroll.page || k.hscroll.doc) + 'px wider than the page, cut off (page overflow-x ' + k.hscroll.pageOverflowX + ')' });
     for (const x of k.clipped || []) add('5C', 'text-clipped|' + lastSeg(x.el), 'S3', { el: x.el, label: x.text, detail: 'sw ' + x.sw + ' > cw ' + x.cw + ' / sh ' + x.sh + ' > ch ' + x.ch });
     for (const x of k.ellipsis || []) if (x.named || NAMEISH.test(x.el)) add('5C', 'name-ellipsis|' + lastSeg(x.el), 'S3', { el: x.el, label: x.text });
-    for (const x of k.clamp || []) if (x.named || NAMEISH.test(x.el)) add('5C', 'name-clamped|' + lastSeg(x.el), 'S4', { el: x.el, label: x.text, detail: 'line-clamp ' + x.lines });
+    // standard 5H (UAT-LAYOUT 2026-09-25): a name may take 2 lines, then an ellipsis WITH THE FULL NAME AVAILABLE — a clamp at
+    // <= 2 lines whose element (or the control around it) carries the whole name as its title is the rule, not a defect
+    for (const x of k.clamp || []) if ((x.named || NAMEISH.test(x.el)) && !(+x.lines <= 2 && x.full === true)) add('5C', 'name-clamped|' + lastSeg(x.el), 'S4', { el: x.el, label: x.text, detail: 'line-clamp ' + x.lines + (x.full ? '' : ', full name not available') });
     // one family per pair of COMPONENTS on a page (class prefix ib-*, pg-*), not per pair of leaf classes (law 4)
     for (const x of k.overlapText || []) { const pa = prefix(x.a), pb = prefix(x.b); add('5C', 'text-overlap|' + [pa, pb].sort().join('+') + '|' + String(c.page || '').replace(/@.*/, ''), 'S3', { el: x.a + ' | ' + lastSeg(x.b), label: x.at + ' / ' + x.bt, detail: x.area + 'px2' }); }
     const clampEls = new Set((k.clamp || []).map((x) => x.el));   // a clamped name is graded as name-clamped, not as a 3-line wrap

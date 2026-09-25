@@ -30,6 +30,19 @@ const CASES = [
   ['5C-text-clipped', '5C', /^5C\|text-clipped/, { plantClipped: true }, {}],
   ['5C-name-ellipsis', '5C', /^5C\|name-ellipsis/, { plantEllipsis: true }, {}],
   ['5C-text-overlap', '5C', /^5C\|text-overlap/, { plantOverlapText: true }, {}],
+  // UAT-LAYOUT 2026-09-25: text hidden by a clamp / ellipsis is not drawn, so it overlaps nothing (a real overlap still fires);
+  // a 2-line clamped name WITH its full name as a title is the 5H rule (no title, or a 3-line clamp, still fires)
+  ['5C-text-overlap-vs-clamp', '5C', /^5C\|text-overlap/, { clampRows: true, plantOverlapText: true }, { clampRows: true }],
+  ['5C-name-clamped-no-title', '5C', /^5C\|name-clamped/, { clampRows: true, plantClampNoTitle: true }, { clampRows: true }],
+  ['5C-name-clamped-3-lines', '5C', /^5C\|name-clamped/, { clampRows: true, plantClamp3: true }, { clampRows: true }],
+  // a toast (Taro's DOM) over a control: the tap must reach the control
+  ['5B-toast-catches-taps', '5B', /^5B\|toast-catches-taps/, { toast: true, plantToastCatches: true }, { toast: true }],
+  // a switch stretched to its row's width is a finding; a 46 px switch in the same row is not
+  ['5C-switch-wide', '5C', /^5C\|switch-wide/, { switchRow: true, plantSwitchWide: true }, { switchRow: true }],
+  // a visually-hidden screen-reader label is clipped by design and never a text-clipped finding; a real clip still fires
+  ['5C-text-clipped-vs-sr-only', '5C', /^5C\|text-clipped/, { srOnly: true, plantClipped: true }, { srOnly: true }],
+  // a 2-line heading with a block child (line-height < 1) is 2 lines; a 3-line name still fires
+  ['5C-name-wraps-vs-heading', '5C', /^5C\|name-wraps-3plus/, { clampRows: true, plantNameWrap: true }, { clampRows: true }],
   ['5C-name-wraps-3plus', '5C', /^5C\|name-wraps-3plus/, { plantNameWrap: true }, {}],
   ['5C-sticky-stack', '5C', /^5C\|sticky-stack/, { plantSticky2: true }, {}],
   ['5C-inner-scrollbar', '5C', /^5C\|inner-scrollbar/, { plantScrollbar: true }, {}, 1280],
@@ -83,6 +96,18 @@ async function livePlant(P) {
   };
 }
 
+async function liveToast(P) {
+  // the real app at 390: Taro's toast DOM injected over the page. The APP's css must make it tap-through (clean); the same toast
+  // with pointer-events forced back on must be caught (plant) — so a pass cannot come from an instrument that sees nothing
+  await D.viewport(P, 390, 844);
+  await D.goto(P, BASE + '/app/pages/community/index?lang=en');
+  await M.settle(P); await M.inject(P);
+  const put = (force) => D.ev(P, (f) => { const o = document.getElementById('gbuat-toast'); if (o) o.remove(); const d = document.createElement('div'); d.id = 'gbuat-toast'; d.className = 'taro__toast'; d.innerHTML = '<div style="position:fixed;z-index:1000;top:0;right:0;left:0;bottom:0;display:none"></div><div style="z-index:5000;display:flex;flex-direction:column;justify-content:center;position:fixed;top:50%;left:50%;min-width:120px;min-height:120px;padding:15px;transform:translate(-50%,-50%);background:rgba(17,17,17,.7);color:#fff' + (f ? ';pointer-events:auto' : '') + '"><p style="' + (f ? 'pointer-events:auto' : '') + '">Matches generated</p></div>'; document.body.appendChild(d); return window.__gbUat.toastBlocks(); }, force);
+  const clean = await put(false), plant = await put(true);
+  await D.ev(P, () => { const o = document.getElementById('gbuat-toast'); if (o) o.remove(); });
+  return { id: '5B-live-toast (community/index, 390, the app css)', plantFired: plant.length > 0, cleanPassed: clean.length === 0, clean, plant };
+}
+
 function driftSelfTest() {
   const mk = (page, sig) => ({ page, cls: 'tab-root', w: 390, sig });
   const clean = G.driftFindings([mk('a', 'lead:none|title:center'), mk('b', 'lead:none|title:center'), mk('c', 'lead:none|title:center')]);
@@ -123,6 +148,7 @@ function driftSelfTest() {
     const planted = src.replace('ALLOW_LATIN = /\\b(GripBat', 'ALLOW_LATIN = /b(GripBat').replace('STOP = /\\b(the', 'STOP = /\b(the');
     const g = { id: 'GUARD-inpage-regex-integrity', plantFired: !ok(planted), cleanPassed: ok(src) }; g.verdict = g.plantFired && g.cleanPassed ? 'pass' : 'fail'; results.push(g); console.log(g.verdict.toUpperCase() + ' ' + g.id); }
   if (!ONLYC) { const d = driftSelfTest(); d.verdict = d.plantFired && d.cleanPassed ? 'pass' : 'fail'; results.push(d); console.log(d.verdict.toUpperCase() + ' ' + d.id); }
+  if (!ONLYC || ONLYC.test('5B-live-toast')) try { const lt = await liveToast(P); lt.verdict = lt.plantFired && lt.cleanPassed ? 'pass' : 'fail'; results.push(lt); console.log(lt.verdict.toUpperCase() + ' ' + lt.id + ' ' + JSON.stringify(lt)); } catch (e) { results.push({ id: '5B-live-toast', verdict: 'no_verdict', error: String(e.message).slice(0, 200) }); }
   if (!ONLYC) try { const lp = await livePlant(P); lp.verdict = lp.plantFired && lp.cleanPassed ? 'pass' : 'fail'; results.push(lp); console.log(lp.verdict.toUpperCase() + ' ' + lp.id + ' ' + JSON.stringify(lp)); } catch (e) { results.push({ id: '5B-live-plant', verdict: 'no_verdict', error: String(e.message).slice(0, 200) }); }
   await D.end(E);
   const pass = results.filter((r) => r.verdict === 'pass').length, fail = results.filter((r) => r.verdict === 'fail').length, nv = results.filter((r) => r.verdict === 'no_verdict').length;

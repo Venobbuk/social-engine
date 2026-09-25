@@ -168,8 +168,15 @@
   }
   function lineCount (el) {
     var cs = styleOf(el), lh = parseFloat(cs.lineHeight); if (!(lh > 0)) lh = parseFloat(cs.fontSize) * 1.25;
-    var rects = null; try { var rg = document.createRange(); rg.selectNodeContents(el); rects = rg.getClientRects(); } catch (e) { rects = null; }
-    if (rects && rects.length) { var ys = {}; for (var i = 0; i < rects.length; i++) if (rects[i].width > 1) ys[Math.round(rects[i].top / 4)] = 1; return Object.keys(ys).length; }
+    // TEXT rects only, grouped by their vertical centre (UAT-LAYOUT 2026-09-25): a range over the whole element also returns
+    // each child element's own box, whose top differs from its text's top when line-height < 1 — the signin hero
+    // "Hong Kong / Pickleball League" (2 lines, line-height 0.95) counted 3
+    var cs2 = [], tw = null; try { tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null); } catch (e) { tw = null; }
+    for (var tn = tw && tw.nextNode(); tn; tn = tw.nextNode()) {
+      if (!/\S/.test(tn.nodeValue)) continue;
+      try { var rg = document.createRange(); rg.selectNodeContents(tn); var rs = rg.getClientRects(); for (var i = 0; i < rs.length; i++) if (rs[i].width > 1) cs2.push(rs[i].top + rs[i].height / 2); } catch (e) { /* detached */ }
+    }
+    if (cs2.length) { cs2.sort(function (a, b) { return a - b; }); var n = 1, tol = Math.max(4, lh * 0.5); for (var j = 1; j < cs2.length; j++) if (cs2[j] - cs2[j - 1] > tol) n++; return n; }
     return Math.round(el.getBoundingClientRect().height / lh);
   }
   function hiddenScrollbar (el) {
@@ -197,7 +204,7 @@
   }
   function c5 () {
     var vw = innerWidth, vh = innerHeight, F = frame();
-    var out = { vw: vw, frame: F, targets: [], hscroll: null, clipped: [], ellipsis: [], clamp: [], overlapText: [], nameWrap: [], stickyStack: [], innerScrollbars: [], hscrollers: [], scrollbarCap: scrollbarCapability() };
+    var out = { vw: vw, frame: F, targets: [], hscroll: null, clipped: [], ellipsis: [], clamp: [], overlapText: [], nameWrap: [], stickyStack: [], innerScrollbars: [], hscrollers: [], switchWide: [], toastBlocks: toastBlocks(), scrollbarCap: scrollbarCapability() };
     // targets (SC 2.5.8 + HIG 44 for primary / repeated)
     var ctl = controls(), sig = {};
     for (var i = 0; i < ctl.length; i++) { var s = desc(ctl[i]); sig[s] = (sig[s] || 0) + 1; }
@@ -218,6 +225,10 @@
         if (clash) out.targets.push({ rule: 'lt24', control: desc(el), path: path(el), label: label(el), w: Math.round(r.width), h: Math.round(r.height) });
       } else if ((primary || repeated) && mn < 44) out.targets.push({ rule: 'lt44', control: desc(el), path: path(el), label: label(el), w: Math.round(r.width), h: Math.round(r.height), why: primary ? 'primary' : 'repeated x' + sig[desc(el)] });
     }
+    // a switch is a switch-sized control (UAT-LAYOUT 2026-09-25, GRADE-S6): a kit Switch stretched by its row read as a full-width
+    // progress bar with the knob at one end. Wider than 64 px = not a switch any more (NutUI's track is 46 px).
+    var sws = document.querySelectorAll('[role=switch], .nut-switch, taro-switch-core');
+    for (var sw = 0; sw < sws.length; sw++) { if (!visible(sws[sw])) continue; var swr = sws[sw].getBoundingClientRect(); if (swr.width > 64) out.switchWide.push({ el: path(sws[sw]), w: Math.round(swr.width), h: Math.round(swr.height) }); }
     // reflow: sideways scroll of the document or the page's own scroller
     var se = document.scrollingElement || document.documentElement;
     var pr = pageRoot(), pageOver = 0, pox = '', body = null;
@@ -242,15 +253,17 @@
     var leaves = textLeaves(), boxes = [];
     for (var t = 0; t < leaves.length; t++) {
       var L = leaves[t], ls = styleOf(L), txt = (L.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+      if (srOnly(L, ls)) continue;   // UAT-LAYOUT 2026-09-25 (orchestrator): the back button's 返回 is a screen-reader label, clipped on purpose
       var overX = L.scrollWidth > L.clientWidth + 1, overY = L.scrollHeight > L.clientHeight + 2;
       var clipX = ls.overflowX !== 'visible' || ls.overflow === 'hidden', clipY = ls.overflowY !== 'visible';
       var named = NAMEY.test(cls(L)) || NAMEY.test(cls(L.parentElement || L));
-      if (ls.webkitLineClamp && ls.webkitLineClamp !== 'none' && overY) out.clamp.push({ el: path(L), text: txt, named: named, lines: ls.webkitLineClamp });
+      if (ls.webkitLineClamp && ls.webkitLineClamp !== 'none' && overY) out.clamp.push({ el: path(L), text: txt, named: named, lines: ls.webkitLineClamp, full: fullNameAvailable(L) });
       else if (ls.textOverflow === 'ellipsis' && overX) out.ellipsis.push({ el: path(L), text: txt, named: named });
       else if ((overX && clipX && L.clientWidth > 0) || (overY && clipY && L.clientHeight > 0 && ls.overflowY === 'hidden')) out.clipped.push({ el: path(L), text: txt, sw: L.scrollWidth, cw: L.clientWidth, sh: L.scrollHeight, ch: L.clientHeight });
       if (named) { var lc = lineCount(L); if (lc >= 3) out.nameWrap.push({ el: path(L), text: txt, lines: lc, w: Math.round(L.getBoundingClientRect().width) }); }
       var br = null; try { var rg = document.createRange(); rg.selectNodeContents(L); br = rg.getBoundingClientRect(); } catch (e) { br = L.getBoundingClientRect(); }
-      if (br.width > 0 && br.height > 0) boxes.push({ el: L, r: br, layer: layerOf(L), txt: txt });
+      br = drawnBox(L, br);   // UAT-LAYOUT 2026-09-25: only the part of the text that is DRAWN can overlap anything
+      if (br && br.width > 0 && br.height > 0) boxes.push({ el: L, r: br, layer: layerOf(L), txt: txt });
     }
     for (var p1 = 0; p1 < boxes.length; p1++) for (var p2 = p1 + 1; p2 < boxes.length; p2++) {
       var A = boxes[p1], B = boxes[p2]; if (A.layer !== B.layer) continue;
@@ -291,6 +304,50 @@
       }
     }
     return out;
+  }
+  // A Range's rect covers ALL the text, also the lines a line-clamp / ellipsis / overflow box hides: a clamped name's hidden
+  // 3rd line "overlapped" the sub line under it, and an ellipsised line "overlapped" the next card (UAT-LAYOUT 2026-09-25,
+  // meets / credits / community / reports: nothing drawn on top of anything). Clip the text box by every box that clips it
+  // (the leaf itself included) up to the page; null when nothing of it is drawn.
+  // 5B TOASTS ARE TAP-THROUGH (UAT-LAYOUT 2026-09-25, BENCH-C T04: the 'matches generated' toast ate the score keypad's taps).
+  // A showing toast without an action of its own must let a finger reach what is under it: elementFromPoint at the toast's
+  // centre (and its 4 inner quarter points) must not land in the toast. Taro's body is .taro__toast's LAST child (its first is the
+  // mask, drawn only when a caller asked showToast/showLoading({ mask: true }) — a declared block, not graded); NutUI's .nut-toast.
+  function toastBlocks () {
+    var out = [], ts = document.querySelectorAll('.taro__toast > div:last-child, .nut-toast-inner, .nut-toast-content');
+    for (var i = 0; i < ts.length; i++) {
+      var t = ts[i]; if (!visible(t)) continue; if (t.querySelector('button, [role=button], a[href], .is-tap')) continue;
+      var r = t.getBoundingClientRect(), pts = [[0.5, 0.5], [0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]], caught = 0;
+      for (var k = 0; k < pts.length; k++) { var h = document.elementFromPoint(r.left + r.width * pts[k][0], r.top + r.height * pts[k][1]); if (h && h.closest && h.closest('.taro__toast, .nut-toast')) caught++; }
+      if (caught) out.push({ el: path(t), text: (t.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 40), caught: caught, w: Math.round(r.width), h: Math.round(r.height) });
+    }
+    return out;
+  }
+  // a visually-hidden label (the kit's .sr-only, the usual 1px clip patterns): text for assistive tech, clipped by design
+  function srOnly (el, cs) {
+    if (/(^|\s)(sr-only|visually-hidden|visuallyhidden|screen-reader-text)(\s|$)/.test(cls(el))) return true;
+    var r = el.getBoundingClientRect(); if (r.width <= 1 || r.height <= 1) return true;
+    return /rect\(\s*0(px)?[\s,]+0(px)?[\s,]+0(px)?[\s,]+0(px)?\s*\)/.test(cs.clip || '') || /inset\(\s*50%\s*\)/.test(cs.clipPath || '');
+  }
+  function drawnBox (el, r) {
+    var L = r.left, T = r.top, Rr = r.right, B = r.bottom;
+    for (var n = el; n && n.nodeType === 1 && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+      var cs = styleOf(n), cx = cs.overflowX !== 'visible', cy = cs.overflowY !== 'visible';
+      if (cx || cy) { var q = n.getBoundingClientRect(); if (cx) { L = Math.max(L, q.left); Rr = Math.min(Rr, q.right); } if (cy) { T = Math.max(T, q.top); B = Math.min(B, q.bottom); } }
+      if (cs.position === 'fixed') break;
+    }
+    if (Rr - L <= 0 || B - T <= 0) return null;
+    return { left: L, top: T, right: Rr, bottom: B, width: Rr - L, height: B - T };
+  }
+  // standard 5H: a name may wrap to 2 lines, then ellipsis WITH THE FULL NAME AVAILABLE. The instrument can see a title
+  // (the leaf's own, or the control's around it) that carries the whole text; a long-press or a detail page it cannot see.
+  function fullNameAvailable (el) {
+    var want = (el.textContent || '').replace(/\s+/g, ' ').trim(); if (!want) return false;
+    for (var n = el, k = 0; n && n.nodeType === 1 && k < 4; n = n.parentElement, k++) {
+      var t = (n.getAttribute('title') || '').replace(/\s+/g, ' ').trim();
+      if (t && t.indexOf(want) >= 0) return true;
+    }
+    return false;
   }
   function layerOf (el) { for (var n = el; n && n !== document.body; n = n.parentElement) { var p = styleOf(n).position; if (p === 'fixed' || p === 'sticky') return desc(n) + '@' + Math.round(n.getBoundingClientRect().top); } return 'flow'; }
 
@@ -513,5 +570,5 @@
     return { loading: loading(), app: !!document.querySelector('.sh-app, .sh-desktop, .sh-wechat'), appMode: !!document.querySelector('.sh-app'), page: !!document.querySelector('.taro_page_show'), textLen: txt.replace(/\s+/g, '').length, root: desc(root), controls: controls().length, title: document.title, url: location.pathname + location.search, htmlLang: document.documentElement.lang };
   }
 
-  window.__gbUat = { v: 3, controls: controlsList, hitScan: hitScan, modalState: modalState, scrollAll: scrollAll, c5: c5, h5: h5, shell: shell, focusInfo: focusInfo, focusables: focusables, closers: closers, loading: loading, ready: ready, scrollbarCapability: scrollbarCapability };
+  window.__gbUat = { v: 3, controls: controlsList, hitScan: hitScan, modalState: modalState, scrollAll: scrollAll, c5: c5, h5: h5, shell: shell, focusInfo: focusInfo, focusables: focusables, closers: closers, loading: loading, ready: ready, scrollbarCapability: scrollbarCapability, toastBlocks: toastBlocks };
 })();
