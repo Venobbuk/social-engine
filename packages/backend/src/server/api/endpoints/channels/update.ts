@@ -112,16 +112,19 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				banner = null;
 			}
 
-			await this.channelsRepository.update(channel.id, {
+			// CLUB-COVER-NULL-V1 (lane G2-HOSTS, 2026-09-26): `bannerId: null` removes the cover. Stock Misskey spread
+			// `banner ? {bannerId} : {}`, so null was never written, and with no other field the empty UPDATE threw → 500.
+			const updates = {
 				...(ps.name !== undefined ? { name: ps.name } : {}),
 				...(ps.description !== undefined ? { description: ps.description } : {}),
 				...(ps.pinnedNoteIds !== undefined ? { pinnedNoteIds: ps.pinnedNoteIds } : {}),
 				...(ps.color !== undefined ? { color: ps.color } : {}),
 				...(typeof ps.isArchived === 'boolean' ? { isArchived: ps.isArchived } : {}),
-				...(banner ? { bannerId: banner.id } : {}),
+				...(banner !== undefined ? { bannerId: banner ? banner.id : null } : {}),
 				...(typeof ps.isSensitive === 'boolean' ? { isSensitive: ps.isSensitive } : {}),
 				...(typeof ps.allowRenoteToExternal === 'boolean' ? { allowRenoteToExternal: ps.allowRenoteToExternal } : {}),
-			});
+			};
+			if (Object.keys(updates).length > 0) await this.channelsRepository.update(channel.id, updates);
 
 			return await this.channelEntityService.pack(channel.id, me);
 		});
