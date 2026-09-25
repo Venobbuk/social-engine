@@ -1,0 +1,149 @@
+{
+ "id": "uat-layout",
+ "at": "2026-09-25T19:59:50.776Z",
+ "label": "after",
+ "condition_fired": true,
+ "verdict": "fail",
+ "counts": {
+  "cells": 1167,
+  "graded": 1165,
+  "no_verdict": 2,
+  "byEngine": {
+   "chromium": {
+    "cells": 1104,
+    "graded": 1102,
+    "noVerdict": 2
+   },
+   "webkit": {
+    "cells": 63,
+    "graded": 63,
+    "noVerdict": 0
+   }
+  },
+  "laneFamiliesWithFindings": 2,
+  "laneCells": 6
+ },
+ "builds": [
+  "chromium:18b06b9f",
+  "chromium:8843ec9c",
+  "chromium:fa52b3ec",
+  "chromium:e5e430e8",
+  "chromium:f0b91b39",
+  "chromium:6406401f",
+  "webkit:18b06b9f"
+ ],
+ "evidence": [
+  {
+   "family": "5C|sticky-stack|taro-view-core.wv-tabbar",
+   "cells": 771,
+   "chromium": 717,
+   "webkit": 54,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|home :: taro-view-core.wv-tabbar ::  :: z 60 / 20, overlap 64px (the floater-clearing backdrop band under the tab bar, by design in Shell.scss; review)"
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-view-core.pg-tabs.pg-tabs-more-r",
+   "cells": 90,
+   "chromium": 87,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|inbox :: taro-view-core.sh.sh-app > taro-scroll-view-core.sh-app-body.taro-scroll-view__scroll-y > taro-view-core.sh-page > taro-view-core#pgts1.pg-tabs.pg-tabs-more-r :: Clubs :: shows 7 of 66px; cue: mask"
+  },
+  {
+   "family": "5C|name-ellipsis|taro-text-core.ah-title",
+   "cells": 88,
+   "chromium": 85,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|meet :: taro-view-core.ah.ah-brand > taro-view-core.ah-bar > taro-view-core.ah-mid > taro-text-core.ah-title :: Thursday Open Play :: "
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-view-core.bt-play",
+   "cells": 37,
+   "chromium": 34,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|home :: taro-view-core.bk-stack > div.bk-cv.bk-cv-m-socialtiles > div.bt.hb-alt > taro-view-core.bt-play :: Tournaments Brackets and pools :: shows 19 of 132px; cue: none"
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-scroll-view-core.dv-days.taro-scroll-view__scroll-x",
+   "cells": 36,
+   "chromium": 36,
+   "webkit": 0,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|meets :: taro-scroll-view-core.sh-app-body.taro-scroll-view__scroll-y > taro-view-core.sh-page > taro-view-core.dv-strip > taro-scroll-view-core.dv-days.taro-scroll-view__scroll-x :: TUE 29 :: shows 57 of 60px; cue: mask"
+  },
+  {
+   "family": "5C|name-clamped|taro-text-core.bt-crestt",
+   "cells": 15,
+   "chromium": 12,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|home :: div.bt.hb-alt > taro-view-core.bt-pin > taro-view-core.bt-crest.is-tap > taro-text-core.bt-crestt :: Rachel Ho Coaching 何詠琪教練班 :: line-clamp 2, full name not available"
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-view-core.cm-rail",
+   "cells": 15,
+   "chromium": 12,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|390|community@club :: taro-scroll-view-core.sh-app-body.taro-scroll-view__scroll-y > taro-view-core.sh-page > taro-view-core > taro-view-core.cm-rail :: Tue, 29 Sept 08:00 pm Intermediate Drills (3.0–3.5 :: shows 70 of 260px; cue: none"
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-view-core.pg-tabs.rp-filter",
+   "cells": 5,
+   "chromium": 5,
+   "webkit": 0,
+   "owner": "handed-off",
+   "example": "chromium|admin|en|320|reports :: taro-scroll-view-core.sh-app-body.taro-scroll-view__scroll-y > taro-view-core.sh-page > taro-view-core > taro-view-core#pgts1.pg-tabs.rp-filter :: In progress :: shows 59 of 101px; cue: mask"
+  },
+  {
+   "family": "5B|overlap|pg-over-pg|inbox",
+   "cells": 3,
+   "chromium": 3,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|player-amy|en|1280|inbox :: taro-view-core.pg-row.is-tap :: [probe] TB w3 wk kudos :: "
+  },
+  {
+   "family": "5B|overlap|pg-over-ib|inbox",
+   "cells": 3,
+   "chromium": 3,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|player-amy|en|1280|inbox :: taro-view-core.ib-rowmore.is-tap :: ⋯ Chat options :: "
+  }
+ ],
+ "selftests": [
+  {
+   "file": "selftest-new/selftest-chromium.json",
+   "engine": "chromium",
+   "verdict": "pass",
+   "counts": {
+    "pass": 40,
+    "fail": 0,
+    "no_verdict": 0,
+    "total": 40
+   },
+   "failed": []
+  },
+  {
+   "file": "selftest-after/selftest-chromium.json",
+   "engine": "chromium",
+   "verdict": "pass",
+   "counts": {
+    "pass": 43,
+    "fail": 0,
+    "no_verdict": 0,
+    "total": 43
+   },
+   "failed": []
+  }
+ ],
+ "sources": [
+  "run/cells-chromium-after.jsonl",
+  "run/cells-chromium-after-b.jsonl",
+  "run/cells-webkit-after.jsonl",
+  "run/cells-chromium-after-cm.jsonl"
+ ]
+}

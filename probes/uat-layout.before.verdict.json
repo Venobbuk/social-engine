@@ -1,0 +1,223 @@
+{
+ "id": "uat-layout.before",
+ "at": "2026-09-25T18:58:52.419Z",
+ "label": "before",
+ "condition_fired": true,
+ "verdict": "fail",
+ "counts": {
+  "cells": 1167,
+  "graded": 1166,
+  "no_verdict": 1,
+  "byEngine": {
+   "chromium": {
+    "cells": 1104,
+    "graded": 1103,
+    "noVerdict": 1
+   },
+   "webkit": {
+    "cells": 63,
+    "graded": 63,
+    "noVerdict": 0
+   }
+  },
+  "laneFamiliesWithFindings": 11,
+  "laneCells": 248
+ },
+ "builds": [
+  "chromium:e477fae0",
+  "chromium:56843b8d",
+  "chromium:ce71826e",
+  "chromium:533ce471",
+  "chromium:c2ae9c85",
+  "webkit:f9097c52"
+ ],
+ "evidence": [
+  {
+   "family": "5C|sticky-stack|taro-view-core.wv-tabbar",
+   "cells": 774,
+   "chromium": 720,
+   "webkit": 54,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|profile :: taro-view-core.wv-tabbar ::  :: z 60 / 20, overlap 64px (the floater-clearing backdrop band under the tab bar, by design in Shell.scss; review)"
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-view-core.pg-tabs.pg-tabs-more-r",
+   "cells": 94,
+   "chromium": 91,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|inbox :: taro-view-core.sh.sh-app > taro-scroll-view-core.sh-app-body.taro-scroll-view__scroll-y > taro-view-core.sh-page > taro-view-core#pgts1.pg-tabs.pg-tabs-more-r :: Clubs :: shows 7 of 66px; cue: mask"
+  },
+  {
+   "family": "5C|name-ellipsis|taro-text-core.ah-title",
+   "cells": 88,
+   "chromium": 85,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|meet :: taro-view-core.ah.ah-brand > taro-view-core.ah-bar > taro-view-core.ah-mid > taro-text-core.ah-title :: Thursday Open Play :: "
+  },
+  {
+   "family": "5C|name-clamped|taro-text-core.pg-row-name",
+   "cells": 70,
+   "chromium": 70,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|visitor|en|320|meets :: taro-view-core > taro-view-core.pg-row.is-tap > taro-view-core.pg-row-main > taro-text-core.pg-row-name :: Friday Night Doubles 週五夜雙打 :: line-clamp 2, full name not available"
+  },
+  {
+   "family": "5C|text-clipped|taro-text-core.bi-line",
+   "cells": 42,
+   "chromium": 41,
+   "webkit": 1,
+   "owner": "uat-layout",
+   "example": "chromium|visitor|en|320|home :: div.bi.hb-plain > taro-view-core.bi-banner.is-tap > taro-view-core.bi-bannerbody > taro-text-core.bi-line :: 31 meets near you this week :: sw 194 > cw 194 / sh 55 > ch 50"
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-view-core.bt-play",
+   "cells": 39,
+   "chromium": 36,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|home :: taro-view-core.bk-stack > div.bk-cv.bk-cv-m-socialtiles > div.bt.hb-alt > taro-view-core.bt-play :: Tournaments Brackets and pools :: shows 19 of 132px; cue: none"
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-scroll-view-core.dv-days.taro-scroll-view__scroll-x",
+   "cells": 36,
+   "chromium": 36,
+   "webkit": 0,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|meets :: taro-scroll-view-core.sh-app-body.taro-scroll-view__scroll-y > taro-view-core.sh-page > taro-view-core.dv-strip > taro-scroll-view-core.dv-days.taro-scroll-view__scroll-x :: MON 28 :: shows 57 of 60px; cue: mask"
+  },
+  {
+   "family": "5C|switch-wide|taro-view-core.nut-switch.ui-switch",
+   "cells": 36,
+   "chromium": 36,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|player-amy|en|320|meet-create :: taro-view-core.mc-managed > taro-view-core.pg-card.mc-field > taro-view-core.mc-fieldv > taro-view-core.nut-switch.ui-switch ::  :: 230x44 (a switch is at most 64 px wide)"
+  },
+  {
+   "family": "5C|name-ellipsis|taro-text-core.ma-venuet",
+   "cells": 25,
+   "chromium": 23,
+   "webkit": 2,
+   "owner": "uat-layout",
+   "example": "chromium|visitor|en|320|home :: taro-view-core.ma-item.is-tap > taro-view-core.ma-main > taro-view-core.ma-venue > taro-text-core.ma-venuet :: Tseung Kwan O Sports Ground :: "
+  },
+  {
+   "family": "5B|overlap|ib-over-pg|inbox",
+   "cells": 24,
+   "chromium": 24,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|visitor|en|768|inbox :: taro-view-core.pg-tab :: Support :: "
+  },
+  {
+   "family": "5C|name-clamped|taro-text-core.ma-title",
+   "cells": 15,
+   "chromium": 15,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|visitor|en|320|home :: taro-view-core > taro-view-core.ma-item.is-tap > taro-view-core.ma-main > taro-text-core.ma-title :: Friday Night Doubles 週五夜雙打 :: line-clamp 2, full name not available"
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-view-core.cm-rail",
+   "cells": 15,
+   "chromium": 12,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|390|community@club :: taro-scroll-view-core.sh-app-body.taro-scroll-view__scroll-y > taro-view-core.sh-page > taro-view-core > taro-view-core.cm-rail :: Tue, 29 Sept 08:00 pm Intermediate Drills (3.0–3.5 :: shows 70 of 260px; cue: none"
+  },
+  {
+   "family": "5B|overlap|pg-over-pg|inbox",
+   "cells": 12,
+   "chromium": 12,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|player-amy|en|768|inbox :: taro-view-core.pg-tab.pg-tab-on :: All :: "
+  },
+  {
+   "family": "5B|overlap|pg-over-ib|inbox",
+   "cells": 12,
+   "chromium": 12,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|player-amy|en|768|inbox :: taro-view-core.ib-rowmore.is-tap :: ⋯ Chat options :: "
+  },
+  {
+   "family": "5C|name-clamped|taro-text-core.bt-crestt",
+   "cells": 10,
+   "chromium": 7,
+   "webkit": 3,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|home :: div.bt.hb-alt > taro-view-core.bt-pin > taro-view-core.bt-crest.is-tap > taro-text-core.bt-crestt :: Harbour Paddle Club :: line-clamp 2, full name not available"
+  },
+  {
+   "family": "5B|overlap|ib-over-ib|inbox",
+   "cells": 6,
+   "chromium": 6,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|player-amy|zh_Hant|768|inbox :: taro-view-core.ib-rowmore.is-tap :: ⋯ 聊天選項 :: "
+  },
+  {
+   "family": "5C|row-cut-at-edge|taro-view-core.pg-tabs.rp-filter",
+   "cells": 5,
+   "chromium": 5,
+   "webkit": 0,
+   "owner": "handed-off",
+   "example": "chromium|admin|en|320|reports :: taro-scroll-view-core.sh-app-body.taro-scroll-view__scroll-y > taro-view-core.sh-page > taro-view-core > taro-view-core#pgts1.pg-tabs.rp-filter :: In progress :: shows 59 of 101px; cue: mask"
+  },
+  {
+   "family": "5C|name-ellipsis|taro-text-core.fd-club",
+   "cells": 3,
+   "chromium": 3,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|visitor|en|320|feed :: taro-view-core.fd-headlink.is-tap > taro-view-core.fd-headb > taro-view-core.fd-clubrow > taro-text-core.fd-club :: Sunday Social Pickleball :: "
+  },
+  {
+   "family": "5C|overflow-clipped|taro-text-core.pg-row-val",
+   "cells": 3,
+   "chromium": 3,
+   "webkit": 0,
+   "owner": "uat-layout",
+   "example": "chromium|host-ken|en|320|tournament-match :: taro-view-core.cmx-body > taro-view-core.pg-card > taro-view-core.pg-row.is-tap > taro-text-core.pg-row-val ::  :: content 43px wider than the page, cut off (page overflow-x hidden)"
+  },
+  {
+   "family": "5C|sticky-stack|taro-view-core.dv-search",
+   "cells": 1,
+   "chromium": 1,
+   "webkit": 0,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|meets :: taro-view-core.dv-search ::  :: z 40 / 20, overlap 44px (the floater-clearing backdrop band under the tab bar, by design in Shell.scss; review)"
+  },
+  {
+   "family": "5C|sticky-stack|taro-view-core.mt-cta",
+   "cells": 1,
+   "chromium": 1,
+   "webkit": 0,
+   "owner": "handed-off",
+   "example": "chromium|visitor|en|320|meet :: taro-view-core.mt-cta ::  :: z 30 / 20, overlap 52px (the floater-clearing backdrop band under the tab bar, by design in Shell.scss; review)"
+  }
+ ],
+ "selftests": [
+  {
+   "file": "selftest-new/selftest-chromium.json",
+   "engine": "chromium",
+   "verdict": "pass",
+   "counts": {
+    "pass": 40,
+    "fail": 0,
+    "no_verdict": 0,
+    "total": 40
+   },
+   "failed": []
+  }
+ ],
+ "sources": [
+  "run/cells-chromium-before.jsonl",
+  "run/cells-chromium-before-b.jsonl",
+  "run/cells-webkit-before-visitor.jsonl"
+ ]
+}
