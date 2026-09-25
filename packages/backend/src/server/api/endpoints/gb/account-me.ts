@@ -9,7 +9,7 @@ import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import type { UserProfilesRepository } from '@/models/_.js';
 import { isGripbatStaff } from '@/modules/staff.js';
-import { isPlaceholderUsername } from '@/misc/gb-accounts.js';
+import { isPlaceholderUsername, SSO_HANDLE_KEY } from '@/misc/gb-accounts.js';   // + ACCOUNT-DELETE-SSO-V1
 
 /*
  * GRIPBAT-ACCOUNTS-V1 (spec §9) — gb/account/me: the account facts the app needs that `i` does not carry.
@@ -59,7 +59,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				needsUsername: isPlaceholderUsername(me.username),
 				email: profile.email ?? null,
 				emailVerified: !!profile.emailVerified,
-				hasPassword: !!profile.password,   // ACCOUNT-DELETE-SSO-V1
+				// ACCOUNT-DELETE-SSO-V1: false for an account the HKPL sign-in made (its password is a random one nobody knows)
+				hasPassword: !(/^[a-z0-9-]+_[0-9a-f]{12}$/.test(me.username) || (await this.db.query('SELECT 1 FROM registry_item WHERE "userId" = $1 AND key = $2 AND domain IS NULL LIMIT 1', [me.id, SSO_HANDLE_KEY]) as unknown[]).length > 0),
 			};
 		});
 	}

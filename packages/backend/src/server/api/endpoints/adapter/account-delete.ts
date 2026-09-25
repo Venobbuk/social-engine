@@ -107,10 +107,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const v = rows[0] ? rows[0].value : null;
 				seamHandle = typeof v === 'string' && v ? v : null;
 			}
-			if (!nativeHow) {
-				const prof = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
-				if (prof.password) throw new ApiError(meta.errors.passwordRequired);   // an account with a password confirms with it
-			}
+			// an account the SSO door made (it has a seam handle) has only a random password nobody knows (sso.ts); every other account
+			// confirms with its own password
+			if (!nativeHow && !seamHandle) throw new ApiError(meta.errors.passwordRequired);
 
 			// SEC-ACCOUNT-DELETE-REAUTH-V1: a purpose-bound, single-use, identity-matched re-auth proof — required only
 			// when the rollout switch is on; verified whenever one is sent.
