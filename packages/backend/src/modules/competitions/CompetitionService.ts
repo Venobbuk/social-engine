@@ -1729,7 +1729,10 @@ export class CompetitionService {
 		const e = await this.entryOrFail(c, entryId);
 		const manager = this.isHost(c, actor.id);
 		if (e.captainId !== actor.id && !manager) throw this.err('forbidden', 'Only the captain can reserve a place.');
-		if (c.status !== 'open' && c.status !== 'closed') throw this.err('started', 'The competition has started.');
+		// BENCH-C2 MATCH-RESERVED-V1: the info of an existing place (name / gender / age group / level) may be edited while the
+		// competition is played (Reclub: match page Reserved + Edit); a new place, a release or a swap only before the start
+		const infoOnly = !!(a.reserve && a.reserve.placeId) && !a.release && !a.swap && c.status === 'inProgress';
+		if (c.status !== 'open' && c.status !== 'closed' && !infoOnly) throw this.err('started', 'The competition has started.');
 		if (!e.captainId || !['pending', 'confirmed'].includes(e.status)) throw this.err('no_such_entry', 'Only a team in the competition has places to reserve.');
 		const places = [...(e.reservedPlaces ?? [])];
 		const find = (pid: string) => { const i = places.findIndex((p) => p.id === pid); if (i < 0) throw this.err('no_such_entry', 'No such reserved place.'); return i; };
