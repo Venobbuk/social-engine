@@ -1,0 +1,280 @@
+{
+ "id": "fix-S7.uat",
+ "at": "2026-09-25T03:11:55.665Z",
+ "run": "e271a9",
+ "engines": {
+  "chromium": {
+   "pages": {
+    "settings-username-open": {
+     "label": "settings, username card open",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 17,
+      "covered": [
+       {
+        "name": "Current password",
+        "cls": "weui-input",
+        "by": "wv-tabbar",
+        "fixed": true,
+        "shell": true,
+        "y": 824
+       }
+      ],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 13,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    },
+    "help": {
+     "label": "help",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 11,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 11,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    },
+    "history": {
+     "label": "history",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 12,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 8,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    },
+    "dupr-connect": {
+     "label": "dupr-connect",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 13,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 12,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    },
+    "player-activities": {
+     "label": "player-activities",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 10,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 10,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    },
+    "settings": {
+     "label": "settings",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 18,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 13,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    },
+    "help-search": {
+     "label": "help, search results",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 11,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 11,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    },
+    "help-article": {
+     "label": "help, article sheet open (modal: covered controls behind it are silent)",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 11,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 11,
+      "covered": [],
+      "small": [],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    },
+    "onboard-0": {
+     "label": "onboarding step 0",
+     "containersScrolled": 1,
+     "rest": {
+      "controls": 7,
+      "covered": [
+       {
+        "name": "Add photo",
+        "cls": "hk-btn border-0 m-0 flex flex-row items-center jus",
+        "by": "wv-fab-clear",
+        "fixed": true,
+        "shell": false,
+        "y": 794
+       }
+      ],
+      "small": [],
+      "modalOpen": false
+     },
+     "end": {
+      "controls": 9,
+      "covered": [],
+      "small": [
+       {
+        "name": "Club code",
+        "w": 209,
+        "h": 22,
+        "cls": "weui-input"
+       }
+      ],
+      "modalOpen": false
+     },
+     "sideways": false,
+     "rawKeys": [],
+     "axe": []
+    }
+   },
+   "journeys": {
+    "username": {
+     "typed": "sam_smash_e271a9",
+     "free": true,
+     "afterReload": true,
+     "otherSees": true,
+     "pass": true
+    }
+   },
+   "zhClipped": {
+    "help": [
+     "返回"
+    ],
+    "settings": [
+     "返回"
+    ],
+    "history": [
+     "返回"
+    ],
+    "dupr-connect": [
+     "返回"
+    ]
+   },
+   "reflow320": {
+    "help": false,
+    "settings": false,
+    "history": false
+   },
+   "summary": {
+    "controls": 208,
+    "coveredOwn": [
+     "onboarding step 0: Add photo ← wv-fab-clear"
+    ],
+    "coveredShell": [
+     "settings, username card open: Current password ← wv-tabbar"
+    ],
+    "small": [],
+    "sideways": [],
+    "axe": [],
+    "rawKeys": [],
+    "zhClipped": [
+     "help: 返回",
+     "settings: 返回",
+     "history: 返回",
+     "dupr-connect: 返回"
+    ],
+    "reflow320": []
+   }
+  }
+ },
+ "fixtures": {
+  "a": {
+   "userId": "arjy3n4wfril07yl",
+   "email": "fs7u-ced7e7d-a@example.invalid",
+   "madeOn": "kaka"
+  },
+  "e": {
+   "userId": "arjy3nhqfril07yv",
+   "email": "fs7u-ced7e7d-e@example.invalid",
+   "madeOn": "kaka"
+  },
+  "b": {
+   "userId": "arjy3pbgfril07z5",
+   "email": "fs7u-ced7e7d-b@example.invalid",
+   "madeOn": "kaka"
+  }
+ },
+ "cleanup": {
+  "a": 200,
+  "e": 200,
+  "b": 200
+ },
+ "errors": [
+  "chromium article locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for loc"
+ ]
+}

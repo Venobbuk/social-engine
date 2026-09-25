@@ -1,0 +1,527 @@
+{
+ "id": "fix-S7",
+ "phase": "after",
+ "app": "live",
+ "run": "9f83ae",
+ "at": "2026-09-25T03:08:11.667Z",
+ "rows": {
+  "U-username": {
+   "id": "U-username",
+   "items": [
+    "E-update-profile.02"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "better",
+   "evidence": {
+    "typed": "sam_smash",
+    "taken": true,
+    "reserved": true,
+    "free": true,
+    "saved": "fs79f83aenew",
+    "fresh": "fs79f83aenew",
+    "uppercaseShown": false
+   }
+  },
+  "U-email": {
+   "id": "U-email",
+   "items": [
+    "E-settings-hub.01",
+    "E-update-account.03"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "better",
+   "evidence": {
+    "hasRow": true,
+    "sent": [
+     200
+    ],
+    "devCodeShown": true,
+    "oldBeforeConfirm": 200,
+    "newBeforeConfirm": 404,
+    "toast": false,
+    "oldAfter": 404,
+    "newAfter": 200,
+    "stored": "fs7-9f83ae-bnew@example.invalid|true"
+   }
+  },
+  "U-dmgr-counts": {
+   "id": "U-dmgr-counts",
+   "items": [
+    "D-dupr-activity-manager.02"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "submitLabel": "Submit all (1)",
+    "rawCodes": false,
+    "pendingLabelRect": {
+     "left": 52,
+     "right": 99,
+     "top": 441,
+     "width": 47
+    }
+   }
+  },
+  "U-dupr-basis": {
+   "id": "U-dupr-basis",
+   "items": [
+    "D-dupr-confirm-submit.01",
+    "D-dupr-confirm-submit.02"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "chooser": true,
+    "scoring": true,
+    "consentWords": true,
+    "request": {
+     "status": 200,
+     "basis": true,
+     "scoring": true
+    },
+    "row": "submitted|sandbox:arjy3qnufril07zb|sets|rally|ari4hbuh3hac0003"
+   }
+  },
+  "U-dmgr-close": {
+   "id": "U-dmgr-close",
+   "items": [
+    "D-dupr-activity-manager.03"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "url": "https://uat.gripbat.com/app/pages/match/index?source=meet&id=arjy3qnufril07zb",
+    "sheetOpen": false,
+    "submittedBy": "Submitted by Ken Wong · 25 Sept 2026",
+    "cageLine": true
+   }
+  },
+  "U-notice": {
+   "id": "U-notice",
+   "items": [
+    "D-dupr-submit-notice.01"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "better",
+   "evidence": {
+    "opts": {
+     "joinLater": true,
+     "connectFirst": true,
+     "cancel": true,
+     "gotItJoins": false
+    },
+    "joined": "0",
+    "url": "https://uat.gripbat.com/app/pages/meet/index?id=arjy3qxjfril07zd&lang=en",
+    "titleClip": {
+     "clipped": false,
+     "text": "This activity will be submitted to DUPR"
+    }
+   }
+  },
+  "U-activity": {
+   "id": "U-activity",
+   "items": [
+    "D-player-activity.01",
+    "E-player-sport.06"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "statLine": "1 match · 1W 0L · 100%",
+    "dateLine": "Fri, 25 Sept 2026 · 4 players",
+    "openMeetRect": {
+     "left": 34,
+     "right": 346,
+     "top": 811,
+     "width": 312
+    },
+    "emptyNext": true
+   }
+  },
+  "U-history-chips": {
+   "id": "U-history-chips",
+   "items": [
+    "D-statistics.06"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "your": {
+     "left": 72,
+     "right": 177,
+     "top": 124,
+     "width": 105
+    },
+    "community": {
+     "left": 177,
+     "right": 318,
+     "top": 124,
+     "width": 141
+    }
+   }
+  },
+  "R-played-one-rule": {
+   "id": "R-played-one-rule",
+   "items": [
+    "D-stats-team-summary.02"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L5",
+   "vsReclub": "equal",
+   "evidence": {
+    "inHistory": false,
+    "historyRows": 1,
+    "pairMatches": 0,
+    "ratingLogRowsForFutureMatch": "0",
+    "rule": "a meet match counts once its meet has started — History and the pair record agree"
+   }
+  },
+  "U-onboard": {
+   "id": "U-onboard",
+   "items": [
+    "E-onb-basic.01",
+    "E-onb-welcome.02"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "better",
+   "evidence": {
+    "boxes": [
+     {
+      "name": "obname",
+      "ph": "First and last name",
+      "cls": "nut-input nut-input-plain ui-tf ",
+      "box": "1px rgb(217, 221, 226)"
+     },
+     {
+      "name": "obusername",
+      "ph": "Letters, numbers or _",
+      "cls": "nut-input nut-input-plain ui-tf ",
+      "box": "1px rgb(217, 221, 226)"
+     }
+    ],
+    "codeField": true,
+    "clubCode": "9DTD73",
+    "msg": "You joined [probe] fix-S7 club 9f83ae.",
+    "joined": "1"
+   }
+  },
+  "U-notif-zh": {
+   "id": "U-notif-zh",
+   "items": [
+    "E-notifications.01"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "newMeetZh": true,
+    "cancelZh": true,
+    "englishLeft": [],
+    "notesInDb": ""
+   }
+  },
+  "U-help-centre": {
+   "id": "U-help-centre",
+   "items": [
+    "E-help.03",
+    "E-faq.01"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "better",
+   "evidence": {
+    "cats": 11,
+    "found": 2,
+    "para": "For players of any level, GripBat helps you play more — quicker, better, easier.",
+    "zhFound": 2,
+    "zhPara": "在收件箱聯絡 GripBat 團隊，或電郵 info@gripbat.com。每宗舉報都由真人審閱。"
+   }
+  },
+  "U-version": {
+   "id": "U-version",
+   "items": [
+    "E-auth-welcome.06",
+    "E-settings-hub.12"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "version": "GripBat · Version 1.0 (build 119)",
+    "zhVersion": "GripBat · 版本 1.0（建置 119）"
+   }
+  },
+  "U-feedback-one": {
+   "id": "U-feedback-one",
+   "items": [
+    "E-help.06",
+    "D-dupr-support.04"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "faqs": true,
+    "faqUrl": "https://uat.gripbat.com/app/pages/help/index?cat=dupr",
+    "panelDupr": true,
+    "duprUrl": "https://uat.gripbat.com/app/pages/dupr-connect/index?lang=en",
+    "panelHelp": true
+   }
+  },
+  "U-zh-dict-retry": {
+   "id": "U-zh-dict-retry",
+   "items": [
+    "A-manage-meet-tutorial.01",
+    "E-help.06 (zh)"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "planted503": 2,
+    "privacyZh": true,
+    "sendZh": true,
+    "english": []
+   }
+  },
+  "U-zh-help-plain": {
+   "id": "U-zh-help-plain",
+   "items": [
+    "A-manage-meet-tutorial.01"
+   ],
+   "pass": true,
+   "mustFail": false,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "privacyZh": true,
+    "sendZh": true,
+    "dictReads": [
+     200
+    ]
+   }
+  },
+  "U-dupr-self": {
+   "id": "U-dupr-self",
+   "items": [
+    "D-dupr-support.02",
+    "D-dupr-support.03"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "coltype": "double precision",
+    "before": "FS7A9F83|3.5|dupr-sandbox",
+    "resync": [
+     200
+    ],
+    "resyncAgain": [
+     200,
+     400
+    ],
+    "cooldown": true,
+    "connection": {
+     "connected": false,
+     "duprId": null,
+     "doubles": null,
+     "singles": null,
+     "source": null,
+     "sandbox": true,
+     "resyncAvailableAt": "2026-09-25T04:14:23.319Z"
+    },
+    "after": "-|-|-",
+    "notConnected": true
+   }
+  },
+  "R-recap-cancelled": {
+   "id": "R-recap-cancelled",
+   "items": [
+    "D-match-summary.02"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "better",
+   "evidence": {
+    "duprStatus": "submitted",
+    "api": {
+     "cancelled": true,
+     "dupr": "submitted",
+     "by": "ken_host"
+    },
+    "screen": [
+     "Submitted by Ken Wong · 25 Sept 2026",
+     "This meet was cancelled after this match was sent to DUPR. The result stays on DUPR."
+    ]
+   }
+  },
+  "U-delete-receipt": {
+   "id": "U-delete-receipt",
+   "items": [
+    "E-delete-account.03"
+   ],
+   "pass": true,
+   "mustFail": true,
+   "level": "L6",
+   "vsReclub": "better",
+   "evidence": {
+    "receiptAt1_5s": true,
+    "receiptAt3s": true,
+    "homeAfterOk": true,
+    "graceRow": "1"
+   }
+  },
+  "U-maintenance": {
+   "id": "U-maintenance",
+   "items": [
+    "E-maintenance.01"
+   ],
+   "pass": true,
+   "mustFail": false,
+   "level": "L6",
+   "vsReclub": "equal",
+   "evidence": {
+    "on": 200,
+    "notStaff": 403,
+    "gate": true,
+    "backIn": "Back in about 2 hours.",
+    "gateZh": true,
+    "off": 200,
+    "gateGone": true,
+    "offFinal": 200,
+    "readBack": {
+     "on": false,
+     "until": null,
+     "message": null,
+     "at": null
+    }
+   }
+  }
+ },
+ "fixtures": {
+  "maintenanceBefore": {
+   "on": false,
+   "until": null,
+   "message": null,
+   "at": null
+  },
+  "acct_A": {
+   "userId": "arjy3krwfril07xd",
+   "email": "fs7-9f83ae-a@example.invalid",
+   "username": "fs79f83aea"
+  },
+  "acct_B": {
+   "userId": "arjy3ldifril07xp",
+   "email": "fs7-9f83ae-b@example.invalid",
+   "username": "fs79f83aeb"
+  },
+  "acct_C": {
+   "userId": "arjy3ln3fril07y0",
+   "email": "fs7-9f83ae-c@example.invalid",
+   "username": "fs79f83aec"
+  },
+  "acct_D": {
+   "userId": "arjy3m70fril07y6",
+   "email": "fs7-9f83ae-d@example.invalid",
+   "username": "fs79f83aed"
+  },
+  "acct_E": {
+   "userId": "arjy3ml0fril07yc",
+   "email": "fs7-9f83ae-e@example.invalid",
+   "username": null
+  },
+  "dupr_A": {
+   "status": 200,
+   "body": {
+    "linked": true,
+    "duprId": "FS7A9F83",
+    "name": null,
+    "doubles": null,
+    "singles": null,
+    "sandbox": true
+   }
+  },
+  "dupr_B": {
+   "status": 200,
+   "body": {
+    "linked": true,
+    "duprId": "FS7B9F83",
+    "name": null,
+    "doubles": null,
+    "singles": null,
+    "sandbox": true
+   }
+  },
+  "joinM_A": 200,
+  "joinM_B": 200,
+  "guest": 200,
+  "matches": {
+   "m1": "200 arjy3qnufril07zb",
+   "m2": "200 arjy3qvdfril07zc",
+   "submitOn": 200
+  },
+  "future": "200 arjy3s2nfril07zw",
+  "club": {
+   "id": "arjy3s3lfril07zx",
+   "code": "9DTD73"
+  },
+  "comp": "200 arjy3sb9fril0804",
+  "compEnterE": 200,
+  "compCancel": 200,
+  "cancelM": 200
+ },
+ "cleanup": {
+  "maintenance": {
+   "on": false,
+   "until": null,
+   "message": null,
+   "at": null
+  },
+  "meet arjy3mvofril07yh": "cancel 200",
+  "meet arjy3qxjfril07zd": "deleted",
+  "meet arjy3r0afril07zg": "cancel 200",
+  "meet arjy8f3tfril080r": "deleted",
+  "comp arjy3sb9fril0804": "400/200",
+  "club arjy3s3lfril07zx": 200,
+  "acct A": "200 {\"deleted\":true,\"scheduled\":true,\"purgeA",
+  "acct B": "200 {\"deleted\":true,\"scheduled\":true,\"purgeA",
+  "acct C": "200 {\"deleted\":true,\"scheduled\":true,\"purgeA",
+  "acct D": "in deletion grace (deleted by U-delete)",
+  "acct E": "200 {\"deleted\":true,\"scheduled\":true,\"purgeA",
+  "remainingMeets": "0",
+  "remainingClubs": "0",
+  "amyTermsUnchanged": true
+ },
+ "errors": [],
+ "build": {
+  "engine": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+  "live": "app.12d359ce.js",
+  "preview": null
+ }
+}
