@@ -9,7 +9,7 @@ const { webkit, devices } = require('playwright');
 const HOST = 'https://uat.gripbat.com';
 const RUN = Date.now().toString(36).slice(-5);
 const P = '[probe] fix-S4 W ';
-const OUT = __dirname + '/fix-S4.webkit.final.json';
+const OUT = __dirname + '/fix-S4.webkit.grade' + (process.env.GRADE || '1') + '.json';
 const SHOTS = __dirname + '/fix-S4-webkit-shots'; fs.mkdirSync(SHOTS, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const R = { id: 'fix-S4-webkit', engine: 'webkit', at: new Date().toISOString(), run: RUN, rows: {}, checks: [], cleanup: [], errors: [] };
@@ -132,6 +132,20 @@ async function tapSel(p, sel, rx, row, label, nth) {
       chk('C-select-venue.03', 'WebKit: "Club venues" first, a tap picks it', t.indexOf('Club venues') >= 0 && t.indexOf('Club venues') < t.indexOf('Kowloon Park') && v === 'Kowloon Park Sports Centre', { t: t.slice(0, 160), v, sh });
       await b.ctx.close();
     }
+    // W7 the meet form's venue hint = the venue's real state (VENUE-STATE-HINT-V1)
+    {
+      const cv = await must('venues/create', { name: P + 'hint court ' + RUN, address: P + '1 Probe Road ' + RUN, lat: 22.3011, lng: 114.1712 }, amy); FX.venues = [cv.id];
+      const b = await open(amy, 'meet-create/index');
+      const SEL = 'input[placeholder="Search venues or type a place"]';
+      await b.page.waitForFunction((q) => { const e = document.querySelector(q); return !!e && e.getBoundingClientRect().height > 0; }, SEL, { timeout: 90000 }).catch(() => null); await sleep(1500);
+      await tapSel(b.page, SEL, null); await b.page.keyboard.type(RUN, { delay: 40 });
+      await b.page.waitForFunction((n) => [...document.querySelectorAll('.mc-venue')].some((x) => (x.innerText || '').includes(n)), P + 'hint court ' + RUN, { timeout: 30000 }).catch(() => null);
+      await tapSel(b.page, '.mc-venue', new RegExp('hint court ' + RUN), 'C-select-venue.04', 'venue search row'); await sleep(1500);
+      const hint = await b.page.evaluate((q) => { let r = document.querySelector(q); for (let k = 0; k < 6 && r && !/Venue/.test(r.innerText || ''); k++) r = r.parentElement; return r ? (r.innerText || '').replace(/\s+/g, ' ').slice(0, 120) : ''; }, SEL).catch(() => '');
+      const sh = await shot(b.page, 'venue-hint');
+      chk('C-select-venue.04', 'WebKit: a just-added (Under review) venue picked in the meet form reads "Under review", never "Verified venue"', /Under review/.test(hint) && !/Verified venue/.test(hint), { hint, sh });
+      await b.ctx.close();
+    }
     // W6 one header on the three pages
     for (const route of ['community-center/index', 'venue-media/index?id=' + KPSC]) {
       const b = await open(amy, route);
@@ -142,6 +156,7 @@ async function tapSel(p, sel, rx, row, label, nth) {
   } catch (e) { R.errors.push(String(e && e.stack || e).slice(0, 600)); console.log('ERR', e && e.message); }
   finally {
     try { if (BR) await BR.close(); } catch (e) { /* */ }
+    if (FX.venues) for (const id of FX.venues) R.cleanup.push({ venue: id, s: (await api('venues/delete', { venueId: id }, token('admin'))).s });
     if (FX.venuesSet) R.cleanup.push({ clubVenues: (await api('clubs/settings/update', { channelId: CLUB, venueIds: FX.venueIds0 }, mei)).s });
     for (const id of FX.comps) { let r = await api('competitions/cancel', { competitionId: id }, tom); r = await api('competitions/delete', { competitionId: id }, tom); R.cleanup.push({ comp: id, s: r.s }); }
     for (const id of FX.meets) R.cleanup.push({ meet: id, cancel: (await api('meets/cancel', { meetId: id }, tom)).s });

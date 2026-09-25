@@ -1,350 +1,185 @@
 {
  "id": "fix-S4-webkit",
  "engine": "webkit (Playwright, iPhone 13, operator PC)",
- "note": "Every open run failed with the control not yet in the DOM (Stencil hydration late, PC at 100 % CPU), 0-byte screenshots, or the browser closed — instrument NO VERDICT runs, not a product flip; no run shows a present control giving a wrong result. run1 (03:05 HKT, app.692ee51f: 6 rows closed) is not on disk (overwritten).",
+ "script": "D:/tmp/gb-uat-tools/fix-S4.webkit.cjs (hydration waits)",
+ "grades": [
+  {
+   "grade": 1,
+   "at": "2026-09-25T03:39:40.639Z",
+   "appBundle": "app.9f75f736.js",
+   "checks": 16,
+   "passed": 16,
+   "errors": 0,
+   "cleanupFailed": 0,
+   "cleanup": [
+    {
+     "venue": "arjzas6qphyb002p",
+     "s": 200
+    },
+    {
+     "clubVenues": 200
+    },
+    {
+     "comp": "arjz95eiphyb001y",
+     "s": 200
+    },
+    {
+     "meet": "arjz86o1phyb001b",
+     "cancel": 200
+    }
+   ]
+  },
+  {
+   "grade": 2,
+   "at": "2026-09-25T03:50:00.823Z",
+   "appBundle": "app.48d812e8.js",
+   "checks": 16,
+   "passed": 16,
+   "errors": 0,
+   "cleanupFailed": 0,
+   "cleanup": [
+    {
+     "venue": "arjzo0kwphyb004b",
+     "s": 200
+    },
+    {
+     "clubVenues": 200
+    },
+    {
+     "comp": "arjzmfkophyb003r",
+     "s": 200
+    },
+    {
+     "meet": "arjzlhlfphyb003f",
+     "cancel": 200
+    }
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "cell": "C-meet-filters.04 | WebKit 5B/5C hit-test + >= 24 px: Clubs only chip",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-meet-filters.04 | WebKit: Clubs only keeps the meet of the club mei owns",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-discover.11 | WebKit 5B/5C hit-test + >= 24 px: club-code row",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-discover.11 | WebKit: typing WAPSUW → the club row → the club page",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-home.11 | WebKit 5B/5C hit-test + >= 24 px: Maybe chip",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-home.11 | WebKit: Maybe under the Home comp card → engine reads maybe → still chosen after a reload",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-filter-dates.01 | WebKit 5B/5C hit-test + >= 24 px: Dates chip",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-filter-dates.01 | WebKit 5B/5C hit-test + >= 24 px: day cell",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-filter-dates.01 | WebKit 5B/5C hit-test + >= 24 px: Confirm",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-filter-dates.01 | WebKit: one range calendar → meets/list with a 3-day range",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-select-venue.03 | WebKit 5B/5C hit-test + >= 24 px: club venue row",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-select-venue.03 | WebKit: \"Club venues\" first, a tap picks it",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-select-venue.04 | WebKit 5B/5C hit-test + >= 24 px: venue search row",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-select-venue.04 | WebKit: a just-added (Under review) venue picked in the meet form reads \"Under review\", never \"Verified venue\"",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-community-detail.01 | WebKit: community-center one Back button",
+   "grade1": true,
+   "grade2": true
+  },
+  {
+   "cell": "C-venue.13 | WebKit: venue-media one Back button",
+   "grade1": true,
+   "grade2": true
+  }
+ ],
  "rows": {
   "C-meet-filters.04": {
    "status": "closed",
-   "passed": 3,
-   "checks": 4,
-   "passRuns": [
-    "fix-S4.webkit.run5.json",
-    "fix-S4.webkit.run6.json",
-    "fix-S4.webkit.final.json"
-   ],
-   "openRuns": [
-    "fix-S4.webkit.json"
-   ]
+   "grade1": "closed",
+   "grade2": "closed"
   },
   "C-discover.11": {
    "status": "closed",
-   "passed": 2,
-   "checks": 3,
-   "passRuns": [
-    "fix-S4.webkit.run5.json",
-    "fix-S4.webkit.run6.json"
-   ],
-   "openRuns": [
-    "fix-S4.webkit.json"
-   ]
+   "grade1": "closed",
+   "grade2": "closed"
   },
   "C-home.11": {
    "status": "closed",
-   "passed": 1,
-   "checks": 3,
-   "passRuns": [
-    "fix-S4.webkit.run5.json"
-   ],
-   "openRuns": [
-    "fix-S4.webkit.run6.json",
-    "fix-S4.webkit.json"
-   ]
+   "grade1": "closed",
+   "grade2": "closed"
   },
   "C-filter-dates.01": {
    "status": "closed",
-   "passed": 1,
-   "checks": 5,
-   "passRuns": [
-    "fix-S4.webkit.w45c.json"
-   ],
-   "openRuns": [
-    "fix-S4.webkit.run5.json",
-    "fix-S4.webkit.run6.json",
-    "fix-S4.webkit.json",
-    "fix-S4.webkit.w45b.json"
-   ]
+   "grade1": "closed",
+   "grade2": "closed"
   },
   "C-select-venue.03": {
    "status": "closed",
-   "passed": 2,
-   "checks": 5,
-   "passRuns": [
-    "fix-S4.webkit.w45b.json",
-    "fix-S4.webkit.w45c.json"
-   ],
-   "openRuns": [
-    "fix-S4.webkit.run5.json",
-    "fix-S4.webkit.run6.json",
-    "fix-S4.webkit.json"
-   ]
+   "grade1": "closed",
+   "grade2": "closed"
+  },
+  "C-select-venue.04": {
+   "status": "closed",
+   "grade1": "closed",
+   "grade2": "closed"
   },
   "C-community-detail.01": {
    "status": "closed",
-   "passed": 4,
-   "checks": 5,
-   "passRuns": [
-    "fix-S4.webkit.run5.json",
-    "fix-S4.webkit.run6.json",
-    "fix-S4.webkit.w45b.json",
-    "fix-S4.webkit.w45c.json"
-   ],
-   "openRuns": [
-    "fix-S4.webkit.json"
-   ]
+   "grade1": "closed",
+   "grade2": "closed"
   },
   "C-venue.13": {
    "status": "closed",
-   "passed": 5,
-   "checks": 5,
-   "passRuns": [
-    "fix-S4.webkit.run5.json",
-    "fix-S4.webkit.run6.json",
-    "fix-S4.webkit.json",
-    "fix-S4.webkit.w45b.json",
-    "fix-S4.webkit.w45c.json"
-   ],
-   "openRuns": []
+   "grade1": "closed",
+   "grade2": "closed"
   }
  },
- "runs": [
-  {
-   "file": "fix-S4.webkit.run5.json",
-   "at": "2026-09-24T20:17:15.057Z",
-   "appBundle": "app.32f1df0f.js",
-   "rows": {
-    "C-meet-filters.04": "closed",
-    "C-discover.11": "closed",
-    "C-home.11": "closed",
-    "C-filter-dates.01": "still-open",
-    "C-select-venue.03": "still-open",
-    "C-community-detail.01": "closed",
-    "C-venue.13": "closed"
-   },
-   "errors": [],
-   "cleanupFailed": 0,
-   "fails": [
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: day cell",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Confirm",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit: one range calendar → meets/list with a 3-day range",
-     "ev": "{\"span\":1,\"s\":200,\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/04-range.png\"}"
-    },
-    {
-     "row": "C-select-venue.03",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: club venue row",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-select-venue.03",
-     "name": "WebKit: \"Club venues\" first, a tap picks it",
-     "ev": "{\"t\":\"\",\"v\":\"\",\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/05-club-venues.png\"}"
-    }
-   ]
-  },
-  {
-   "file": "fix-S4.webkit.run6.json",
-   "at": "2026-09-24T20:22:14.129Z",
-   "appBundle": "app.32f1df0f.js",
-   "rows": {
-    "C-meet-filters.04": "closed",
-    "C-discover.11": "closed",
-    "C-home.11": "still-open",
-    "C-filter-dates.01": "still-open",
-    "C-select-venue.03": "still-open",
-    "C-community-detail.01": "closed",
-    "C-venue.13": "closed"
-   },
-   "errors": [],
-   "cleanupFailed": 0,
-   "fails": [
-    {
-     "row": "C-home.11",
-     "name": "WebKit: Maybe under the Home comp card → engine reads maybe → still chosen after a reload",
-     "ev": "{\"engine\":1,\"on\":[],\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/03-home-maybe.png\"}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Dates chip",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: day cell",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Confirm",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit: one range calendar → meets/list with a 3-day range",
-     "ev": "{\"span\":1,\"s\":200,\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/04-range.png\"}"
-    },
-    {
-     "row": "C-select-venue.03",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: club venue row",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-select-venue.03",
-     "name": "WebKit: \"Club venues\" first, a tap picks it",
-     "ev": "{\"t\":\"\",\"v\":\"\",\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/05-club-venues.png\"}"
-    }
-   ]
-  },
-  {
-   "file": "fix-S4.webkit.json",
-   "at": "2026-09-24T20:42:33.426Z",
-   "appBundle": "app.c00330fb.js",
-   "rows": {
-    "C-meet-filters.04": "still-open",
-    "C-discover.11": "still-open",
-    "C-home.11": "still-open",
-    "C-filter-dates.01": "still-open",
-    "C-select-venue.03": "still-open",
-    "C-community-detail.01": "still-open",
-    "C-venue.13": "closed"
-   },
-   "errors": [
-    "home/index pageerror /uat.gripbat.com/api/meets/reviews/show due to access control checks.",
-    "home/index pageerror /uat.gripbat.com/api/clubs/settings/show due to access control checks.",
-    "home/index pageerror /uat.gripbat.com/api/meets/list due to access control checks.",
-    "home/index pageerror /uat.gripbat.com/api/competitions/list due to access control checks.",
-    "home/index pageerror /uat.gripbat.com/api/venues/locations/list due to access control checks.",
-    "home/index pageerror /uat.gripbat.com/api/i due to access control checks."
-   ],
-   "cleanupFailed": 0,
-   "fails": [
-    {
-     "row": "C-meet-filters.04",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Clubs only chip",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-meet-filters.04",
-     "name": "WebKit: Clubs only keeps the meet of the club mei owns",
-     "ev": "{\"items\":[],\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/01-clubs-only.png\"}"
-    },
-    {
-     "row": "C-discover.11",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: club-code row",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-discover.11",
-     "name": "WebKit: typing WAPSUW → the club row → the club page",
-     "ev": "{\"url\":\"https://uat.gripbat.com/app/pages/meets/index?lang=en\",\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/02-club-code.png\"}"
-    },
-    {
-     "row": "C-home.11",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Maybe chip",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-home.11",
-     "name": "WebKit: Maybe under the Home comp card → engine reads maybe → still chosen after a reload",
-     "ev": "{\"engine\":0,\"on\":[],\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/03-home-maybe.png\"}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Dates chip",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: day cell",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Confirm",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit: one range calendar → meets/list with a 3-day range",
-     "ev": "{\"span\":1,\"s\":200,\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/04-range.png\"}"
-    },
-    {
-     "row": "C-select-venue.03",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: club venue row",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-select-venue.03",
-     "name": "WebKit: \"Club venues\" first, a tap picks it",
-     "ev": "{\"t\":\"\",\"v\":\"\",\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/05-club-venues.png\"}"
-    },
-    {
-     "row": "C-community-detail.01",
-     "name": "WebKit: community-center one Back button",
-     "ev": "{\"backs\":0}"
-    }
-   ]
-  },
-  {
-   "file": "fix-S4.webkit.w45b.json",
-   "at": "2026-09-24T21:42:00.433Z",
-   "appBundle": "app.afd5e999.js",
-   "rows": {
-    "C-filter-dates.01": "still-open",
-    "C-select-venue.03": "closed",
-    "C-community-detail.01": "closed",
-    "C-venue.13": "closed"
-   },
-   "errors": [],
-   "cleanupFailed": 0,
-   "fails": [
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Dates chip",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: day cell",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit 5B/5C hit-test + >= 24 px: Confirm",
-     "ev": "{\"found\":false}"
-    },
-    {
-     "row": "C-filter-dates.01",
-     "name": "WebKit: one range calendar → meets/list with a 3-day range",
-     "ev": "{\"span\":1,\"s\":200,\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S4-webkit-shots/01-range.png\"}"
-    }
-   ]
-  },
-  {
-   "file": "fix-S4.webkit.w45c.json",
-   "at": "2026-09-24T21:48:01.919Z",
-   "appBundle": "app.5102f936.js",
-   "rows": {
-    "C-filter-dates.01": "closed",
-    "C-select-venue.03": "closed",
-    "C-community-detail.01": "closed",
-    "C-venue.13": "closed"
-   },
-   "errors": [],
-   "cleanupFailed": 0,
-   "fails": []
-  },
-  {
-   "file": "fix-S4.webkit.final.json",
-   "at": "2026-09-24T21:52:57.026Z",
-   "appBundle": "app.5102f936.js",
-   "rows": {
-    "C-meet-filters.04": "closed"
-   },
-   "errors": [
-    "keyboard.type: Target page, context or browser has been closed\n    at D:\\tmp\\gb-uat-tools\\fix-S4.webkit.cjs:86:285"
-   ],
-   "cleanupFailed": 0,
-   "fails": []
-  }
- ],
- "cleanupFailed": 0
+ "cleanupFailed": 0,
+ "note": "Two consecutive clean grades (every cell passed in both); a third grade was not needed. Earlier unstable runs (PC at 100 % CPU, no hydration waits) are kept in fix-S4.webkit.runs-earlier.json."
 }

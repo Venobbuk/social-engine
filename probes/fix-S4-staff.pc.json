@@ -1,0 +1,153 @@
+{
+ "id": "fix-S4-staff",
+ "at": "2026-09-25T07:42:06.978Z",
+ "run": "26d6e9",
+ "rows": {
+  "C-root-layout.04": {
+   "id": "C-root-layout.04",
+   "checks": 9,
+   "passed": 9,
+   "status": "closed",
+   "evidence": [
+    "ok SSO as an hkpl TENANT_ADMIN of boyau-uat → adapter/sso staff:true → the engine account is moderator + administrator (i)",
+    "ok S1 staff raises a banner (admin/announcements/create 200) → the public announcements door lists it → /app/ at 390 px (WebKit, iPhone 13, read by probe persona amy: UAT hides [probe] items from testers) shows it; staff clears it (isActive false) → gone from the door and the app",
+    "ok N non-staff (amy) refused: admin/announcements/create and /update",
+    "ok S2 staff switches maintenance on → gb/status on (with the note) → off → gb/status off",
+    "ok N non-staff (amy) refused: gb/maintenance",
+    "ok S3 amy files a [probe] report on the test persona host-ken (users/report-abuse 204) → staff lists it → resolves it (admin/resolve-abuse-user-report) → it reads resolved",
+    "ok N non-staff (amy) refused: admin/abuse-user-reports and admin/resolve-abuse-user-report",
+    "ok S4 staff reads admin/meta (200, the settings object; nothing written); non-staff (amy) refused",
+    "ok D hkpl sets the same person to PLAYER → the next SSO says staff:false, same engine account, no longer moderator/admin; admin/meta, admin/announcements/create and gb/maintenance 403"
+   ]
+  }
+ },
+ "checks": [
+  {
+   "row": "C-root-layout.04",
+   "name": "SSO as an hkpl TENANT_ADMIN of boyau-uat → adapter/sso staff:true → the engine account is moderator + administrator (i)",
+   "pass": true,
+   "ev": "{\"sso\":{\"s\":200,\"staff\":true,\"claims\":{\"tenant\":\"boyau-uat\",\"role\":\"TENANT_ADMIN\"}},\"i\":{\"isModerator\":true,\"isAdmin\":true}}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "S1 staff raises a banner (admin/announcements/create 200) → the public announcements door lists it → /app/ at 390 px (WebKit, iPhone 13, read by probe persona amy: UAT hides [probe] items from testers) shows it; staff clears it (isActive false) → gone from the door and the app",
+   "pass": true,
+   "ev": "{\"create\":200,\"update\":204,\"publicRaw\":\"[{\\\"id\\\":\\\"ark7w723aco801z9\\\",\\\"createdAt\\\":\\\"2026-09-25T07:42:27.003Z\\\",\\\"updatedAt\\\":null,\\\"title\\\":\\\"[probe] fix-S4 staff banner 26d6e9\\\",\\\"text\\\":\\\"fix-S4 staff probe — a server banner raised and cleared by GripBat staff.\\\",\\\"imageUrl\\\":null,\\\"icon\\\":\\\"warning\\\",\\\"display\\\":\\\"banner\\\",\\\"forYou\\\":false,\\\"needConfirmationToRead\\\":false,\\\"silence\\\":true}]\",\"onBars\":[\"[probe] fix-S4 staff banner 26d6e9 fix-S4 staff probe — a server banner raised and cleared by GripBat staff. Hide\"],\"onDom\":{\"sb\":1,\"textHas\":true,\"hidden\":null,\"head\":\"<!----><taro-view-core data-ctl=\\\"button\\\" aria-label=\\\"[probe] fix-S4 staff banner 26d6e9\\\" class=\\\"sb-bar sb-warning\\\" tabindex=\\\"0\\\" role=\\\"button\\\"><!----><taro-view-core class=\\\"sb-body\\\"><!----><taro-text-c\"},\"onCons\":[],\"onNet\":[{\"s\":200,\"req\":\"{\\\"limit\\\":10,\\\"isActive\\\":true,\\\"i\\\":\\\"1M1iuG6Dr68j2QbI\\\"}\",\"n\":1,\"raw\":\"[{\\\"id\\\":\\\"ark7w723aco801z9\\\",\\\"createdAt\\\":\\\"2026-09-25T07:42:27.003Z\\\",\\\"updatedAt\\\":null,\\\"title\\\":\\\"[probe] fix-S4 staff banner 26d6e9\\\",\\\"text\\\":\\\"fix-S4 staff probe — a server banner raised and cleared by GripBat staff.\\\",\\\"imageUrl\\\":null,\\\"icon\\\":\\\"warning\\\",\\\"display\\\":\\\"banner\\\",\\\"fo"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "N non-staff (amy) refused: admin/announcements/create and /update",
+   "pass": true,
+   "ev": "{\"create\":\"403 ROLE_PERMISSION_DENIED\",\"update\":\"403 ROLE_PERMISSION_DENIED\"}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "S2 staff switches maintenance on → gb/status on (with the note) → off → gb/status off",
+   "pass": true,
+   "ev": "{\"on\":200,\"status1\":{\"on\":true,\"until\":null,\"message\":\"[probe] fix-S4 staff maintenance 26d6e9\",\"at\":\"2026-09-25T07:43:52.095Z\"},\"off\":200,\"status2\":{\"on\":false,\"until\":null,\"message\":null,\"at\":null}}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "N non-staff (amy) refused: gb/maintenance",
+   "pass": true,
+   "ev": "{\"s\":403,\"code\":\"NOT_GRIPBAT_STAFF\"}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "S3 amy files a [probe] report on the test persona host-ken (users/report-abuse 204) → staff lists it → resolves it (admin/resolve-abuse-user-report) → it reads resolved",
+   "pass": true,
+   "ev": "{\"report\":204,\"listed\":true,\"resolve\":204,\"resolved\":true}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "N non-staff (amy) refused: admin/abuse-user-reports and admin/resolve-abuse-user-report",
+   "pass": true,
+   "ev": "{\"list\":\"403 ROLE_PERMISSION_DENIED\",\"resolve\":\"403 ROLE_PERMISSION_DENIED\"}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "S4 staff reads admin/meta (200, the settings object; nothing written); non-staff (amy) refused",
+   "pass": true,
+   "ev": "{\"staff\":200,\"keys\":135,\"amy\":\"403 ROLE_PERMISSION_DENIED\"}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "D hkpl sets the same person to PLAYER → the next SSO says staff:false, same engine account, no longer moderator/admin; admin/meta, admin/announcements/create and gb/maintenance 403",
+   "pass": true,
+   "ev": "{\"staff\":false,\"claims\":{\"tenant\":\"boyau-uat\",\"role\":\"PLAYER\"},\"isAdmin\":false,\"isModerator\":false,\"meta\":403,\"annCreate\":403,\"maintenance\":403,\"sameAccount\":true}"
+  }
+ ],
+ "plants": [
+  {
+   "name": "the staff token passes the door amy is refused at (admin/meta 200 vs 403) — the 403 checks can fail",
+   "fired": true
+  },
+  {
+   "name": "the banner check can see a banner (it saw the probe banner while active)",
+   "fired": true
+  },
+  {
+   "name": "run 1 (tester1, hkpl PLAYER) was refused on every staff door — the staff checks can fail",
+   "fired": true,
+   "evidence": "probes/fix-S4-staff.run1.json"
+  }
+ ],
+ "fx": {
+  "announcements": [],
+  "reports": [],
+  "hkEmail": "fs4-staff-26d6e9@example.test",
+  "hkUserId": "4991d6e5-b1fb-4c18-9b58-a6239bf93924",
+  "hkPromoted": false,
+  "engUserId": "ark7w69yaco801z4",
+  "engToken": "EeSElPhBmkmB7JSW",
+  "maintenance": false
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "announcement": "ark7w723aco801z9",
+   "del": 204
+  },
+  {
+   "engineAccount": "ark7w69yaco801z4",
+   "del": 204
+  },
+  {
+   "hkUser": "1"
+  }
+ ],
+ "leftover": {
+  "maintenanceOn": false,
+  "probeBanners": 0,
+  "unresolvedProbeReports": 0
+ },
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": [
+   "C-root-layout.04"
+  ],
+  "open": [],
+  "plants": [
+   {
+    "name": "the staff token passes the door amy is refused at (admin/meta 200 vs 403) — the 403 checks can fail",
+    "fired": true
+   },
+   {
+    "name": "the banner check can see a banner (it saw the probe banner while active)",
+    "fired": true
+   },
+   {
+    "name": "run 1 (tester1, hkpl PLAYER) was refused on every staff door — the staff checks can fail",
+    "fired": true,
+    "evidence": "probes/fix-S4-staff.run1.json"
+   }
+  ],
+  "leftover": {
+   "maintenanceOn": false,
+   "probeBanners": 0,
+   "unresolvedProbeReports": 0
+  },
+  "cleanupFailed": 0,
+  "errors": 0
+ }
+}

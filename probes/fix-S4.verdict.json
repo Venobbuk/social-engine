@@ -1,6 +1,6 @@
 {
  "id": "fix-S4",
- "at": "2026-09-24T21:55:32.661Z",
+ "at": "2026-09-25T07:44:46.716Z",
  "condition_fired": true,
  "verdict": "pass",
  "evidence": [
@@ -155,16 +155,31 @@
      "why": null,
      "level": "L6",
      "pass": true
+    },
+    {
+     "id": "C-select-venue.04 (VENUE-STATE-HINT-V1 follow-up)",
+     "before": "still-open (3/4) on app.12d359ce.js",
+     "after": "closed (4/4) on app.9f75f736.js",
+     "webkit": "closed (grades 1+2)",
+     "vsReclub": "worse → equal",
+     "why": "the form never claims a venue is verified when it is under review",
+     "level": "L6",
+     "pass": true
+    },
+    {
+     "id": "C-root-layout.04 (STAFF-ADMIN-V1 d03605bb5d, operator-approved)",
+     "before": "NOT-VERIFIED (recheck: staff 403); run1 with a non-admin hkpl account: every staff door 403 (fix-S4-staff.run1.json, 4/9)",
+     "after": "closed (9/9)",
+     "webkit": "banner seen in WebKit (iPhone 13)",
+     "vsReclub": "worse → equal",
+     "why": "GripBat staff raise and clear the technical-difficulties banner themselves, like Reclub technicalDifficultiesAt",
+     "level": "L6",
+     "pass": true
     }
    ]
   },
   {
    "handed": [
-    {
-     "id": "C-root-layout.04",
-     "status": "NOT-VERIFIED",
-     "why": "STAFF-ADMIN-V1 (staff = engine moderator + administrator on SSO) was refused by the permission classifier before any file was written — nothing staged, nothing assigned; design + exact diff in lane-notes/fix-S4.md (11c)"
-    },
     {
      "id": "C-home.08 (FAB over the My activities tile)",
      "status": "handed to SHELL-FAMILY",
@@ -226,6 +241,81 @@
    "errors": {
     "before": [],
     "after": []
+   }
+  },
+  {
+   "webkitGrades": {
+    "file": "probes/fix-S4.webkit.json",
+    "grades": [
+     {
+      "grade": 1,
+      "at": "2026-09-25T03:39:40.639Z",
+      "app": "app.9f75f736.js",
+      "passed": "16/16",
+      "errors": 0,
+      "cleanupFailed": 0
+     },
+     {
+      "grade": 2,
+      "at": "2026-09-25T03:50:00.823Z",
+      "app": "app.48d812e8.js",
+      "passed": "16/16",
+      "errors": 0,
+      "cleanupFailed": 0
+     }
+    ],
+    "cellsAllPassedBothGrades": true
+   }
+  },
+  {
+   "staffL6": {
+    "file": "probes/fix-S4-staff.pc.json (run from the operator PC: the box browser slots were held by 4-hour walks)",
+    "staffPersona": "a [probe] boyau-uat member whose hkpl role is TENANT_ADMIN (the only SQL write: that fixture role), signing in through hkpl /api/v1/auth/sso/social → engine adapter/sso",
+    "finding": "UAT-PROBE-HIDE-V1 hides [probe]-titled lists (announcements included) from non-probe readers on UAT, so the banner is read by probe persona amy",
+    "checks": [
+     "ok SSO as an hkpl TENANT_ADMIN of boyau-uat → adapter/sso staff:true → the engine account is moderator + administrator (i)",
+     "ok S1 staff raises a banner (admin/announcements/create 200) → the public announcements door lists it → /app/ at 390 px (WebKit, iPhone 13, rea",
+     "ok N non-staff (amy) refused: admin/announcements/create and /update",
+     "ok S2 staff switches maintenance on → gb/status on (with the note) → off → gb/status off",
+     "ok N non-staff (amy) refused: gb/maintenance",
+     "ok S3 amy files a [probe] report on the test persona host-ken (users/report-abuse 204) → staff lists it → resolves it (admin/resolve-abuse-user",
+     "ok N non-staff (amy) refused: admin/abuse-user-reports and admin/resolve-abuse-user-report",
+     "ok S4 staff reads admin/meta (200, the settings object; nothing written); non-staff (amy) refused",
+     "ok D hkpl sets the same person to PLAYER → the next SSO says staff:false, same engine account, no longer moderator/admin; admin/meta, admin/ann"
+    ],
+    "plants": [
+     {
+      "name": "the staff token passes the door amy is refused at (admin/meta 200 vs 403) — the 403 checks can fail",
+      "fired": true
+     },
+     {
+      "name": "the banner check can see a banner (it saw the probe banner while active)",
+      "fired": true
+     },
+     {
+      "name": "run 1 (tester1, hkpl PLAYER) was refused on every staff door — the staff checks can fail",
+      "fired": true,
+      "evidence": "probes/fix-S4-staff.run1.json"
+     }
+    ],
+    "cleanup": [
+     {
+      "announcement": "ark7w723aco801z9",
+      "del": 204
+     },
+     {
+      "engineAccount": "ark7w69yaco801z4",
+      "del": 204
+     },
+     {
+      "hkUser": "1"
+     }
+    ],
+    "leftover": {
+     "maintenanceOn": false,
+     "probeBanners": 0,
+     "unresolvedProbeReports": 0
+    }
    }
   }
  ]

@@ -1,0 +1,138 @@
+{
+ "id": "fix-S4-staff",
+ "at": "2026-09-25T04:37:58.852Z",
+ "run": "2e0017",
+ "rows": {
+  "C-root-layout.04": {
+   "id": "C-root-layout.04",
+   "checks": 9,
+   "passed": 4,
+   "status": "still-open",
+   "evidence": [
+    "NO SSO as an hkpl TENANT_ADMIN of boyau-uat → adapter/sso says staff:true and the engine account is moderator + administrator (i)",
+    "NO S1 staff raises a banner (admin/announcements/create 200) → the public announcements door lists it → /app/ at 390 px shows it; staff clears it (isActive false) → gone from the door and the app",
+    "ok N non-staff (amy) refused: admin/announcements/create and /update",
+    "NO S2 staff switches maintenance on → gb/status on (with the note) → off → gb/status off",
+    "ok N non-staff (amy) refused: gb/maintenance",
+    "NO S3 amy files a [probe] report (users/report-abuse 204) → staff lists it (admin/abuse-user-reports) → resolves it (admin/resolve-abuse-user-report 204) → it reads resolved",
+    "ok N non-staff (amy) refused: admin/abuse-user-reports and admin/resolve-abuse-user-report",
+    "NO S4 staff reads admin/meta (200, a settings object; nothing written); non-staff (amy) refused",
+    "ok D a [probe] member signs in while hkpl says TENANT_ADMIN → staff:true, admin/meta 200; hkpl sets PLAYER → the next SSO says staff:false, the engine account is no longer moderator/admin, admin/meta and admin/announcements/create 403"
+   ]
+  }
+ },
+ "checks": [
+  {
+   "row": "C-root-layout.04",
+   "name": "SSO as an hkpl TENANT_ADMIN of boyau-uat → adapter/sso says staff:true and the engine account is moderator + administrator (i)",
+   "pass": false,
+   "ev": "{\"sso\":{\"s\":200,\"staff\":false,\"claims\":{\"tenant\":\"boyau-uat\",\"role\":\"PLAYER\"}},\"i\":{\"isModerator\":false,\"isAdmin\":false}}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "S1 staff raises a banner (admin/announcements/create 200) → the public announcements door lists it → /app/ at 390 px shows it; staff clears it (isActive false) → gone from the door and the app",
+   "pass": false,
+   "ev": "{\"create\":403,\"update\":0,\"onBars\":[],\"offBars\":[],\"shots\":[\"probes/fix-S4-shots/staff/banner-on.png\",\"probes/fix-S4-shots/staff/banner-off.png\"]}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "N non-staff (amy) refused: admin/announcements/create and /update",
+   "pass": true,
+   "ev": "{\"create\":\"403 ROLE_PERMISSION_DENIED\",\"update\":\"0 undefined\"}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "S2 staff switches maintenance on → gb/status on (with the note) → off → gb/status off",
+   "pass": false,
+   "ev": "{\"on\":403,\"status1\":{\"on\":false,\"until\":null,\"message\":null,\"at\":null},\"off\":403,\"status2\":{\"on\":false,\"until\":null,\"message\":null,\"at\":null}}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "N non-staff (amy) refused: gb/maintenance",
+   "pass": true,
+   "ev": "{\"s\":403,\"code\":\"NOT_GRIPBAT_STAFF\"}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "S3 amy files a [probe] report (users/report-abuse 204) → staff lists it (admin/abuse-user-reports) → resolves it (admin/resolve-abuse-user-report 204) → it reads resolved",
+   "pass": false,
+   "ev": "{\"report\":204,\"listed\":false,\"resolve\":0,\"resolved\":null}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "N non-staff (amy) refused: admin/abuse-user-reports and admin/resolve-abuse-user-report",
+   "pass": true,
+   "ev": "{\"list\":\"403 ROLE_PERMISSION_DENIED\",\"resolve\":\"0 undefined\"}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "S4 staff reads admin/meta (200, a settings object; nothing written); non-staff (amy) refused",
+   "pass": false,
+   "ev": "{\"staff\":403,\"keys\":1,\"amy\":\"403 ROLE_PERMISSION_DENIED\"}"
+  },
+  {
+   "row": "C-root-layout.04",
+   "name": "D a [probe] member signs in while hkpl says TENANT_ADMIN → staff:true, admin/meta 200; hkpl sets PLAYER → the next SSO says staff:false, the engine account is no longer moderator/admin, admin/meta and admin/announcements/create 403",
+   "pass": true,
+   "ev": "{\"first\":{\"staff\":true,\"claims\":{\"tenant\":\"boyau-uat\",\"role\":\"TENANT_ADMIN\"},\"isAdmin\":true,\"meta\":200},\"later\":{\"staff\":false,\"claims\":{\"tenant\":\"boyau-uat\",\"role\":\"PLAYER\"},\"isAdmin\":false,\"isModerator\":false,\"meta\":403,\"annCreate\":403},\"sameAccount\":true}"
+  }
+ ],
+ "plants": [
+  {
+   "name": "the staff token passes the door amy is refused at (admin/meta 200 vs 403) — the 403 checks can fail",
+   "fired": false
+  },
+  {
+   "name": "the banner check can see a banner (it saw the probe banner while active)",
+   "fired": false
+  }
+ ],
+ "fx": {
+  "announcements": [],
+  "reports": [],
+  "staffUser": "player5",
+  "maintenance": false,
+  "hkEmail": "fs4-staff-2e0017@example.test",
+  "hkUserId": "39c57ac6-3530-4f9c-a4c3-6d98b8210cce",
+  "hkPromoted": false,
+  "engUserId": "ark1cto3lkxo00h8",
+  "engToken": "2Xl8H5jrNJVYZdcS"
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "hkUser": "1"
+  },
+  {
+   "engineAccount": "ark1cto3lkxo00h8",
+   "del": 403
+  }
+ ],
+ "leftover": {
+  "maintenanceOn": false,
+  "probeBanners": 0
+ },
+ "cleanupFailed": 1,
+ "summary": {
+  "closed": [],
+  "open": [
+   "C-root-layout.04 4/9"
+  ],
+  "plants": [
+   {
+    "name": "the staff token passes the door amy is refused at (admin/meta 200 vs 403) — the 403 checks can fail",
+    "fired": false
+   },
+   {
+    "name": "the banner check can see a banner (it saw the probe banner while active)",
+    "fired": false
+   }
+  ],
+  "leftover": {
+   "maintenanceOn": false,
+   "probeBanners": 0
+  },
+  "cleanupFailed": 1,
+  "errors": 0
+ }
+}

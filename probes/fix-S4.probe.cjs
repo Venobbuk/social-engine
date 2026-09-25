@@ -453,6 +453,27 @@ const dayIso = (days, h) => { const d = new Date(Date.now() + days * 86400e3); d
       chk('G2', 'meet share card (crawler UA): og:image + og:url on uat.gripbat.com, image 200, no "silkvo" anywhere in the card', img.startsWith(APP + '/') && url.startsWith(APP + '/app/pages/meet/index?id=' + MF.id) && ir && ir.status === 200 && !/silkvo/.test(t), { img, url, imgStatus: ir && ir.status, silkvo: (t.match(/silkvo/g) || []).length });
     });
 
+    // ================= K15 meet form venue hint says the venue's REAL state (Under review vs Verified)
+    await step('K15', async () => {
+      const vname = P + 'hint court ' + RUN;
+      const cv = await must('venues/create', { name: vname, address: P + '1 Probe Road ' + RUN, lat: 22.3011, lng: 114.1712 }, amy); FX.venues.push(cv.id);
+      const st = sql(`select status from venue where id=${lit(cv.id)}`);
+      const H = await newPage(amy, 'K15');
+      await H.go('meet-create/index');
+      const pickBy = async (q, name) => {
+        const vin = await H.page.$('input[placeholder="Search venues or type a place"], input[placeholder="搜尋場地或輸入地點"]'); if (!vin) return false;
+        await vin.click({ clickCount: 3 }); await H.page.keyboard.press('Backspace'); await vin.type(q, { delay: 20 }); await sleep(2500);
+        const row = await H.page.evaluateHandle((n) => [...document.querySelectorAll('.mc-venue')].find((x) => (x.innerText || '').includes(n)) || null, name).then((h) => h.asElement()).catch(() => null);
+        if (!row) return false; await hitChk('C-select-venue.04', 'venue search row "' + name.slice(0, 30) + '"', row); await row.click(); await sleep(1500); return true;
+      };
+      const hintNow = () => H.page.evaluate(() => { const i = document.querySelector('input[placeholder="Search venues or type a place"], input[placeholder="搜尋場地或輸入地點"]'); let r = i; for (let k = 0; k < 6 && r && !/Venue|場地/.test(r.innerText || ''); k++) r = r.parentElement; return r ? (r.innerText || '').replace(/\s+/g, ' ').slice(0, 160) : ''; }).catch(() => '');
+      const p1 = await pickBy(RUN, vname); await sleep(1200); const h1 = await hintNow(); const sh1 = await H.shot('under-review');
+      const p2 = await pickBy('Kowloon Park', 'Kowloon Park Sports Centre'); await sleep(1500); const h2 = await hintNow(); const sh2 = await H.shot('verified');
+      await H.go('meet-create/index', 'zh_Hant'); const p3 = await pickBy(RUN, vname); await sleep(1500); const h3 = await hintNow(); const sh3 = await H.shot('under-review-zh');
+      chk('C-select-venue.04', 'meet form hint = the venue\'s real state: a just-added venue (' + st + ') reads "Under review" (never "Verified venue"); Kowloon Park (verified) reads "Verified venue"; 繁 審核中', st === 'under_review' && p1 && /Under review/.test(h1) && !/Verified venue/.test(h1) && p2 && /Verified venue/.test(h2) && p3 && /審核中/.test(h3) && !/已認證場地/.test(h3), { h1, h2, h3, sh1, sh2, sh3 }, { before: 'worse', after: 'equal', why: 'the form never claims a venue is verified when it is under review' });
+      await H.ctx.close();
+    });
+
     // ================= plants (G16.1): the checks must be able to fail
     await step('PLANT', async () => {
       const H = await newPage(mei, 'PLANT');

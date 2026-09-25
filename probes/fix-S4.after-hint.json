@@ -1,0 +1,108 @@
+{
+ "id": "fix-S4",
+ "mode": "after-hint",
+ "at": "2026-09-25T03:31:20.619Z",
+ "run": "em0fc",
+ "build": {
+  "engineRev": "d03605bb5daffeb714ecead632a77090cc743a45",
+  "appBundle": "app.9f75f736.js"
+ },
+ "rows": {
+  "C-select-venue.04": {
+   "id": "C-select-venue.04",
+   "checks": 4,
+   "passed": 4,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test + >=24px: venue search row \"[probe] fix-S4 hint court em0f\" :: {\"size\":{\"w\":298,\"h\":56},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}",
+    "ok 5B/5C finger hit-test + >=24px: venue search row \"Kowloon Park Sports Centre\" :: {\"size\":{\"w\":298,\"h\":74},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}",
+    "ok 5B/5C finger hit-test + >=24px: venue search row \"[probe] fix-S4 hint court em0f\" :: {\"size\":{\"w\":298,\"h\":56},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}",
+    "ok meet form hint = the venue's real state: a just-added venue (under_review) reads \"Under review\" (never \"Verified venue\"); Kowloon Park (verified) reads \"Verified venue\"; 繁 審核中 :: {\"h1\":\"Venue Under review\",\"h2\":\"Venue Verified venue\",\"h3\":\"場地 審核中\",\"sh1\":\"probes/fix-S4-shots/after-hint/K15-under-review.png\",\"sh2\":\"probes/fix-S4-shots/after-hint/K15-verified.png\",\"sh3\":\"probes/fix-S4-shots/after-hint/K15-under-review-zh.png\"}"
+   ],
+   "vsReclub": {
+    "before": "worse",
+    "after": "equal",
+    "why": "the form never claims a venue is verified when it is under review"
+   }
+  }
+ },
+ "checks": [
+  {
+   "row": "C-select-venue.04",
+   "name": "5B/5C finger hit-test + >=24px: venue search row \"[probe] fix-S4 hint court em0f\"",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":298,\"h\":56},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}"
+  },
+  {
+   "row": "C-select-venue.04",
+   "name": "5B/5C finger hit-test + >=24px: venue search row \"Kowloon Park Sports Centre\"",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":298,\"h\":74},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}"
+  },
+  {
+   "row": "C-select-venue.04",
+   "name": "5B/5C finger hit-test + >=24px: venue search row \"[probe] fix-S4 hint court em0f\"",
+   "pass": true,
+   "ev": "{\"size\":{\"w\":298,\"h\":56},\"rest\":true,\"end\":\"offscreen\",\"ok\":true}"
+  },
+  {
+   "row": "C-select-venue.04",
+   "name": "meet form hint = the venue's real state: a just-added venue (under_review) reads \"Under review\" (never \"Verified venue\"); Kowloon Park (verified) reads \"Verified venue\"; 繁 審核中",
+   "pass": true,
+   "ev": "{\"h1\":\"Venue Under review\",\"h2\":\"Venue Verified venue\",\"h3\":\"場地 審核中\",\"sh1\":\"probes/fix-S4-shots/after-hint/K15-under-review.png\",\"sh2\":\"probes/fix-S4-shots/after-hint/K15-verified.png\",\"sh3\":\"probes/fix-S4-shots/after-hint/K15-under-review-zh.png\"}"
+  }
+ ],
+ "plants": [],
+ "fx": {
+  "clubs": [],
+  "meets": [
+   "arjyxbvnphyb0004"
+  ],
+  "comps": [],
+  "venues": [
+   "arjyxc1rphyb000f"
+  ],
+  "accts": [],
+  "F": "ari4he5s3hac000m",
+  "venueIds0": [],
+  "venuesSet": true,
+  "meiFollowsF": "0"
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "meet": "arjyxbvnphyb0004",
+   "cancel": 200
+  },
+  {
+   "meetRows": "arjyxbvnphyb0004",
+   "del": "1"
+  },
+  {
+   "venue": "arjyxc1rphyb000f",
+   "s": 403
+  },
+  {
+   "venuesByName": "1"
+  },
+  {
+   "clubVenuesRestored": 200,
+   "to": []
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "leftover": "0/0/0/0",
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": [
+   "C-select-venue.04"
+  ],
+  "open": [],
+  "plants": [],
+  "leftover": "0/0/0/0",
+  "cleanupFailed": 0,
+  "errors": 0
+ }
+}
