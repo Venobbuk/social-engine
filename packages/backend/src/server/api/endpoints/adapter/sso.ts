@@ -33,9 +33,9 @@
  *   for itself; a production engine must never list the UAT tenant), holds it; a sign-in through a GripBat tenant with
  *   any other role drops it (demotion follows the host). A sign-in through another tenant (the league) says nothing
  *   and changes nothing.
- *   Batch-1 review fix: the role is PLAIN — isModerator false, no Misskey moderator or admin power (no DM read, no
- *   instance-wide note delete, no channel edit). It opens only the doors that check it by id (modules/staff.ts):
- *   clubs/claims/list|decide and venues/staff-update.
+ *   STAFF-ADMIN-V1 (2026-09-25, operator: "Yes, full moderator + administrator" — the same people run hkpl and GripBat):
+ *   the role is a FULL moderator + administrator role (supersedes the batch-1 "plain role" review fix). It still opens
+ *   the id-checked doors (modules/staff.ts) and now every Misskey moderator/admin door too. Assignment rule unchanged.
  */
 import { createPublicKey, createVerify, randomBytes, createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -417,9 +417,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	private async ensureStaffRole(): Promise<void> {
 		const existing = await this.rolesRepository.findOneBy({ id: STAFF_ROLE_ID });
 		if (existing) {
-			// batch-1 review fix: a row made by an earlier build as a moderator role is demoted to a plain role
-			if (existing.isModerator || existing.isAdministrator) {
-				await this.rolesRepository.update(STAFF_ROLE_ID, { isModerator: false, isAdministrator: false, updatedAt: new Date() });
+			// STAFF-ADMIN-V1: a row made by an earlier build as a plain role is promoted to moderator + administrator
+			if (!existing.isModerator || !existing.isAdministrator) {
+				await this.rolesRepository.update(STAFF_ROLE_ID, { isModerator: true, isAdministrator: true, description: STAFF_ROLE_DESCRIPTION, updatedAt: new Date() });
 				this.globalEventService.publishInternalEvent('roleUpdated', await this.rolesRepository.findOneByOrFail({ id: STAFF_ROLE_ID }));
 			}
 			return;
@@ -428,9 +428,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		try {
 			const created = await this.rolesRepository.insertOne({
 				id: STAFF_ROLE_ID, updatedAt: now, lastUsedAt: now, name: 'GripBat staff',
-				description: 'The host\'s admins (hkpl SUPER_ADMIN, or TENANT_ADMIN of a GripBat tenant), synced at every SSO sign-in (STAFF-ROLE-V1). A plain role: it opens only the club-claim queue and venue verification (modules/staff.ts), no moderator power.',
+				description: STAFF_ROLE_DESCRIPTION,
 				color: null, iconUrl: null, target: 'manual', condFormula: {} as MiRole['condFormula'], isPublic: false, asBadge: false,
-				isModerator: false, isAdministrator: false, isExplorable: false, preserveAssignmentOnMoveAccount: false, canEditMembersByModerator: false,
+				isModerator: true, isAdministrator: true, isExplorable: false, preserveAssignmentOnMoveAccount: false, canEditMembersByModerator: false,
 				displayOrder: 0, policies: {},
 			});
 			this.globalEventService.publishInternalEvent('roleCreated', created);
@@ -465,3 +465,6 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		}
 	}
 }
+
+// STAFF-ADMIN-V1 — the staff role row's description (also the ship marker: a string in code, not a comment)
+const STAFF_ROLE_DESCRIPTION = 'GripBat staff: full moderator and administrator (STAFF-ADMIN-V1). The host\'s admins (hkpl SUPER_ADMIN, or TENANT_ADMIN of a GripBat tenant), synced at every SSO sign-in (STAFF-ROLE-V1).';
