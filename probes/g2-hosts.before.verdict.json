@@ -1,0 +1,17 @@
+{
+ "id": "g2-hosts.before",
+ "at": "2026-09-25T03:49:36.501Z",
+ "condition_fired": true,
+ "verdict": "fail",
+ "evidence": [
+  "/root/social-engine/probes/g2-hosts.before.json",
+  "A-crawler 12/20",
+  "B-misskey-pages 0/197",
+  "C-controls 59/59",
+  "D-activitypub 8/8",
+  "E-media 2/10",
+  "F-emitted 0/5",
+  "G-network 7/12",
+  "cleanup: amy avatar+fields restored; FAILED club restore channels/update 500 {\"error\":{\"message\":\"Internal error occurred. Please contact us if the error persists.\",\"code\":\"INTERNAL_ERROR\",\"id\":\"5d37dbcb-891e-41ca-a3d6-e690c97775ac\",\"kind\":\"server\",\"info\":{\"e\":{\"message\":\"Cann; file arjzj8cvphyb003c deleted; file arjzj8vpphyb003d deleted"
+ ]
+}

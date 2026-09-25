@@ -1,0 +1,18 @@
+{
+ "id": "g2-hosts",
+ "at": "2026-09-25T06:48:09.283Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "/root/social-engine/probes/g2-hosts.after.json",
+  "A-crawler 18/18",
+  "B-misskey-pages 197/197",
+  "C-controls 59/59",
+  "D-activitypub 8/8",
+  "E-media 10/10",
+  "F-emitted 5/5",
+  "G-network 12/12",
+  "H-profile-door 2/2",
+  "cleanup: amy avatar+fields restored; file ark5wjvgaco800sl deleted; file ark5wkugaco800sm deleted; readback files-left/club-banner 0/NULL (club banner before: NULL)"
+ ]
+}

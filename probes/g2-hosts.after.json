@@ -1,0 +1,2184 @@
+{
+ "id": "g2-hosts",
+ "mode": "after",
+ "at": "2026-09-25T06:46:13.430Z",
+ "fixtures": {
+  "live": {
+   "mid": "ar7uzm8ts64a012h",
+   "cid": "ar7o90brs64a0017",
+   "uid": "aqxxu4p6sfmc000c",
+   "u": "demo_ken",
+   "compId": "",
+   "key": "8b8f7ff5-3f3b-4b87-a26d-94f4e762c350.png"
+  },
+  "uat": {
+   "mid": "ari4jxi93hac00bx",
+   "cid": "ar7o90brs64a0017",
+   "uid": "aqxxu4p6sfmc000c",
+   "u": "ken",
+   "compId": "ark5qp8taco800qd",
+   "compAt": "W3rbsCvTr0tHf2Ol",
+   "key": "a8887ea8-ca1f-47ad-923c-8b013546621c.png"
+  },
+  "coachPhotoUrl": "https://uat.gripbat.com/media/files/35e050bb-059d-450e-a847-80527e04e381.png",
+  "clubWithCover": "ari4he5s3hac000m"
+ },
+ "rows": {
+  "A-crawler": {
+   "id": "A-crawler",
+   "checks": 18,
+   "passed": 18
+  },
+  "B-misskey-pages": {
+   "id": "B-misskey-pages",
+   "checks": 197,
+   "passed": 197
+  },
+  "C-controls": {
+   "id": "C-controls",
+   "checks": 59,
+   "passed": 59
+  },
+  "D-activitypub": {
+   "id": "D-activitypub",
+   "checks": 8,
+   "passed": 8
+  },
+  "E-media": {
+   "id": "E-media",
+   "checks": 10,
+   "passed": 10
+  },
+  "F-emitted": {
+   "id": "F-emitted",
+   "checks": 5,
+   "passed": 5
+  },
+  "G-network": {
+   "id": "G-network",
+   "checks": 12,
+   "passed": 12
+  },
+  "H-profile-door": {
+   "id": "H-profile-door",
+   "checks": 2,
+   "passed": 2
+  }
+ },
+ "checks": [
+  {
+   "row": "A-crawler",
+   "name": "live facebookexternalhit meet 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/app/pages/meet/index?id=ar7uzm8ts64a012h\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://gripbat.com/app/static/boyau/img/jardim-kovalova-net-card.jpg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "live facebookexternalhit club 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/clubs/ar7o90brs64a0017\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://gripbat.com/app/static/boyau/img/hunter-s-pt-community-pk-td-2023-08-21-0-card.jpg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "live facebookexternalhit profile 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://gripbat.com/share/avatar/aqxxu4p6sfmc000c.svg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "live facebookexternalhit mkProfile 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/@demo_ken\",\"hops\":[\"302>https://gripbat.com/app/pages/link/index?u=demo_ken\",\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"\",\"ogImageStatus\":null,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "live Twitterbot meet 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/app/pages/meet/index?id=ar7uzm8ts64a012h\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://gripbat.com/app/static/boyau/img/jardim-kovalova-net-card.jpg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "live Twitterbot club 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/clubs/ar7o90brs64a0017\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://gripbat.com/app/static/boyau/img/hunter-s-pt-community-pk-td-2023-08-21-0-card.jpg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "live Twitterbot profile 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://gripbat.com/share/avatar/aqxxu4p6sfmc000c.svg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "live Twitterbot mkProfile 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/@demo_ken\",\"hops\":[\"302>https://gripbat.com/app/pages/link/index?u=demo_ken\",\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"\",\"ogImageStatus\":null,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat facebookexternalhit meet 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app/pages/meet/index?id=ari4jxi93hac00bx\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://uat.gripbat.com/app/static/boyau/img/spanish-armada-and-u-s-armed-forces-comp-4-card.jpg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat facebookexternalhit club 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/clubs/ar7o90brs64a0017\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://uat.gripbat.com/app/static/boyau/img/hunter-s-pt-community-pk-td-2023-08-21-0-card.jpg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat facebookexternalhit profile 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://uat.gripbat.com/share/avatar/aqxxu4p6sfmc000c.svg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat facebookexternalhit competition 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app/pages/tournament/index?id=ark5qp8taco800qd&at=W3rbsCvTr0tHf2Ol\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"\",\"ogImageStatus\":null,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat facebookexternalhit mkProfile 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/@ken\",\"hops\":[\"302>https://uat.gripbat.com/app/pages/link/index?u=ken\",\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"\",\"ogImageStatus\":null,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat Twitterbot meet 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app/pages/meet/index?id=ari4jxi93hac00bx\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://uat.gripbat.com/app/static/boyau/img/spanish-armada-and-u-s-armed-forces-comp-4-card.jpg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat Twitterbot club 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/clubs/ar7o90brs64a0017\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://uat.gripbat.com/app/static/boyau/img/hunter-s-pt-community-pk-td-2023-08-21-0-card.jpg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat Twitterbot profile 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"https://uat.gripbat.com/share/avatar/aqxxu4p6sfmc000c.svg\",\"ogImageStatus\":200,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat Twitterbot competition 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app/pages/tournament/index?id=ark5qp8taco800qd&at=W3rbsCvTr0tHf2Ol\",\"hops\":[\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"\",\"ogImageStatus\":null,\"where\":\"\"}"
+  },
+  {
+   "row": "A-crawler",
+   "name": "uat Twitterbot mkProfile 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/@ken\",\"hops\":[\"302>https://uat.gripbat.com/app/pages/link/index?u=ken\",\"200\"],\"final\":200,\"silkvo\":0,\"ogImage\":\"\",\"ogImageStatus\":null,\"where\":\"\"}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /@{u}",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/@demo_ken\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/link/index?u=demo_ken\",\"want\":\"/app/pages/link/index?u=demo_ken\",\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /@{u}/following",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/@demo_ken/following\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/link/index?u=demo_ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /@{u}/followers",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/@demo_ken/followers\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/link/index?u=demo_ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /@{u}/pages/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/@demo_ken/pages/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/link/index?u=demo_ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /@{u}.rss",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/@demo_ken.rss\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/link/index?u=demo_ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /@{u}.json",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/@demo_ken.json\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/link/index?u=demo_ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /timeline",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/timeline\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /notes/aaaaaaaaaa",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/notes/aaaaaaaaaa\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/feed/index?note=aaaaaaaaaa\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /list/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/list/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /clips/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/clips/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /chat",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/chat\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /chat/user/{uid}",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/chat/user/aqxxu4p6sfmc000c\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /chat/room/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/chat/room/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /chat/messages/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/chat/messages/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /instance-info/example.com",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/instance-info/example.com\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /settings",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/settings\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /settings/profile",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/settings/profile\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /reset-password",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/reset-password\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /signup-complete/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/signup-complete/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /verify-email/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/verify-email/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /announcements",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/announcements\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /announcements/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/announcements/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /about",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/about\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /contact",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/contact\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /about-misskey",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/about-misskey\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /invite",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/invite\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /ads",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/ads\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /theme-editor",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/theme-editor\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /roles/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/roles/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /user-tags/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/user-tags/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /explore",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/explore\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /search",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/search\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /authorize-follow",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/authorize-follow\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /authorize_interaction",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/authorize_interaction\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /lookup",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/lookup\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /share-compose-g2",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/share-compose-g2\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /api-console",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/api-console\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /scratchpad",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/scratchpad\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /preview",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/preview\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /auth/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/auth/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /sso",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/sso\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /miauth/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/miauth/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /tags/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/tags/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /pages",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/pages\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /pages/new",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/pages/new\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /pages/edit/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/pages/edit/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /play",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/play\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /play/new",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/play/new\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /play/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/play/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /play/x/edit",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/play/x/edit\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /gallery",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/gallery\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /gallery/new",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/gallery/new\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /gallery/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/gallery/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /gallery/x/edit",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/gallery/x/edit\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /channels",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/channels\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /channels/new",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/channels/new\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /channels/{cid}",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/channels/ar7o90brs64a0017\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/community/index?id=ar7o90brs64a0017\",\"want\":\"/app/pages/community/index?id=ar7o90brs64a0017\",\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /channels/{cid}/edit",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/channels/ar7o90brs64a0017/edit\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /custom-emojis-manager",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/custom-emojis-manager\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /avatar-decorations",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/avatar-decorations\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /registry",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/registry\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /registry/keys/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/registry/keys/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /install-extentions",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/install-extentions\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /install-extensions",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/install-extensions\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /admin",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/admin\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /admin/user/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/admin/user/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /admin/file/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/admin/file/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/notifications",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/notifications\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/favorites",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/favorites\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/achievements",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/achievements\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/drive",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/drive\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/drive/folder/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/drive/folder/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/drive/file/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/drive/file/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/follow-requests",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/follow-requests\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/lists",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/lists\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/lists/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/lists/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/clips",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/clips\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/antennas",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/antennas\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /my/antennas/create",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/my/antennas/create\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /timeline/list/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/timeline/list/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /timeline/antenna/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/timeline/antenna/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /clicker",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/clicker\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /games",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/games\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /bubble-game",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/bubble-game\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /reversi",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/reversi\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /reversi/g/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/reversi/g/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /qr",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/qr\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /debug",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/debug\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /redirect-test",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/redirect-test\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /users/{uid}",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/users/aqxxu4p6sfmc000c\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"want\":\"/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /embed/notes/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/embed/notes/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /embed/user-timeline/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/embed/user-timeline/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /embed/clips/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/embed/clips/x\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /_info_card_",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/_info_card_\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /bios",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/bios\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /cli",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/cli\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /flush",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/flush\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /api-doc",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/api-doc\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /g2-unknown-path",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/g2-unknown-path\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "live /g2/unknown/deep",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/g2/unknown/deep\",\"s\":302,\"loc\":\"https://gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /@{u}",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/@ken\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?u=ken\",\"want\":\"/app/pages/link/index?u=ken\",\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /@{u}/following",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/@ken/following\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?u=ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /@{u}/followers",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/@ken/followers\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?u=ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /@{u}/pages/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/@ken/pages/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?u=ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /@{u}.rss",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/@ken.rss\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?u=ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /@{u}.json",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/@ken.json\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?u=ken\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /timeline",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/timeline\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /notes/aaaaaaaaaa",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/notes/aaaaaaaaaa\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/feed/index?note=aaaaaaaaaa\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /list/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/list/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /clips/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/clips/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /chat",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/chat\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /chat/user/{uid}",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/chat/user/aqxxu4p6sfmc000c\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /chat/room/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/chat/room/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /chat/messages/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/chat/messages/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /instance-info/example.com",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/instance-info/example.com\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /settings",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/settings\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /settings/profile",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/settings/profile\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /reset-password",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/reset-password\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /signup-complete/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/signup-complete/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /verify-email/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/verify-email/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /announcements",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/announcements\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /announcements/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/announcements/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /about",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/about\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /contact",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/contact\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /about-misskey",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/about-misskey\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /invite",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/invite\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /ads",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/ads\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /theme-editor",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/theme-editor\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /roles/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/roles/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /user-tags/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/user-tags/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /explore",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/explore\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /search",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/search\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /authorize-follow",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/authorize-follow\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /authorize_interaction",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/authorize_interaction\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /lookup",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/lookup\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /share-compose-g2",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/share-compose-g2\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /api-console",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/api-console\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /scratchpad",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/scratchpad\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /preview",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/preview\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /auth/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/auth/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /sso",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/sso\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /miauth/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/miauth/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /tags/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/tags/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /pages",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/pages\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /pages/new",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/pages/new\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /pages/edit/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/pages/edit/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /play",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/play\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /play/new",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/play/new\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /play/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/play/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /play/x/edit",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/play/x/edit\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /gallery",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/gallery\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /gallery/new",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/gallery/new\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /gallery/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/gallery/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /gallery/x/edit",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/gallery/x/edit\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /channels",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/channels\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /channels/new",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/channels/new\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /channels/{cid}",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/channels/ar7o90brs64a0017\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/community/index?id=ar7o90brs64a0017\",\"want\":\"/app/pages/community/index?id=ar7o90brs64a0017\",\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /channels/{cid}/edit",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/channels/ar7o90brs64a0017/edit\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /custom-emojis-manager",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/custom-emojis-manager\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /avatar-decorations",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/avatar-decorations\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /registry",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/registry\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /registry/keys/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/registry/keys/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /install-extentions",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/install-extentions\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /install-extensions",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/install-extensions\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/notifications",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/notifications\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/favorites",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/favorites\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/achievements",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/achievements\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/drive",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/drive\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/drive/folder/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/drive/folder/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/drive/file/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/drive/file/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/follow-requests",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/follow-requests\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/lists",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/lists\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/lists/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/lists/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/clips",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/clips\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/antennas",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/antennas\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /my/antennas/create",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/my/antennas/create\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /timeline/list/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/timeline/list/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /timeline/antenna/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/timeline/antenna/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /clicker",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/clicker\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /games",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/games\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /bubble-game",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/bubble-game\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /reversi",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/reversi\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /reversi/g/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/reversi/g/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /qr",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/qr\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /debug",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/debug\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /redirect-test",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/redirect-test\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /users/{uid}",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/users/aqxxu4p6sfmc000c\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"want\":\"/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /embed/notes/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/embed/notes/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /embed/user-timeline/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/embed/user-timeline/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /embed/clips/x",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/embed/clips/x\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /_info_card_",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/_info_card_\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /bios",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/bios\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /cli",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/cli\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /flush",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/flush\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /api-doc",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/api-doc\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /g2-unknown-path",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/g2-unknown-path\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "B-misskey-pages",
+   "name": "uat /g2/unknown/deep",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/g2/unknown/deep\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/\",\"want\":null,\"silkvoInBody\":0}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /app/ unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/app/\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /app/pages/home/index unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/app/pages/home/index\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live POST /api/meta unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/api/meta\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /share/meet/{mid} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/share/meet/ar7uzm8ts64a012h\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /share/player/{uid} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/share/player/aqxxu4p6sfmc000c\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /identicon/g2probe@x unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/identicon/g2probe@x\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /manifest.json unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/manifest.json\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /robots.txt unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/robots.txt\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /favicon.ico unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/favicon.ico\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /.well-known/nodeinfo unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/.well-known/nodeinfo\",\"s\":403,\"loc\":\"\",\"before\":{\"s\":403,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /.well-known/host-meta unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/.well-known/host-meta\",\"s\":403,\"loc\":\"\",\"before\":{\"s\":403,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /nodeinfo/2.1 unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/nodeinfo/2.1\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /streaming unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/streaming\",\"s\":503,\"loc\":\"\",\"before\":{\"s\":503,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /files/app-default.jpg unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/files/app-default.jpg\",\"s\":500,\"loc\":\"\",\"before\":{\"s\":500,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /api.json unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/api.json\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /avatar/@{u} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/avatar/@demo_ken\",\"s\":302,\"loc\":\"https://gripbat.com/identicon/demo_ken\",\"before\":{\"s\":302,\"loc\":\"/identicon/demo_ken@social.silkvo.com\"},\"fixedTargetStatus\":200}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /clubs/{cid} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/clubs/ar7o90brs64a0017\",\"s\":302,\"loc\":\"https://gripbat.com/app/pages/community/index?id=ar7o90brs64a0017&\",\"before\":{\"s\":302,\"loc\":\"/app/pages/community/index?id=ar7o90brs64a0017&\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /terms.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/terms.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /privacy.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/privacy.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /proxy/image.webp?url=https%3A%2F%2Fmedia.social.silkvo.com%2Ffiles%2F{key} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/proxy/image.webp?url=https%3A%2F%2Fmedia.social.silkvo.com%2Ffiles%2F8b8f7ff5-3f3b-4b87-a26d-94f4e762c350.png\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /fonts/ unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/fonts/\",\"s\":404,\"loc\":\"\",\"before\":{\"s\":404,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live /cdn/ unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/cdn/\",\"s\":404,\"loc\":\"\",\"before\":{\"s\":404,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live live:/hub/ unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/hub/\",\"s\":403,\"loc\":\"\",\"before\":{\"s\":403,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live live:/uat/nav.js unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/uat/nav.js\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "live live:/depth.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/depth.html\",\"s\":404,\"loc\":\"\",\"before\":{\"s\":404,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /app/ unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app/\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /app/pages/home/index unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app/pages/home/index\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat POST /api/meta unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/api/meta\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /share/meet/{mid} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/share/meet/ari4jxi93hac00bx\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /share/player/{uid} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/share/player/aqxxu4p6sfmc000c\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /identicon/g2probe@x unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/identicon/g2probe@x\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /manifest.json unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/manifest.json\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /robots.txt unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/robots.txt\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /favicon.ico unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/favicon.ico\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /.well-known/nodeinfo unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/.well-known/nodeinfo\",\"s\":403,\"loc\":\"\",\"before\":{\"s\":403,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /.well-known/host-meta unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/.well-known/host-meta\",\"s\":403,\"loc\":\"\",\"before\":{\"s\":403,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /nodeinfo/2.1 unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/nodeinfo/2.1\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /streaming unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/streaming\",\"s\":503,\"loc\":\"\",\"before\":{\"s\":503,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /files/app-default.jpg unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/files/app-default.jpg\",\"s\":500,\"loc\":\"\",\"before\":{\"s\":500,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /api.json unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/api.json\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /avatar/@{u} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/avatar/@ken\",\"s\":302,\"loc\":\"https://uat.gripbat.com/identicon/ken\",\"before\":{\"s\":302,\"loc\":\"/identicon/ken@uat.social.silkvo.com\"},\"fixedTargetStatus\":200}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /clubs/{cid} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/clubs/ar7o90brs64a0017\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/community/index?id=ar7o90brs64a0017&\",\"before\":{\"s\":302,\"loc\":\"/app/pages/community/index?id=ar7o90brs64a0017&\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /terms.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/terms.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /privacy.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/privacy.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /proxy/image.webp?url=https%3A%2F%2Fmedia.social.silkvo.com%2Ffiles%2F{key} unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/proxy/image.webp?url=https%3A%2F%2Fmedia.social.silkvo.com%2Ffiles%2Fa8887ea8-ca1f-47ad-923c-8b013546621c.png\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /fonts/ unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/fonts/\",\"s\":404,\"loc\":\"\",\"before\":{\"s\":404,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat /cdn/ unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/cdn/\",\"s\":404,\"loc\":\"\",\"before\":{\"s\":404,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/admin unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/admin\",\"s\":302,\"loc\":\"/admin.html\",\"before\":{\"s\":302,\"loc\":\"/admin.html\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/super unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/super\",\"s\":302,\"loc\":\"/super.html\",\"before\":{\"s\":302,\"loc\":\"/super.html\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/sign-in.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/sign-in.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/qa.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/qa.html\",\"s\":404,\"loc\":\"\",\"before\":{\"s\":404,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/sandbox-gate.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/sandbox-gate.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/uat/hub.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/uat/hub.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/demo.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/demo.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/how.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/how.html\",\"s\":200,\"loc\":\"\",\"before\":{\"s\":200,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/features unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/features\",\"s\":301,\"loc\":\"https://uat.gripbat.com/features.html\",\"before\":{\"s\":301,\"loc\":\"/features.html\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/overview unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/overview\",\"s\":404,\"loc\":\"\",\"before\":{\"s\":404,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/app.html unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/app.html\",\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/home/index\",\"before\":{\"s\":302,\"loc\":\"/app/pages/home/index\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "C-controls",
+   "name": "uat uat:/css/g2.css unchanged",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/css/g2.css\",\"s\":404,\"loc\":\"\",\"before\":{\"s\":404,\"loc\":\"\"},\"fixedTargetStatus\":null}"
+  },
+  {
+   "row": "D-activitypub",
+   "name": "live /@demo_ken application/activity+json reaches the engine",
+   "pass": true,
+   "ev": "{\"s\":403,\"ct\":\"\",\"vary\":\"Accept\",\"loc\":\"\",\"body\":\"\"}"
+  },
+  {
+   "row": "D-activitypub",
+   "name": "live /@demo_ken application/ld+json reaches the engine",
+   "pass": true,
+   "ev": "{\"s\":403,\"ct\":\"\",\"vary\":\"Accept\",\"loc\":\"\",\"body\":\"\"}"
+  },
+  {
+   "row": "D-activitypub",
+   "name": "live /users/aqxxu4p6sfmc000c application/activity+json reaches the engine",
+   "pass": true,
+   "ev": "{\"s\":403,\"ct\":\"\",\"vary\":\"Accept\",\"loc\":\"\",\"body\":\"\"}"
+  },
+  {
+   "row": "D-activitypub",
+   "name": "live /users/aqxxu4p6sfmc000c application/ld+json reaches the engine",
+   "pass": true,
+   "ev": "{\"s\":403,\"ct\":\"\",\"vary\":\"Accept\",\"loc\":\"\",\"body\":\"\"}"
+  },
+  {
+   "row": "D-activitypub",
+   "name": "uat /@ken application/activity+json reaches the engine",
+   "pass": true,
+   "ev": "{\"s\":403,\"ct\":\"\",\"vary\":\"Accept\",\"loc\":\"\",\"body\":\"\"}"
+  },
+  {
+   "row": "D-activitypub",
+   "name": "uat /@ken application/ld+json reaches the engine",
+   "pass": true,
+   "ev": "{\"s\":403,\"ct\":\"\",\"vary\":\"Accept\",\"loc\":\"\",\"body\":\"\"}"
+  },
+  {
+   "row": "D-activitypub",
+   "name": "uat /users/aqxxu4p6sfmc000c application/activity+json reaches the engine",
+   "pass": true,
+   "ev": "{\"s\":403,\"ct\":\"\",\"vary\":\"Accept\",\"loc\":\"\",\"body\":\"\"}"
+  },
+  {
+   "row": "D-activitypub",
+   "name": "uat /users/aqxxu4p6sfmc000c application/ld+json reaches the engine",
+   "pass": true,
+   "ev": "{\"s\":403,\"ct\":\"\",\"vary\":\"Accept\",\"loc\":\"\",\"body\":\"\"}"
+  },
+  {
+   "row": "E-media",
+   "name": "live old stored URL still 200",
+   "pass": true,
+   "ev": "{\"url\":\"https://media.social.silkvo.com/files/8b8f7ff5-3f3b-4b87-a26d-94f4e762c350.png\",\"s\":200,\"bytes\":18313}"
+  },
+  {
+   "row": "E-media",
+   "name": "live same key on /media/files/ 200, same bytes",
+   "pass": true,
+   "ev": "{\"url\":\"https://gripbat.com/media/files/8b8f7ff5-3f3b-4b87-a26d-94f4e762c350.png\",\"s\":200,\"bytes\":18313,\"ct\":\"image/png\"}"
+  },
+  {
+   "row": "E-media",
+   "name": "live /media/ no listing / no bucket name",
+   "pass": true,
+   "ev": "{\"s\":404,\"body\":\"not found\\n\"}"
+  },
+  {
+   "row": "E-media",
+   "name": "live /media/files/g2-no-such-key.png no listing / no bucket name",
+   "pass": true,
+   "ev": "{\"s\":404,\"body\":\"not found\\n\"}"
+  },
+  {
+   "row": "E-media",
+   "name": "live /media/?list-type=2 no listing / no bucket name",
+   "pass": true,
+   "ev": "{\"s\":404,\"body\":\"not found\\n\"}"
+  },
+  {
+   "row": "E-media",
+   "name": "uat old stored URL still 200",
+   "pass": true,
+   "ev": "{\"url\":\"https://media.social.silkvo.com/files/a8887ea8-ca1f-47ad-923c-8b013546621c.png\",\"s\":200,\"bytes\":56775}"
+  },
+  {
+   "row": "E-media",
+   "name": "uat same key on /media/files/ 200, same bytes",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/media/files/a8887ea8-ca1f-47ad-923c-8b013546621c.png\",\"s\":200,\"bytes\":56775,\"ct\":\"image/png\"}"
+  },
+  {
+   "row": "E-media",
+   "name": "uat /media/ no listing / no bucket name",
+   "pass": true,
+   "ev": "{\"s\":404,\"body\":\"not found\\n\"}"
+  },
+  {
+   "row": "E-media",
+   "name": "uat /media/files/g2-no-such-key.png no listing / no bucket name",
+   "pass": true,
+   "ev": "{\"s\":404,\"body\":\"not found\\n\"}"
+  },
+  {
+   "row": "E-media",
+   "name": "uat /media/?list-type=2 no listing / no bucket name",
+   "pass": true,
+   "ev": "{\"s\":404,\"body\":\"not found\\n\"}"
+  },
+  {
+   "row": "F-emitted",
+   "name": "uat drive/files/create url + thumbnailUrl 0 silkvo",
+   "pass": true,
+   "ev": "{\"url\":\"https://uat.gripbat.com/media/files/35e050bb-059d-450e-a847-80527e04e381.png\",\"thumb\":\"https://uat.gripbat.com/media/files/thumbnail-da1002ab-52d6-4cc1-8f0e-c081742cafd4.webp\"}"
+  },
+  {
+   "row": "F-emitted",
+   "name": "uat avatar (i/update → avatarUrl) 0 silkvo, loads",
+   "pass": true,
+   "ev": "{\"avatarUrl\":\"https://uat.gripbat.com/proxy/avatar.webp?url=https%3A%2F%2Fuat.gripbat.com%2Fmedia%2Ffiles%2F35e050bb-059d-450e-a847-80527e04e381.png&avatar=1\",\"s\":200,\"ct\":\"image/webp\"}"
+  },
+  {
+   "row": "F-emitted",
+   "name": "uat club cover (channels/show bannerUrl) 0 silkvo, loads",
+   "pass": true,
+   "ev": "{\"bannerUrl\":\"https://uat.gripbat.com/media/files/2e864bba-ad54-4c7d-89ed-01ff17b858f9.png\",\"s\":200}"
+  },
+  {
+   "row": "F-emitted",
+   "name": "live default avatar (identicon) 0 silkvo, loads",
+   "pass": true,
+   "ev": "{\"avatarUrl\":\"https://gripbat.com/identicon/demo_ken\",\"s\":200,\"ct\":\"image/png\"}"
+  },
+  {
+   "row": "F-emitted",
+   "name": "uat default avatar (identicon) 0 silkvo, loads",
+   "pass": true,
+   "ev": "{\"avatarUrl\":\"https://uat.gripbat.com/identicon/ken\",\"s\":200,\"ct\":\"image/png\"}"
+  },
+  {
+   "row": "G-network",
+   "name": "live home 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/home/index\",\"requests\":49,\"drawn\":39,\"silkvo\":[],\"gripbatMedia\":[]}"
+  },
+  {
+   "row": "G-network",
+   "name": "live meets 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/meets/index\",\"requests\":32,\"drawn\":4,\"silkvo\":[],\"gripbatMedia\":[]}"
+  },
+  {
+   "row": "G-network",
+   "name": "live profile 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/locations/index\",\"requests\":27,\"drawn\":2,\"silkvo\":[],\"gripbatMedia\":[]}"
+  },
+  {
+   "row": "G-network",
+   "name": "live player 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"requests\":53,\"drawn\":11,\"silkvo\":[],\"gripbatMedia\":[]}"
+  },
+  {
+   "row": "G-network",
+   "name": "live club 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/community/index?id=ar7o90brs64a0017\",\"requests\":44,\"drawn\":6,\"silkvo\":[],\"gripbatMedia\":[]}"
+  },
+  {
+   "row": "G-network",
+   "name": "live meet 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/meet/index?id=ar7uzm8ts64a012h\",\"requests\":41,\"drawn\":3,\"silkvo\":[],\"gripbatMedia\":[]}"
+  },
+  {
+   "row": "G-network",
+   "name": "uat home 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/home/index\",\"requests\":219,\"drawn\":11,\"silkvo\":[],\"gripbatMedia\":[\"https://uat.gripbat.com/proxy/avatar.webp?url=https%3A%2F%2Fuat.gripbat.com%2Fmedia%2Ffiles%2F35e050bb-059d-450e-a847-80527e04e381.png&avatar=1\"]}"
+  },
+  {
+   "row": "G-network",
+   "name": "uat meets 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/meets/index\",\"requests\":129,\"drawn\":4,\"silkvo\":[],\"gripbatMedia\":[\"https://uat.gripbat.com/proxy/avatar.webp?url=https%3A%2F%2Fuat.gripbat.com%2Fmedia%2Ffiles%2F35e050bb-059d-450e-a847-80527e04e381.png&avatar=1\"]}"
+  },
+  {
+   "row": "G-network",
+   "name": "uat profile 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/profile/index\",\"requests\":160,\"drawn\":3,\"silkvo\":[],\"gripbatMedia\":[\"https://uat.gripbat.com/proxy/avatar.webp?url=https%3A%2F%2Fuat.gripbat.com%2Fmedia%2Ffiles%2F35e050bb-059d-450e-a847-80527e04e381.png&avatar=1\"]}"
+  },
+  {
+   "row": "G-network",
+   "name": "uat player 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/player/index?id=ari4hb3c3hac0001\",\"requests\":217,\"drawn\":4,\"silkvo\":[],\"gripbatMedia\":[\"https://uat.gripbat.com/proxy/avatar.webp?url=https%3A%2F%2Fuat.gripbat.com%2Fmedia%2Ffiles%2F35e050bb-059d-450e-a847-80527e04e381.png&avatar=1\"]}"
+  },
+  {
+   "row": "G-network",
+   "name": "uat club 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/community/index?id=ari4he5s3hac000m\",\"requests\":125,\"drawn\":3,\"silkvo\":[],\"gripbatMedia\":[\"https://uat.gripbat.com/media/files/2e864bba-ad54-4c7d-89ed-01ff17b858f9.png\"]}"
+  },
+  {
+   "row": "G-network",
+   "name": "uat meet 0 silkvo URLs (requests + drawn images)",
+   "pass": true,
+   "ev": "{\"path\":\"/app/pages/meet/index?id=ari4jxi93hac00bx\",\"requests\":137,\"drawn\":3,\"silkvo\":[],\"gripbatMedia\":[]}"
+  },
+  {
+   "row": "H-profile-door",
+   "name": "live /@demo_ken opens that person's GripBat page",
+   "pass": true,
+   "ev": "{\"start\":\"/@demo_ken\",\"landed\":\"/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"nameShown\":true,\"name\":\"Ken 陳\",\"silkvoInText\":0}"
+  },
+  {
+   "row": "H-profile-door",
+   "name": "uat /@ken opens that person's GripBat page",
+   "pass": true,
+   "ev": "{\"start\":\"/@ken\",\"landed\":\"/app/pages/player/index?id=aqxxu4p6sfmc000c\",\"nameShown\":true,\"name\":\"Ken 陳\",\"silkvoInText\":0}"
+  }
+ ],
+ "errors": [],
+ "cleanup": [
+  "amy avatar+fields restored",
+  "file ark5wjvgaco800sl deleted",
+  "file ark5wkugaco800sm deleted",
+  "readback files-left/club-banner 0/NULL (club banner before: NULL)"
+ ],
+ "notes": [
+  "live: no competition exists in social — the competition link is measured on the other host"
+ ],
+ "controls": {
+  "live /app/": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /app/pages/home/index": {
+   "s": 200,
+   "loc": ""
+  },
+  "live POST /api/meta": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /share/meet/{mid}": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /share/player/{uid}": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /identicon/g2probe@x": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /manifest.json": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /robots.txt": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /favicon.ico": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /.well-known/nodeinfo": {
+   "s": 403,
+   "loc": ""
+  },
+  "live /.well-known/host-meta": {
+   "s": 403,
+   "loc": ""
+  },
+  "live /nodeinfo/2.1": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /streaming": {
+   "s": 503,
+   "loc": ""
+  },
+  "live /files/app-default.jpg": {
+   "s": 500,
+   "loc": ""
+  },
+  "live /api.json": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /avatar/@{u}": {
+   "s": 302,
+   "loc": "/identicon/demo_ken"
+  },
+  "live /clubs/{cid}": {
+   "s": 302,
+   "loc": "/app/pages/community/index?id=ar7o90brs64a0017&"
+  },
+  "live /terms.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /privacy.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /proxy/image.webp?url=https%3A%2F%2Fmedia.social.silkvo.com%2Ffiles%2F{key}": {
+   "s": 200,
+   "loc": ""
+  },
+  "live /fonts/": {
+   "s": 404,
+   "loc": ""
+  },
+  "live /cdn/": {
+   "s": 404,
+   "loc": ""
+  },
+  "live live:/hub/": {
+   "s": 403,
+   "loc": ""
+  },
+  "live live:/uat/nav.js": {
+   "s": 200,
+   "loc": ""
+  },
+  "live live:/depth.html": {
+   "s": 404,
+   "loc": ""
+  },
+  "uat /app/": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /app/pages/home/index": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat POST /api/meta": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /share/meet/{mid}": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /share/player/{uid}": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /identicon/g2probe@x": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /manifest.json": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /robots.txt": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /favicon.ico": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /.well-known/nodeinfo": {
+   "s": 403,
+   "loc": ""
+  },
+  "uat /.well-known/host-meta": {
+   "s": 403,
+   "loc": ""
+  },
+  "uat /nodeinfo/2.1": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /streaming": {
+   "s": 503,
+   "loc": ""
+  },
+  "uat /files/app-default.jpg": {
+   "s": 500,
+   "loc": ""
+  },
+  "uat /api.json": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /avatar/@{u}": {
+   "s": 302,
+   "loc": "/identicon/ken"
+  },
+  "uat /clubs/{cid}": {
+   "s": 302,
+   "loc": "/app/pages/community/index?id=ar7o90brs64a0017&"
+  },
+  "uat /terms.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /privacy.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /proxy/image.webp?url=https%3A%2F%2Fmedia.social.silkvo.com%2Ffiles%2F{key}": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat /fonts/": {
+   "s": 404,
+   "loc": ""
+  },
+  "uat /cdn/": {
+   "s": 404,
+   "loc": ""
+  },
+  "uat uat:/admin": {
+   "s": 302,
+   "loc": "/admin.html"
+  },
+  "uat uat:/super": {
+   "s": 302,
+   "loc": "/super.html"
+  },
+  "uat uat:/sign-in.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat uat:/qa.html": {
+   "s": 404,
+   "loc": ""
+  },
+  "uat uat:/sandbox-gate.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat uat:/uat/hub.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat uat:/demo.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat uat:/how.html": {
+   "s": 200,
+   "loc": ""
+  },
+  "uat uat:/features": {
+   "s": 301,
+   "loc": "/features.html"
+  },
+  "uat uat:/overview": {
+   "s": 404,
+   "loc": ""
+  },
+  "uat uat:/app.html": {
+   "s": 302,
+   "loc": "/app/pages/home/index"
+  },
+  "uat uat:/css/g2.css": {
+   "s": 404,
+   "loc": ""
+  }
+ }
+}
