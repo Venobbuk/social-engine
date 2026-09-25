@@ -1,0 +1,42 @@
+{
+ "id": "club-cover",
+ "mode": "after",
+ "at": "2026-09-25T20:52:20.628Z",
+ "checks": [
+  {
+   "name": "set cover → bannerUrl set",
+   "pass": true,
+   "ev": "{\"club\":\"ari4he5s3hac000m\",\"s\":200,\"bannerUrl\":\"https://uat.gripbat.com/media/files/e4f6ff42-caca-4b7c-8b41-fc2b8e57f526.png\"}"
+  },
+  {
+   "name": "remove cover (bannerId:null) → 200",
+   "pass": true,
+   "ev": "{\"s\":200,\"body\":\"{\\\"id\\\":\\\"ari4he5s3hac000m\\\",\\\"createdAt\\\":\\\"2026-09-23T20:31:25.168Z\\\",\\\"lastNotedAt\\\":\\\"2026-09-25T20:32:38.285Z\\\",\\\"name\\\":\\\"Harbour Paddle Club\\\",\\\"description\\\":\\\"A friendly \"}"
+  },
+  {
+   "name": "channels/show after removal → bannerUrl null",
+   "pass": true,
+   "ev": "{\"bannerUrl\":null}"
+  },
+  {
+   "name": "DB channel.bannerId NULL after removal (file still exists)",
+   "pass": true,
+   "ev": "{\"bannerId\":\"NULL\"}"
+  },
+  {
+   "name": "an update without bannerId leaves the cover alone (200)",
+   "pass": true,
+   "ev": "{\"s\":200}"
+  },
+  {
+   "name": "app club page draws no cover of the removed file",
+   "pass": true,
+   "ev": "{\"key\":\"e4f6ff42-caca-4b7c-8b41-fc2b8e57f526.png\",\"drawn\":false,\"requested\":0,\"page\":\"返回 | 分享 | 更多 | 總覽 | 活動 | 討論區 | 聊天 | 相片 | 成員 | 更換封面相 | Harbour Paddle Club | 公開 · 匹克球 · 各種程度 · ID: TQ6R\"}"
+  }
+ ],
+ "cleanup": [
+  "readback files-left/club-banner 0/NULL (before NULL)"
+ ],
+ "errors": [],
+ "verdict": "pass"
+}

@@ -1,0 +1,14 @@
+{
+ "id": "club-cover.before",
+ "at": "2026-09-25T20:36:22.160Z",
+ "condition_fired": true,
+ "verdict": "fail",
+ "evidence": [
+  "ok set cover → bannerUrl set",
+  "NO remove cover (bannerId:null) → 200",
+  "NO channels/show after removal → bannerUrl null",
+  "NO DB channel.bannerId NULL after removal (file still exists)",
+  "NO an update without bannerId leaves the cover alone (200)",
+  "cleanup: readback files-left/club-banner 0/NULL (before NULL)"
+ ]
+}

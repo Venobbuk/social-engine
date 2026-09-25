@@ -1,0 +1,37 @@
+{
+ "id": "club-cover",
+ "mode": "before",
+ "at": "2026-09-25T20:36:15.818Z",
+ "checks": [
+  {
+   "name": "set cover → bannerUrl set",
+   "pass": true,
+   "ev": "{\"club\":\"ari4he5s3hac000m\",\"s\":200,\"bannerUrl\":\"https://uat.gripbat.com/media/files/9711e855-7501-45d2-91c0-7bb82dd9a124.png\"}"
+  },
+  {
+   "name": "remove cover (bannerId:null) → 200",
+   "pass": false,
+   "ev": "{\"s\":500,\"body\":\"{\\\"error\\\":{\\\"message\\\":\\\"Internal error occurred. Please contact us if the error persists.\\\",\\\"code\\\":\\\"INTERNAL_ERROR\\\",\\\"id\\\":\\\"5d37dbcb-891e-41ca-a3d6-e690c97775ac\\\",\\\"kin\"}"
+  },
+  {
+   "name": "channels/show after removal → bannerUrl null",
+   "pass": false,
+   "ev": "{\"bannerUrl\":\"https://uat.gripbat.com/media/files/9711e855-7501-45d2-91c0-7bb82dd9a124.png\"}"
+  },
+  {
+   "name": "DB channel.bannerId NULL after removal (file still exists)",
+   "pass": false,
+   "ev": "{\"bannerId\":\"arkzjcifv1e201nc\"}"
+  },
+  {
+   "name": "an update without bannerId leaves the cover alone (200)",
+   "pass": false,
+   "ev": "{\"s\":200}"
+  }
+ ],
+ "cleanup": [
+  "readback files-left/club-banner 0/NULL (before NULL)"
+ ],
+ "errors": [],
+ "verdict": "fail"
+}

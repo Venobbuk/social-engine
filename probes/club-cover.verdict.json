@@ -1,0 +1,15 @@
+{
+ "id": "club-cover",
+ "at": "2026-09-25T20:52:35.076Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  "ok set cover → bannerUrl set",
+  "ok remove cover (bannerId:null) → 200",
+  "ok channels/show after removal → bannerUrl null",
+  "ok DB channel.bannerId NULL after removal (file still exists)",
+  "ok an update without bannerId leaves the cover alone (200)",
+  "ok app club page draws no cover of the removed file",
+  "cleanup: readback files-left/club-banner 0/NULL (before NULL)"
+ ]
+}
