@@ -1,0 +1,18 @@
+{
+  "_note": "UAT-STD class overrides after reading what each family matched (hits.cjs, regrade1, 2026-09-25). probe = the instrument matched user / sample DATA, not an interface string; the text itself is not a product defect. real = confirmed interface copy.",
+  "5H|english-on-zh|home": { "class": "probe", "why": "matched a meet NAME (host data): 'Saturday Morning Open Play'" },
+  "5H|english-on-zh|open-play": { "class": "probe", "why": "matched a meet NAME (host data)" },
+  "5H|english-on-zh|meet": { "class": "probe", "why": "matched the meet's host-written notes" },
+  "5H|english-on-zh|credits": { "class": "probe", "why": "matched image file titles / descriptions (data)" },
+  "5H|english-on-zh|feed": { "class": "probe", "why": "matched members' posts (data)" },
+  "5H|english-on-zh|player": { "class": "probe", "why": "matched a player's post (data)" },
+  "5H|english-on-zh|coach": { "class": "probe", "why": "matched a coach's bio (data)" },
+  "5H|english-on-zh|lesson": { "class": "probe", "why": "matched a coach's About text (data)" },
+  "5H|english-on-zh|inbox": { "class": "probe", "why": "matched a meet name 'Pickleball Social with Ken Wong' (data)" },
+  "5H|english-on-zh|signin": { "class": "probe", "why": "email placeholder 'you@example.com' is language-neutral" },
+  "5H|english-on-zh|login": { "class": "probe", "why": "email placeholder 'you@example.com' is language-neutral" },
+  "5H|english-on-zh|venue-create": { "class": "probe", "why": "third-party map attribution link title (Leaflet)" },
+  "5H|english-on-zh|notifications": { "class": "real", "why": "the invite template 'X invited you to join …' is interface copy left in English on 繁/简" },
+  "5H|english-on-zh|clubs": { "class": "real", "why": "the map's aria-label 'Map of Hong Kong showing the venues…' is interface copy, untranslated" },
+  "5H|english-on-zh|reports": { "class": "env", "why": "other lanes' [probe] report titles" }
+}

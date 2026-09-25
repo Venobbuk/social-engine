@@ -1,0 +1,672 @@
+{
+ "at": "2026-09-24T18:44:19.442Z",
+ "source": "/root/hkpl-taro-branch/src/app.config.ts",
+ "listedUnique": 91,
+ "pageDirs": 91,
+ "missingDir": [],
+ "unlisted": [],
+ "fixtures": {
+  "meet": "ari4he4a3hac000j",
+  "club": "ari4he5s3hac000m",
+  "venue": "ar7iv182jhqz0001",
+  "comp": "ari4ifgy3hac006c",
+  "compClosed": "ari4if6t3hac0054",
+  "compMatch": "ari4ifep3hac005y",
+  "compEntry": "ari4ifhy3hac006e",
+  "lesson": "ari4jxmk3hac00c7",
+  "meetMatch": "ar8yuc2xoctj00df",
+  "dupr": "6492138567"
+ },
+ "personas": {
+  "KEN": "ari4hbuh3hac0003",
+  "AMY": "ari4hb3c3hac0001",
+  "MEI": "ari4hcj63hac0006"
+ },
+ "pages": [
+  {
+   "key": "home",
+   "route": "home/index",
+   "params": "",
+   "cls": "tab-root",
+   "src": "src/pages/home/index.tsx"
+  },
+  {
+   "key": "schedule",
+   "route": "schedule/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/schedule/index.tsx"
+  },
+  {
+   "key": "standings",
+   "route": "standings/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/standings/index.tsx"
+  },
+  {
+   "key": "results",
+   "route": "results/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/results/index.tsx"
+  },
+  {
+   "key": "results-history",
+   "route": "results-history/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/results-history/index.tsx"
+  },
+  {
+   "key": "players",
+   "route": "players/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/players/index.tsx"
+  },
+  {
+   "key": "topten",
+   "route": "topten/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/topten/index.tsx"
+  },
+  {
+   "key": "clubs",
+   "route": "clubs/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/clubs/index.tsx"
+  },
+  {
+   "key": "club-leaderboard",
+   "route": "club-leaderboard/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/club-leaderboard/index.tsx"
+  },
+  {
+   "key": "playoffs",
+   "route": "playoffs/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/playoffs/index.tsx"
+  },
+  {
+   "key": "stats",
+   "route": "stats/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/stats/index.tsx"
+  },
+  {
+   "key": "team-stats",
+   "route": "team-stats/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/team-stats/index.tsx"
+  },
+  {
+   "key": "about",
+   "route": "about/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/about/index.tsx"
+  },
+  {
+   "key": "organization",
+   "route": "organization/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/organization/index.tsx"
+  },
+  {
+   "key": "sponsors",
+   "route": "sponsors/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/sponsors/index.tsx"
+  },
+  {
+   "key": "faq",
+   "route": "faq/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/faq/index.tsx"
+  },
+  {
+   "key": "contact",
+   "route": "contact/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/contact/index.tsx"
+  },
+  {
+   "key": "updates",
+   "route": "updates/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/updates/index.tsx"
+  },
+  {
+   "key": "photos",
+   "route": "photos/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/photos/index.tsx"
+  },
+  {
+   "key": "tournaments",
+   "route": "tournaments/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/tournaments/index.tsx"
+  },
+  {
+   "key": "coaching",
+   "route": "coaching/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/coaching/index.tsx"
+  },
+  {
+   "key": "register",
+   "route": "register/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/register/index.tsx"
+  },
+  {
+   "key": "privacy",
+   "route": "privacy/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/privacy/index.tsx"
+  },
+  {
+   "key": "terms",
+   "route": "terms/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/terms/index.tsx"
+  },
+  {
+   "key": "profile",
+   "route": "profile/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/profile/index.tsx"
+  },
+  {
+   "key": "app",
+   "route": "app/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/app/index.tsx"
+  },
+  {
+   "key": "signin",
+   "route": "signin/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/signin/index.tsx"
+  },
+  {
+   "key": "registrar",
+   "route": "registrar/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/registrar/index.tsx"
+  },
+  {
+   "key": "referee",
+   "route": "referee/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/referee/index.tsx"
+  },
+  {
+   "key": "referee-score",
+   "route": "referee-score/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/referee-score/index.tsx"
+  },
+  {
+   "key": "referee-live",
+   "route": "referee-live/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/referee-live/index.tsx"
+  },
+  {
+   "key": "team",
+   "route": "team/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/team/index.tsx"
+  },
+  {
+   "key": "club",
+   "route": "club/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/club/index.tsx"
+  },
+  {
+   "key": "account",
+   "route": "account/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/account/index.tsx"
+  },
+  {
+   "key": "settings",
+   "route": "settings/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/settings/index.tsx"
+  },
+  {
+   "key": "matchup",
+   "route": "matchup/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/matchup/index.tsx"
+  },
+  {
+   "key": "policy",
+   "route": "policy/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/policy/index.tsx"
+  },
+  {
+   "key": "open-play",
+   "route": "open-play/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/open-play/index.tsx"
+  },
+  {
+   "key": "social-games",
+   "route": "social-games/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/social-games/index.tsx"
+  },
+  {
+   "key": "login",
+   "route": "login/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/login/index.tsx"
+  },
+  {
+   "key": "lineup",
+   "route": "lineup/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/lineup/index.tsx"
+  },
+  {
+   "key": "match-live",
+   "route": "match-live/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/match-live/index.tsx"
+  },
+  {
+   "key": "meets",
+   "route": "meets/index",
+   "params": "",
+   "cls": "tab-root",
+   "src": "src/pages/meets/index.tsx"
+  },
+  {
+   "key": "meet",
+   "route": "meet/index",
+   "params": "id=ari4he4a3hac000j",
+   "cls": "detail",
+   "src": "src/pages/meet/index.tsx"
+  },
+  {
+   "key": "meet-create",
+   "route": "meet-create/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/meet-create/index.tsx"
+  },
+  {
+   "key": "community",
+   "route": "community/index",
+   "params": "",
+   "cls": "tab-root",
+   "src": "src/pages/community/index.tsx"
+  },
+  {
+   "key": "inbox",
+   "route": "inbox/index",
+   "params": "",
+   "cls": "tab-root",
+   "src": "src/pages/inbox/index.tsx"
+  },
+  {
+   "key": "credits",
+   "route": "credits/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/credits/index.tsx"
+  },
+  {
+   "key": "network",
+   "route": "network/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/network/index.tsx"
+  },
+  {
+   "key": "casual",
+   "route": "casual/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/casual/index.tsx"
+  },
+  {
+   "key": "venue",
+   "route": "venue/index",
+   "params": "id=ar7iv182jhqz0001",
+   "cls": "detail",
+   "src": "src/pages/venue/index.tsx"
+  },
+  {
+   "key": "feed",
+   "route": "feed/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/feed/index.tsx"
+  },
+  {
+   "key": "my-stats",
+   "route": "my-stats/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/my-stats/index.tsx"
+  },
+  {
+   "key": "more",
+   "route": "more/index",
+   "params": "",
+   "cls": "tab-root",
+   "src": "src/pages/more/index.tsx"
+  },
+  {
+   "key": "chat",
+   "route": "chat/index",
+   "params": "user={OTHER}",
+   "cls": "detail",
+   "src": "src/pages/chat/index.tsx"
+  },
+  {
+   "key": "player",
+   "route": "player/index",
+   "params": "id=ari4hbuh3hac0003",
+   "cls": "detail",
+   "src": "src/pages/player/index.tsx"
+  },
+  {
+   "key": "notifications",
+   "route": "notifications/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/notifications/index.tsx"
+  },
+  {
+   "key": "history",
+   "route": "history/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/history/index.tsx"
+  },
+  {
+   "key": "match",
+   "route": "match/index",
+   "params": "id=ar8yuc2xoctj00df&source=meet",
+   "cls": "detail",
+   "src": "src/pages/match/index.tsx"
+  },
+  {
+   "key": "pair",
+   "route": "pair/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/pair/index.tsx"
+  },
+  {
+   "key": "reviews",
+   "route": "reviews/index",
+   "params": "id=ari4hbuh3hac0003",
+   "cls": "detail",
+   "src": "src/pages/reviews/index.tsx"
+  },
+  {
+   "key": "tournament-match",
+   "route": "tournament-match/index",
+   "params": "id=ari4if6t3hac0054&m=ari4ifep3hac005y",
+   "cls": "detail",
+   "src": "src/pages/tournament-match/index.tsx"
+  },
+  {
+   "key": "tournament-team",
+   "route": "tournament-team/index",
+   "params": "id=ari4ifgy3hac006c&e=ari4ifhy3hac006e",
+   "cls": "detail",
+   "src": "src/pages/tournament-team/index.tsx"
+  },
+  {
+   "key": "dupr-player",
+   "route": "dupr-player/index",
+   "params": "id=6492138567",
+   "cls": "detail",
+   "src": "src/pages/dupr-player/index.tsx"
+  },
+  {
+   "key": "dupr-connect",
+   "route": "dupr-connect/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/dupr-connect/index.tsx"
+  },
+  {
+   "key": "club-schedule",
+   "route": "club-schedule/index",
+   "params": "club=ari4he5s3hac000m",
+   "cls": "detail",
+   "src": "src/pages/club-schedule/index.tsx"
+  },
+  {
+   "key": "club-tags",
+   "route": "club-tags/index",
+   "params": "id=ari4he5s3hac000m",
+   "cls": "detail",
+   "src": "src/pages/club-tags/index.tsx"
+  },
+  {
+   "key": "club-join",
+   "route": "club-join/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/club-join/index.tsx"
+  },
+  {
+   "key": "locations",
+   "route": "locations/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/locations/index.tsx"
+  },
+  {
+   "key": "venue-create",
+   "route": "venue-create/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/venue-create/index.tsx"
+  },
+  {
+   "key": "venue-feedback",
+   "route": "venue-feedback/index",
+   "params": "venue=ar7iv182jhqz0001",
+   "cls": "detail",
+   "src": "src/pages/venue-feedback/index.tsx"
+  },
+  {
+   "key": "venue-media",
+   "route": "venue-media/index",
+   "params": "id=ar7iv182jhqz0001",
+   "cls": "detail",
+   "src": "src/pages/venue-media/index.tsx"
+  },
+  {
+   "key": "venue-edit",
+   "route": "venue-edit/index",
+   "params": "id=ar7iv182jhqz0001",
+   "cls": "flow",
+   "src": "src/pages/venue-edit/index.tsx"
+  },
+  {
+   "key": "community-center",
+   "route": "community-center/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/community-center/index.tsx"
+  },
+  {
+   "key": "coach",
+   "route": "coach/index",
+   "params": "id=ari4hcj63hac0006",
+   "cls": "detail",
+   "src": "src/pages/coach/index.tsx"
+  },
+  {
+   "key": "h2h",
+   "route": "h2h/index",
+   "params": "user=ari4hbuh3hac0003",
+   "cls": "detail",
+   "src": "src/pages/h2h/index.tsx"
+  },
+  {
+   "key": "safety",
+   "route": "safety/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/safety/index.tsx"
+  },
+  {
+   "key": "standards",
+   "route": "standards/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/standards/index.tsx"
+  },
+  {
+   "key": "charter",
+   "route": "charter/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/charter/index.tsx"
+  },
+  {
+   "key": "tournament",
+   "route": "tournament/index",
+   "params": "id=ari4ifgy3hac006c",
+   "cls": "detail",
+   "src": "src/pages/tournament/index.tsx"
+  },
+  {
+   "key": "tournament-create",
+   "route": "tournament-create/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/tournament-create/index.tsx"
+  },
+  {
+   "key": "not-found",
+   "route": "not-found/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/not-found/index.tsx"
+  },
+  {
+   "key": "admin",
+   "route": "admin/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/admin/index.tsx"
+  },
+  {
+   "key": "reports",
+   "route": "reports/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/reports/index.tsx"
+  },
+  {
+   "key": "social-settings",
+   "route": "social-settings/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/social-settings/index.tsx"
+  },
+  {
+   "key": "club-admin",
+   "route": "club-admin/index",
+   "params": "id=ari4he5s3hac000m",
+   "cls": "detail",
+   "src": "src/pages/club-admin/index.tsx"
+  },
+  {
+   "key": "help",
+   "route": "help/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/help/index.tsx"
+  },
+  {
+   "key": "onboard",
+   "route": "onboard/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/onboard/index.tsx"
+  },
+  {
+   "key": "lessons",
+   "route": "lessons/index",
+   "params": "",
+   "cls": "detail",
+   "src": "src/pages/lessons/index.tsx"
+  },
+  {
+   "key": "lesson",
+   "route": "lesson/index",
+   "params": "id=ari4jxmk3hac00c7",
+   "cls": "detail",
+   "src": "src/pages/lesson/index.tsx"
+  },
+  {
+   "key": "link",
+   "route": "link/index",
+   "params": "",
+   "cls": "flow",
+   "src": "src/pages/link/index.tsx"
+  },
+  {
+   "key": "community@club",
+   "route": "community/index",
+   "params": "id=ari4he5s3hac000m",
+   "cls": "detail",
+   "src": "src/pages/community/index.tsx",
+   "variant": true
+  }
+ ]
+}

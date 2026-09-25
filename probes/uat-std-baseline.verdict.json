@@ -1,0 +1,119 @@
+{
+  "id": "uat-std-baseline",
+  "at": "2026-09-25T04:10:00.791Z",
+  "verdict": "fail",
+  "condition_fired": true,
+  "counts": {
+    "cells": 6138,
+    "checkVerdicts": {
+      "PASS": 27785,
+      "FAIL": 5279,
+      "FLAKY": 0,
+      "NO VERDICT": 48,
+      "N/A": 3716
+    },
+    "byCheck": {
+      "5A": {
+        "PASS": 5647,
+        "FAIL": 483,
+        "FLAKY": 0,
+        "NO VERDICT": 8,
+        "N/A": 0
+      },
+      "5B": {
+        "PASS": 6127,
+        "FAIL": 3,
+        "FLAKY": 0,
+        "NO VERDICT": 8,
+        "N/A": 0
+      },
+      "5C": {
+        "PASS": 2560,
+        "FAIL": 3570,
+        "FLAKY": 0,
+        "NO VERDICT": 8,
+        "N/A": 0
+      },
+      "5E": {
+        "PASS": 1839,
+        "FAIL": 575,
+        "FLAKY": 0,
+        "NO VERDICT": 8,
+        "N/A": 3716
+      },
+      "5H": {
+        "PASS": 5482,
+        "FAIL": 648,
+        "FLAKY": 0,
+        "NO VERDICT": 8,
+        "N/A": 0
+      },
+      "SHELL": {
+        "PASS": 6130,
+        "FAIL": 0,
+        "FLAKY": 0,
+        "NO VERDICT": 8,
+        "N/A": 0
+      }
+    },
+    "families": {
+      "total": 147,
+      "review": 6,
+      "bySeverity": {
+        "S2": 8,
+        "S3": 100,
+        "S4": 39
+      },
+      "byClass": {
+        "real": 128,
+        "env": 6,
+        "probe": 13
+      },
+      "byOwner": {
+        "fix-S7": 53,
+        "BENCH-D": 8,
+        "BENCH-B": 20,
+        "fix-S2": 21,
+        "fix-S8": 6,
+        "SHELL-FAMILY": 7,
+        "BENCH-C": 9,
+        "BENCH-A": 15,
+        "fix-S4": 5,
+        "fix-S6": 3
+      }
+    },
+    "selftest": {
+      "chromium": {
+        "pass": 35,
+        "fail": 0,
+        "no_verdict": 0,
+        "total": 35
+      },
+      "webkit": {
+        "pass": 35,
+        "fail": 0,
+        "no_verdict": 0,
+        "total": 35
+      }
+    },
+    "byEngine": {
+      "chromium": 5580,
+      "webkit": 558
+    }
+  },
+  "evidence": [
+    "/root/gen/l6-scope/UAT_STD_BASELINE.md",
+    "/root/gen/l6-scope/uat-std-defects.json",
+    "/root/gen/l6-scope/uat-std/uat-std-cells.csv",
+    "/root/gen/l6-scope/uat-std/grade.json",
+    "/root/gen/l6-scope/uat-std/selftest-chromium.json",
+    "/root/gen/l6-scope/uat-std/selftest-webkit.json",
+    "/root/gen/l6-scope/uat-std/build-chromium-baseline.json",
+    "/root/gen/l6-scope/uat-std/build-chromium-regrade1.json",
+    "/root/gen/l6-scope/uat-std/build-chromium-regrade2.json",
+    "/root/gen/l6-scope/uat-std/build-chromium-regrade3.json",
+    "/root/gen/l6-scope/uat-std/build-webkit-baseline.json",
+    "/root/gen/l6-scope/uat-std/build-webkit-regrade1.json",
+    "/root/gen/l6-scope/uat-std/build-webkit-regrade3.json"
+  ]
+}
