@@ -6,6 +6,7 @@
 import type { DataSource } from 'typeorm';
 import type { MiChatRoom } from '@/models/ChatRoom.js';
 import type { MiUser } from '@/models/User.js';
+import { supportUsername } from '@/core/ChatCsat.js';   // SUPPORT-DESK-V1
 
 /* CHAT-MOD-V1 (WAVE-1 lane B3, 2026-09-20) — who runs a room, read by chat/threads/show so the app knows whether to
  * offer Delete on someone else's message, and whether a room's membership is its own.
@@ -16,7 +17,7 @@ import type { MiUser } from '@/models/User.js';
  *    club's chat (club_setting.chatRoomId), a competition's chat. Its membership follows the meet roster / the club /
  *    the entries, so members are removed THERE, never from the chat alone. A plain group (chat/rooms/create or
  *    chat/rooms/create-group) is managed by nobody but its owner. */
-export type ManagedKind = 'meet' | 'club' | 'competition' | null;
+export type ManagedKind = 'meet' | 'club' | 'competition' | 'support' | null;   // SUPPORT-DESK-V1: a support desk room (core/ChatSupportDesk)
 
 export async function runsRoom(db: DataSource, roomId: MiChatRoom['id'], userId: MiUser['id']): Promise<boolean> {
 	const rows = await db.query(`SELECT 1 FROM "chat_room" r WHERE r."id" = $1 AND r."ownerId" = $2
@@ -31,6 +32,7 @@ export async function roomManagement(db: DataSource, roomId: MiChatRoom['id']): 
 	const rows = await db.query(`SELECT 'club' AS "kind" FROM "club_setting" WHERE "chatRoomId" = $1
 		UNION ALL SELECT 'meet' FROM "meet" WHERE "chatRoomId" = $1
 		UNION ALL SELECT 'competition' FROM "competition" WHERE "chatRoomId" = $1
-		LIMIT 1`, [roomId]) as { kind: ManagedKind }[];
+		UNION ALL SELECT 'support' FROM "chat_room" r JOIN "user" u ON u."id" = r."ownerId" WHERE r."id" = $1 AND r."description" LIKE 'support:%' AND u."usernameLower" = $2 AND u."host" IS NULL
+		LIMIT 1`, [roomId, supportUsername().toLowerCase()]) as { kind: ManagedKind }[];
 	return rows.length ? rows[0].kind : null;
 }

@@ -643,6 +643,7 @@ export * as 'chat/messages/react' from './endpoints/chat/messages/react.js';
 export * as 'chat/messages/unreact' from './endpoints/chat/messages/unreact.js';
 export * as 'chat/messages/report' from './endpoints/chat/messages/report.js';
 export * as 'chat/threads/show' from './endpoints/chat/threads/show.js';
+export * as 'chat/support/open' from './endpoints/chat/support/open.js';   // SUPPORT-DESK-V1 (BENCH-A)
 export * as 'chat/threads/mute' from './endpoints/chat/threads/mute.js';
 export * as 'chat/threads/archive' from './endpoints/chat/threads/archive.js';
 export * as 'chat/threads/archived' from './endpoints/chat/threads/archived.js';

@@ -7,6 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
 import { DI } from '@/di-symbols.js';
 import { ChatService } from '@/core/ChatService.js';
+import { supportUsername } from '@/core/ChatCsat.js';   // SUPPORT-DESK-V1
 import { ChatEntityService } from '@/core/entities/ChatEntityService.js';
 import { ApiError } from '@/server/api/error.js';
 import type { DataSource } from 'typeorm';
@@ -68,7 +69,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (ids.length) {
 					const rows = await this.db.query(`SELECT "chatRoomId" AS "roomId", 'club' AS kind, "channelId" AS id FROM "club_setting" WHERE "chatRoomId" = ANY($1)
 						UNION ALL SELECT "chatRoomId", 'meet', id FROM "meet" WHERE "chatRoomId" = ANY($1)
-						UNION ALL SELECT "chatRoomId", 'competition', id FROM "competition" WHERE "chatRoomId" = ANY($1)`, [ids]) as { roomId: string; kind: string; id: string }[];
+						UNION ALL SELECT "chatRoomId", 'competition', id FROM "competition" WHERE "chatRoomId" = ANY($1)
+						UNION ALL SELECT r."id", 'support', substring(r."description" from 9) FROM "chat_room" r JOIN "user" u ON u."id" = r."ownerId" WHERE r."id" = ANY($1) AND r."description" LIKE 'support:%' AND u."usernameLower" = $2 AND u."host" IS NULL`, [ids, supportUsername().toLowerCase()]) as { roomId: string; kind: string; id: string }[];   // SUPPORT-DESK-V1: the desk files under Support; id = the player
 					const by = new Map(rows.map(r => [r.roomId, r]));
 					for (const message of packedMessages) {
 						const k = by.get(message.toRoomId!);

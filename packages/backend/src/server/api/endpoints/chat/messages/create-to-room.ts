@@ -10,7 +10,10 @@ import { GetterService } from '@/server/api/GetterService.js';
 import { DI } from '@/di-symbols.js';
 import { ApiError } from '@/server/api/error.js';
 import { ChatService } from '@/core/ChatService.js';
-import type { DriveFilesRepository, MeetsRepository, MiUser, UsersRepository } from '@/models/_.js';
+import type { ChatMessagesRepository, DriveFilesRepository, MeetsRepository, MiUser, UsersRepository } from '@/models/_.js';
+import { RoleService } from '@/core/RoleService.js';   // SUPPORT-DESK-V1
+import { csatForRoom } from '@/core/ChatSupportDesk.js';   // SUPPORT-DESK-V1
+import { CsatError } from '@/core/ChatCsat.js';   // SUPPORT-DESK-V1
 import { replyAttachment } from '@/core/ChatReply.js';
 import type { DataSource } from 'typeorm';
 import { ClubService } from '@/modules/clubs/ClubService.js';
@@ -71,6 +74,11 @@ export const meta = {
 		// CLUB-POSTS-LINKS-V1 (B-set-comms.03 / E-chat-room.21): the club chat refuses another club's meet or competition
 		outsideLinks: outsideLinksError,
 
+		// SUPPORT-DESK-V1: the survey in a support desk room (CHAT-CSAT-V1's codes)
+		csatRefused: { message: 'This survey cannot be sent or answered.', code: 'CSAT_REFUSED', id: 'a7c4e9b1-2d3f-4e5a-8b6c-0000000000f4' },
+		csatExpired: { message: 'This survey has expired.', code: 'CSAT_EXPIRED', id: 'a7c4e9b1-2d3f-4e5a-8b6c-0000000000f5' },
+		csatAnswered: { message: 'This survey has been submitted.', code: 'CSAT_ANSWERED', id: 'a7c4e9b1-2d3f-4e5a-8b6c-0000000000f6' },
+
 		contentRequired: {
 			message: 'Content required. You need to set text or fileId.',
 			code: 'CONTENT_REQUIRED',
@@ -89,6 +97,10 @@ export const paramDef = {
 		/** CHAT-REPLY-V1: reply to a message of this thread — the message carries its quote (attachment.kind = 'reply'); not with meetId */
 		replyId: { type: 'string', format: 'misskey:id' },
 		toRoomId: { type: 'string', format: 'misskey:id' },
+		/** SUPPORT-DESK-V1: a staff member closes a support desk conversation with the survey bubble */
+		csatAsk: { type: 'boolean' },
+		/** SUPPORT-DESK-V1: the desk's player answers a survey bubble (once, before it expires) */
+		csat: { type: 'object', properties: { askId: { type: 'string', format: 'misskey:id' }, score: { type: 'integer', minimum: 1, maximum: 5 }, comment: { type: 'string', nullable: true, maxLength: 500 } }, required: ['askId', 'score'] },
 	},
 	required: ['toRoomId'],
 } as const;
@@ -109,6 +121,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private chatService: ChatService,
 		private clubService: ClubService,
 		@Inject(DI.db) private db: DataSource,
+		@Inject(DI.chatMessagesRepository) private chatMessagesRepository: ChatMessagesRepository,   // SUPPORT-DESK-V1
+		private roleService: RoleService,   // SUPPORT-DESK-V1
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			await this.chatService.checkChatAvailability(me.id, 'write');
@@ -154,6 +168,17 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			// CLUB-POSTS-LINKS-V1: a club's chat room with "Allow outside activity links" OFF — text links and meet cards
 			const roomClub = await clubOfRoom(this.db, room.id);
 			if (roomClub && await outsideLinkRefusal(this.db, this.clubService, roomClub, me.id, ps.text ?? null, ps.meetId ?? null)) throw new ApiError(meta.errors.outsideLinks);
+
+			// SUPPORT-DESK-V1: the survey bubble (staff) and its answer (the desk's player) — never with a card, a quote or a file
+			if (ps.csatAsk || ps.csat) {
+				if (attachment != null || file != null) throw new ApiError(meta.errors.csatRefused);
+				try {
+					attachment = await csatForRoom({ db: this.db, users: this.usersRepository, messages: this.chatMessagesRepository, roleService: this.roleService }, me, room, { csatAsk: ps.csatAsk, csat: ps.csat });
+				} catch (e) {
+					if (e instanceof CsatError) throw new ApiError(e.code === 'expired' ? meta.errors.csatExpired : e.code === 'answered' ? meta.errors.csatAnswered : meta.errors.csatRefused);
+					throw e;
+				}
+			}
 
 			// テキストが無いかつ添付ファイルも無かったらエラー
 			if (ps.text == null && file == null && attachment == null) {
