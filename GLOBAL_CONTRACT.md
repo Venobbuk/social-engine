@@ -196,8 +196,10 @@ an earlier one:
    correct in EN / 繁 / 简.
 4. **Trust** — confirm before anything destructive or irreversible, privacy rules (G15.3/.4/.5) held, errors say what to do.
 5. **Speed** — the screen answers as fast as Reclub's or faster (measured time-to-usable at 390 px on UAT).
-6. **Wow** — what only GripBat has (coaching booking, DUPR built in, partner chemistry, verified venues, web app,
-   one-tap HKPL sign-in): showcased, but never a substitute for 1–5.
+6. **Wow** — what only GripBat has (coaching / lesson booking with a locked price, its own rating from every scored game,
+   positive partner chemistry, expected win % before the first serve, web app, one-tap HKPL sign-in): showcased, but never a
+   substitute for 1–5. NOT exclusive (Reclub has them too — decoded Reclub strings, COPY lane 2026-09-26): verified venues,
+   balanced-team generation, DUPR submission (GripBat's DUPR win is fewer taps, 5 vs 7).
 **The human test:** a stranger who has never seen GripBat gets a task and no instructions; every hesitation, wrong tap or
 "what now?" is a defect even when every automated check passed.
 **TOP-20 TASK BENCHMARK** (`/root/gen/l6-scope/TASKS.json`): the 20 things users come to do (find & join a meet, host a
