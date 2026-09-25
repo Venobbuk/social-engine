@@ -101,9 +101,9 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (role === 'host') {
 				start.meetId = await one(`SELECT id FROM meet WHERE "hostId" = $1 AND status = 'active' AND "coachScheduleId" IS NULL AND "startAt" > now() ORDER BY "startAt" LIMIT 1`);
 			} else if (role === 'owner') {
-				start.clubId = await one(`SELECT c.id FROM channel c JOIN club_setting s ON s."channelId" = c.id WHERE c."userId" = $1 AND c."isArchived" = false ORDER BY c."createdAt" LIMIT 1`);
+				start.clubId = await one(`SELECT c.id FROM channel c JOIN club_setting s ON s."channelId" = c.id WHERE c."userId" = $1 AND c."isArchived" = false ORDER BY c.id LIMIT 1`);
 			} else if (role === 'admin') {
-				start.clubId = await one(`SELECT c.id FROM club_setting s JOIN channel c ON c.id = s."channelId" WHERE $1 = ANY(s."adminIds") AND c."userId" <> $1 AND c."isArchived" = false ORDER BY c."createdAt" LIMIT 1`);
+				start.clubId = await one(`SELECT c.id FROM club_setting s JOIN channel c ON c.id = s."channelId" WHERE $1 = ANY(s."adminIds") AND c."userId" <> $1 AND c."isArchived" = false ORDER BY c.id LIMIT 1`);
 			}
 			return { i: user.token, id: user.id, role, name: user.name ?? null, start };
 		});
