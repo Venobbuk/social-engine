@@ -53,6 +53,7 @@ import type { NoteEntityService } from './NoteEntityService.js';
 import type { PageEntityService } from './PageEntityService.js';
 import { toArray } from '@/misc/prelude/array.js';
 import { gbEngineOrigin, gbMediaUrl } from '@/misc/gb-media.js'; // GB-MEDIA-HOST-V1
+import { GB_PUBLIC_ORIGIN } from '@/misc/gb-accounts.js'; // GB-MEDIA-HOST-V1
 
 const Ajv = _Ajv.default;
 const ajv = new Ajv();
@@ -388,8 +389,11 @@ export class UserEntityService implements OnModuleInit {
 		if ((user.host == null || user.host === this.config.host) && user.username.includes('.') && this.meta.iconUrl) { // ローカルのシステムアカウントの場合
 			return this.meta.iconUrl;
 		} else {
-			// GB-MEDIA-HOST-V1: a default avatar is drawn on the GripBat origin (nginx passes /identicon/ through), not the engine host
-			return `${gbEngineOrigin(this.config.url)}/identicon/${user.username.toLowerCase()}@${user.host ?? this.config.host}`;
+			// GB-MEDIA-HOST-V1: a default avatar is drawn on the GripBat origin (nginx passes /identicon/ through), not the engine
+			// host — and a LOCAL user's seed leaves out "@<engine host>" (the /identicon route adds it back, so the picture is the
+			// same one as before), or the address would still print the engine host.
+			const acct = user.host == null && GB_PUBLIC_ORIGIN ? user.username.toLowerCase() : `${user.username.toLowerCase()}@${user.host ?? this.config.host}`;
+			return `${gbEngineOrigin(this.config.url)}/identicon/${acct}`;
 		}
 	}
 

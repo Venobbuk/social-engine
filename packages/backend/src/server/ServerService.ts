@@ -244,7 +244,10 @@ export class ServerService implements OnApplicationShutdown {
 			reply.header('Cache-Control', 'public, max-age=86400');
 
 			if (this.meta.enableIdenticonGeneration) {
-				return await genIdenticon(request.params.x);
+				// GB-MEDIA-HOST-V1: a GripBat engine writes a local user's seed without "@<engine host>" — add it back so the
+				// picture is the one that user always had
+				const x = request.params.x.includes('@') ? request.params.x : `${request.params.x}@${this.config.host}`;
+				return await genIdenticon(x);
 			} else {
 				return reply.redirect('/static-assets/avatar.png');
 			}
