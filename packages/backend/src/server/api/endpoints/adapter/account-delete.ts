@@ -16,6 +16,7 @@ import { LoggerService } from '@/core/LoggerService.js';
 import type Logger from '@/logger.js';
 import { ApiError } from '@/server/api/error.js';
 import { verifyJwt, usernameFor } from '@/server/api/endpoints/adapter/sso.js';
+import { SSO_HANDLE_KEY } from '@/misc/gb-accounts.js';   // ACCOUNT-DELETE-SSO-V1: the seam handle of a renamed SSO account
 
 // ACCOUNT-DELETE-V1 (PDPO, Reclub settings › delete account): an account minted by the host SSO has a password
 // nobody knows (adapter/sso), so i/delete-account's password check can never pass for it. This door deletes the
@@ -47,6 +48,7 @@ export const meta = {
 		reauthRequired: { message: 'A fresh sign-in is required to delete your account.', code: 'REAUTH_REQUIRED', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f10' },
 		reauthMismatch: { message: 'The re-authentication does not match this account.', code: 'REAUTH_MISMATCH', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f11' },
 		reauthReplayed: { message: 'This re-authentication has already been used.', code: 'REAUTH_REPLAYED', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f12' },
+		passwordRequired: { message: 'Enter your password to delete your account.', code: 'PASSWORD_REQUIRED', id: '8c2d0e5a-1b7c-4e1a-9c0e-5a0c3a1d2f14' },   // ACCOUNT-DELETE-SSO-V1
 	},
 	// ACCOUNT-GRACE-V1: `deleted` stays true — the account is CLOSED now (signed out everywhere, hidden from search); the minute
 	// sweep purges it at `purgeAt` (7 days) unless the person signs in and restores it (adapter/account/restore).
@@ -96,7 +98,19 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				const prof = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
 				if (!prof.password || !(await bcrypt.compare(ps.password, prof.password))) throw new ApiError(meta.errors.incorrectPassword);
 				nativeHow = 'account password';
-			} else if (!/^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username)) throw new Error('use i/delete-account');   // adapter/sso usernameFor(): <iss>_<12 hex>
+			}
+			/* ACCOUNT-DELETE-SSO-V1 (was: a username that is not "<iss>_<12 hex>" threw a plain Error → 500 — every SSO account
+			 * renamed by SSO-ONE-TAP). The seam handle is the username, or the registry alias the rename kept (SSO_HANDLE_KEY). */
+			let seamHandle: string | null = /^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username) ? user.username : null;
+			if (!seamHandle) {
+				const rows = await this.db.query('SELECT value FROM registry_item WHERE "userId" = $1 AND key = $2 AND domain IS NULL LIMIT 1', [user.id, SSO_HANDLE_KEY]) as { value: unknown }[];
+				const v = rows[0] ? rows[0].value : null;
+				seamHandle = typeof v === 'string' && v ? v : null;
+			}
+			if (!nativeHow) {
+				const prof = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
+				if (prof.password) throw new ApiError(meta.errors.passwordRequired);   // an account with a password confirms with it
+			}
 
 			// SEC-ACCOUNT-DELETE-REAUTH-V1: a purpose-bound, single-use, identity-matched re-auth proof — required only
 			// when the rollout switch is on; verified whenever one is sent.
@@ -116,7 +130,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				if (claims.purpose !== PROOF_PURPOSE) throw new ApiError(meta.errors.reauthRequired);
 				if (typeof claims.jti !== 'string' || claims.jti.length < 8) throw new ApiError(meta.errors.reauthRequired);
 				// the proof must be for THIS account (same host identity → same deterministic username)
-				if (usernameFor(claims.iss, claims.sub) !== user.username) throw new ApiError(meta.errors.reauthMismatch);
+				if (usernameFor(claims.iss, claims.sub) !== (seamHandle ?? user.username)) throw new ApiError(meta.errors.reauthMismatch);   // ACCOUNT-DELETE-SSO-V1
 				// single use: redeem the jti once, in the same namespace adapter/sso uses
 				const ttl = Math.max(1, Math.min(300, (claims.exp - Math.floor(Date.now() / 1000)) + 5));
 				const first = await this.redisClient.set(`sso:jti:${claims.iss}:${claims.jti}`, '1', 'EX', ttl, 'NX');

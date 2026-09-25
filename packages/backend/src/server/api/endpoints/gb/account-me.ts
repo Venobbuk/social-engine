@@ -34,6 +34,7 @@ export const meta = {
 			needsUsername: { type: 'boolean', optional: false, nullable: false },
 			email: { type: 'string', optional: false, nullable: true },
 			emailVerified: { type: 'boolean', optional: false, nullable: false },
+			hasPassword: { type: 'boolean', optional: false, nullable: false },   // ACCOUNT-DELETE-SSO-V1: the app asks for a password only when there is one
 		},
 	},
 } as const;
@@ -58,6 +59,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				needsUsername: isPlaceholderUsername(me.username),
 				email: profile.email ?? null,
 				emailVerified: !!profile.emailVerified,
+				hasPassword: !!profile.password,   // ACCOUNT-DELETE-SSO-V1
 			};
 		});
 	}
