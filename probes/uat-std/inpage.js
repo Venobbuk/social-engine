@@ -228,7 +228,7 @@
     // a switch is a switch-sized control (UAT-LAYOUT 2026-09-25, GRADE-S6): a kit Switch stretched by its row read as a full-width
     // progress bar with the knob at one end. Wider than 64 px = not a switch any more (NutUI's track is 46 px).
     var sws = document.querySelectorAll('[role=switch], .nut-switch, taro-switch-core');
-    for (var sw = 0; sw < sws.length; sw++) { if (!visible(sws[sw])) continue; var swr = sws[sw].getBoundingClientRect(); if (swr.width > 64) out.switchWide.push({ el: path(sws[sw]), w: Math.round(swr.width), h: Math.round(swr.height) }); }
+    for (var sw = 0; sw < sws.length; sw++) { if (!visible(sws[sw])) continue; out.switchN = (out.switchN || 0) + 1; var swr = sws[sw].getBoundingClientRect(); if (swr.width > 64) out.switchWide.push({ el: path(sws[sw]), w: Math.round(swr.width), h: Math.round(swr.height) }); }
     // reflow: sideways scroll of the document or the page's own scroller
     var se = document.scrollingElement || document.documentElement;
     var pr = pageRoot(), pageOver = 0, pox = '', body = null;
