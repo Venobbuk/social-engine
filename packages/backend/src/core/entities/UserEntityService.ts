@@ -52,6 +52,7 @@ import type { OnModuleInit } from '@nestjs/common';
 import type { NoteEntityService } from './NoteEntityService.js';
 import type { PageEntityService } from './PageEntityService.js';
 import { toArray } from '@/misc/prelude/array.js';
+import { gbEngineOrigin, gbMediaUrl } from '@/misc/gb-media.js'; // GB-MEDIA-HOST-V1
 
 const Ajv = _Ajv.default;
 const ajv = new Ajv();
@@ -387,7 +388,8 @@ export class UserEntityService implements OnModuleInit {
 		if ((user.host == null || user.host === this.config.host) && user.username.includes('.') && this.meta.iconUrl) { // ローカルのシステムアカウントの場合
 			return this.meta.iconUrl;
 		} else {
-			return `${this.config.url}/identicon/${user.username.toLowerCase()}@${user.host ?? this.config.host}`;
+			// GB-MEDIA-HOST-V1: a default avatar is drawn on the GripBat origin (nginx passes /identicon/ through), not the engine host
+			return `${gbEngineOrigin(this.config.url)}/identicon/${user.username.toLowerCase()}@${user.host ?? this.config.host}`;
 		}
 	}
 
@@ -535,7 +537,7 @@ export class UserEntityService implements OnModuleInit {
 				createdAt: this.idService.parse(user.id).date.toISOString(),
 				updatedAt: user.updatedAt ? user.updatedAt.toISOString() : null,
 				lastFetchedAt: user.lastFetchedAt ? user.lastFetchedAt.toISOString() : null,
-				bannerUrl: user.bannerId == null ? null : user.bannerUrl,
+				bannerUrl: user.bannerId == null ? null : gbMediaUrl(user.bannerUrl), // GB-MEDIA-HOST-V1
 				bannerBlurhash: user.bannerId == null ? null : user.bannerBlurhash,
 				isLocked: user.isLocked,
 				isSilenced: this.roleService.getUserPolicies(user.id).then(r => !r.canPublicNote),

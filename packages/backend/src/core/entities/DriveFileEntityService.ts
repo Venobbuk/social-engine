@@ -22,6 +22,7 @@ import { UtilityService } from '../UtilityService.js';
 import { VideoProcessingService } from '../VideoProcessingService.js';
 import { UserEntityService } from './UserEntityService.js';
 import { DriveFolderEntityService } from './DriveFolderEntityService.js';
+import { gbEngineOrigin, gbMediaUrl, gbMediaUseMeta } from '@/misc/gb-media.js'; // GB-MEDIA-HOST-V1
 
 type PackOptions = {
 	detail?: boolean,
@@ -50,6 +51,7 @@ export class DriveFileEntityService {
 		private videoProcessingService: VideoProcessingService,
 		private idService: IdService,
 	) {
+		gbMediaUseMeta(this.meta); // GB-MEDIA-HOST-V1: gbMediaUrl() maps the live objectStorageBaseUrl
 	}
 
 	@bindThis
@@ -79,8 +81,11 @@ export class DriveFileEntityService {
 
 	@bindThis
 	private getProxiedUrl(url: string, mode?: 'static' | 'avatar'): string {
+		// GB-MEDIA-HOST-V1: the engine's OWN proxy is addressed on the GripBat origin (nginx passes /proxy/ through); an
+		// external media proxy (config.mediaProxy on another host) is left as configured.
+		const proxyBase = this.config.externalMediaProxyEnabled ? this.config.mediaProxy : `${gbEngineOrigin(this.config.url)}/proxy`;
 		return appendQuery(
-			`${this.config.mediaProxy}/${mode ?? 'image'}.webp`,
+			`${proxyBase}/${mode ?? 'image'}.webp`,
 			query({
 				url,
 				...(mode ? { [mode]: '1' } : {}),
@@ -91,9 +96,9 @@ export class DriveFileEntityService {
 	@bindThis
 	public getThumbnailUrl(file: MiDriveFile): string | null {
 		if (file.type.startsWith('video')) {
-			if (file.thumbnailUrl) return file.thumbnailUrl;
+			if (file.thumbnailUrl) return gbMediaUrl(file.thumbnailUrl); // GB-MEDIA-HOST-V1
 
-			return this.videoProcessingService.getExternalVideoThumbnailUrl(file.webpublicUrl ?? file.url);
+			return this.videoProcessingService.getExternalVideoThumbnailUrl(gbMediaUrl(file.webpublicUrl ?? file.url));
 		} else if (file.uri != null && file.userHost != null && this.config.externalMediaProxyEnabled) {
 			// 動画ではなくリモートかつメディアプロキシ
 			return this.getProxiedUrl(file.uri, 'static');
@@ -106,9 +111,9 @@ export class DriveFileEntityService {
 			return this.getProxiedUrl(file.uri, 'static');
 		}
 
-		const url = file.webpublicUrl ?? file.url;
+		const url = gbMediaUrl(file.webpublicUrl ?? file.url); // GB-MEDIA-HOST-V1
 
-		return file.thumbnailUrl ?? (isMimeImage(file.type, 'sharp-convertible-image') ? url : null);
+		return gbMediaUrl(file.thumbnailUrl) ?? (isMimeImage(file.type, 'sharp-convertible-image') ? url : null);
 	}
 
 	@bindThis
@@ -129,7 +134,7 @@ export class DriveFileEntityService {
 			}
 		}
 
-		const url = file.webpublicUrl ?? file.url;
+		const url = gbMediaUrl(file.webpublicUrl ?? file.url); // GB-MEDIA-HOST-V1
 
 		if (mode === 'avatar') {
 			return this.getProxiedUrl(url, 'avatar');
@@ -209,7 +214,7 @@ export class DriveFileEntityService {
 			isSensitive: file.isSensitive,
 			blurhash: file.blurhash,
 			properties: opts.self ? file.properties : this.getPublicProperties(file),
-			url: opts.self ? file.url : this.getPublicUrl(file),
+			url: opts.self ? gbMediaUrl(file.url) : this.getPublicUrl(file), // GB-MEDIA-HOST-V1
 			thumbnailUrl: this.getThumbnailUrl(file),
 			comment: file.comment,
 			folderId: file.folderId,
@@ -248,7 +253,7 @@ export class DriveFileEntityService {
 			isSensitive: file.isSensitive,
 			blurhash: file.blurhash,
 			properties: opts.self ? file.properties : this.getPublicProperties(file),
-			url: opts.self ? file.url : this.getPublicUrl(file),
+			url: opts.self ? gbMediaUrl(file.url) : this.getPublicUrl(file), // GB-MEDIA-HOST-V1
 			thumbnailUrl: this.getThumbnailUrl(file),
 			comment: file.comment,
 			folderId: file.folderId,

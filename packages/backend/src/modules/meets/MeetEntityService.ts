@@ -20,6 +20,7 @@ import { MeetMatchService } from '@/modules/meets/MeetMatchService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { ChannelEntityService } from '@/core/entities/ChannelEntityService.js';
 import { ChatService } from '@/core/ChatService.js';
+import { gbMediaUrl } from '@/misc/gb-media.js'; // GB-MEDIA-HOST-V1
 
 const ACTIVE_STATUSES = ['requested', 'invited', 'confirmed', 'waitlisted', 'hold', 'maybe'];
 // T3-MEET-HOST-V1 (Reclub triage A-meet-detail.43): the roster also lists who answered "Can't go" (Reclub's own section).
@@ -77,7 +78,7 @@ export class MeetEntityService {
 			level: p.declaredLevel ?? this.meetLevelService.levelValue(level, meet.levelBasis),
 			statusChangedAt: p.statusChangedAt?.toISOString() ?? null,
 			checkedInAt: p.checkedInAt?.toISOString() ?? null,
-			receiptUrl: p.receiptUrl ?? null,
+			receiptUrl: gbMediaUrl(p.receiptUrl) ?? null,   // GB-MEDIA-HOST-V1: a stored storage-host URL is emitted on the GripBat host
 			receiptAt: p.receiptAt ? new Date(p.receiptAt).toISOString() : null,
 			receiptById: p.receiptById ?? null,
 			agreedPrice: p.agreedPrice ?? null,          // COACHING-V1: the price this student locked at booking
