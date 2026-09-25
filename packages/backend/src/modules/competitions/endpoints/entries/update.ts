@@ -44,7 +44,7 @@ export const paramDef = {
 		positions: { type: 'object', additionalProperties: { type: 'string', nullable: true, maxLength: 24 } },
 		captainUserId: { type: 'string', format: 'misskey:id' },
 		moveUserId: { type: 'string', format: 'misskey:id' },
-		moveTo: { type: 'string', enum: ['spectator', 'freeAgent'] },
+		moveTo: { type: 'string', enum: ['spectator', 'freeAgent', 'remove'] },   // BENCH-C MEMBER-REMOVE-V1: + remove
 		assignCaptainId: { type: 'string', format: 'misskey:id' },
 	},
 	required: ['competitionId'],

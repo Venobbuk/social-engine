@@ -351,10 +351,10 @@ export class CompetitionService {
 		return await this.entriesRepository.countBy({ competitionId: c.id, status: In([...ENTRY_ACTIVE]) });
 	}
 
-	private async assertTeam(c: MiCompetition, userIds: string[]): Promise<void> {
+	private async assertTeam(c: MiCompetition, userIds: string[], opts: { allowShort?: boolean } = {}): Promise<void> {
 		const uniq = Array.from(new Set(userIds));
 		if (uniq.length !== userIds.length) throw this.err('bad_team', 'A player is listed twice.');
-		if (uniq.length < c.teamMinSize || uniq.length > c.teamMaxSize) throw this.err('bad_team', c.teamMinSize === c.teamMaxSize ? `This competition takes ${c.teamMinSize} player(s) per entry.` : `This competition takes ${c.teamMinSize}–${c.teamMaxSize} players per entry.`);
+		if ((uniq.length < c.teamMinSize && !opts.allowShort) || uniq.length > c.teamMaxSize) throw this.err('bad_team', c.teamMinSize === c.teamMaxSize ? `This competition takes ${c.teamMinSize} player(s) per entry.` : `This competition takes ${c.teamMinSize}–${c.teamMaxSize} players per entry.`);
 		if (uniq.length) {
 			const n = await this.usersRepository.countBy({ id: In(uniq) });
 			if (n !== uniq.length) throw this.err('bad_team', 'A player does not exist.');
@@ -383,7 +383,7 @@ export class CompetitionService {
 		const partners = Array.from(new Set((data.partnerIds ?? []).filter((x) => x !== user.id)));
 		const team = [user.id, ...partners];
 		await this.assertMayJoin(c, team);   // COMP-T3-V1: club members only — the whole proposed team
-		await this.assertTeam(c, team);
+		await this.assertTeam(c, team, { allowShort: true });   // BENCH-C TEAM-ALONE-V1
 		await this.assertNoBlocks(team);
 		const name = (data.name ?? '').trim() || (user.name ?? user.username);
 		const status = c.autoApprove || hostInvite ? 'confirmed' : 'pending';
@@ -624,9 +624,11 @@ export class CompetitionService {
 			await this.competitionsRepository.update(c.id, { manualSeeding: true });
 		} else if (this.isKnockout(c.format)) {
 			seeded = confirmed.map((e) => e.id);
+			if (c.manualSeeding) await this.competitionsRepository.update(c.id, { manualSeeding: false });   // BENCH-C SEED-AUTO-V1
 		} else {
 			const st = await this.standings(c);
 			if (!st.stageComplete) throw this.err('stage_incomplete', 'Every pool match must be completed before the playoffs.');
+			if (c.manualSeeding) await this.competitionsRepository.update(c.id, { manualSeeding: false });   // BENCH-C SEED-AUTO-V1: back to the standings
 			const perPool = st.pools.map((p) => p.rows.slice(0, c.numContinue).map((r) => r.entryId));
 			seeded = [];
 			const depth = Math.max(...perPool.map((p) => p.length));
@@ -1624,7 +1626,7 @@ export class CompetitionService {
 	 * Returns the entry (or the first invitation).
 	 */
 	@bindThis
-	public async hostEntryA(c: MiCompetition, host: MiUser, entryId: string | null, a: { inviteUserIds?: string[] | null; approveSpectator?: boolean | null; reserved?: { gender?: string | null; ageGroup?: string | null; level?: number | null } | null; positions?: Record<string, string | null> | null; captainUserId?: string | null; moveUserId?: string | null; moveTo?: 'spectator' | 'freeAgent' | null; assignCaptainId?: string | null; name?: string | null }): Promise<MiCompetitionEntry | null> {
+	public async hostEntryA(c: MiCompetition, host: MiUser, entryId: string | null, a: { inviteUserIds?: string[] | null; approveSpectator?: boolean | null; reserved?: { gender?: string | null; ageGroup?: string | null; level?: number | null } | null; positions?: Record<string, string | null> | null; captainUserId?: string | null; moveUserId?: string | null; moveTo?: 'spectator' | 'freeAgent' | 'remove' | null; assignCaptainId?: string | null; name?: string | null }): Promise<MiCompetitionEntry | null> {
 		if (!this.isHost(c, host.id)) throw this.err('not_host', 'Only the host can do this.');
 		if (!entryId) {
 			const rows = await this.hostInvite(c, host, a.inviteUserIds ?? []);
@@ -1664,6 +1666,15 @@ export class CompetitionService {
 			const uid = a.moveUserId;
 			if (!e.userIds.includes(uid) || !['pending', 'confirmed'].includes(e.status)) throw this.err('no_such_entry', 'That player is not in this entry.');
 			if (a.moveTo === 'freeAgent' && c.participantType === 'singles') throw this.err('bad_team', 'A singles competition has no free agents.');
+			if (a.moveTo === 'remove') {   // BENCH-C MEMBER-REMOVE-V1: out of the competition — a solo entry is withdrawn, a member leaves the team
+				if (await this.matchesRepository.existsBy({ competitionId: c.id })) throw this.err('draw_exists', 'The draw is generated — the roster is fixed.');
+				if (e.userIds.length === 1) await this.entriesRepository.update(e.id, { status: 'withdrawn', invitedUserIds: [], requestedUserIds: [], statusChangedAt: now });
+				else { const rest = e.userIds.filter((x) => x !== uid); await this.entriesRepository.update(e.id, { userIds: rest, captainId: e.captainId === uid ? rest[0] : e.captainId }); }
+				if (e.chatRoomId) await this.chatService.leaveRoom(uid, e.chatRoomId).catch(() => undefined);
+				if (c.chatRoomId) await this.chatService.leaveRoom(uid, c.chatRoomId).catch(() => undefined);
+				if (uid !== host.id) this.notify(uid, c, 'Removed from the competition', `The host removed you from ${c.name}.`);
+				return await this.entriesRepository.findOneBy({ id: e.id });
+			}
 			if (await this.matchesRepository.existsBy({ competitionId: c.id })) throw this.err('draw_exists', 'The draw is generated — the roster is fixed.');
 			const u = await this.usersRepository.findOneBy({ id: uid });
 			const uname = u ? (u.name ?? u.username) : e.name;
