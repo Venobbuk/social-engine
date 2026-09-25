@@ -101,7 +101,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			}
 			/* ACCOUNT-DELETE-SSO-V1 (was: a username that is not "<iss>_<12 hex>" threw a plain Error → 500 — every SSO account
 			 * renamed by SSO-ONE-TAP). The seam handle is the username, or the registry alias the rename kept (SSO_HANDLE_KEY). */
-			let seamHandle: string | null = /^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username) ? user.username : null;
+			// part 3: a native sign-up's placeholder "gb_<12 hex>" has the same shape — it is NOT a seam handle
+			let seamHandle: string | null = /^[a-z0-9-]+_[0-9a-f]{12}$/.test(user.username) && !/^gb_/i.test(user.username) ? user.username : null;   // only the NATIVE placeholder; hkpl_<hex> IS a seam handle
 			if (!seamHandle) {
 				const rows = await this.db.query('SELECT value FROM registry_item WHERE "userId" = $1 AND key = $2 AND domain IS NULL LIMIT 1', [user.id, SSO_HANDLE_KEY]) as { value: unknown }[];
 				const v = rows[0] ? rows[0].value : null;

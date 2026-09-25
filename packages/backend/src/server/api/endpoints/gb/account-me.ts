@@ -60,7 +60,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				email: profile.email ?? null,
 				emailVerified: !!profile.emailVerified,
 				// ACCOUNT-DELETE-SSO-V1: false for an account the HKPL sign-in made (its password is a random one nobody knows)
-				hasPassword: !(/^[a-z0-9-]+_[0-9a-f]{12}$/.test(me.username) || (await this.db.query('SELECT 1 FROM registry_item WHERE "userId" = $1 AND key = $2 AND domain IS NULL LIMIT 1', [me.id, SSO_HANDLE_KEY]) as unknown[]).length > 0),
+				hasPassword: !((/^[a-z0-9-]+_[0-9a-f]{12}$/.test(me.username) && !/^gb_/i.test(me.username)) || (await this.db.query('SELECT 1 FROM registry_item WHERE "userId" = $1 AND key = $2 AND domain IS NULL LIMIT 1', [me.id, SSO_HANDLE_KEY]) as unknown[]).length > 0),
 			};
 		});
 	}
