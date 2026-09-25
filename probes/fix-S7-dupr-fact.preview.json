@@ -1,0 +1,76 @@
+{
+ "id": "fix-S7-dupr-fact",
+ "app": "preview",
+ "at": "2026-09-25T20:36:04.347Z",
+ "rows": {
+  "tiffany-en": {
+   "id": "tiffany-en",
+   "pass": true,
+   "evidence": {
+    "headerLine": "DUPR (unverified) 4.9 · Advanced",
+    "statsSaysNoDupr": false,
+    "statsUnverified": true,
+    "statsRating": true
+   }
+  },
+  "fresh-linked-en": {
+   "id": "fresh-linked-en",
+   "pass": true,
+   "evidence": {
+    "statsSaysNoDupr": false,
+    "statsShowsId": true,
+    "headerLine": "Self-rated 3.5 · Intermediate"
+   }
+  },
+  "fresh-none-en": {
+   "id": "fresh-none-en",
+   "pass": true,
+   "evidence": {
+    "statsSaysNoDupr": true,
+    "headerLine": "Self-rated 3.5 · Intermediate"
+   }
+  },
+  "tiffany-zh_Hant": {
+   "id": "tiffany-zh_Hant",
+   "pass": true,
+   "evidence": {
+    "headerLine": "DUPR（未驗證） 4.9 · 高級",
+    "statsSaysNoDupr": false,
+    "statsUnverified": true,
+    "statsRating": true
+   }
+  },
+  "fresh-linked-zh_Hant": {
+   "id": "fresh-linked-zh_Hant",
+   "pass": true,
+   "evidence": {
+    "statsSaysNoDupr": false,
+    "statsShowsId": true,
+    "headerLine": "自評 3.5 · 中級"
+   }
+  },
+  "fresh-none-zh_Hant": {
+   "id": "fresh-none-zh_Hant",
+   "pass": false,
+   "evidence": {
+    "statsSaysNoDupr": false,
+    "headerLine": "自評 3.5 · 中級"
+   }
+  }
+ },
+ "errors": [],
+ "cleanup": {
+  "fs7d-00a9f8-L@example.invalid": 200,
+  "fs7d-9bee20-N@example.invalid": 200
+ },
+ "tiffany": "-|4.89|4",
+ "bundle": "app.3c8c3e10.js",
+ "linkL": {
+  "linked": true,
+  "duprId": "FS7DEC16",
+  "name": null,
+  "doubles": null,
+  "singles": null,
+  "sandbox": true
+ }
+}
