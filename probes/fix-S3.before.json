@@ -1,0 +1,918 @@
+{
+ "id": "fix-S3",
+ "mode": "before",
+ "at": "2026-09-24T11:57:50.455Z",
+ "run": "h9ipj",
+ "rows": {
+  "fixture": {
+   "id": "fixture",
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless :: {\"F1handle\":\"fs3h9ipj\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":21,\"kudos\":[200,200,200],\"insightsActive\":5,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+   ]
+  },
+  "B-club-home.13": {
+   "id": "B-club-home.13",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO club HOME (not Manage club) asks \"Lock your club's venues in\" with the meet's venue; real click Confirm all -> engine venueIds has it :: prompt=false clicked=false venueIds=[] shots=probes/fix-S3-shots/before/001-R3-mei-home-venue-lock.png,probes/fix-S3-shots/before/002-R3-mei-home-after-confirm.png"
+   ]
+  },
+  "B-club-detail.23": {
+   "id": "B-club-detail.23",
+   "checks": 2,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO engine: Most rewarded per kudo dimension + Most stats (matches won) name amy :: kudo=undefined stat=undefined",
+    "NO screen: \"Most rewarded\" kudo chips (real click Sportsmanship lists amy) + \"Most stats\" section + \"See all\" :: chip=false |  | 1 | Amy Chan | 3 kudos | Club insights are updated approximately every 12 hours. | Home | Discover | Community | Inbox | See more shot=probes/fix-S3-shots/before/003-R1-mei-insights.png"
+   ]
+  },
+  "B-insight-rankings.01": {
+   "id": "B-insight-rankings.01",
+   "checks": 3,
+   "passed": 1,
+   "status": "still-open",
+   "evidence": [
+    "NO See all -> the full ranking sheet (20 rows) + Load more -> the next page (engine offset 20) :: seeAll=false rows=6->6 paged=[] shots=probes/fix-S3-shots/before/004-R2-mei-ranking-sheet.png,probes/fix-S3-shots/before/005-R2-mei-ranking-loadmore.png",
+    "NO stat ranking: \"Most matches won\" sheet lists amy with her wins ::  shot=probes/fix-S3-shots/before/006-R2-mei-stat-ranking.png",
+    "ok permission: signed out and a plain member are refused the ranking (admins only) :: anon=401 member=400"
+   ]
+  },
+  "B-club-home.24": {
+   "id": "B-club-home.24",
+   "checks": 2,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO share card: \"N members · N activities\" + \"Organized by Mei\" :: 23 members · 0 activities shot=probes/fix-S3-shots/before/007-R4-mei-share-sheet.png",
+    "NO link preview of the short link (crawler UA): the club, \"N members · N activities\", \"Organized by\" :: {\"s\":200,\"title\":\"\",\"desc\":\"\"}"
+   ]
+  },
+  "Q-share-link": {
+   "id": "Q-share-link",
+   "checks": 3,
+   "passed": 1,
+   "status": "still-open",
+   "evidence": [
+    "NO a PUBLIC club with a handle is shared as /clubs/@handle (no community/index, no id=, no at=) :: url=uat.gripbat.com/app/pages/community/index?id=arj1ksiy0gya0001&at=HzlCr7j3GM5JaJFv",
+    "ok a person opening /clubs/@handle is sent to the app :: {\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?club=fs3h9ipj\"}",
+    "NO a PRIVATE club is shared as the clean /clubs/<id>?at=<token> (no community/index) :: url= shot=probes/fix-S3-shots/before/008-R4-amy-private-share.png"
+   ]
+  },
+  "G15.5-private": {
+   "id": "G15.5-private",
+   "checks": 4,
+   "passed": 3,
+   "status": "still-open",
+   "evidence": [
+    "NO link preview of a PRIVATE club names nothing of it (no name, description, count, organisers) :: {\"short\":[200,\"GripBat\",\"GripBat — one app for the whole pickleball day.\"],\"long\":[200,\"[probe] fix-S3 F2 private h9ipj\",\"[probe] fix-S3 secret description h9ipj · 0 members\"]}",
+    "ok signed out: /clubs/<private id> without the token shows nothing of the club :: GripBat | Sign Up | No page corresponding to this URL could be found. shot=probes/fix-S3-shots/before/009-PRIV-anon-private-link.png",
+    "ok NON-member ken: /clubs/<private id> without the token shows nothing of the club :: GripBat | Sign Up | No page corresponding to this URL could be found. shot=probes/fix-S3-shots/before/010-PRIV-ken-private-link.png",
+    "ok NON-member ken: private club insights refused, not in his clubs, no member-sheet meets :: insights=400 mine=2 memberMeets=200/0"
+   ]
+  },
+  "B-my-clubs.04": {
+   "id": "B-my-clubs.04",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO Clubs view: collapsible sections (real click Hide -> fewer cards, \"Show\") + Reviewing as a section :: reviewing=false cards=11->11 shots=probes/fix-S3-shots/before/011-R10-mei-myclubs.png,probes/fix-S3-shots/before/012-R10-mei-myclubs-collapsed.png"
+   ]
+  },
+  "B-my-clubs.05": {
+   "id": "B-my-clubs.05",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO club row carries my tag (\"fixS3 tag\"); engine clubs/mine myTags :: myTags=undefined line=Public · Pickleball · 23 members · 0 upcoming activities shot=probes/fix-S3-shots/before/013-R11-amy-myclubs.png"
+   ]
+  },
+  "B-group-user.02": {
+   "id": "B-group-user.02",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO real tap on a member in the club Members pane opens the club-scoped sheet (Activity, the club meet) — not the global profile :: tap=true url=/app/pages/player/index?id=ari4hb3c3hac0001 shot=probes/fix-S3-shots/before/014-R6-mei-member-sheet.png"
+   ]
+  },
+  "B-club-menu.02": {
+   "id": "B-club-menu.02",
+   "checks": 2,
+   "passed": 1,
+   "status": "still-open",
+   "evidence": [
+    "NO Member Gated: the MEMBER's kebab Invite opens the in-app player picker; real Invite -> engine invitation for tom :: items=[\"Invite\",\"Create activity\",\"Post question\",\"Chat notifications: On\",\"Pin to home screen\",\"Take a break\",\"Message Admins\",\"Report club\",\"Get GripBat Support\",\"Leave club\"] picker=false sent=false invited=false shot=probes/fix-S3-shots/before/015-R5-amy-kebab-invite-picker.png",
+    "ok control — Admin Gated: a member's Invite shares the link (no in-app invite she is not allowed to send) :: Copy link shot=probes/fix-S3-shots/before/016-R5-amy-kebab-invite-admin-gated.png"
+   ]
+  },
+  "B-set-privacy.02": {
+   "id": "B-set-privacy.02",
+   "checks": 2,
+   "passed": 1,
+   "status": "still-open",
+   "evidence": [
+    "NO Member Gated changes a MEMBER's screen: Invite players + Need review (ken); real click Approve -> engine ken is a member :: seen=false approve=false kenMember=false shot=probes/fix-S3-shots/before/017-R7-amy-members-member-gated.png",
+    "ok control — Admin Gated club: the member sees neither Invite players nor Need review :: invite=false review=false"
+   ]
+  },
+  "E-chat-room.21": {
+   "id": "E-chat-room.21",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO refused outside link: Reclub's sentence on the bubble, NO Retry, Edit puts the text back; engine stored 0 :: refused=true stored=0 sentence=false retry=true edit=false draftBack=false shot=probes/fix-S3-shots/before/018-R8-amy-chat-refused.png"
+   ]
+  },
+  "B-invite-friends.01": {
+   "id": "B-invite-friends.01",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO OWNER's Club tags tab: her club -> its tag -> amy (not \"Join a club to use its tags.\") :: club=false tag=false shot=probes/fix-S3-shots/before/019-R9-mei-club-tags.png"
+   ]
+  },
+  "B-onboard-join-club.03": {
+   "id": "B-onboard-join-club.03",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO suggested cards carry level + followers; the listed club shows \"3.5 · External club · Next meet full\" :: card=1 member | Are you a club leader? | Create club shots=probes/fix-S3-shots/before/020-R12-amy-onboard-club-step.png,probes/fix-S3-shots/before/021-R12-amy-onboard-search.png"
+   ]
+  },
+  "B-select-club-members.01": {
+   "id": "B-select-club-members.01",
+   "checks": 2,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO competition staff: \"Pick from the club members\" -> the club picker (Admins / Members) -> amy as Referee -> engine staff :: add=true pick=false items=[] referees=[] shot=probes/fix-S3-shots/before/022-R13-mei-staff-from-club.png",
+    "NO the competition FORM offers \"Staff — Add co-admins or referees\" from the club :: shot=probes/fix-S3-shots/before/023-R13-mei-create-form-staff.png"
+   ]
+  },
+  "B-set-hub.02": {
+   "id": "B-set-hub.02",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO Manage club has \"Get GripBat Support\"; real tap opens the support thread with the club named :: url=/app/pages/club-admin/index?id=arj1ksiy0gya0001&lang=en shot=probes/fix-S3-shots/before/024-R14-mei-support.png"
+   ]
+  },
+  "B-tutorial.01": {
+   "id": "B-tutorial.01",
+   "checks": 2,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO Create club: swipeable tutorial panes — a real swipe moves from 1 / 6 to 2 / 6 (Manage members) :: p1=null p2=null shot=probes/fix-S3-shots/before/025-R15-mei-create-tutorial.png",
+    "NO Help › Run a club = the six topics + the swipeable panes :: six=false swiper=false shot=probes/fix-S3-shots/before/026-R15-mei-help-run-a-club.png"
+   ]
+  },
+  "Q-level-chip": {
+   "id": "Q-level-chip",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO real tap on the 4.0 level chip (no Save pressed) -> engine level 4.0 :: tap=true level=null net=0"
+   ]
+  },
+  "Q-bold-italic": {
+   "id": "Q-bold-italic",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO B with nothing selected -> \"****\" with the cursor inside (typing lands between); I wraps the selection; the post has no \"bold text\" :: v1=\"*bold text**\" v2=\"*bold text**\" v3=\">italic text</i>\" note=\"\" shot=probes/fix-S3-shots/before/027-Q3-amy-bold-italic.png"
+   ]
+  },
+  "B-claim.01": {
+   "id": "B-claim.01",
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok ownerless club: Reclub's note + \"Managing a club\" (opens Help › Run a club) for everyone; a member's real Claim -> engine claim pending :: note=true anonNote=true claim={\"status\":\"pending\",\"createdAt\":\"2026-09-24T12:15:37.765Z\"} link=/app/pages/help/index?tab=club shots=probes/fix-S3-shots/before/028-V1-amy-ownerless.png,probes/fix-S3-shots/before/029-V1-amy-claim-sent.png"
+   ]
+  },
+  "B-invite-friends.02": {
+   "id": "B-invite-friends.02",
+   "checks": 1,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO 21 invitable club members: the 21st tap says \"You've reached the limit of 20 players per invitation.\" and 20 stay selected :: opened=true rows=0 tapped=0 selected=? shot=probes/fix-S3-shots/before/030-V2-mei-invite-cap.png"
+   ]
+  },
+  "i18n": {
+   "id": "i18n",
+   "checks": 2,
+   "passed": 0,
+   "status": "still-open",
+   "evidence": [
+    "NO zh_Hant: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English) :: shot=probes/fix-S3-shots/before/031-LANG-zh_Hant-insights.png",
+    "NO zh_Hans: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English) :: shot=probes/fix-S3-shots/before/032-LANG-zh_Hans-insights.png"
+   ]
+  }
+ },
+ "checks": [
+  {
+   "row": "fixture",
+   "name": "fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless",
+   "pass": true,
+   "ev": "{\"F1handle\":\"fs3h9ipj\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":21,\"kudos\":[200,200,200],\"insightsActive\":5,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+  },
+  {
+   "row": "B-club-home.13",
+   "name": "club HOME (not Manage club) asks \"Lock your club's venues in\" with the meet's venue; real click Confirm all -> engine venueIds has it",
+   "pass": false,
+   "ev": "prompt=false clicked=false venueIds=[] shots=probes/fix-S3-shots/before/001-R3-mei-home-venue-lock.png,probes/fix-S3-shots/before/002-R3-mei-home-after-confirm.png"
+  },
+  {
+   "row": "B-club-detail.23",
+   "name": "engine: Most rewarded per kudo dimension + Most stats (matches won) name amy",
+   "pass": false,
+   "ev": "kudo=undefined stat=undefined"
+  },
+  {
+   "row": "B-club-detail.23",
+   "name": "screen: \"Most rewarded\" kudo chips (real click Sportsmanship lists amy) + \"Most stats\" section + \"See all\"",
+   "pass": false,
+   "ev": "chip=false |  | 1 | Amy Chan | 3 kudos | Club insights are updated approximately every 12 hours. | Home | Discover | Community | Inbox | See more shot=probes/fix-S3-shots/before/003-R1-mei-insights.png"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "name": "See all -> the full ranking sheet (20 rows) + Load more -> the next page (engine offset 20)",
+   "pass": false,
+   "ev": "seeAll=false rows=6->6 paged=[] shots=probes/fix-S3-shots/before/004-R2-mei-ranking-sheet.png,probes/fix-S3-shots/before/005-R2-mei-ranking-loadmore.png"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "name": "stat ranking: \"Most matches won\" sheet lists amy with her wins",
+   "pass": false,
+   "ev": " shot=probes/fix-S3-shots/before/006-R2-mei-stat-ranking.png"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "name": "permission: signed out and a plain member are refused the ranking (admins only)",
+   "pass": true,
+   "ev": "anon=401 member=400"
+  },
+  {
+   "row": "B-club-home.24",
+   "name": "share card: \"N members · N activities\" + \"Organized by Mei\"",
+   "pass": false,
+   "ev": "23 members · 0 activities shot=probes/fix-S3-shots/before/007-R4-mei-share-sheet.png"
+  },
+  {
+   "row": "Q-share-link",
+   "name": "a PUBLIC club with a handle is shared as /clubs/@handle (no community/index, no id=, no at=)",
+   "pass": false,
+   "ev": "url=uat.gripbat.com/app/pages/community/index?id=arj1ksiy0gya0001&at=HzlCr7j3GM5JaJFv"
+  },
+  {
+   "row": "B-club-home.24",
+   "name": "link preview of the short link (crawler UA): the club, \"N members · N activities\", \"Organized by\"",
+   "pass": false,
+   "ev": "{\"s\":200,\"title\":\"\",\"desc\":\"\"}"
+  },
+  {
+   "row": "Q-share-link",
+   "name": "a person opening /clubs/@handle is sent to the app",
+   "pass": true,
+   "ev": "{\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?club=fs3h9ipj\"}"
+  },
+  {
+   "row": "Q-share-link",
+   "name": "a PRIVATE club is shared as the clean /clubs/<id>?at=<token> (no community/index)",
+   "pass": false,
+   "ev": "url= shot=probes/fix-S3-shots/before/008-R4-amy-private-share.png"
+  },
+  {
+   "row": "G15.5-private",
+   "name": "link preview of a PRIVATE club names nothing of it (no name, description, count, organisers)",
+   "pass": false,
+   "ev": "{\"short\":[200,\"GripBat\",\"GripBat — one app for the whole pickleball day.\"],\"long\":[200,\"[probe] fix-S3 F2 private h9ipj\",\"[probe] fix-S3 secret description h9ipj · 0 members\"]}"
+  },
+  {
+   "row": "G15.5-private",
+   "name": "signed out: /clubs/<private id> without the token shows nothing of the club",
+   "pass": true,
+   "ev": "GripBat | Sign Up | No page corresponding to this URL could be found. shot=probes/fix-S3-shots/before/009-PRIV-anon-private-link.png"
+  },
+  {
+   "row": "G15.5-private",
+   "name": "NON-member ken: /clubs/<private id> without the token shows nothing of the club",
+   "pass": true,
+   "ev": "GripBat | Sign Up | No page corresponding to this URL could be found. shot=probes/fix-S3-shots/before/010-PRIV-ken-private-link.png"
+  },
+  {
+   "row": "G15.5-private",
+   "name": "NON-member ken: private club insights refused, not in his clubs, no member-sheet meets",
+   "pass": true,
+   "ev": "insights=400 mine=2 memberMeets=200/0"
+  },
+  {
+   "row": "B-my-clubs.04",
+   "name": "Clubs view: collapsible sections (real click Hide -> fewer cards, \"Show\") + Reviewing as a section",
+   "pass": false,
+   "ev": "reviewing=false cards=11->11 shots=probes/fix-S3-shots/before/011-R10-mei-myclubs.png,probes/fix-S3-shots/before/012-R10-mei-myclubs-collapsed.png"
+  },
+  {
+   "row": "B-my-clubs.05",
+   "name": "club row carries my tag (\"fixS3 tag\"); engine clubs/mine myTags",
+   "pass": false,
+   "ev": "myTags=undefined line=Public · Pickleball · 23 members · 0 upcoming activities shot=probes/fix-S3-shots/before/013-R11-amy-myclubs.png"
+  },
+  {
+   "row": "B-group-user.02",
+   "name": "real tap on a member in the club Members pane opens the club-scoped sheet (Activity, the club meet) — not the global profile",
+   "pass": false,
+   "ev": "tap=true url=/app/pages/player/index?id=ari4hb3c3hac0001 shot=probes/fix-S3-shots/before/014-R6-mei-member-sheet.png"
+  },
+  {
+   "row": "B-club-menu.02",
+   "name": "Member Gated: the MEMBER's kebab Invite opens the in-app player picker; real Invite -> engine invitation for tom",
+   "pass": false,
+   "ev": "items=[\"Invite\",\"Create activity\",\"Post question\",\"Chat notifications: On\",\"Pin to home screen\",\"Take a break\",\"Message Admins\",\"Report club\",\"Get GripBat Support\",\"Leave club\"] picker=false sent=false invited=false shot=probes/fix-S3-shots/before/015-R5-amy-kebab-invite-picker.png"
+  },
+  {
+   "row": "B-club-menu.02",
+   "name": "control — Admin Gated: a member's Invite shares the link (no in-app invite she is not allowed to send)",
+   "pass": true,
+   "ev": "Copy link shot=probes/fix-S3-shots/before/016-R5-amy-kebab-invite-admin-gated.png"
+  },
+  {
+   "row": "B-set-privacy.02",
+   "name": "Member Gated changes a MEMBER's screen: Invite players + Need review (ken); real click Approve -> engine ken is a member",
+   "pass": false,
+   "ev": "seen=false approve=false kenMember=false shot=probes/fix-S3-shots/before/017-R7-amy-members-member-gated.png"
+  },
+  {
+   "row": "B-set-privacy.02",
+   "name": "control — Admin Gated club: the member sees neither Invite players nor Need review",
+   "pass": true,
+   "ev": "invite=false review=false"
+  },
+  {
+   "row": "E-chat-room.21",
+   "name": "refused outside link: Reclub's sentence on the bubble, NO Retry, Edit puts the text back; engine stored 0",
+   "pass": false,
+   "ev": "refused=true stored=0 sentence=false retry=true edit=false draftBack=false shot=probes/fix-S3-shots/before/018-R8-amy-chat-refused.png"
+  },
+  {
+   "row": "B-invite-friends.01",
+   "name": "OWNER's Club tags tab: her club -> its tag -> amy (not \"Join a club to use its tags.\")",
+   "pass": false,
+   "ev": "club=false tag=false shot=probes/fix-S3-shots/before/019-R9-mei-club-tags.png"
+  },
+  {
+   "row": "B-onboard-join-club.03",
+   "name": "suggested cards carry level + followers; the listed club shows \"3.5 · External club · Next meet full\"",
+   "pass": false,
+   "ev": "card=1 member | Are you a club leader? | Create club shots=probes/fix-S3-shots/before/020-R12-amy-onboard-club-step.png,probes/fix-S3-shots/before/021-R12-amy-onboard-search.png"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "competition staff: \"Pick from the club members\" -> the club picker (Admins / Members) -> amy as Referee -> engine staff",
+   "pass": false,
+   "ev": "add=true pick=false items=[] referees=[] shot=probes/fix-S3-shots/before/022-R13-mei-staff-from-club.png"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "the competition FORM offers \"Staff — Add co-admins or referees\" from the club",
+   "pass": false,
+   "ev": "shot=probes/fix-S3-shots/before/023-R13-mei-create-form-staff.png"
+  },
+  {
+   "row": "B-set-hub.02",
+   "name": "Manage club has \"Get GripBat Support\"; real tap opens the support thread with the club named",
+   "pass": false,
+   "ev": "url=/app/pages/club-admin/index?id=arj1ksiy0gya0001&lang=en shot=probes/fix-S3-shots/before/024-R14-mei-support.png"
+  },
+  {
+   "row": "B-tutorial.01",
+   "name": "Create club: swipeable tutorial panes — a real swipe moves from 1 / 6 to 2 / 6 (Manage members)",
+   "pass": false,
+   "ev": "p1=null p2=null shot=probes/fix-S3-shots/before/025-R15-mei-create-tutorial.png"
+  },
+  {
+   "row": "B-tutorial.01",
+   "name": "Help › Run a club = the six topics + the swipeable panes",
+   "pass": false,
+   "ev": "six=false swiper=false shot=probes/fix-S3-shots/before/026-R15-mei-help-run-a-club.png"
+  },
+  {
+   "row": "Q-level-chip",
+   "name": "real tap on the 4.0 level chip (no Save pressed) -> engine level 4.0",
+   "pass": false,
+   "ev": "tap=true level=null net=0"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "B with nothing selected -> \"****\" with the cursor inside (typing lands between); I wraps the selection; the post has no \"bold text\"",
+   "pass": false,
+   "ev": "v1=\"*bold text**\" v2=\"*bold text**\" v3=\">italic text</i>\" note=\"\" shot=probes/fix-S3-shots/before/027-Q3-amy-bold-italic.png"
+  },
+  {
+   "row": "B-claim.01",
+   "name": "ownerless club: Reclub's note + \"Managing a club\" (opens Help › Run a club) for everyone; a member's real Claim -> engine claim pending",
+   "pass": true,
+   "ev": "note=true anonNote=true claim={\"status\":\"pending\",\"createdAt\":\"2026-09-24T12:15:37.765Z\"} link=/app/pages/help/index?tab=club shots=probes/fix-S3-shots/before/028-V1-amy-ownerless.png,probes/fix-S3-shots/before/029-V1-amy-claim-sent.png"
+  },
+  {
+   "row": "B-invite-friends.02",
+   "name": "21 invitable club members: the 21st tap says \"You've reached the limit of 20 players per invitation.\" and 20 stay selected",
+   "pass": false,
+   "ev": "opened=true rows=0 tapped=0 selected=? shot=probes/fix-S3-shots/before/030-V2-mei-invite-cap.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English)",
+   "pass": false,
+   "ev": "shot=probes/fix-S3-shots/before/031-LANG-zh_Hant-insights.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English)",
+   "pass": false,
+   "ev": "shot=probes/fix-S3-shots/before/032-LANG-zh_Hans-insights.png"
+  }
+ ],
+ "plants": [
+  {
+   "name": "a planted absent control is NOT clickable",
+   "pass": true
+  },
+  {
+   "name": "a planted absent string is NOT on screen",
+   "pass": true
+  },
+  {
+   "name": "the club name IS on screen (the reader sees the page)",
+   "pass": true
+  },
+  {
+   "name": "a member (not admin) asking the ranking is refused",
+   "pass": true,
+   "s": 400
+  }
+ ],
+ "fx": {
+  "clubs": [
+   "arj1ksiy0gya0001",
+   "arj1kyt40gya008r",
+   "arj1kyu80gya008s",
+   "arj1kyy70gya0093"
+  ],
+  "meets": [
+   "arj1kw630gya004t",
+   "arj1kywr0gya008y",
+   "arj1kyzx0gya0097"
+  ],
+  "comps": [
+   "arj1zvt50gya009n"
+  ],
+  "accts": [
+   {
+    "i": 1,
+    "username": "fs3h9ipjp1",
+    "password": "Fs3-1fb1e8c204118d92",
+    "email": "fs3-h9ipj-1@example.invalid",
+    "token": "uvW60gIjNmCVWUdw",
+    "userId": "arj1ksp00gya0006",
+    "name": "[probe] fix-S3 P1 h9ipj"
+   },
+   {
+    "i": 2,
+    "username": "fs3h9ipjp2",
+    "password": "Fs3-082e35d2b205de61",
+    "email": "fs3-h9ipj-2@example.invalid",
+    "token": "AtWAycRSApkgxbt3",
+    "userId": "arj1kswv0gya000e",
+    "name": "[probe] fix-S3 P2 h9ipj"
+   },
+   {
+    "i": 3,
+    "username": "fs3h9ipjp3",
+    "password": "Fs3-7ddc365d9c8d13c5",
+    "email": "fs3-h9ipj-3@example.invalid",
+    "token": "CpwAotK32UE6URrr",
+    "userId": "arj1kt720gya000m",
+    "name": "[probe] fix-S3 P3 h9ipj"
+   },
+   {
+    "i": 4,
+    "username": "fs3h9ipjp4",
+    "password": "Fs3-2a5c6305637e1960",
+    "email": "fs3-h9ipj-4@example.invalid",
+    "token": "rHiJxVuXdrhjqJlI",
+    "userId": "arj1ktcm0gya000u",
+    "name": "[probe] fix-S3 P4 h9ipj"
+   },
+   {
+    "i": 5,
+    "username": "fs3h9ipjp5",
+    "password": "Fs3-e74ed14d9c6cd92c",
+    "email": "fs3-h9ipj-5@example.invalid",
+    "token": "XxiO3UpHAu88XZTy",
+    "userId": "arj1kthy0gya0012",
+    "name": "[probe] fix-S3 P5 h9ipj"
+   },
+   {
+    "i": 6,
+    "username": "fs3h9ipjp6",
+    "password": "Fs3-e5bbd715daa74dad",
+    "email": "fs3-h9ipj-6@example.invalid",
+    "token": "Eb8usZXNIsBgwhGa",
+    "userId": "arj1ktle0gya001a",
+    "name": "[probe] fix-S3 P6 h9ipj"
+   },
+   {
+    "i": 7,
+    "username": "fs3h9ipjp7",
+    "password": "Fs3-dbc306af2b69d675",
+    "email": "fs3-h9ipj-7@example.invalid",
+    "token": "30TufVLflh5G3k0v",
+    "userId": "arj1ktox0gya001i",
+    "name": "[probe] fix-S3 P7 h9ipj"
+   },
+   {
+    "i": 8,
+    "username": "fs3h9ipjp8",
+    "password": "Fs3-0e3b83c4416eebd8",
+    "email": "fs3-h9ipj-8@example.invalid",
+    "token": "fXDEsW2FPsWGdRz6",
+    "userId": "arj1kttu0gya001q",
+    "name": "[probe] fix-S3 P8 h9ipj"
+   },
+   {
+    "i": 9,
+    "username": "fs3h9ipjp9",
+    "password": "Fs3-1abfda1d290fec81",
+    "email": "fs3-h9ipj-9@example.invalid",
+    "token": "UFkEzxfOyjI809wq",
+    "userId": "arj1ktxe0gya001y",
+    "name": "[probe] fix-S3 P9 h9ipj"
+   },
+   {
+    "i": 10,
+    "username": "fs3h9ipjp10",
+    "password": "Fs3-47ea7b05d84a6433",
+    "email": "fs3-h9ipj-10@example.invalid",
+    "token": "YnBRxkJTSLqvoS3H",
+    "userId": "arj1ku3z0gya0026",
+    "name": "[probe] fix-S3 P10 h9ipj"
+   },
+   {
+    "i": 11,
+    "username": "fs3h9ipjp11",
+    "password": "Fs3-ba5ef549a96b010e",
+    "email": "fs3-h9ipj-11@example.invalid",
+    "token": "AuZ18sf6c4t3NrBh",
+    "userId": "arj1ku810gya002e",
+    "name": "[probe] fix-S3 P11 h9ipj"
+   },
+   {
+    "i": 12,
+    "username": "fs3h9ipjp12",
+    "password": "Fs3-b786d10a221471e4",
+    "email": "fs3-h9ipj-12@example.invalid",
+    "token": "YvRhfB6UXEocT0xC",
+    "userId": "arj1kuds0gya002m",
+    "name": "[probe] fix-S3 P12 h9ipj"
+   },
+   {
+    "i": 13,
+    "username": "fs3h9ipjp13",
+    "password": "Fs3-1d371298acd11082",
+    "email": "fs3-h9ipj-13@example.invalid",
+    "token": "QVEIT0jkEqLnnROv",
+    "userId": "arj1kuj10gya002u",
+    "name": "[probe] fix-S3 P13 h9ipj"
+   },
+   {
+    "i": 14,
+    "username": "fs3h9ipjp14",
+    "password": "Fs3-49d84dbd11c00621",
+    "email": "fs3-h9ipj-14@example.invalid",
+    "token": "EIUTNOrJlQUlwQb4",
+    "userId": "arj1kuoz0gya0032",
+    "name": "[probe] fix-S3 P14 h9ipj"
+   },
+   {
+    "i": 15,
+    "username": "fs3h9ipjp15",
+    "password": "Fs3-40185c7c272ce69a",
+    "email": "fs3-h9ipj-15@example.invalid",
+    "token": "1wEy78lLeBffdKV9",
+    "userId": "arj1kuv10gya003a",
+    "name": "[probe] fix-S3 P15 h9ipj"
+   },
+   {
+    "i": 16,
+    "username": "fs3h9ipjp16",
+    "password": "Fs3-b2d29c029ef9f7e8",
+    "email": "fs3-h9ipj-16@example.invalid",
+    "token": "iSvBQQH94ImgHNP8",
+    "userId": "arj1kv0v0gya003i",
+    "name": "[probe] fix-S3 P16 h9ipj"
+   },
+   {
+    "i": 17,
+    "username": "fs3h9ipjp17",
+    "password": "Fs3-876767fd62d170fc",
+    "email": "fs3-h9ipj-17@example.invalid",
+    "token": "4u26NM9Cx4C1bUsu",
+    "userId": "arj1kv890gya003q",
+    "name": "[probe] fix-S3 P17 h9ipj"
+   },
+   {
+    "i": 18,
+    "username": "fs3h9ipjp18",
+    "password": "Fs3-d52372a0388a0776",
+    "email": "fs3-h9ipj-18@example.invalid",
+    "token": "0aMozCrD1JKiToAS",
+    "userId": "arj1kvfr0gya003y",
+    "name": "[probe] fix-S3 P18 h9ipj"
+   },
+   {
+    "i": 19,
+    "username": "fs3h9ipjp19",
+    "password": "Fs3-4ceee39e825c6857",
+    "email": "fs3-h9ipj-19@example.invalid",
+    "token": "sfyqyZACQxyIcr30",
+    "userId": "arj1kvko0gya0046",
+    "name": "[probe] fix-S3 P19 h9ipj"
+   },
+   {
+    "i": 20,
+    "username": "fs3h9ipjp20",
+    "password": "Fs3-b051ccb75823e139",
+    "email": "fs3-h9ipj-20@example.invalid",
+    "token": "8JX5sEcrPaIfDt3p",
+    "userId": "arj1kvsq0gya004e",
+    "name": "[probe] fix-S3 P20 h9ipj"
+   },
+   {
+    "i": 21,
+    "username": "fs3h9ipjp21",
+    "password": "Fs3-6e21a5ff9fa5cc39",
+    "email": "fs3-h9ipj-21@example.invalid",
+    "token": "6qcvdohXDPnUTWtD",
+    "userId": "arj1kw3m0gya004m",
+    "name": "[probe] fix-S3 P21 h9ipj"
+   }
+  ],
+  "notes": [],
+  "claims": [],
+  "ownerless": [
+   "arj1kyy70gya0093"
+  ],
+  "F1": "arj1ksiy0gya0001",
+  "handle": "fs3h9ipj",
+  "tag": "arj1kslb0gya0004",
+  "M1": "arj1kw630gya004t",
+  "kudos": [
+   200,
+   200,
+   200
+  ],
+  "F2": "arj1kyt40gya008r",
+  "F3": "arj1kyu80gya008s",
+  "kenJoin": "requested",
+  "M3": "arj1kywr0gya008y",
+  "F5": "arj1kyy70gya0093",
+  "M5": "arj1kyzx0gya0097",
+  "readback": {
+   "F1handle": "fs3h9ipj",
+   "F1links": false,
+   "F1venues": [],
+   "F2vis": "private",
+   "F3gate": "approval/true",
+   "kenJoin": "requested",
+   "M5": "2/2",
+   "F5owner": "NULL",
+   "seeded": 21,
+   "kudos": [
+    200,
+    200,
+    200
+   ],
+   "insightsActive": 5,
+   "venue": [
+    "ar7iv182jhqz0001",
+    "Hong Kong Football Club"
+   ]
+  }
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "comp": "arj1zvt50gya009n",
+   "s": 200
+  },
+  {
+   "claims": "1"
+  },
+  {
+   "ownerRestored": "arj1kyy70gya0093"
+  },
+  {
+   "meet": "arj1kw630gya004t",
+   "cancel": 200
+  },
+  {
+   "meet": "arj1kywr0gya008y",
+   "cancel": 200
+  },
+  {
+   "meet": "arj1kyzx0gya0097",
+   "cancel": 200
+  },
+  {
+   "meetRows": "arj1kw630gya004t",
+   "del": "1"
+  },
+  {
+   "meetRows": "arj1kywr0gya008y",
+   "del": "1"
+  },
+  {
+   "meetRows": "arj1kyzx0gya0097",
+   "del": "1"
+  },
+  {
+   "chatInvites": "0"
+  },
+  {
+   "club": "arj1ksiy0gya0001",
+   "archived": 200
+  },
+  {
+   "club": "arj1kyt40gya008r",
+   "archived": 200
+  },
+  {
+   "club": "arj1kyu80gya008s",
+   "archived": 200
+  },
+  {
+   "club": "arj1kyy70gya0093",
+   "archived": 200
+  },
+  {
+   "acct": "fs3h9ipjp1",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp2",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp3",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp4",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp5",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp6",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp7",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp8",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp9",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp10",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp11",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp12",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp13",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp14",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp15",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp16",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp17",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp18",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp19",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp20",
+   "deleted": 204
+  },
+  {
+   "acct": "fs3h9ipjp21",
+   "deleted": 204
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "engineRev": "6fa4e5e96b7785030676d87b35faf64239b35fec",
+ "appBundle": "js/app.a42d4f64.js",
+ "leftover": "0/0/0/0",
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": [
+   "fixture",
+   "B-claim.01"
+  ],
+  "open": [
+   "B-club-home.13",
+   "B-club-detail.23",
+   "B-insight-rankings.01",
+   "B-club-home.24",
+   "Q-share-link",
+   "G15.5-private",
+   "B-my-clubs.04",
+   "B-my-clubs.05",
+   "B-group-user.02",
+   "B-club-menu.02",
+   "B-set-privacy.02",
+   "E-chat-room.21",
+   "B-invite-friends.01",
+   "B-onboard-join-club.03",
+   "B-select-club-members.01",
+   "B-set-hub.02",
+   "B-tutorial.01",
+   "Q-level-chip",
+   "Q-bold-italic",
+   "B-invite-friends.02",
+   "i18n"
+  ],
+  "plants": [
+   {
+    "name": "a planted absent control is NOT clickable",
+    "pass": true
+   },
+   {
+    "name": "a planted absent string is NOT on screen",
+    "pass": true
+   },
+   {
+    "name": "the club name IS on screen (the reader sees the page)",
+    "pass": true
+   },
+   {
+    "name": "a member (not admin) asking the ranking is refused",
+    "pass": true,
+    "s": 400
+   }
+  ],
+  "leftover": "0/0/0/0",
+  "cleanupFailed": 0,
+  "errors": 0
+ }
+}

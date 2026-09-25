@@ -1,0 +1,1011 @@
+{
+ "id": "fix-S3",
+ "mode": "rerun",
+ "at": "2026-09-24T20:49:57.192Z",
+ "run": "09tjc",
+ "rows": {
+  "fixture": {
+   "id": "fixture",
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless :: {\"F1handle\":\"fs309tjc\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F2amy\":true,\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":21,\"kudos\":[200,200,200],\"insightsActive\":5,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+   ]
+  },
+  "B-insight-rankings.01": {
+   "id": "B-insight-rankings.01",
+   "checks": 5,
+   "passed": 5,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: See all :: {\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":41,\"h\":36,\"ctl\":\"TARO-TEXT-CORE.pg-card-link is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Load more (sheet) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"nut-popup nut-popup-round nut-popup-bott\"}",
+    "ok See all -> the full ranking sheet (20 rows) + Load more -> the next page (engine offset 20) :: seeAll=true rows=28->30 paged=[200] shots=probes/fix-S3-shots/rerun/001-R2-mei-ranking-sheet.png,probes/fix-S3-shots/rerun/002-R2-mei-ranking-loadmore.png",
+    "ok stat ranking: \"Most matches won\" sheet lists amy with her wins ::  | Most matches played | Most points won | 1 | Amy Chan | 1 wins | 2 | [probe] fix-S3 P1 09tjc | 1 wins | Club insights are updated approximately every 12 hours. | Home | Discover | Community | Inbox | See more |  shot=probes/fix-S3-shots/rerun/003-R2-mei-stat-ranking.png",
+    "ok permission: signed out and a plain member are refused the ranking (admins only) :: anon=401 member=400"
+   ]
+  },
+  "B-my-clubs.04": {
+   "id": "B-my-clubs.04",
+   "checks": 3,
+   "passed": 3,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Hide (section head) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":44,\"h\":36,\"ctl\":\"TARO-TEXT-CORE.pg-card-link is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok Clubs view: collapsible sections (real click Hide -> fewer cards, \"Show\") + Reviewing as a section :: reviewing=true cards=13->9 shots=probes/fix-S3-shots/rerun/004-R10-mei-myclubs.png,probes/fix-S3-shots/rerun/005-R10-mei-myclubs-collapsed.png",
+    "ok 5D reload: the collapsed section stays collapsed (remembered on the device) :: afterReload=▸ Show,▾ Hide"
+   ]
+  },
+  "B-group-user.02": {
+   "id": "B-group-user.02",
+   "checks": 2,
+   "passed": 2,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: member row :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":358,\"h\":70,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok real tap on a member in the club Members pane opens the club-scoped sheet (Activity, the club meet) — not the global profile :: tap=true url=/app/pages/community/index?id=arjkl3fhfril02a1&pane=members&lang=en shot=probes/fix-S3-shots/rerun/006-R6-mei-member-sheet.png"
+   ]
+  },
+  "E-chat-room.21": {
+   "id": "E-chat-room.21",
+   "checks": 4,
+   "passed": 4,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test and >= 24 px: Send (icon) :: {\"x\":357,\"y\":587.140625,\"w\":42,\"h\":42,\"ok\":true,\"top\":\"svg.[object SVGAnimatedString]\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Edit on the refused bubble :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":25,\"h\":31,\"ctl\":\"TARO-VIEW-CORE.ct-failact is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok refused outside link: Reclub's sentence on the bubble, NO Retry, Edit puts the text back; engine stored 0 :: refused=true stored=0 sentence=true retry=false edit=true draftBack=true shot=probes/fix-S3-shots/rerun/007-R8-amy-chat-refused.png",
+    "ok 5D reload: nothing refused is left in the thread; the other party (owner mei) never sees the refused link :: afterReload=false meiSees=false"
+   ]
+  },
+  "B-select-club-members.01": {
+   "id": "B-select-club-members.01",
+   "checks": 5,
+   "passed": 4,
+   "status": "still-open",
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Pick from the club members :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":268,\"h\":70,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Done (club picker) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"nut-popup nut-popup-round nut-popup-bott\"}",
+    "ok competition staff: \"Pick from the club members\" -> the club picker (Admins / Members) -> amy as Referee -> engine staff :: add=true pick=true items=[\"Co-admin\",\"Referee\"] referees=[\"ari4hb3c3hac0001\"] shot=probes/fix-S3-shots/rerun/008-R13-mei-staff-from-club.png",
+    "NO 5D reload: amy stays under Referees; the other party (amy) sees herself as Referee :: reload= amy= shot=probes/fix-S3-shots/rerun/009-R13-amy-sees-staff.png",
+    "ok the competition FORM offers \"Staff — Add co-admins or referees\" from the club :: shot=probes/fix-S3-shots/rerun/010-R13-mei-create-form-staff.png"
+   ]
+  },
+  "Q-bold-italic": {
+   "id": "Q-bold-italic",
+   "checks": 5,
+   "passed": 5,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: B tool :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: I tool :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Post (send) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":50,\"h\":32,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5D the other party (ken, not a member) sees the post in the club forum drawn bold / italic, no markup :: {\"b\":\"700\",\"i\":\"italic\",\"raw\":false} shot=probes/fix-S3-shots/rerun/012-Q3-ken-sees-post.png",
+    "ok B with nothing selected -> \"****\" with the cursor inside (typing lands between); I wraps the selection; the post has no \"bold text\" :: v1=\"D 09tjc ****\" v2=\"09tjc **go**\" v3=\"go** <i>word</i>\" note=\"be] fix-S3 BOLD 09tjc **go** <i>word</i>\" net=[\"notes/create 200\"] btn=[\"TARO-TEXT-CORE.pg-chip pc-chip is-tap pg-tab-on pc-chip\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\"] shot=probes/fix-S3-shots/rerun/011-Q3-amy-bold-italic.png"
+   ]
+  },
+  "i18n": {
+   "id": "i18n",
+   "checks": 12,
+   "passed": 12,
+   "status": "closed",
+   "evidence": [
+    "ok zh_Hant: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English) :: shot=probes/fix-S3-shots/rerun/013-LANG-zh_Hant-insights.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on Insights :: []",
+    "ok zh_Hant: 5C no clipped or off-screen text on club home :: [] shot=probes/fix-S3-shots/rerun/014-LANG-zh_Hant-club-home.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on my clubs :: [] shot=probes/fix-S3-shots/rerun/015-LANG-zh_Hant-my-clubs.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on members (member gated) :: [] shot=probes/fix-S3-shots/rerun/016-LANG-zh_Hant-members-member-gated-.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on help run a club :: [] shot=probes/fix-S3-shots/rerun/017-LANG-zh_Hant-help-run-a-club.png",
+    "ok zh_Hans: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English) :: shot=probes/fix-S3-shots/rerun/018-LANG-zh_Hans-insights.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on Insights :: []",
+    "ok zh_Hans: 5C no clipped or off-screen text on club home :: [] shot=probes/fix-S3-shots/rerun/019-LANG-zh_Hans-club-home.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on my clubs :: [] shot=probes/fix-S3-shots/rerun/020-LANG-zh_Hans-my-clubs.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on members (member gated) :: [] shot=probes/fix-S3-shots/rerun/021-LANG-zh_Hans-members-member-gated-.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on help run a club :: [] shot=probes/fix-S3-shots/rerun/022-LANG-zh_Hans-help-run-a-club.png"
+   ]
+  }
+ },
+ "checks": [
+  {
+   "row": "fixture",
+   "name": "fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless",
+   "pass": true,
+   "ev": "{\"F1handle\":\"fs309tjc\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F2amy\":true,\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":21,\"kudos\":[200,200,200],\"insightsActive\":5,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: See all",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":41,\"h\":36,\"ctl\":\"TARO-TEXT-CORE.pg-card-link is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Load more (sheet)",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"nut-popup nut-popup-round nut-popup-bott\"}"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "name": "See all -> the full ranking sheet (20 rows) + Load more -> the next page (engine offset 20)",
+   "pass": true,
+   "ev": "seeAll=true rows=28->30 paged=[200] shots=probes/fix-S3-shots/rerun/001-R2-mei-ranking-sheet.png,probes/fix-S3-shots/rerun/002-R2-mei-ranking-loadmore.png"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "name": "stat ranking: \"Most matches won\" sheet lists amy with her wins",
+   "pass": true,
+   "ev": " | Most matches played | Most points won | 1 | Amy Chan | 1 wins | 2 | [probe] fix-S3 P1 09tjc | 1 wins | Club insights are updated approximately every 12 hours. | Home | Discover | Community | Inbox | See more |  shot=probes/fix-S3-shots/rerun/003-R2-mei-stat-ranking.png"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "name": "permission: signed out and a plain member are refused the ranking (admins only)",
+   "pass": true,
+   "ev": "anon=401 member=400"
+  },
+  {
+   "row": "B-my-clubs.04",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Hide (section head)",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":44,\"h\":36,\"ctl\":\"TARO-TEXT-CORE.pg-card-link is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "B-my-clubs.04",
+   "name": "Clubs view: collapsible sections (real click Hide -> fewer cards, \"Show\") + Reviewing as a section",
+   "pass": true,
+   "ev": "reviewing=true cards=13->9 shots=probes/fix-S3-shots/rerun/004-R10-mei-myclubs.png,probes/fix-S3-shots/rerun/005-R10-mei-myclubs-collapsed.png"
+  },
+  {
+   "row": "B-my-clubs.04",
+   "name": "5D reload: the collapsed section stays collapsed (remembered on the device)",
+   "pass": true,
+   "ev": "afterReload=▸ Show,▾ Hide"
+  },
+  {
+   "row": "B-group-user.02",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: member row",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":358,\"h\":70,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "B-group-user.02",
+   "name": "real tap on a member in the club Members pane opens the club-scoped sheet (Activity, the club meet) — not the global profile",
+   "pass": true,
+   "ev": "tap=true url=/app/pages/community/index?id=arjkl3fhfril02a1&pane=members&lang=en shot=probes/fix-S3-shots/rerun/006-R6-mei-member-sheet.png"
+  },
+  {
+   "row": "E-chat-room.21",
+   "name": "5B/5C finger hit-test and >= 24 px: Send (icon)",
+   "pass": true,
+   "ev": "{\"x\":357,\"y\":587.140625,\"w\":42,\"h\":42,\"ok\":true,\"top\":\"svg.[object SVGAnimatedString]\"}"
+  },
+  {
+   "row": "E-chat-room.21",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Edit on the refused bubble",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":25,\"h\":31,\"ctl\":\"TARO-VIEW-CORE.ct-failact is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "E-chat-room.21",
+   "name": "refused outside link: Reclub's sentence on the bubble, NO Retry, Edit puts the text back; engine stored 0",
+   "pass": true,
+   "ev": "refused=true stored=0 sentence=true retry=false edit=true draftBack=true shot=probes/fix-S3-shots/rerun/007-R8-amy-chat-refused.png"
+  },
+  {
+   "row": "E-chat-room.21",
+   "name": "5D reload: nothing refused is left in the thread; the other party (owner mei) never sees the refused link",
+   "pass": true,
+   "ev": "afterReload=false meiSees=false"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Pick from the club members",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":268,\"h\":70,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Done (club picker)",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"nut-popup nut-popup-round nut-popup-bott\"}"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "competition staff: \"Pick from the club members\" -> the club picker (Admins / Members) -> amy as Referee -> engine staff",
+   "pass": true,
+   "ev": "add=true pick=true items=[\"Co-admin\",\"Referee\"] referees=[\"ari4hb3c3hac0001\"] shot=probes/fix-S3-shots/rerun/008-R13-mei-staff-from-club.png"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "5D reload: amy stays under Referees; the other party (amy) sees herself as Referee",
+   "pass": false,
+   "ev": "reload= amy= shot=probes/fix-S3-shots/rerun/009-R13-amy-sees-staff.png"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "the competition FORM offers \"Staff — Add co-admins or referees\" from the club",
+   "pass": true,
+   "ev": "shot=probes/fix-S3-shots/rerun/010-R13-mei-create-form-staff.png"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: B tool",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: I tool",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Post (send)",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":50,\"h\":32,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "5D the other party (ken, not a member) sees the post in the club forum drawn bold / italic, no markup",
+   "pass": true,
+   "ev": "{\"b\":\"700\",\"i\":\"italic\",\"raw\":false} shot=probes/fix-S3-shots/rerun/012-Q3-ken-sees-post.png"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "B with nothing selected -> \"****\" with the cursor inside (typing lands between); I wraps the selection; the post has no \"bold text\"",
+   "pass": true,
+   "ev": "v1=\"D 09tjc ****\" v2=\"09tjc **go**\" v3=\"go** <i>word</i>\" note=\"be] fix-S3 BOLD 09tjc **go** <i>word</i>\" net=[\"notes/create 200\"] btn=[\"TARO-TEXT-CORE.pg-chip pc-chip is-tap pg-tab-on pc-chip\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\"] shot=probes/fix-S3-shots/rerun/011-Q3-amy-bold-italic.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English)",
+   "pass": true,
+   "ev": "shot=probes/fix-S3-shots/rerun/013-LANG-zh_Hant-insights.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on Insights",
+   "pass": true,
+   "ev": "[]"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on club home",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun/014-LANG-zh_Hant-club-home.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on my clubs",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun/015-LANG-zh_Hant-my-clubs.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on members (member gated)",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun/016-LANG-zh_Hant-members-member-gated-.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on help run a club",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun/017-LANG-zh_Hant-help-run-a-club.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English)",
+   "pass": true,
+   "ev": "shot=probes/fix-S3-shots/rerun/018-LANG-zh_Hans-insights.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on Insights",
+   "pass": true,
+   "ev": "[]"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on club home",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun/019-LANG-zh_Hans-club-home.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on my clubs",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun/020-LANG-zh_Hans-my-clubs.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on members (member gated)",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun/021-LANG-zh_Hans-members-member-gated-.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on help run a club",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun/022-LANG-zh_Hans-help-run-a-club.png"
+  }
+ ],
+ "plants": [
+  {
+   "name": "a planted absent control is NOT clickable",
+   "pass": true
+  },
+  {
+   "name": "a planted absent string is NOT on screen",
+   "pass": true
+  },
+  {
+   "name": "the club name IS on screen (the reader sees the page)",
+   "pass": true
+  },
+  {
+   "name": "a member (not admin) asking the ranking is refused",
+   "pass": true,
+   "s": 400
+  },
+  {
+   "name": "5B: the clean control passes the hit-test",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "ok",
+    "end": "ok",
+    "w": 292,
+    "h": 91,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  },
+  {
+   "name": "5B: a transparent layer planted over the page makes it FAIL",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "covered by DIV.",
+    "end": "covered by DIV.",
+    "w": 292,
+    "h": 91,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  },
+  {
+   "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "ok",
+    "end": "ok",
+    "w": 292,
+    "h": 12,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  }
+ ],
+ "fx": {
+  "clubs": [
+   "arjkl3fhfril02a1",
+   "arjkl9msfril02im",
+   "arjkl9nzfril02ip",
+   "arjkl9sqfril02j0"
+  ],
+  "meets": [
+   "arjkl744fril02et",
+   "arjkl9qnfril02iv",
+   "arjkl9uufril02j4"
+  ],
+  "comps": [
+   "arjktppqfril02kx"
+  ],
+  "accts": [
+   {
+    "i": 1,
+    "username": "fs309tjcp1",
+    "password": "Fs3-2e2cd7d6dbd9c052",
+    "email": "fs3-09tjc-1@example.invalid",
+    "token": "myfShHU7l913Pxov",
+    "userId": "arjkl3n7fril02a6",
+    "name": "[probe] fix-S3 P1 09tjc"
+   },
+   {
+    "i": 2,
+    "username": "fs309tjcp2",
+    "password": "Fs3-a9efeb384e381430",
+    "email": "fs3-09tjc-2@example.invalid",
+    "token": "oFQyzPGaIbn9jUx0",
+    "userId": "arjkl3w3fril02ae",
+    "name": "[probe] fix-S3 P2 09tjc"
+   },
+   {
+    "i": 3,
+    "username": "fs309tjcp3",
+    "password": "Fs3-48eabded32946c81",
+    "email": "fs3-09tjc-3@example.invalid",
+    "token": "5WfXAsw2AQ3Cfaxy",
+    "userId": "arjkl41kfril02am",
+    "name": "[probe] fix-S3 P3 09tjc"
+   },
+   {
+    "i": 4,
+    "username": "fs309tjcp4",
+    "password": "Fs3-5080bf9497eed23a",
+    "email": "fs3-09tjc-4@example.invalid",
+    "token": "RjIoJb0iiWYjlBEc",
+    "userId": "arjkl48sfril02au",
+    "name": "[probe] fix-S3 P4 09tjc"
+   },
+   {
+    "i": 5,
+    "username": "fs309tjcp5",
+    "password": "Fs3-5273821759911b43",
+    "email": "fs3-09tjc-5@example.invalid",
+    "token": "uq7azgQk1CETkCMg",
+    "userId": "arjkl4e3fril02b2",
+    "name": "[probe] fix-S3 P5 09tjc"
+   },
+   {
+    "i": 6,
+    "username": "fs309tjcp6",
+    "password": "Fs3-6563b28022545fb1",
+    "email": "fs3-09tjc-6@example.invalid",
+    "token": "3SeKkG0b2oQc2oHm",
+    "userId": "arjkl4h3fril02ba",
+    "name": "[probe] fix-S3 P6 09tjc"
+   },
+   {
+    "i": 7,
+    "username": "fs309tjcp7",
+    "password": "Fs3-6cae91bd0b888d25",
+    "email": "fs3-09tjc-7@example.invalid",
+    "token": "1C7MMecs19p7xnts",
+    "userId": "arjkl4p5fril02bi",
+    "name": "[probe] fix-S3 P7 09tjc"
+   },
+   {
+    "i": 8,
+    "username": "fs309tjcp8",
+    "password": "Fs3-d6bae8cd2a94f51a",
+    "email": "fs3-09tjc-8@example.invalid",
+    "token": "v5gBXNvqVbzfbj8S",
+    "userId": "arjkl4sofril02bq",
+    "name": "[probe] fix-S3 P8 09tjc"
+   },
+   {
+    "i": 9,
+    "username": "fs309tjcp9",
+    "password": "Fs3-37ad52874c28de7c",
+    "email": "fs3-09tjc-9@example.invalid",
+    "token": "l4g8WXFSKtRlZgjc",
+    "userId": "arjkl4vpfril02by",
+    "name": "[probe] fix-S3 P9 09tjc"
+   },
+   {
+    "i": 10,
+    "username": "fs309tjcp10",
+    "password": "Fs3-a8c3a26cd536d61e",
+    "email": "fs3-09tjc-10@example.invalid",
+    "token": "TKA0xD2zLKPGKIXq",
+    "userId": "arjkl505fril02c6",
+    "name": "[probe] fix-S3 P10 09tjc"
+   },
+   {
+    "i": 11,
+    "username": "fs309tjcp11",
+    "password": "Fs3-8761bf46153eeeef",
+    "email": "fs3-09tjc-11@example.invalid",
+    "token": "PMj96SH0iUI6aJ5F",
+    "userId": "arjkl54yfril02ce",
+    "name": "[probe] fix-S3 P11 09tjc"
+   },
+   {
+    "i": 12,
+    "username": "fs309tjcp12",
+    "password": "Fs3-a53d43b5495ac28d",
+    "email": "fs3-09tjc-12@example.invalid",
+    "token": "pgrMO7Veouznw0Wz",
+    "userId": "arjkl5bhfril02cm",
+    "name": "[probe] fix-S3 P12 09tjc"
+   },
+   {
+    "i": 13,
+    "username": "fs309tjcp13",
+    "password": "Fs3-68b2c72c1302a303",
+    "email": "fs3-09tjc-13@example.invalid",
+    "token": "85zR30A47fJdp1uY",
+    "userId": "arjkl5fafril02cu",
+    "name": "[probe] fix-S3 P13 09tjc"
+   },
+   {
+    "i": 14,
+    "username": "fs309tjcp14",
+    "password": "Fs3-e34d98a979318adc",
+    "email": "fs3-09tjc-14@example.invalid",
+    "token": "4zGxI4ZuBs8Izqum",
+    "userId": "arjkl5kjfril02d2",
+    "name": "[probe] fix-S3 P14 09tjc"
+   },
+   {
+    "i": 15,
+    "username": "fs309tjcp15",
+    "password": "Fs3-a31dc1ee2b9d3df3",
+    "email": "fs3-09tjc-15@example.invalid",
+    "token": "J2QoBucbRXwTrIKL",
+    "userId": "arjkl5pdfril02da",
+    "name": "[probe] fix-S3 P15 09tjc"
+   },
+   {
+    "i": 16,
+    "username": "fs309tjcp16",
+    "password": "Fs3-13ca896dbd10a23c",
+    "email": "fs3-09tjc-16@example.invalid",
+    "token": "c9S6ZPREBJt8hQxB",
+    "userId": "arjkl5shfril02di",
+    "name": "[probe] fix-S3 P16 09tjc"
+   },
+   {
+    "i": 17,
+    "username": "fs309tjcp17",
+    "password": "Fs3-cb1d073218529e27",
+    "email": "fs3-09tjc-17@example.invalid",
+    "token": "apGmHpjtaa9hilJO",
+    "userId": "arjkl5xffril02dq",
+    "name": "[probe] fix-S3 P17 09tjc"
+   },
+   {
+    "i": 18,
+    "username": "fs309tjcp18",
+    "password": "Fs3-9e7fa8c11245f128",
+    "email": "fs3-09tjc-18@example.invalid",
+    "token": "I74sOCXak8rPcviQ",
+    "userId": "arjkl67ffril02dy",
+    "name": "[probe] fix-S3 P18 09tjc"
+   },
+   {
+    "i": 19,
+    "username": "fs309tjcp19",
+    "password": "Fs3-1fa3fbe7a3b94c77",
+    "email": "fs3-09tjc-19@example.invalid",
+    "token": "ZzY3PrYZy63CWDld",
+    "userId": "arjkl6fzfril02e6",
+    "name": "[probe] fix-S3 P19 09tjc"
+   },
+   {
+    "i": 20,
+    "username": "fs309tjcp20",
+    "password": "Fs3-59864866513a5f0c",
+    "email": "fs3-09tjc-20@example.invalid",
+    "token": "zxTdymkc1GFDwITQ",
+    "userId": "arjkl6qwfril02ee",
+    "name": "[probe] fix-S3 P20 09tjc"
+   },
+   {
+    "i": 21,
+    "username": "fs309tjcp21",
+    "password": "Fs3-7ea75a86cc74e94a",
+    "email": "fs3-09tjc-21@example.invalid",
+    "token": "l0MtnSMsGypuncYz",
+    "userId": "arjkl6zyfril02em",
+    "name": "[probe] fix-S3 P21 09tjc"
+   }
+  ],
+  "notes": [
+   "arjkyq1tfril02l4"
+  ],
+  "claims": [],
+  "ownerless": [
+   "arjkl9sqfril02j0"
+  ],
+  "F1": "arjkl3fhfril02a1",
+  "handle": "fs309tjc",
+  "tag": "arjkl3iffril02a4",
+  "M1": "arjkl744fril02et",
+  "kudos": [
+   200,
+   200,
+   200
+  ],
+  "F2": "arjkl9msfril02im",
+  "F3": "arjkl9nzfril02ip",
+  "kenJoin": "requested",
+  "M3": "arjkl9qnfril02iv",
+  "F5": "arjkl9sqfril02j0",
+  "M5": "arjkl9uufril02j4",
+  "readback": {
+   "F1handle": "fs309tjc",
+   "F1links": false,
+   "F1venues": [],
+   "F2vis": "private",
+   "F2amy": true,
+   "F3gate": "approval/true",
+   "kenJoin": "requested",
+   "M5": "2/2",
+   "F5owner": "NULL",
+   "seeded": 21,
+   "kudos": [
+    200,
+    200,
+    200
+   ],
+   "insightsActive": 5,
+   "venue": [
+    "ar7iv182jhqz0001",
+    "Hong Kong Football Club"
+   ]
+  }
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "note": "arjkyq1tfril02l4",
+   "s": 204
+  },
+  {
+   "comp": "arjktppqfril02kx",
+   "s": 200
+  },
+  {
+   "claims": "0"
+  },
+  {
+   "ownerRestored": "arjkl9sqfril02j0"
+  },
+  {
+   "meet": "arjkl744fril02et",
+   "cancel": 200
+  },
+  {
+   "meet": "arjkl9qnfril02iv",
+   "cancel": 200
+  },
+  {
+   "meet": "arjkl9uufril02j4",
+   "cancel": 200
+  },
+  {
+   "meetRows": "arjkl744fril02et",
+   "del": "1"
+  },
+  {
+   "meetRows": "arjkl9qnfril02iv",
+   "del": "1"
+  },
+  {
+   "meetRows": "arjkl9uufril02j4",
+   "del": "1"
+  },
+  {
+   "chatInvites": "0"
+  },
+  {
+   "club": "arjkl3fhfril02a1",
+   "archived": 200
+  },
+  {
+   "club": "arjkl9msfril02im",
+   "archived": 200
+  },
+  {
+   "club": "arjkl9nzfril02ip",
+   "archived": 200
+  },
+  {
+   "club": "arjkl9sqfril02j0",
+   "archived": 200
+  },
+  {
+   "acct": "fs309tjcp1",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp2",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp3",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp4",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp5",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp6",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp7",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp8",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp9",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp10",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp11",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp12",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp13",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp14",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp15",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp16",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp17",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp18",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp19",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp20",
+   "deleted": 204
+  },
+  {
+   "acct": "fs309tjcp21",
+   "deleted": 204
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "engineRev": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+ "appBundle": "js/app.a225879e.js",
+ "axe": [
+  {
+   "page": "club home (owner)",
+   "route": "community/index?id=arjkl3fhfril02a1",
+   "violations": [
+    {
+     "id": "aria-valid-attr",
+     "impact": "critical",
+     "n": 1,
+     "targets": [
+      ".nut-popup-title-right"
+     ]
+    },
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 7,
+     "targets": [
+      ".cm-meta",
+      ".cm-icon.is-tap[hover-class=\"tap\"]:nth-child(1) > .cm-iconn",
+      ".cm-rail > .pg-note",
+      "taro-view-core[data-act=\"clubs/settings/update\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core[aria-label=\"The more the merrier\"] > .pg-row-main > .pg-row-sub"
+     ]
+    },
+    {
+     "id": "nested-interactive",
+     "impact": "serious",
+     "n": 2,
+     "targets": [
+      "taro-view-core[aria-label=\"The more the merrier\"]",
+      "taro-view-core[aria-label=\"Start an activity\"]"
+     ]
+    }
+   ]
+  },
+  {
+   "page": "Manage club Insights",
+   "route": "club-admin/index?id=arjkl3fhfril02a1&pane=insights",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 1,
+     "targets": [
+      ".pg-note"
+     ]
+    }
+   ]
+  },
+  {
+   "page": "My clubs",
+   "route": "community/index",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 2,
+     "targets": [
+      "taro-view-core[aria-label=\"[probe] fix-S3 F3 gated 09tjc\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core[aria-label=\"UAT Paddle Club\"] > .pg-row-main > .pg-row-sub"
+     ]
+    }
+   ]
+  },
+  {
+   "page": "Members (Member Gated)",
+   "route": "community/index?id=arjkl9nzfril02ip&pane=members",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 3,
+     "targets": [
+      "taro-view-core[aria-label=\"Mei Lam\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core[aria-label=\"Amy Chan\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core:nth-child(5) > .pg-row > .pg-row-main > .pg-row-sub"
+     ]
+    }
+   ]
+  },
+  {
+   "page": "club chat",
+   "route": "community/index?id=arjkl3fhfril02a1&pane=chat",
+   "violations": []
+  },
+  {
+   "page": "Create club",
+   "route": "community/index?new=1",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 3,
+     "targets": [
+      "taro-button-core",
+      "taro-view-core[aria-label=\"[probe] fix-S3 F3 gated 09tjc\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core[aria-label=\"UAT Paddle Club\"] > .pg-row-main > .pg-row-sub"
+     ]
+    }
+   ]
+  },
+  {
+   "page": "Help Run a club",
+   "route": "help/index?tab=club",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 18,
+     "targets": [
+      "taro-view-core[data-act=\"help/cat:start\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core[data-act=\"help/cat:play\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core[data-act=\"help/cat:host\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core[data-act=\"help/cat:clubs\"] > .pg-row-main > .pg-row-sub",
+      "taro-view-core[data-act=\"help/cat:competitions\"] > .pg-row-main > .pg-row-sub"
+     ]
+    }
+   ]
+  },
+  {
+   "page": "composer",
+   "route": "feed/index?club=arjkl3fhfril02a1&compose=1",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 1,
+     "targets": [
+      "taro-button-core"
+     ]
+    },
+    {
+     "id": "nested-interactive",
+     "impact": "serious",
+     "n": 1,
+     "targets": [
+      ".fd-head"
+     ]
+    }
+   ]
+  }
+ ],
+ "leftover": "0/0/0/0",
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": [
+   "fixture",
+   "B-insight-rankings.01",
+   "B-my-clubs.04",
+   "B-group-user.02",
+   "E-chat-room.21",
+   "Q-bold-italic",
+   "i18n"
+  ],
+  "open": [
+   "B-select-club-members.01"
+  ],
+  "plants": [
+   {
+    "name": "a planted absent control is NOT clickable",
+    "pass": true
+   },
+   {
+    "name": "a planted absent string is NOT on screen",
+    "pass": true
+   },
+   {
+    "name": "the club name IS on screen (the reader sees the page)",
+    "pass": true
+   },
+   {
+    "name": "a member (not admin) asking the ranking is refused",
+    "pass": true,
+    "s": 400
+   },
+   {
+    "name": "5B: the clean control passes the hit-test",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "ok",
+     "end": "ok",
+     "w": 292,
+     "h": 91,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   },
+   {
+    "name": "5B: a transparent layer planted over the page makes it FAIL",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "covered by DIV.",
+     "end": "covered by DIV.",
+     "w": 292,
+     "h": 91,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   },
+   {
+    "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "ok",
+     "end": "ok",
+     "w": 292,
+     "h": 12,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   }
+  ],
+  "leftover": "0/0/0/0",
+  "cleanupFailed": 0,
+  "errors": 0
+ }
+}

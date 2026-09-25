@@ -1,0 +1,445 @@
+{
+ "id": "fix-S3",
+ "mode": "rerun4",
+ "at": "2026-09-25T00:59:56.020Z",
+ "run": "97apg",
+ "rows": {
+  "fixture": {
+   "id": "fixture",
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless :: {\"F1handle\":\"fs397apg\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F2amy\":true,\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":0,\"kudos\":[],\"insightsActive\":1,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+   ]
+  },
+  "Q-bold-italic": {
+   "id": "Q-bold-italic",
+   "checks": 5,
+   "passed": 5,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: B tool :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: I tool :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Post (send) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":50,\"h\":32,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5D the other party (ken, not a member) sees the post in the club forum drawn bold / italic, no markup :: {\"b\":\"700\",\"i\":\"italic\",\"raw\":false} shot=probes/fix-S3-shots/rerun4/002-Q3-ken-sees-post.png",
+    "ok B with nothing selected -> \"****\" with the cursor inside (typing lands between); I wraps the selection; the post has no \"bold text\" :: v1=\"D 97apg ****\" v2=\"97apg **go**\" v3=\"go** <i>word</i>\" note=\"be] fix-S3 BOLD 97apg **go** <i>word</i>\" net=[\"notes/create 200\"] btn=[\"TARO-TEXT-CORE.pg-chip pc-chip is-tap pg-tab-on pc-chip\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\"] shot=probes/fix-S3-shots/rerun4/001-Q3-amy-bold-italic.png"
+   ]
+  },
+  "i18n": {
+   "id": "i18n",
+   "checks": 12,
+   "passed": 12,
+   "status": "closed",
+   "evidence": [
+    "ok zh_Hant: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English) :: shot=probes/fix-S3-shots/rerun4/003-LANG-zh_Hant-insights.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on Insights :: []",
+    "ok zh_Hant: 5C no clipped or off-screen text on club home :: [] shot=probes/fix-S3-shots/rerun4/004-LANG-zh_Hant-club-home.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on my clubs :: [] shot=probes/fix-S3-shots/rerun4/005-LANG-zh_Hant-my-clubs.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on members (member gated) :: [] shot=probes/fix-S3-shots/rerun4/006-LANG-zh_Hant-members-member-gated-.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on help run a club :: [] shot=probes/fix-S3-shots/rerun4/007-LANG-zh_Hant-help-run-a-club.png",
+    "ok zh_Hans: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English) :: shot=probes/fix-S3-shots/rerun4/008-LANG-zh_Hans-insights.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on Insights :: []",
+    "ok zh_Hans: 5C no clipped or off-screen text on club home :: [] shot=probes/fix-S3-shots/rerun4/009-LANG-zh_Hans-club-home.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on my clubs :: [] shot=probes/fix-S3-shots/rerun4/010-LANG-zh_Hans-my-clubs.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on members (member gated) :: [] shot=probes/fix-S3-shots/rerun4/011-LANG-zh_Hans-members-member-gated-.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on help run a club :: [] shot=probes/fix-S3-shots/rerun4/012-LANG-zh_Hans-help-run-a-club.png"
+   ]
+  }
+ },
+ "checks": [
+  {
+   "row": "fixture",
+   "name": "fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless",
+   "pass": true,
+   "ev": "{\"F1handle\":\"fs397apg\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F2amy\":true,\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":0,\"kudos\":[],\"insightsActive\":1,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: B tool",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: I tool",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Post (send)",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":50,\"h\":32,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "5D the other party (ken, not a member) sees the post in the club forum drawn bold / italic, no markup",
+   "pass": true,
+   "ev": "{\"b\":\"700\",\"i\":\"italic\",\"raw\":false} shot=probes/fix-S3-shots/rerun4/002-Q3-ken-sees-post.png"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "B with nothing selected -> \"****\" with the cursor inside (typing lands between); I wraps the selection; the post has no \"bold text\"",
+   "pass": true,
+   "ev": "v1=\"D 97apg ****\" v2=\"97apg **go**\" v3=\"go** <i>word</i>\" note=\"be] fix-S3 BOLD 97apg **go** <i>word</i>\" net=[\"notes/create 200\"] btn=[\"TARO-TEXT-CORE.pg-chip pc-chip is-tap pg-tab-on pc-chip\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\"] shot=probes/fix-S3-shots/rerun4/001-Q3-amy-bold-italic.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English)",
+   "pass": true,
+   "ev": "shot=probes/fix-S3-shots/rerun4/003-LANG-zh_Hant-insights.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on Insights",
+   "pass": true,
+   "ev": "[]"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on club home",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun4/004-LANG-zh_Hant-club-home.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on my clubs",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun4/005-LANG-zh_Hant-my-clubs.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on members (member gated)",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun4/006-LANG-zh_Hant-members-member-gated-.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hant: 5C no clipped or off-screen text on help run a club",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun4/007-LANG-zh_Hant-help-run-a-club.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English)",
+   "pass": true,
+   "ev": "shot=probes/fix-S3-shots/rerun4/008-LANG-zh_Hans-insights.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on Insights",
+   "pass": true,
+   "ev": "[]"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on club home",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun4/009-LANG-zh_Hans-club-home.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on my clubs",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun4/010-LANG-zh_Hans-my-clubs.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on members (member gated)",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun4/011-LANG-zh_Hans-members-member-gated-.png"
+  },
+  {
+   "row": "i18n",
+   "name": "zh_Hans: 5C no clipped or off-screen text on help run a club",
+   "pass": true,
+   "ev": "[] shot=probes/fix-S3-shots/rerun4/012-LANG-zh_Hans-help-run-a-club.png"
+  }
+ ],
+ "plants": [
+  {
+   "name": "a planted absent control is NOT clickable",
+   "pass": true
+  },
+  {
+   "name": "a planted absent string is NOT on screen",
+   "pass": true
+  },
+  {
+   "name": "the club name IS on screen (the reader sees the page)",
+   "pass": true
+  },
+  {
+   "name": "a member (not admin) asking the ranking is refused",
+   "pass": true,
+   "s": 400
+  },
+  {
+   "name": "5B: the clean control passes the hit-test",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "ok",
+    "end": "ok",
+    "w": 292,
+    "h": 87,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  },
+  {
+   "name": "5B: a transparent layer planted over the page makes it FAIL",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "covered by DIV.",
+    "end": "covered by DIV.",
+    "w": 292,
+    "h": 87,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  },
+  {
+   "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "ok",
+    "end": "ok",
+    "w": 292,
+    "h": 12,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  }
+ ],
+ "fx": {
+  "clubs": [
+   "arjtiklefril06rn",
+   "arjtikw8fril06rv",
+   "arjtikxsfril06ry",
+   "arjtil0bfril06s9"
+  ],
+  "meets": [
+   "arjtikobfril06rr",
+   "arjtikzdfril06s4",
+   "arjtil1ffril06sd"
+  ],
+  "comps": [],
+  "accts": [],
+  "notes": [
+   "arjtjhigfril06so"
+  ],
+  "claims": [],
+  "ownerless": [
+   "arjtil0bfril06s9"
+  ],
+  "F1": "arjtiklefril06rn",
+  "handle": "fs397apg",
+  "tag": "arjtiknffril06rq",
+  "M1": "arjtikobfril06rr",
+  "kudos": [],
+  "F2": "arjtikw8fril06rv",
+  "F3": "arjtikxsfril06ry",
+  "kenJoin": "requested",
+  "M3": "arjtikzdfril06s4",
+  "F5": "arjtil0bfril06s9",
+  "M5": "arjtil1ffril06sd",
+  "readback": {
+   "F1handle": "fs397apg",
+   "F1links": false,
+   "F1venues": [],
+   "F2vis": "private",
+   "F2amy": true,
+   "F3gate": "approval/true",
+   "kenJoin": "requested",
+   "M5": "2/2",
+   "F5owner": "NULL",
+   "seeded": 0,
+   "kudos": [],
+   "insightsActive": 1,
+   "venue": [
+    "ar7iv182jhqz0001",
+    "Hong Kong Football Club"
+   ]
+  }
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "note": "arjtjhigfril06so",
+   "s": 204
+  },
+  {
+   "claims": "0"
+  },
+  {
+   "ownerRestored": "arjtil0bfril06s9"
+  },
+  {
+   "meet": "arjtikobfril06rr",
+   "cancel": 200
+  },
+  {
+   "meet": "arjtikzdfril06s4",
+   "cancel": 200
+  },
+  {
+   "meet": "arjtil1ffril06sd",
+   "cancel": 200
+  },
+  {
+   "meetRows": "arjtikobfril06rr",
+   "del": "1"
+  },
+  {
+   "meetRows": "arjtikzdfril06s4",
+   "del": "1"
+  },
+  {
+   "meetRows": "arjtil1ffril06sd",
+   "del": "1"
+  },
+  {
+   "chatInvites": "0"
+  },
+  {
+   "club": "arjtiklefril06rn",
+   "archived": 200
+  },
+  {
+   "club": "arjtikw8fril06rv",
+   "archived": 200
+  },
+  {
+   "club": "arjtikxsfril06ry",
+   "archived": 200
+  },
+  {
+   "club": "arjtil0bfril06s9",
+   "archived": 200
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "engineRev": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+ "appBundle": "js/app.3dce1896.js",
+ "axe": [
+  {
+   "page": "club home (owner)",
+   "route": "community/index?id=arjtiklefril06rn",
+   "violations": []
+  },
+  {
+   "page": "Manage club Insights",
+   "route": "club-admin/index?id=arjtiklefril06rn&pane=insights",
+   "violations": []
+  },
+  {
+   "page": "My clubs",
+   "route": "community/index",
+   "violations": []
+  },
+  {
+   "page": "Members (Member Gated)",
+   "route": "community/index?id=arjtikxsfril06ry&pane=members",
+   "violations": []
+  },
+  {
+   "page": "club chat",
+   "route": "community/index?id=arjtiklefril06rn&pane=chat",
+   "violations": []
+  },
+  {
+   "page": "Create club",
+   "route": "community/index?new=1",
+   "violations": []
+  },
+  {
+   "page": "Help Run a club",
+   "route": "help/index?tab=club",
+   "violations": []
+  },
+  {
+   "page": "composer",
+   "route": "feed/index?club=arjtiklefril06rn&compose=1",
+   "violations": []
+  }
+ ],
+ "leftover": "0/0/0/0",
+ "bundleEnd": "js/app.3dce1896.js",
+ "contaminated": false,
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": [
+   "fixture",
+   "Q-bold-italic",
+   "i18n"
+  ],
+  "open": [],
+  "plants": [
+   {
+    "name": "a planted absent control is NOT clickable",
+    "pass": true
+   },
+   {
+    "name": "a planted absent string is NOT on screen",
+    "pass": true
+   },
+   {
+    "name": "the club name IS on screen (the reader sees the page)",
+    "pass": true
+   },
+   {
+    "name": "a member (not admin) asking the ranking is refused",
+    "pass": true,
+    "s": 400
+   },
+   {
+    "name": "5B: the clean control passes the hit-test",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "ok",
+     "end": "ok",
+     "w": 292,
+     "h": 87,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   },
+   {
+    "name": "5B: a transparent layer planted over the page makes it FAIL",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "covered by DIV.",
+     "end": "covered by DIV.",
+     "w": 292,
+     "h": 87,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   },
+   {
+    "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "ok",
+     "end": "ok",
+     "w": 292,
+     "h": 12,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   }
+  ],
+  "leftover": "0/0/0/0",
+  "cleanupFailed": 0,
+  "errors": 0
+ }
+}

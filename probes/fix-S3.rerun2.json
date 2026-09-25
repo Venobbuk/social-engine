@@ -1,0 +1,668 @@
+{
+ "id": "fix-S3",
+ "mode": "rerun2",
+ "at": "2026-09-24T22:38:43.573Z",
+ "run": "45pbi",
+ "rows": {
+  "fixture": {
+   "id": "fixture",
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless :: {\"F1handle\":\"fs345pbi\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F2amy\":true,\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":21,\"kudos\":[200,200,200],\"insightsActive\":5,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+   ]
+  },
+  "B-select-club-members.01": {
+   "id": "B-select-club-members.01",
+   "checks": 5,
+   "passed": 5,
+   "status": "closed",
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Pick from the club members :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":268,\"h\":67,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Done (club picker) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"nut-popup nut-popup-round nut-popup-bott\"}",
+    "ok competition staff: \"Pick from the club members\" -> the club picker (Admins / Members) -> amy as Referee -> engine staff :: add=true pick=true items=[\"Co-admin\",\"Referee\"] referees=[\"ari4hb3c3hac0001\"] shot=probes/fix-S3-shots/rerun2/001-R13-mei-staff-from-club.png",
+    "ok 5D reload: amy stays under Referees; the other party (amy) sees herself as Referee :: reload= | Amy Chan | Referee | Mei Lam | Host | The competition is saved as a draft. Do amy= | Amy Chan | Referee | Mei Lam | Host | Home | Discover | Community | Inbox | S shot=probes/fix-S3-shots/rerun2/002-R13-amy-sees-staff.png",
+    "ok the competition FORM offers \"Staff — Add co-admins or referees\" from the club :: shot=probes/fix-S3-shots/rerun2/003-R13-mei-create-form-staff.png"
+   ]
+  }
+ },
+ "checks": [
+  {
+   "row": "fixture",
+   "name": "fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless",
+   "pass": true,
+   "ev": "{\"F1handle\":\"fs345pbi\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F2amy\":true,\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":21,\"kudos\":[200,200,200],\"insightsActive\":5,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Pick from the club members",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":268,\"h\":67,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "5B/5C finger hit-test (rest + container end) and >= 24 px: Done (club picker)",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"nut-popup nut-popup-round nut-popup-bott\"}"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "competition staff: \"Pick from the club members\" -> the club picker (Admins / Members) -> amy as Referee -> engine staff",
+   "pass": true,
+   "ev": "add=true pick=true items=[\"Co-admin\",\"Referee\"] referees=[\"ari4hb3c3hac0001\"] shot=probes/fix-S3-shots/rerun2/001-R13-mei-staff-from-club.png"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "5D reload: amy stays under Referees; the other party (amy) sees herself as Referee",
+   "pass": true,
+   "ev": "reload= | Amy Chan | Referee | Mei Lam | Host | The competition is saved as a draft. Do amy= | Amy Chan | Referee | Mei Lam | Host | Home | Discover | Community | Inbox | S shot=probes/fix-S3-shots/rerun2/002-R13-amy-sees-staff.png"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "name": "the competition FORM offers \"Staff — Add co-admins or referees\" from the club",
+   "pass": true,
+   "ev": "shot=probes/fix-S3-shots/rerun2/003-R13-mei-create-form-staff.png"
+  }
+ ],
+ "plants": [
+  {
+   "name": "a planted absent control is NOT clickable",
+   "pass": true
+  },
+  {
+   "name": "a planted absent string is NOT on screen",
+   "pass": true
+  },
+  {
+   "name": "the club name IS on screen (the reader sees the page)",
+   "pass": true
+  },
+  {
+   "name": "a member (not admin) asking the ranking is refused",
+   "pass": true,
+   "s": 400
+  },
+  {
+   "name": "5B: the clean control passes the hit-test",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "ok",
+    "end": "ok",
+    "w": 292,
+    "h": 87,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  },
+  {
+   "name": "5B: a transparent layer planted over the page makes it FAIL",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "covered by DIV.",
+    "end": "covered by DIV.",
+    "w": 292,
+    "h": 87,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  },
+  {
+   "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "ok",
+    "end": "ok",
+    "w": 292,
+    "h": 12,
+    "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+    "container": "taro_page taro_page_show taro_page_stati"
+   }
+  }
+ ],
+ "fx": {
+  "clubs": [
+   "arjoh0fufril03wy",
+   "arjohbw5fril045l",
+   "arjohbyjfril045o",
+   "arjohc36fril045z"
+  ],
+  "meets": [
+   "arjoh9bcfril041r",
+   "arjohc1efril045u",
+   "arjohc5gfril0463"
+  ],
+  "comps": [
+   "arjohz5ffril046q"
+  ],
+  "accts": [
+   {
+    "i": 1,
+    "username": "fs345pbip1",
+    "password": "Fs3-a8f2ddf2dcaef315",
+    "email": "fs3-45pbi-1@example.invalid",
+    "token": "8kOnNGE9TYxlvJTs",
+    "userId": "arjoh0z5fril03x3",
+    "name": "[probe] fix-S3 P1 45pbi"
+   },
+   {
+    "i": 2,
+    "username": "fs345pbip2",
+    "password": "Fs3-f91756b15c1ed26c",
+    "email": "fs3-45pbi-2@example.invalid",
+    "token": "0WL4VRwuAI0qsEM4",
+    "userId": "arjoh1qpfril03xb",
+    "name": "[probe] fix-S3 P2 45pbi"
+   },
+   {
+    "i": 3,
+    "username": "fs345pbip3",
+    "password": "Fs3-a96ec1bb2b899d26",
+    "email": "fs3-45pbi-3@example.invalid",
+    "token": "azGiJFLtBxUaofuq",
+    "userId": "arjoh235fril03xj",
+    "name": "[probe] fix-S3 P3 45pbi"
+   },
+   {
+    "i": 4,
+    "username": "fs345pbip4",
+    "password": "Fs3-bdf31ebaf33cca6f",
+    "email": "fs3-45pbi-4@example.invalid",
+    "token": "INZZ86WAICDlgZnH",
+    "userId": "arjoh2gufril03xr",
+    "name": "[probe] fix-S3 P4 45pbi"
+   },
+   {
+    "i": 5,
+    "username": "fs345pbip5",
+    "password": "Fs3-4dc53982652bd903",
+    "email": "fs3-45pbi-5@example.invalid",
+    "token": "uYoKCYUsjIe3au8X",
+    "userId": "arjoh2q7fril03xz",
+    "name": "[probe] fix-S3 P5 45pbi"
+   },
+   {
+    "i": 6,
+    "username": "fs345pbip6",
+    "password": "Fs3-4d80fa3e64c88667",
+    "email": "fs3-45pbi-6@example.invalid",
+    "token": "KFucwgOQHS6zPnLO",
+    "userId": "arjoh2y6fril03y7",
+    "name": "[probe] fix-S3 P6 45pbi"
+   },
+   {
+    "i": 7,
+    "username": "fs345pbip7",
+    "password": "Fs3-cbafd37d0a1736a8",
+    "email": "fs3-45pbi-7@example.invalid",
+    "token": "1H5h01O0vP3puh0w",
+    "userId": "arjoh35sfril03yf",
+    "name": "[probe] fix-S3 P7 45pbi"
+   },
+   {
+    "i": 8,
+    "username": "fs345pbip8",
+    "password": "Fs3-efe1fd99dbfc02cb",
+    "email": "fs3-45pbi-8@example.invalid",
+    "token": "fKGUuN8UChte5jNI",
+    "userId": "arjoh3refril03yn",
+    "name": "[probe] fix-S3 P8 45pbi"
+   },
+   {
+    "i": 9,
+    "username": "fs345pbip9",
+    "password": "Fs3-68d897ca5d00fc3c",
+    "email": "fs3-45pbi-9@example.invalid",
+    "token": "djsQZLP87i8RM9Hg",
+    "userId": "arjoh4kcfril03yv",
+    "name": "[probe] fix-S3 P9 45pbi"
+   },
+   {
+    "i": 10,
+    "username": "fs345pbip10",
+    "password": "Fs3-0e4ca442d6b8f856",
+    "email": "fs3-45pbi-10@example.invalid",
+    "token": "b7fscWNJ8WdhTptc",
+    "userId": "arjoh4sdfril03z3",
+    "name": "[probe] fix-S3 P10 45pbi"
+   },
+   {
+    "i": 11,
+    "username": "fs345pbip11",
+    "password": "Fs3-7b7541b84020b0b8",
+    "email": "fs3-45pbi-11@example.invalid",
+    "token": "pJBD1PjBYarxo0lE",
+    "userId": "arjoh58sfril03zb",
+    "name": "[probe] fix-S3 P11 45pbi"
+   },
+   {
+    "i": 12,
+    "username": "fs345pbip12",
+    "password": "Fs3-929e5553944c5251",
+    "email": "fs3-45pbi-12@example.invalid",
+    "token": "2lMXzrRoEqNx8znZ",
+    "userId": "arjoh5gzfril03zj",
+    "name": "[probe] fix-S3 P12 45pbi"
+   },
+   {
+    "i": 13,
+    "username": "fs345pbip13",
+    "password": "Fs3-6f4f63e9328f7e80",
+    "email": "fs3-45pbi-13@example.invalid",
+    "token": "klarTO1XyUYddtZ3",
+    "userId": "arjoh5scfril03zr",
+    "name": "[probe] fix-S3 P13 45pbi"
+   },
+   {
+    "i": 14,
+    "username": "fs345pbip14",
+    "password": "Fs3-8d411619cca36cf5",
+    "email": "fs3-45pbi-14@example.invalid",
+    "token": "637vQMM3w2jyo8b3",
+    "userId": "arjoh6drfril03zz",
+    "name": "[probe] fix-S3 P14 45pbi"
+   },
+   {
+    "i": 15,
+    "username": "fs345pbip15",
+    "password": "Fs3-918785b3a7cc947e",
+    "email": "fs3-45pbi-15@example.invalid",
+    "token": "DBvX8nFm908IKaLA",
+    "userId": "arjoh6tlfril0407",
+    "name": "[probe] fix-S3 P15 45pbi"
+   },
+   {
+    "i": 16,
+    "username": "fs345pbip16",
+    "password": "Fs3-b8f2a30361dfd465",
+    "email": "fs3-45pbi-16@example.invalid",
+    "token": "gQdWETGN9g5UlXDe",
+    "userId": "arjoh7knfril040f",
+    "name": "[probe] fix-S3 P16 45pbi"
+   },
+   {
+    "i": 17,
+    "username": "fs345pbip17",
+    "password": "Fs3-8762d8b2e391bb1c",
+    "email": "fs3-45pbi-17@example.invalid",
+    "token": "eQbkxvUpKQp8QFKg",
+    "userId": "arjoh84rfril040o",
+    "name": "[probe] fix-S3 P17 45pbi"
+   },
+   {
+    "i": 18,
+    "username": "fs345pbip18",
+    "password": "Fs3-530dbeee1aa66d63",
+    "email": "fs3-45pbi-18@example.invalid",
+    "token": "r5JxSYVNZ3iGydlL",
+    "userId": "arjoh8fxfril040w",
+    "name": "[probe] fix-S3 P18 45pbi"
+   },
+   {
+    "i": 19,
+    "username": "fs345pbip19",
+    "password": "Fs3-1404f09f59df6a5c",
+    "email": "fs3-45pbi-19@example.invalid",
+    "token": "tqUNTZdhh2ZNN9Nt",
+    "userId": "arjoh8qcfril0414",
+    "name": "[probe] fix-S3 P19 45pbi"
+   },
+   {
+    "i": 20,
+    "username": "fs345pbip20",
+    "password": "Fs3-0c058deb46ee7908",
+    "email": "fs3-45pbi-20@example.invalid",
+    "token": "LF1AyC6CPEjDsntD",
+    "userId": "arjoh8zmfril041c",
+    "name": "[probe] fix-S3 P20 45pbi"
+   },
+   {
+    "i": 21,
+    "username": "fs345pbip21",
+    "password": "Fs3-b7a092dfcb99b46c",
+    "email": "fs3-45pbi-21@example.invalid",
+    "token": "G0dFf5h9C7SQm7gH",
+    "userId": "arjoh971fril041k",
+    "name": "[probe] fix-S3 P21 45pbi"
+   }
+  ],
+  "notes": [],
+  "claims": [],
+  "ownerless": [
+   "arjohc36fril045z"
+  ],
+  "F1": "arjoh0fufril03wy",
+  "handle": "fs345pbi",
+  "tag": "arjoh0p0fril03x1",
+  "M1": "arjoh9bcfril041r",
+  "kudos": [
+   200,
+   200,
+   200
+  ],
+  "F2": "arjohbw5fril045l",
+  "F3": "arjohbyjfril045o",
+  "kenJoin": "requested",
+  "M3": "arjohc1efril045u",
+  "F5": "arjohc36fril045z",
+  "M5": "arjohc5gfril0463",
+  "readback": {
+   "F1handle": "fs345pbi",
+   "F1links": false,
+   "F1venues": [],
+   "F2vis": "private",
+   "F2amy": true,
+   "F3gate": "approval/true",
+   "kenJoin": "requested",
+   "M5": "2/2",
+   "F5owner": "NULL",
+   "seeded": 21,
+   "kudos": [
+    200,
+    200,
+    200
+   ],
+   "insightsActive": 5,
+   "venue": [
+    "ar7iv182jhqz0001",
+    "Hong Kong Football Club"
+   ]
+  }
+ },
+ "errors": [],
+ "cleanup": [
+  {
+   "comp": "arjohz5ffril046q",
+   "s": 200
+  },
+  {
+   "claims": "0"
+  },
+  {
+   "ownerRestored": "arjohc36fril045z"
+  },
+  {
+   "meet": "arjoh9bcfril041r",
+   "cancel": 200
+  },
+  {
+   "meet": "arjohc1efril045u",
+   "cancel": 200
+  },
+  {
+   "meet": "arjohc5gfril0463",
+   "cancel": 200
+  },
+  {
+   "meetRows": "arjoh9bcfril041r",
+   "del": "1"
+  },
+  {
+   "meetRows": "arjohc1efril045u",
+   "del": "1"
+  },
+  {
+   "meetRows": "arjohc5gfril0463",
+   "del": "1"
+  },
+  {
+   "chatInvites": "0"
+  },
+  {
+   "club": "arjoh0fufril03wy",
+   "archived": 200
+  },
+  {
+   "club": "arjohbw5fril045l",
+   "archived": 200
+  },
+  {
+   "club": "arjohbyjfril045o",
+   "archived": 200
+  },
+  {
+   "club": "arjohc36fril045z",
+   "archived": 200
+  },
+  {
+   "acct": "fs345pbip1",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip2",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip3",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip4",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip5",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip6",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip7",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip8",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip9",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip10",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip11",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip12",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip13",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip14",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip15",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip16",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip17",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip18",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip19",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip20",
+   "deleted": 204
+  },
+  {
+   "acct": "fs345pbip21",
+   "deleted": 204
+  },
+  {
+   "pendingRemoved": "0"
+  }
+ ],
+ "engineRev": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+ "appBundle": "js/app.9741d831.js",
+ "axe": [
+  {
+   "page": "club home (owner)",
+   "route": "community/index?id=arjoh0fufril03wy",
+   "violations": [
+    {
+     "id": "aria-valid-attr",
+     "impact": "critical",
+     "n": 1,
+     "targets": [
+      ".nut-popup-title-right"
+     ]
+    },
+    {
+     "id": "nested-interactive",
+     "impact": "serious",
+     "n": 2,
+     "targets": [
+      "taro-view-core[aria-label=\"The more the merrier\"]",
+      "taro-view-core[aria-label=\"Start an activity\"]"
+     ]
+    }
+   ]
+  },
+  {
+   "page": "Manage club Insights",
+   "route": "club-admin/index?id=arjoh0fufril03wy&pane=insights",
+   "violations": []
+  },
+  {
+   "page": "My clubs",
+   "route": "community/index",
+   "violations": []
+  },
+  {
+   "page": "Members (Member Gated)",
+   "route": "community/index?id=arjohbyjfril045o&pane=members",
+   "violations": []
+  },
+  {
+   "page": "club chat",
+   "route": "community/index?id=arjoh0fufril03wy&pane=chat",
+   "violations": []
+  },
+  {
+   "page": "Create club",
+   "route": "community/index?new=1",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 1,
+     "targets": [
+      "taro-button-core"
+     ]
+    }
+   ]
+  },
+  {
+   "page": "Help Run a club",
+   "route": "help/index?tab=club",
+   "violations": []
+  },
+  {
+   "page": "composer",
+   "route": "feed/index?club=arjoh0fufril03wy&compose=1",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "n": 1,
+     "targets": [
+      ".btn-disabled"
+     ]
+    }
+   ]
+  }
+ ],
+ "leftover": "0/0/0/0",
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": [
+   "fixture",
+   "B-select-club-members.01"
+  ],
+  "open": [],
+  "plants": [
+   {
+    "name": "a planted absent control is NOT clickable",
+    "pass": true
+   },
+   {
+    "name": "a planted absent string is NOT on screen",
+    "pass": true
+   },
+   {
+    "name": "the club name IS on screen (the reader sees the page)",
+    "pass": true
+   },
+   {
+    "name": "a member (not admin) asking the ranking is refused",
+    "pass": true,
+    "s": 400
+   },
+   {
+    "name": "5B: the clean control passes the hit-test",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "ok",
+     "end": "ok",
+     "w": 292,
+     "h": 87,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   },
+   {
+    "name": "5B: a transparent layer planted over the page makes it FAIL",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "covered by DIV.",
+     "end": "covered by DIV.",
+     "w": 292,
+     "h": 87,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   },
+   {
+    "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+    "pass": true,
+    "t": {
+     "found": true,
+     "rest": "ok",
+     "end": "ok",
+     "w": 292,
+     "h": 12,
+     "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+     "container": "taro_page taro_page_show taro_page_stati"
+    }
+   }
+  ],
+  "leftover": "0/0/0/0",
+  "cleanupFailed": 0,
+  "errors": 0
+ }
+}

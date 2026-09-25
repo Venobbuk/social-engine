@@ -1,0 +1,4 @@
+{
+ "color-contrast@disabled": "exempt — WCAG 2.2 SC 1.4.3 \"text that is part of an inactive user interface component\" (a disabled Create club / Post button); the active colours pass",
+ "nested-interactive@.fd-head": "the Forum page post-card header (src/pages/feed/index.tsx:146/155 .fd-head, a tappable View holding the author/club controls) — the feed page, not an S3 row; reported to the orchestrator for its owner"
+}

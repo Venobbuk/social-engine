@@ -1,0 +1,239 @@
+{
+ "id": "fix-S3-webkit",
+ "engine": "webkit",
+ "at": "2026-09-24T18:56:16.713Z",
+ "run": "w7mtl",
+ "rows": {
+  "fixture": {
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok WebKit fixtures read back :: {\"ken\":\"requested\",\"venue\":\"Hong Kong Football Club\"}"
+   ]
+  },
+  "B-club-home.13": {
+   "checks": 2,
+   "passed": 2,
+   "status": "closed",
+   "evidence": [
+    "ok WebKit 5B/5C hit-test + >= 24 px: Confirm all :: {\"found\":true,\"rest\":\"ok\",\"end\":\"modal (no inner scroller)\",\"w\":390,\"h\":36,\"x\":195,\"y\":610}",
+    "ok WebKit: the club home asks and Confirm all stores the venue :: {\"prompt\":true,\"ok\":true,\"venueIds\":[\"ar7iv182jhqz0001\"],\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/01-venue-lock.png\"}"
+   ]
+  },
+  "Q-share-link": {
+   "checks": 1,
+   "passed": 1,
+   "status": "closed",
+   "evidence": [
+    "ok WebKit: the share sheet prints /clubs/@handle :: {\"url\":\"uat.gripbat.com/clubs/@fs3ww7mtl\",\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/02-share.png\"}"
+   ]
+  },
+  "E-chat-room.21": {
+   "checks": 3,
+   "passed": 3,
+   "status": "closed",
+   "evidence": [
+    "ok WebKit 5B/5C hit-test + >= 24 px: Send :: {\"x\":357,\"y\":407.140625,\"w\":42,\"h\":42,\"ok\":true,\"top\":\"svg.[object SVGAnimatedString]\"}",
+    "ok WebKit 5B/5C hit-test + >= 24 px: Edit :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":25,\"h\":31,\"x\":314.96875,\"y\":331.84375}",
+    "ok WebKit: the refused link shows Reclub's sentence, no Retry, Edit :: {\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/03-chat-refused.png\"}"
+   ]
+  },
+  "B-club-menu.02": {
+   "checks": 2,
+   "passed": 2,
+   "status": "closed",
+   "evidence": [
+    "ok WebKit 5B/5C hit-test + >= 24 px: kebab Invite :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":58,\"x\":195,\"y\":132.0234375}",
+    "ok WebKit: a Member Gated member's kebab Invite opens the in-app picker :: {\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/04-kebab-invite.png\"}"
+   ]
+  },
+  "B-set-privacy.02": {
+   "checks": 2,
+   "passed": 2,
+   "status": "closed",
+   "evidence": [
+    "ok WebKit 5B/5C hit-test + >= 24 px: Approve :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":73,\"h\":32,\"x\":321.65625,\"y\":392.875}",
+    "ok WebKit: the member sees Need review and Approve seats ken :: {\"seen\":true,\"ap\":true,\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/05-member-gated.png\"}"
+   ]
+  },
+  "Q-bold-italic": {
+   "checks": 3,
+   "passed": 3,
+   "status": "closed",
+   "evidence": [
+    "ok WebKit 5B/5C hit-test + >= 24 px: B :: {\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":29,\"h\":31,\"x\":47.3359375,\"y\":311.1875}",
+    "ok WebKit 5B/5C hit-test + >= 24 px: Post (send) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":50,\"h\":32,\"x\":331.9921875,\"y\":331.921875}",
+    "ok WebKit: B drops \"****\" at the cursor, typing lands between, the post carries **go** and no placeholder :: {\"v\":\"w7mtl **go**\",\"note\":\"be] fix-S3 W BOLD w7mtl **go**\",\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/06-composer.png\"}"
+   ]
+  }
+ },
+ "checks": [
+  {
+   "row": "fixture",
+   "name": "WebKit fixtures read back",
+   "pass": true,
+   "ev": "{\"ken\":\"requested\",\"venue\":\"Hong Kong Football Club\"}"
+  },
+  {
+   "row": "B-club-home.13",
+   "name": "WebKit 5B/5C hit-test + >= 24 px: Confirm all",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"modal (no inner scroller)\",\"w\":390,\"h\":36,\"x\":195,\"y\":610}"
+  },
+  {
+   "row": "B-club-home.13",
+   "name": "WebKit: the club home asks and Confirm all stores the venue",
+   "pass": true,
+   "ev": "{\"prompt\":true,\"ok\":true,\"venueIds\":[\"ar7iv182jhqz0001\"],\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/01-venue-lock.png\"}"
+  },
+  {
+   "row": "Q-share-link",
+   "name": "WebKit: the share sheet prints /clubs/@handle",
+   "pass": true,
+   "ev": "{\"url\":\"uat.gripbat.com/clubs/@fs3ww7mtl\",\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/02-share.png\"}"
+  },
+  {
+   "row": "E-chat-room.21",
+   "name": "WebKit 5B/5C hit-test + >= 24 px: Send",
+   "pass": true,
+   "ev": "{\"x\":357,\"y\":407.140625,\"w\":42,\"h\":42,\"ok\":true,\"top\":\"svg.[object SVGAnimatedString]\"}"
+  },
+  {
+   "row": "E-chat-room.21",
+   "name": "WebKit 5B/5C hit-test + >= 24 px: Edit",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":25,\"h\":31,\"x\":314.96875,\"y\":331.84375}"
+  },
+  {
+   "row": "E-chat-room.21",
+   "name": "WebKit: the refused link shows Reclub's sentence, no Retry, Edit",
+   "pass": true,
+   "ev": "{\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/03-chat-refused.png\"}"
+  },
+  {
+   "row": "B-club-menu.02",
+   "name": "WebKit 5B/5C hit-test + >= 24 px: kebab Invite",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":58,\"x\":195,\"y\":132.0234375}"
+  },
+  {
+   "row": "B-club-menu.02",
+   "name": "WebKit: a Member Gated member's kebab Invite opens the in-app picker",
+   "pass": true,
+   "ev": "{\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/04-kebab-invite.png\"}"
+  },
+  {
+   "row": "B-set-privacy.02",
+   "name": "WebKit 5B/5C hit-test + >= 24 px: Approve",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":73,\"h\":32,\"x\":321.65625,\"y\":392.875}"
+  },
+  {
+   "row": "B-set-privacy.02",
+   "name": "WebKit: the member sees Need review and Approve seats ken",
+   "pass": true,
+   "ev": "{\"seen\":true,\"ap\":true,\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/05-member-gated.png\"}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "WebKit 5B/5C hit-test + >= 24 px: B",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":29,\"h\":31,\"x\":47.3359375,\"y\":311.1875}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "WebKit 5B/5C hit-test + >= 24 px: Post (send)",
+   "pass": true,
+   "ev": "{\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":50,\"h\":32,\"x\":331.9921875,\"y\":331.921875}"
+  },
+  {
+   "row": "Q-bold-italic",
+   "name": "WebKit: B drops \"****\" at the cursor, typing lands between, the post carries **go** and no placeholder",
+   "pass": true,
+   "ev": "{\"v\":\"w7mtl **go**\",\"note\":\"be] fix-S3 W BOLD w7mtl **go**\",\"sh\":\"D:\\\\tmp\\\\gb-uat-tools/fix-S3-webkit-shots/06-composer.png\"}"
+  }
+ ],
+ "cleanup": [
+  {
+   "note": "arjglanufril000y",
+   "s": 204
+  },
+  {
+   "meet": "arjgj42ifril000b",
+   "cancel": 200
+  },
+  {
+   "meet": "arjgj4d6fril000l",
+   "cancel": 200
+  },
+  {
+   "club": "arjgj2z6fril0008",
+   "archived": 200
+  },
+  {
+   "club": "arjgj46hfril000f",
+   "archived": 200
+  }
+ ],
+ "errors": [],
+ "appBundle": "js/app.c8d383a3.js",
+ "fx": {
+  "clubs": [
+   "arjgj2z6fril0008",
+   "arjgj46hfril000f"
+  ],
+  "meets": [
+   "arjgj42ifril000b",
+   "arjgj4d6fril000l"
+  ],
+  "notes": [
+   "arjglanufril000y"
+  ],
+  "handle": "fs3ww7mtl"
+ },
+ "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+ "plants": [
+  {
+   "name": "WebKit 5B: clean control passes",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "ok",
+    "end": "modal (no inner scroller)",
+    "w": 78,
+    "h": 32,
+    "x": 161.3203125,
+    "y": 586
+   }
+  },
+  {
+   "name": "WebKit 5B: planted covering layer FAILS",
+   "pass": true,
+   "t": {
+    "found": true,
+    "rest": "covered by DIV.",
+    "end": "modal (no inner scroller)",
+    "w": 78,
+    "h": 32,
+    "x": 161.3203125,
+    "y": 586
+   }
+  }
+ ],
+ "cleanupFailed": 0,
+ "summary": {
+  "closed": [
+   "fixture",
+   "B-club-home.13",
+   "Q-share-link",
+   "E-chat-room.21",
+   "B-club-menu.02",
+   "B-set-privacy.02",
+   "Q-bold-italic"
+  ],
+  "open": [],
+  "errors": 0,
+  "cleanupFailed": 0
+ }
+}

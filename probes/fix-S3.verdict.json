@@ -1,0 +1,799 @@
+{
+ "id": "fix-S3",
+ "at": "2026-09-25T01:13:14.713Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "evidence": [
+  {
+   "after": {
+    "at": "2026-09-24T19:41:39.752Z",
+    "engineRev": "5fe81c2468c22bd3cdc4377f46b1020b28e37f20",
+    "appBundle": "js/app.328197ac.js",
+    "run": "xtzxi",
+    "open": [],
+    "errors": [],
+    "leftover": "0/0/0/0",
+    "cleanupFailed": 0,
+    "plants": [
+     {
+      "name": "a planted absent control is NOT clickable",
+      "pass": true
+     },
+     {
+      "name": "a planted absent string is NOT on screen",
+      "pass": true
+     },
+     {
+      "name": "the club name IS on screen (the reader sees the page)",
+      "pass": true
+     },
+     {
+      "name": "a member (not admin) asking the ranking is refused",
+      "pass": true,
+      "s": 400
+     },
+     {
+      "name": "5B: the clean control passes the hit-test",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 91,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5B: a transparent layer planted over the page makes it FAIL",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "covered by DIV.",
+       "end": "covered by DIV.",
+       "w": 292,
+       "h": 91,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 12,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "a planted absent control is NOT clickable",
+      "pass": true
+     },
+     {
+      "name": "a planted absent string is NOT on screen",
+      "pass": true
+     },
+     {
+      "name": "the club name IS on screen (the reader sees the page)",
+      "pass": true
+     },
+     {
+      "name": "a member (not admin) asking the ranking is refused",
+      "pass": true,
+      "s": 400
+     },
+     {
+      "name": "5B: the clean control passes the hit-test",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 91,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5B: a transparent layer planted over the page makes it FAIL",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "covered by DIV.",
+       "end": "covered by DIV.",
+       "w": 292,
+       "h": 91,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 12,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "a planted absent control is NOT clickable",
+      "pass": true
+     },
+     {
+      "name": "a planted absent string is NOT on screen",
+      "pass": true
+     },
+     {
+      "name": "the club name IS on screen (the reader sees the page)",
+      "pass": true
+     },
+     {
+      "name": "a member (not admin) asking the ranking is refused",
+      "pass": true,
+      "s": 400
+     },
+     {
+      "name": "5B: the clean control passes the hit-test",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 87,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5B: a transparent layer planted over the page makes it FAIL",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "covered by DIV.",
+       "end": "covered by DIV.",
+       "w": 292,
+       "h": 87,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 12,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "a planted absent control is NOT clickable",
+      "pass": true
+     },
+     {
+      "name": "a planted absent string is NOT on screen",
+      "pass": true
+     },
+     {
+      "name": "the club name IS on screen (the reader sees the page)",
+      "pass": true
+     },
+     {
+      "name": "a member (not admin) asking the ranking is refused",
+      "pass": true,
+      "s": 400
+     },
+     {
+      "name": "5B: the clean control passes the hit-test",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 87,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5B: a transparent layer planted over the page makes it FAIL",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "covered by DIV.",
+       "end": "covered by DIV.",
+       "w": 292,
+       "h": 87,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 12,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "a planted absent control is NOT clickable",
+      "pass": true
+     },
+     {
+      "name": "a planted absent string is NOT on screen",
+      "pass": true
+     },
+     {
+      "name": "the club name IS on screen (the reader sees the page)",
+      "pass": true
+     },
+     {
+      "name": "a member (not admin) asking the ranking is refused",
+      "pass": true,
+      "s": 400
+     },
+     {
+      "name": "5B: the clean control passes the hit-test",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 87,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5B: a transparent layer planted over the page makes it FAIL",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "covered by DIV.",
+       "end": "covered by DIV.",
+       "w": 292,
+       "h": 87,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     },
+     {
+      "name": "5C: the same control squeezed to 12 px tall FAILS the 24 px rule",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "ok",
+       "w": 292,
+       "h": 12,
+       "ctl": "TARO-VIEW-CORE.pg-row is-tap",
+       "container": "taro_page taro_page_show taro_page_stati"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "before": {
+    "at": "2026-09-24T11:57:50.455Z",
+    "engineRev": "6fa4e5e96b7785030676d87b35faf64239b35fec",
+    "appBundle": "js/app.a42d4f64.js",
+    "mustFailRowsThatFailed": "18/18",
+    "passedBefore": []
+   }
+  },
+  {
+   "webkit": {
+    "at": "2026-09-24T18:56:16.713Z",
+    "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+    "appBundle": "js/app.c8d383a3.js",
+    "summary": {
+     "closed": [
+      "fixture",
+      "B-club-home.13",
+      "Q-share-link",
+      "E-chat-room.21",
+      "B-club-menu.02",
+      "B-set-privacy.02",
+      "Q-bold-italic"
+     ],
+     "open": [],
+     "errors": 0,
+     "cleanupFailed": 0
+    },
+    "plants": [
+     {
+      "name": "WebKit 5B: clean control passes",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "ok",
+       "end": "modal (no inner scroller)",
+       "w": 78,
+       "h": 32,
+       "x": 161.3203125,
+       "y": 586
+      }
+     },
+     {
+      "name": "WebKit 5B: planted covering layer FAILS",
+      "pass": true,
+      "t": {
+       "found": true,
+       "rest": "covered by DIV.",
+       "end": "modal (no inner scroller)",
+       "w": 78,
+       "h": 32,
+       "x": 161.3203125,
+       "y": 586
+      }
+     }
+    ]
+   }
+  },
+  {
+   "axe": {
+    "pagesScanned": [
+     "club home (owner)",
+     "Manage club Insights",
+     "My clubs",
+     "Members (Member Gated)",
+     "club chat",
+     "Create club",
+     "Help Run a club",
+     "composer"
+    ],
+    "criticalOrSerious": 0,
+    "notFixS3": [],
+    "fixS3": []
+   }
+  },
+  {
+   "notMeasured": [
+    "WebKit: the clean pass (7 priority rows, plants caught) ran on app.c8d383a3 (engine 5fe81c2468). The later app changes (9321ca5 tap boxes, 52e9a53 Sheet role + nudges, cface90 Forum head) were measured on Chromium only: 4 WebKit re-runs on the operator PC were starved (100 % CPU, < 0.8 GB free, ~58 browser processes from several lanes: 0-byte screenshots, \"browser has been closed\") — NO VERDICT, not a pass.",
+    "Real devices, screen readers, 320 / 768 / 1280 widths, dark theme (none offered) and Gecko were not run by this lane.",
+    "Reclub's side of the effort axis is counted from its decoded flow (reclub_forensic, L2), not a running Reclub."
+   ]
+  }
+ ],
+ "table": [
+  {
+   "row": "B-club-detail.23",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "every Reclub ranking (Most active, Most rewarded per kudo dimension, Most {stat}) — Most stats free where Reclub asks for Premium",
+    "effort": "club home › Insights row = 1 tap (Reclub club › Reports tab = 1); kudo dimension = 1 chip tap",
+    "clarityTrust": "empty lists say how to fill them (Reclub copy); admins only, as Reclub",
+    "wow": "free stats"
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Insights row on the club home :: {\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":358,\"h\":67,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok club HOME -> \"Insights\" row (1 tap) opens the club's Insights :: tap=true url=/app/pages/club-admin/index?id=arjs816efril05w9&pane=insights",
+    "ok engine: Most rewarded per kudo dimension + Most stats (matches won) name amy :: kudo={\"d\":\"Sportsmanship\",\"t\":3,\"n\":1} stat=[1,1]",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: kudo chip Sportsmanship :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":151,\"h\":41,\"ctl\":\"TARO-TEXT-CORE.pg-chip ca-chip is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: stat chip Most matches won :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":155,\"h\":41,\"ctl\":\"TARO-TEXT-CORE.pg-chip ca-chip is-tap pg-tab-on ca-chip\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok screen: \"Most rewarded\" kudo chips (real click Sportsmanship lists amy) + \"Most stats\" section + \"See all\" :: chip=true |  | See all | All | Sportsmanship · 3 | Dinking · 3 | 1 | Amy Chan | 3 kudos | Most stats | See all | Most matches won | Most matches played | Most points won | 1 | Amy Chan | 1 wins | 2 | [probe] fix-S3 P1 7wrdc | 1 wins | Club insights are updated approximately every 12 hours. | Home | Discover | Community | Inbox | See more shot=probes/fix-S3-shots/rerun3/003-R1-mei-insights.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-insight-rankings.01",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "full list per dimension + timeframe chips + Load more + stat ranking",
+    "effort": "See all = 1 tap, Load more = 1 tap (same as Reclub)",
+    "clarityTrust": "rows open the player; \"No ranking data available\" when empty",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: See all :: {\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":41,\"h\":36,\"ctl\":\"TARO-TEXT-CORE.pg-card-link is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Load more (sheet) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"nut-popup nut-popup-round nut-popup-bott\"}",
+    "ok See all -> the full ranking sheet (20 rows) + Load more -> the next page (engine offset 20) :: seeAll=true rows=28->30 paged=[200] shots=probes/fix-S3-shots/rerun3/004-R2-mei-ranking-sheet.png,probes/fix-S3-shots/rerun3/005-R2-mei-ranking-loadmore.png",
+    "ok stat ranking: \"Most matches won\" sheet lists amy with her wins ::  | Most matches played | Most points won | 1 | Amy Chan | 1 wins | 2 | [probe] fix-S3 P1 7wrdc | 1 wins | Club insights are updated approximately every 12 hours. | Home | Discover | Community | Inbox | See more |  shot=probes/fix-S3-shots/rerun3/006-R2-mei-stat-ranking.png",
+    "ok permission: signed out and a plain member are refused the ranking (admins only) :: anon=401 member=400"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-club-home.13",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "Reclub overlay from the club meets, Confirm all",
+    "effort": "opens by itself (0 taps) + Confirm all 1 tap (Reclub: same)",
+    "clarityTrust": "after \"Not now\" a quiet row keeps the task reachable (Reclub: gone after the one overlay)",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Confirm all (sheet) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"modal (no inner scroller)\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"document\"}",
+    "ok club HOME (not Manage club) asks \"Lock your club's venues in\" with the meet's venue; real click Confirm all -> engine venueIds has it :: prompt=true clicked=true venueIds=[\"ar7iv182jhqz0001\"] shots=probes/fix-S3-shots/rerun3/001-R3-mei-home-venue-lock.png,probes/fix-S3-shots/rerun3/002-R3-mei-home-after-confirm.png",
+    "ok 5D reload: the prompt is gone, Venues lists the venue; the other party (member amy) sees it in the club's Venues :: reloadPrompt=false amySees=true"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-club-home.24",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "share card N members · N activities · Organized by + link preview (Reclub web share page)",
+    "effort": "header share = 1 tap (Reclub: menu › Share = 2)",
+    "clarityTrust": "the link is the short /clubs/@handle; a PRIVATE club previews nothing of itself (G15.5 — Reclub-style preview named it)",
+    "wow": null
+   },
+   "evidence": [
+    "ok share card: \"N members · N activities\" + \"Organized by Mei\" :: 23 members · 0 activities · Organized by Mei Lam shot=probes/fix-S3-shots/rerun3/007-R4-mei-share-sheet.png",
+    "ok link preview of the short link (crawler UA): the club, \"N members · N activities\", \"Organized by\" :: {\"s\":200,\"title\":\"[probe] fix-S3 F1 7wrdc\",\"desc\":\"[probe] fix-S3 main club 7wrdc · 23 members · 0 activities · Organized by Mei Lam\"}"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-club-menu.02",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "kebab Invite -> invite-players picker (Member Gated members too)",
+    "effort": "kebab › Invite = 2 taps (Reclub: same)",
+    "clarityTrust": "\"Share invite link\" inside the picker, so nobody hits a dead end",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: kebab Invite :: {\"found\":true,\"rest\":\"ok\",\"end\":\"modal (no inner scroller)\",\"w\":390,\"h\":58,\"ctl\":\"TARO-VIEW-CORE.ak-item is-tap\",\"container\":\"document\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Share invite link (picker) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"modal (no inner scroller)\",\"w\":366,\"h\":63,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"document\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Invite (a search result) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"modal (no inner scroller)\",\"w\":55,\"h\":32,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"document\"}",
+    "ok Member Gated: the MEMBER's kebab Invite opens the in-app player picker; real Invite -> engine invitation for tom :: items=[\"Invite\",\"Create activity\",\"Post question\",\"Chat notifications: On\",\"Pin to home screen\",\"Take a break\",\"Message Admins\",\"Report club\",\"Get GripBat Support\",\"Leave club\"] picker=true sent=true invited=true shot=probes/fix-S3-shots/rerun3/015-R5-amy-kebab-invite-picker.png",
+    "ok 5D the other party: tom's My clubs shows the invitation to the club (Accept / Decline) :: shot=probes/fix-S3-shots/rerun3/016-R5-tom-sees-invitation.png",
+    "ok control — Admin Gated: a member's Invite shares the link (no in-app invite she is not allowed to send) :: Copy link shot=probes/fix-S3-shots/rerun3/017-R5-amy-kebab-invite-admin-gated.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-group-user.02",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "member-in-club: role, tags, Activity by month",
+    "effort": "Members › tap = 2 taps (Reclub: same)",
+    "clarityTrust": "View profile one tap away",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: member row :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":358,\"h\":69,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok real tap on a member in the club Members pane opens the club-scoped sheet (Activity, the club meet) — not the global profile :: tap=true url=/app/pages/community/index?id=arjs816efril05w9&pane=members&lang=en shot=probes/fix-S3-shots/rerun3/014-R6-mei-member-sheet.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-set-privacy.02",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "Member Gated gives members Invite players + Need review with Approve / Decline",
+    "effort": "same taps as an admin",
+    "clarityTrust": "Admin Gated members see neither (no control that would be refused)",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Invite players (member) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":358,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Approve (member) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":73,\"h\":32,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok Member Gated changes a MEMBER's screen: Invite players + Need review (ken); real click Approve -> engine ken is a member :: seen=true approve=true kenMember=true shot=probes/fix-S3-shots/rerun3/018-R7-amy-members-member-gated.png",
+    "ok 5D reload: Need review is empty and ken is a member; the other party (ken) sees he is in the club :: reloadNeedReview=false shot=probes/fix-S3-shots/rerun3/019-R7-ken-sees-member.png",
+    "ok control — Admin Gated club: the member sees neither Invite players nor Need review :: invite=false review=false"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "E-chat-room.21",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "Reclub's refusal sentence on the refused message",
+    "effort": "Edit = 1 tap puts the text back (Reclub: retype)",
+    "clarityTrust": "no Retry that can only be refused again",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test and >= 24 px: Send (icon) :: {\"x\":357,\"y\":595.140625,\"w\":42,\"h\":42,\"ok\":true,\"top\":\"svg.[object SVGAnimatedString]\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Edit on the refused bubble :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":25,\"h\":31,\"ctl\":\"TARO-VIEW-CORE.ct-failact is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok refused outside link: Reclub's sentence on the bubble, NO Retry, Edit puts the text back; engine stored 0 :: refused=true stored=0 sentence=true retry=false edit=true draftBack=true shot=probes/fix-S3-shots/rerun3/020-R8-amy-chat-refused.png",
+    "ok 5D reload: nothing refused is left in the thread; the other party (owner mei) never sees the refused link :: afterReload=false meiSees=false"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-invite-friends.01",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "Club tags tab lists the clubs I own / admin / belong to",
+    "effort": "same taps",
+    "clarityTrust": "no false \"Join a club\" line for an owner",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Club tags tab :: {\"found\":true,\"rest\":\"ok\",\"end\":\"modal (no inner scroller)\",\"w\":93,\"h\":44,\"ctl\":\"TARO-VIEW-CORE.pg-tab\",\"container\":\"document\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: the tag chip :: {\"found\":true,\"rest\":\"ok\",\"end\":\"modal (no inner scroller)\",\"w\":81,\"h\":37,\"ctl\":\"TARO-TEXT-CORE.pg-chip ip-chip is-tap\",\"container\":\"document\"}",
+    "ok OWNER's Club tags tab: her club -> its tag -> amy (not \"Join a club to use its tags.\") :: club=true tag=true shot=probes/fix-S3-shots/rerun3/021-R9-mei-club-tags.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-my-clubs.04",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "collapsible Admin / Member / Reviewing (+ Clubs I follow)",
+    "effort": "Hide / Show = 1 tap, remembered",
+    "clarityTrust": "",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Hide (section head) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":38,\"h\":36,\"ctl\":\"TARO-TEXT-CORE.pg-card-link is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok Clubs view: collapsible sections (real click Hide -> fewer cards, \"Show\") + Reviewing as a section :: reviewing=true cards=11->7 shots=probes/fix-S3-shots/rerun3/011-R10-mei-myclubs.png,probes/fix-S3-shots/rerun3/012-R10-mei-myclubs-collapsed.png",
+    "ok 5D reload: the collapsed section stays collapsed (remembered on the device) :: afterReload=▸ Show,▾ Hide"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-my-clubs.05",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "club row \"tag +n\"",
+    "effort": "0 taps",
+    "clarityTrust": "admins-only tags only for admins (engine)",
+    "wow": null
+   },
+   "evidence": [
+    "ok club row carries my tag (\"fixS3 tag\"); engine clubs/mine myTags :: myTags=[\"fixS3 tag\"] line=Public · Pickleball · 23 members · 0 upcoming activities · fixS3 tag shot=probes/fix-S3-shots/rerun3/013-R11-amy-myclubs.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-onboard-join-club.03",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "level, members, followers, External, full next meet on the card",
+    "effort": "0 taps",
+    "clarityTrust": "\"Next meet full\" spelled out (Reclub: a bare \"Full\")",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: the listed club card :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":178,\"h\":180,\"ctl\":\"TARO-VIEW-CORE.ob-club is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok suggested cards carry level + followers; the listed club shows \"3.5 · External club · Next meet full\" :: card=1 member · 1 follower | 3.5 · External club · Next meet full | Are you a club leader? shots=probes/fix-S3-shots/rerun3/022-R12-amy-onboard-club-step.png,probes/fix-S3-shots/rerun3/023-R12-amy-onboard-search.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-select-club-members.01",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "club-member picker for competition staff (create form AND competition page), multi-pick, Co-admin / Referee",
+    "effort": "Staff row › pick › role = 3 taps per person (Reclub: select-club-members then role = same)",
+    "clarityTrust": "Admins / Members sections, search",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Pick from the club members :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":268,\"h\":67,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Done (club picker) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":390,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"nut-popup nut-popup-round nut-popup-bott\"}",
+    "ok competition staff: \"Pick from the club members\" -> the club picker (Admins / Members) -> amy as Referee -> engine staff :: add=true pick=true items=[\"Co-admin\",\"Referee\"] referees=[\"ari4hb3c3hac0001\"] shot=probes/fix-S3-shots/rerun3/024-R13-mei-staff-from-club.png",
+    "ok 5D reload: amy stays under Referees; the other party (amy) sees herself as Referee :: reload= | Amy Chan | Referee | Mei Lam | Host | The competition is saved as a draft. Do amy= | Amy Chan | Referee | Mei Lam | Host | Home | Discover | Community | Inbox | S shot=probes/fix-S3-shots/rerun3/025-R13-amy-sees-staff.png",
+    "ok the competition FORM offers \"Staff — Add co-admins or referees\" from the club :: shot=probes/fix-S3-shots/rerun3/026-R13-mei-create-form-staff.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-set-hub.02",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "Get GripBat Support on Manage club",
+    "effort": "1 tap (Reclub: settings › Get support = 1)",
+    "clarityTrust": "the draft names the club",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Get GripBat Support :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":292,\"h\":87,\"ctl\":\"TARO-VIEW-CORE.pg-row is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok Manage club has \"Get GripBat Support\"; real tap opens the support thread with the club named :: url=/app/pages/chat/index?user=ar8tjvsqvskd0028&draft=Support request about the club [probe] fix-S3 F1 7wrdc:  shot=probes/fix-S3-shots/rerun3/027-R14-mei-support.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-tutorial.01",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "six swipeable panes (INTRO / Manage members / Insights / Activities / Forum / Chat) + Help › Run a club six topics",
+    "effort": "swipe (Reclub: same)",
+    "clarityTrust": "\"n / 6\" + dots say how many are left",
+    "wow": null
+   },
+   "evidence": [
+    "ok Create club: swipeable tutorial panes — a real swipe moves from 1 / 6 to 2 / 6 (Manage members) :: p1=1 / 6 | Run your club on GripBat | For clubs of any variety — a weekly social, a ladder, a squad. p2=2 / 6 | Manage members | Organize and check attendance: roles, tags, requests and invitations. shot=probes/fix-S3-shots/rerun3/028-R15-mei-create-tutorial.png",
+    "ok Help › Run a club = the six topics + the swipeable panes :: six=true swiper=true shot=probes/fix-S3-shots/rerun3/029-R15-mei-help-run-a-club.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "Q-share-link",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "short link /clubs/@handle; private /clubs/<id>?at=",
+    "effort": "-",
+    "clarityTrust": "no raw id + token for a public club; a member link no longer skips the approval gate",
+    "wow": null
+   },
+   "evidence": [
+    "ok a PUBLIC club with a handle is shared as /clubs/@handle (no community/index, no id=, no at=) :: url=uat.gripbat.com/clubs/@fs37wrdc",
+    "ok a person opening /clubs/@handle is sent to the app :: {\"s\":302,\"loc\":\"https://uat.gripbat.com/app/pages/link/index?club=fs37wrdc&\"}",
+    "ok a PRIVATE club is shared as the clean /clubs/<id>?at=<token> (no community/index) :: url=uat.gripbat.com/clubs/arjs85rlfril064u?at=… shot=probes/fix-S3-shots/rerun3/008-R4-amy-private-share.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "Q-level-chip",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "level chip",
+    "effort": "saves on tap (was: tap + an unrelated Save)",
+    "clarityTrust": "consistent with every other chip",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: level chip 4.0 :: {\"found\":true,\"rest\":\"ok\",\"end\":\"offscreen\",\"w\":51,\"h\":41,\"ctl\":\"TARO-TEXT-CORE.pg-chip ca-chip is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok real tap on the 4.0 level chip (no Save pressed) -> engine level 4.0 :: tap=true level=4.0 net=1",
+    "ok 5D reload: 4.0 stays selected; the other party (member amy) reads 4.0 on the club head :: selected=[\"4.0\",\"Public\",\"Anyone can join\",\"Members and admins\",\"Admin Gated\"] amyHead=Public · Pickleball · 4.0 · ID: XEVL4W"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "Q-bold-italic",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "better",
+   "axes": {
+    "function": "B / I",
+    "effort": "wrap the selection / markers at the cursor",
+    "clarityTrust": "no placeholder words reach a post",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: B tool :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: I tool :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":32,\"h\":31,\"ctl\":\"TARO-TEXT-CORE.pc-tool is-tap\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Post (send) :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":50,\"h\":32,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok 5D the other party (ken, not a member) sees the post in the club forum drawn bold / italic, no markup :: {\"b\":\"700\",\"i\":\"italic\",\"raw\":false} shot=probes/fix-S3-shots/rerun4/002-Q3-ken-sees-post.png",
+    "ok B with nothing selected -> \"****\" with the cursor inside (typing lands between); I wraps the selection; the post has no \"bold text\" :: v1=\"D 97apg ****\" v2=\"97apg **go**\" v3=\"go** <i>word</i>\" note=\"be] fix-S3 BOLD 97apg **go** <i>word</i>\" net=[\"notes/create 200\"] btn=[\"TARO-TEXT-CORE.pg-chip pc-chip is-tap pg-tab-on pc-chip\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\"] shot=probes/fix-S3-shots/rerun4/001-Q3-amy-bold-italic.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "B-claim.01",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "ownerless-club note + Managing a club link + Claim",
+    "effort": "1 tap",
+    "clarityTrust": "the claim is a staff-verified request (says so)",
+    "wow": null
+   },
+   "evidence": [
+    "ok 5B/5C finger hit-test (rest + container end) and >= 24 px: Claim this club :: {\"found\":true,\"rest\":\"ok\",\"end\":\"ok\",\"w\":358,\"h\":36,\"ctl\":\"TARO-BUTTON-CORE.hk-btn border-0 m-0 flex flex-row items-\",\"container\":\"taro_page taro_page_show taro_page_stati\"}",
+    "ok ownerless club: Reclub's note + \"Managing a club\" (opens Help › Run a club) for everyone; a member's real Claim -> engine claim pending :: note=true anonNote=true claim={\"status\":\"pending\",\"createdAt\":\"2026-09-25T00:31:43.863Z\"} link=/app/pages/help/index?tab=club shots=probes/fix-S3-shots/rerun3/032-V1-amy-ownerless.png,probes/fix-S3-shots/rerun3/033-V1-amy-claim-sent.png",
+    "ok 5D reload: \"Request sent — GripBat staff will verify\" stays; the other party (GripBat staff) has the claim in its queue :: staffQueue=200/1"
+   ],
+   "before": "closed"
+  },
+  {
+   "row": "B-invite-friends.02",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": "equal",
+   "axes": {
+    "function": "20 players per invitation with the notice",
+    "effort": "-",
+    "clarityTrust": "the notice names the limit",
+    "wow": null
+   },
+   "evidence": [
+    "ok 21 invitable club members: the 21st tap says \"You've reached the limit of 20 players per invitation.\" and 20 stay selected :: opened=true rows=25 tapped=21 selected=20 shot=probes/fix-S3-shots/rerun3/034-V2-mei-invite-cap.png"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "fixture",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": null,
+   "axes": null,
+   "evidence": [
+    "ok fixtures are real (read back): F1 handle + links off + V not confirmed, F2 private, F3 approval + Member Gated, ken requested, M5 full, F5 ownerless :: {\"F1handle\":\"fs3xtzxi\",\"F1links\":false,\"F1venues\":[],\"F2vis\":\"private\",\"F2amy\":true,\"F3gate\":\"approval/true\",\"kenJoin\":\"requested\",\"M5\":\"2/2\",\"F5owner\":\"NULL\",\"seeded\":21,\"kudos\":[200,200,200],\"insightsActive\":5,\"venue\":[\"ar7iv182jhqz0001\",\"Hong Kong Football Club\"]}"
+   ],
+   "before": "closed"
+  },
+  {
+   "row": "G15.5-private",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": null,
+   "axes": null,
+   "evidence": [
+    "ok link preview of a PRIVATE club names nothing of it (no name, description, count, organisers) :: {\"short\":[200,\"A private club on GripBat\",\"You were sent an invitation link. Open it to see the club.\"],\"long\":[200,\"A private club on GripBat\",\"You were sent an invitation link. Open it to see the club.\"]}",
+    "ok signed out: /clubs/<private id> without the token shows nothing of the club :: Back | Share | More | This club is private or no longer exists. If you were invited, open the invite link or enter the club code. | Join by code | Back to clubs | Home | Discover | Community | Inbox | See more shot=probes/fix-S3-shots/rerun3/009-PRIV-anon-private-link.png",
+    "ok NON-member ken: /clubs/<private id> without the token shows nothing of the club :: 返回 | 分享 | 更多 | 這個球會是私人球會或已不存在。如你獲邀請，請開啟邀請連結或輸入球會代碼。 | 以代碼加入 | 返回球會列表 | 主頁 | 探索 | 社群 | 收件箱 | 更多 shot=probes/fix-S3-shots/rerun3/010-PRIV-ken-private-link.png",
+    "ok NON-member ken: private club insights refused, not in his clubs, no member-sheet meets :: insights=400 mine=2 memberMeets=200/0"
+   ],
+   "before": "still-open"
+  },
+  {
+   "row": "i18n",
+   "status": "closed",
+   "level": "L6",
+   "vsReclub": null,
+   "axes": null,
+   "evidence": [
+    "ok zh_Hant: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English) :: shot=probes/fix-S3-shots/rerun4/003-LANG-zh_Hant-insights.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on Insights :: []",
+    "ok zh_Hant: 5C no clipped or off-screen text on club home :: [] shot=probes/fix-S3-shots/rerun4/004-LANG-zh_Hant-club-home.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on my clubs :: [] shot=probes/fix-S3-shots/rerun4/005-LANG-zh_Hant-my-clubs.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on members (member gated) :: [] shot=probes/fix-S3-shots/rerun4/006-LANG-zh_Hant-members-member-gated-.png",
+    "ok zh_Hant: 5C no clipped or off-screen text on help run a club :: [] shot=probes/fix-S3-shots/rerun4/007-LANG-zh_Hant-help-run-a-club.png",
+    "ok zh_Hans: Insights shows the new rows translated (no \"Most stats\" / \"See all\" in English) :: shot=probes/fix-S3-shots/rerun4/008-LANG-zh_Hans-insights.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on Insights :: []",
+    "ok zh_Hans: 5C no clipped or off-screen text on club home :: [] shot=probes/fix-S3-shots/rerun4/009-LANG-zh_Hans-club-home.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on my clubs :: [] shot=probes/fix-S3-shots/rerun4/010-LANG-zh_Hans-my-clubs.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on members (member gated) :: [] shot=probes/fix-S3-shots/rerun4/011-LANG-zh_Hans-members-member-gated-.png",
+    "ok zh_Hans: 5C no clipped or off-screen text on help run a club :: [] shot=probes/fix-S3-shots/rerun4/012-LANG-zh_Hans-help-run-a-club.png"
+   ],
+   "before": "still-open"
+  }
+ ]
+}
