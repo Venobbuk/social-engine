@@ -1,12 +1,12 @@
 {
  "id": "club-cover",
  "mode": "after",
- "at": "2026-09-25T20:52:20.628Z",
+ "at": "2026-09-25T21:39:32.162Z",
  "checks": [
   {
    "name": "set cover → bannerUrl set",
    "pass": true,
-   "ev": "{\"club\":\"ari4he5s3hac000m\",\"s\":200,\"bannerUrl\":\"https://uat.gripbat.com/media/files/e4f6ff42-caca-4b7c-8b41-fc2b8e57f526.png\"}"
+   "ev": "{\"club\":\"ari4he5s3hac000m\",\"s\":200,\"bannerUrl\":\"https://uat.gripbat.com/media/files/10bcea82-e487-4960-8000-8a140a5ecd17.png\"}"
   },
   {
    "name": "remove cover (bannerId:null) → 200",
@@ -29,14 +29,26 @@
    "ev": "{\"s\":200}"
   },
   {
-   "name": "app club page draws no cover of the removed file",
+   "name": "taps: Change cover uploads and shows the new cover",
    "pass": true,
-   "ev": "{\"key\":\"e4f6ff42-caca-4b7c-8b41-fc2b8e57f526.png\",\"drawn\":false,\"requested\":0,\"page\":\"返回 | 分享 | 更多 | 總覽 | 活動 | 討論區 | 聊天 | 相片 | 成員 | 更換封面相 | Harbour Paddle Club | 公開 · 匹克球 · 各種程度 · ID: TQ6R\"}"
+   "ev": "{\"bannerId\":\"arl1spstznnr001d\",\"bannerSrc\":\"https://uat.gripbat.com/media/files/10bcea82-e487-4960-8000-8a140a5ecd17.png\"}"
+  },
+  {
+   "name": "taps: Remove cover → confirm → after reload no cover (bannerId NULL, art shown)",
+   "pass": true,
+   "ev": "{\"confirmShown\":true,\"bannerId\":\"NULL\",\"bannerSrcAfterReload\":\"https://uat.gripbat.com/app/static/boyau/img/outdoor-pickleball-courts-hero.webp\"}"
+  },
+  {
+   "name": "taps: with no cover the sheet offers Change only",
+   "pass": true,
+   "ev": "{\"offers\":[\"更換封面相\"]}"
   }
  ],
  "cleanup": [
   "readback files-left/club-banner 0/NULL (before NULL)"
  ],
  "errors": [],
+ "uploadPath": "file chooser",
+ "tapFile": "arl1spstznnr001d",
  "verdict": "pass"
 }
