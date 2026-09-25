@@ -164,7 +164,14 @@ export class ClubService {
 	public async settings(channelId: string): Promise<MiClubSetting> {
 		const s = await this.clubSettingsRepository.findOneBy({ channelId });
 		if (s) return s;
-		return await this.clubSettingsRepository.insertOne({ channelId, visibility: 'public', gateType: 'open', createMeetPermission: 'members', sport: 'pickleball', level: null, adminIds: [], memberTags: {}, venueIds: [], paymentInfo: null, enableForum: true, enableChat: true, chatRoomId: null, refCode: await this.freshRefCode(), accessToken: secureRndstr(16), tags: [], awards: [], updatedAt: new Date() });
+		// BENCH-B CLUB-SETTINGS-RACE-V1: two first reads race to create the row; the one that loses reads the winner's row
+		try {
+			return await this.clubSettingsRepository.insertOne({ channelId, visibility: 'public', gateType: 'open', createMeetPermission: 'members', sport: 'pickleball', level: null, adminIds: [], memberTags: {}, venueIds: [], paymentInfo: null, enableForum: true, enableChat: true, chatRoomId: null, refCode: await this.freshRefCode(), accessToken: secureRndstr(16), tags: [], awards: [], updatedAt: new Date() });
+		} catch (e) {
+			const won = await this.clubSettingsRepository.findOneBy({ channelId });
+			if (won) return won;
+			throw e;
+		}
 	}
 
 	@bindThis
