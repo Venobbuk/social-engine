@@ -1,0 +1,24 @@
+{
+ "id": "fix-S7-rating-seq",
+ "at": "2026-09-26T09:47:03.747Z",
+ "base": "https://uat.social.silkvo.com",
+ "condition_fired": true,
+ "verdict": "fail",
+ "evidence": [
+  "PASS G1 today: casual game logged — {\"status\":200,\"meetId\":\"arlrqtt21r1i0003\",\"matchId\":\"arlrqv6v1r1i0008\"}",
+  "PASS G1 today: opponent confirms — {\"status\":200}",
+  "PASS G1 today: rated by the sweep — {\"ratedAfterMs\":6678,\"row\":\"ari4hb3c3hac0001|4.200|4.239|2026-09-26 02:00:00+00|2026-09-26 09:46:00.492706+00\"}",
+  "PASS G2 three days ago: casual game logged — {\"status\":200,\"meetId\":\"arlrr0p51r1i000b\",\"matchId\":\"arlrr0rs1r1i000g\"}",
+  "PASS G2 three days ago: opponent confirms — {\"status\":200}",
+  "PASS G2 three days ago: rated by the sweep — {\"ratedAfterMs\":58170,\"row\":\"ari4hb3c3hac0001|4.239|4.260|2026-09-23 09:46:03.972+00|2026-09-26 09:47:00.194297+00\"}",
+  "PASS setup: G2 (newest in the chain) has the EARLIER playedAt — the defect shape — {\"g1\":\"2026-09-26 02:00:00+00\",\"g2\":\"2026-09-23 09:46:03.972+00\"}",
+  "PASS setup: the pre-fix order (newest playedAt) would pick a different, stale row — {\"byPlayed\":\"4.239\",\"bySeq\":\"4.260\"}",
+  "PASS after: shown rating is G2's post (newest in the chain) — {\"rating\":4.26,\"g2post\":4.26}",
+  "PASS after: the rating shown (2 dp) changed — {\"before\":\"4.24\",\"after\":\"4.26\"}",
+  "PASS after: trend30 shown changed — {\"before\":\"+0.04\",\"after\":\"+0.06\"}",
+  "PASS after: within 2 min of the confirm — {\"secs\":59}",
+  "INFO cleanup cancel arlrqtt21r1i0003 — {\"status\":200}",
+  "INFO cleanup cancel arlrr0p51r1i000b — {\"status\":200}",
+  "FAIL cleanup: the probe games left no rating rows — {\"left\":4}"
+ ]
+}
