@@ -1,0 +1,246 @@
+{
+ "id": "chat-extras",
+ "mode": "after",
+ "at": "2026-09-26T08:27:42.272Z",
+ "condition_fired": true,
+ "verdict": "pass",
+ "rows": {
+  "api no-key 503 NOT_CONFIGURED": {
+   "ok": true,
+   "status": 200,
+   "statusBody": "{\"gif\":false,\"translate\":false,\"gifMode\":\"off\",\"translateMode\":\"off\"}",
+   "trending": "503 {\"error\":{\"message\":\"This feature is not available yet.\",\"code\":\"NOT_CONFIGURED\",\"id\":\"c7e1a0b2-5d3f",
+   "search": 503
+  },
+  "api status names no key": {
+   "ok": true,
+   "body": "{\"gif\":false,\"translate\":false,\"gifMode\":\"off\",\"translateMode\":\"off\"}"
+  },
+  "api translate no-key 503": {
+   "ok": true,
+   "status": 503,
+   "body": "{\"error\":{\"message\":\"This feature is not available yet.\",\"code\":\"NOT_CONFIGURED\",\"id\":\"c7e1a0b2-5d3f-4e8a-9b1c-2f6d0a4e8"
+  },
+  "api translate 繁→EN and EN→繁 (+cache)": {
+   "ok": true,
+   "zhToEn": "200 [TEST EN] [probe] 今晚七點球場見，記得帶球拍。",
+   "enToZh": "200 [TEST 繁] [probe] See you at the courts at 7, bring your paddle.",
+   "secondCallCached": false
+  },
+  "api translate non-member refused": {
+   "ok": true,
+   "status": 404,
+   "body": "{\"error\":{\"message\":\"No such message.\",\"code\":\"NO_SUCH_MESSAGE\",\"id\":\"c7e1a0b2-5d3f-4e8a-9b1c-2f6d0a"
+  },
+  "api translate member ok": {
+   "ok": true,
+   "status": 200,
+   "body": "{\"text\":\"[TEST 繁] [probe] room message\",\"target\":\"ZH-HANT\",\"cached\":false}"
+  },
+  "en gif-send": {
+   "ok": true,
+   "gifBtn": true,
+   "grid": 24,
+   "attr": true,
+   "sentId": "arloymrr7ze500gt",
+   "fileType": "image/gif",
+   "otherPartySeesAfterReload": true,
+   "hitBtn": {
+    "x": 83,
+    "y": 747,
+    "hit": "taro-text-core.cx-giflbl"
+   },
+   "hitCell": {
+    "x": 74,
+    "y": 470,
+    "hit": "img.taro-img__mode-aspectfill taro-img__mode"
+   },
+   "sz": {
+    "btn": {
+     "w": 42,
+     "h": 42
+    },
+    "cell": {
+     "w": 115,
+     "h": 115
+    }
+   },
+   "sideways": false,
+   "axeSeriousAll": [
+    "aria-valid-attr"
+   ],
+   "axeCx": [],
+   "net": [
+    {
+     "tag": "amy",
+     "ep": "gb/status",
+     "status": 200,
+     "body": "{\"maintenance\":{\"on\":false,\"until\":null,\"message\":null,\"at\":null}}"
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/account/me",
+     "status": 200
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/extras/status",
+     "status": 200,
+     "body": "{\"gif\":true,\"translate\":true,\"gifMode\":\"mock\",\"translateMode\":\"mock\"}"
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/gif/trending",
+     "status": 200
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/gif/attach",
+     "status": 200
+    },
+    {
+     "tag": "amy",
+     "ep": "chat/messages/create-to-user",
+     "status": 200
+    }
+   ]
+  },
+  "en translate": {
+   "ok": true,
+   "menu": true,
+   "trText": "[TEST EN] [probe] 今晚七點球場見，記得帶球拍。",
+   "origStill": true,
+   "showOriginalHides": true,
+   "net": [
+    {
+     "tag": "admin",
+     "ep": "gb/chat/translate",
+     "status": 200,
+     "body": "{\"text\":\"[TEST EN] [probe] 今晚七點球場見，記得帶球拍。\",\"target\":\"EN\",\"cached\":false}"
+    }
+   ]
+  },
+  "zh_Hant gif-send": {
+   "ok": true,
+   "gifBtn": true,
+   "grid": 24,
+   "attr": true,
+   "sentId": "arloz81y7ze500gv",
+   "fileType": "image/gif",
+   "otherPartySeesAfterReload": true,
+   "hitBtn": {
+    "x": 83,
+    "y": 747,
+    "hit": "taro-text-core.cx-giflbl"
+   },
+   "hitCell": {
+    "x": 74,
+    "y": 470,
+    "hit": "img.taro-img__mode-aspectfill taro-img__mode"
+   },
+   "sz": {
+    "btn": {
+     "w": 42,
+     "h": 42
+    },
+    "cell": {
+     "w": 115,
+     "h": 115
+    }
+   },
+   "sideways": false,
+   "axeSeriousAll": [],
+   "axeCx": [],
+   "net": [
+    {
+     "tag": "amy",
+     "ep": "gb/status",
+     "status": 200,
+     "body": "{\"maintenance\":{\"on\":false,\"until\":null,\"message\":null,\"at\":null}}"
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/account/me",
+     "status": 200
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/extras/status",
+     "status": 200,
+     "body": "{\"gif\":true,\"translate\":true,\"gifMode\":\"mock\",\"translateMode\":\"mock\"}"
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/gif/trending",
+     "status": 200
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/gif/attach",
+     "status": 200
+    },
+    {
+     "tag": "amy",
+     "ep": "chat/messages/create-to-user",
+     "status": 200
+    }
+   ]
+  },
+  "zh_Hant translate": {
+   "ok": true,
+   "menu": true,
+   "trText": "[TEST 繁] [probe] See you at the courts at 7, bring your paddle.",
+   "origStill": true,
+   "showOriginalHides": true,
+   "net": [
+    {
+     "tag": "admin",
+     "ep": "gb/chat/translate",
+     "status": 200,
+     "body": "{\"text\":\"[TEST 繁] [probe] See you at the courts at 7, bring your paddle.\",\"target\":\"ZH-HANT\",\"cached\":false}"
+    }
+   ]
+  },
+  "en off-clean": {
+   "ok": true,
+   "gifButtons": 0,
+   "translateRow": "Translate messageNot available yet",
+   "pageErrors": []
+  },
+  "zh_Hant off-clean": {
+   "ok": true,
+   "gifButtons": 0,
+   "translateRow": "翻譯訊息暫未提供",
+   "pageErrors": []
+  }
+ },
+ "evidence": [
+  "PASS api no-key 503 NOT_CONFIGURED",
+  "PASS api status names no key",
+  "PASS api translate no-key 503",
+  "PASS api translate 繁→EN and EN→繁 (+cache)",
+  "PASS api translate non-member refused",
+  "PASS api translate member ok",
+  "PASS en gif-send",
+  "PASS en translate",
+  "PASS zh_Hant gif-send",
+  "PASS zh_Hant translate",
+  "PASS en off-clean",
+  "PASS zh_Hant off-clean"
+ ],
+ "cleanup": [
+  "msg arloy9157ze500go delete -> 204",
+  "msg arloy91v7ze500gp delete -> 204",
+  "msg arloymrr7ze500gt delete -> 204",
+  "msg arloz81y7ze500gv delete -> 204",
+  "room delete -> 204, show after -> 400"
+ ],
+ "mockAtStart": false,
+ "statusMockOn": {
+  "gif": true,
+  "translate": true,
+  "gifMode": "mock",
+  "translateMode": "mock"
+ },
+ "mockAtEnd": false
+}

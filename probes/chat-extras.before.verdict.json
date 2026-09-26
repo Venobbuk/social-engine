@@ -1,0 +1,150 @@
+{
+ "id": "chat-extras",
+ "mode": "before",
+ "at": "2026-09-26T07:11:45.029Z",
+ "condition_fired": true,
+ "verdict": "fail",
+ "rows": {
+  "api no-key 503 NOT_CONFIGURED": {
+   "ok": false,
+   "status": 404,
+   "statusBody": "{\"message\":\"Route POST:/api/gb/extras/status not found\",\"error\":\"Not Found\",\"statusCode\":404}",
+   "trending": "404 {\"message\":\"Route POST:/api/gb/gif/trending not found\",\"error\":\"Not Found\",\"statusCode\":404}",
+   "search": 404
+  },
+  "api status names no key": {
+   "ok": false,
+   "body": "{\"message\":\"Route POST:/api/gb/extras/status not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  },
+  "api translate no-key 503": {
+   "ok": false,
+   "status": 404,
+   "body": "{\"message\":\"Route POST:/api/gb/chat/translate not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  },
+  "api translate 繁→EN and EN→繁 (+cache)": {
+   "ok": false,
+   "zhToEn": "404 undefined",
+   "enToZh": "404 undefined"
+  },
+  "api translate non-member refused": {
+   "ok": false,
+   "status": 404,
+   "body": "{\"message\":\"Route POST:/api/gb/chat/translate not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  },
+  "api translate member ok": {
+   "ok": false,
+   "status": 404,
+   "body": "{\"message\":\"Route POST:/api/gb/chat/translate not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  },
+  "en gif-send": {
+   "ok": false,
+   "gifBtn": false,
+   "grid": 0,
+   "attr": false,
+   "sentId": null,
+   "fileType": null,
+   "otherPartySeesAfterReload": false,
+   "hitBtn": null,
+   "hitCell": null,
+   "sz": {},
+   "sideways": null,
+   "axeSeriousAll": null,
+   "axeCx": null,
+   "net": [
+    {
+     "tag": "amy",
+     "ep": "gb/status",
+     "status": 200,
+     "body": "{\"maintenance\":{\"on\":false,\"until\":null,\"message\":null,\"at\":null}}"
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/account/me",
+     "status": 200
+    }
+   ]
+  },
+  "en translate": {
+   "ok": false,
+   "menu": false,
+   "trText": "",
+   "origStill": false,
+   "showOriginalHides": false,
+   "net": []
+  },
+  "zh_Hant gif-send": {
+   "ok": false,
+   "gifBtn": false,
+   "grid": 0,
+   "attr": false,
+   "sentId": null,
+   "fileType": null,
+   "otherPartySeesAfterReload": false,
+   "hitBtn": null,
+   "hitCell": null,
+   "sz": {},
+   "sideways": null,
+   "axeSeriousAll": null,
+   "axeCx": null,
+   "net": [
+    {
+     "tag": "amy",
+     "ep": "gb/account/me",
+     "status": 200
+    },
+    {
+     "tag": "amy",
+     "ep": "gb/status",
+     "status": 200,
+     "body": "{\"maintenance\":{\"on\":false,\"until\":null,\"message\":null,\"at\":null}}"
+    }
+   ]
+  },
+  "zh_Hant translate": {
+   "ok": false,
+   "menu": false,
+   "trText": "",
+   "origStill": false,
+   "showOriginalHides": false,
+   "net": []
+  },
+  "en off-clean": {
+   "ok": false,
+   "gifButtons": 0,
+   "translateRow": "",
+   "pageErrors": []
+  },
+  "zh_Hant off-clean": {
+   "ok": false,
+   "gifButtons": 0,
+   "translateRow": "",
+   "pageErrors": []
+  }
+ },
+ "evidence": [
+  "FAIL api no-key 503 NOT_CONFIGURED",
+  "FAIL api status names no key",
+  "FAIL api translate no-key 503",
+  "FAIL api translate 繁→EN and EN→繁 (+cache)",
+  "FAIL api translate non-member refused",
+  "FAIL api translate member ok",
+  "FAIL en gif-send",
+  "FAIL en translate",
+  "FAIL zh_Hant gif-send",
+  "FAIL zh_Hant translate",
+  "FAIL en off-clean",
+  "FAIL zh_Hant off-clean"
+ ],
+ "cleanup": [
+  "msg arlm8ubfznnr00n4 delete -> 204",
+  "msg arlm8ucnznnr00n6 delete -> 204",
+  "room delete -> 204, show after -> 400"
+ ],
+ "mockAtStart": false,
+ "statusMockOn": {
+  "message": "Route POST:/api/gb/extras/status not found",
+  "error": "Not Found",
+  "statusCode": 404
+ },
+ "mockAtEnd": false
+}
