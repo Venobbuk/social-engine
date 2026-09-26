@@ -1,0 +1,168 @@
+{
+ "id": "uat-layout-scoresheet-foot",
+ "at": "2026-09-26T10:46:54.321Z",
+ "builds": [
+  "https://uat.gripbat.com/app/js/app.2d5d85c1.js"
+ ],
+ "condition_fired": true,
+ "verdict": "pass",
+ "A_delete_label": {
+  "pass": true,
+  "finding": "繁 renders U+522A 刪 (correct), 简 U+5220 删, both engines — the text is right; the 删-looking glyph is the fallback face (Noto Sans TC is font-display: optional and not yet loaded on a cold WebKit/Windows load), not a string",
+  "cells": [
+   {
+    "engine": "chromium",
+    "lang": "en",
+    "delete": "Delete",
+    "cps": "U+0044 U+0065 U+006C U+0065 U+0074 U+0065",
+    "font": "\"Albert Sans\", \"Noto Sans TC\", \"Noto Sans SC\", -ap"
+   },
+   {
+    "engine": "chromium",
+    "lang": "zh_Hant",
+    "delete": "刪除",
+    "cps": "U+522A U+9664",
+    "font": "\"Noto Sans TC\", \"Noto Sans SC\", \"Albert Sans\", -ap"
+   },
+   {
+    "engine": "chromium",
+    "lang": "zh_Hans",
+    "delete": "删除",
+    "cps": "U+5220 U+9664",
+    "font": "\"Noto Sans SC\", \"Albert Sans\", -apple-system, sans"
+   },
+   {
+    "engine": "webkit",
+    "lang": "en",
+    "delete": "Delete",
+    "cps": "U+0044 U+0065 U+006C U+0065 U+0074 U+0065",
+    "font": "Albert Sans, Noto Sans TC, Noto Sans SC, -apple-sy"
+   },
+   {
+    "engine": "webkit",
+    "lang": "zh_Hant",
+    "delete": "刪除",
+    "cps": "U+522A U+9664",
+    "font": "Noto Sans TC, Noto Sans SC, Albert Sans, -apple-sy"
+   },
+   {
+    "engine": "webkit",
+    "lang": "zh_Hans",
+    "delete": "删除",
+    "cps": "U+5220 U+9664",
+    "font": "Noto Sans SC, Albert Sans, -apple-system, sans-ser"
+   }
+  ]
+ },
+ "B_hit_test": {
+  "pass": true,
+  "rule": "FRONTEND_UAT_STANDARD 5B: scan at rest AND with the sheet scroller at its end; a control under the bottom bar while its scroller can still bring it up is reachable (not a defect); at the end every control must be hit and the last content must clear the bar",
+  "finding": "at rest the second court row (chips 5-8) sits under the sticky foot (the sheet scrolls 135-139 px); at the end 0 of 25 controls covered and the last row (bottom 574) clears the foot (top 586) — pass by the standard; the foot stays sticky (BENCH-C-2 SW-16: Save always reachable)",
+  "cells": [
+   {
+    "engine": "chromium",
+    "lang": "en",
+    "restCovered": [
+     "pg-chip \"5\" under hk-btn",
+     "pg-chip \"6\" under hk-btn",
+     "pg-chip \"7\" under ks-foot",
+     "pg-chip \"8\" under ks-foot"
+    ],
+    "restScroll": "0/135",
+    "endCovered": 0,
+    "lastContentBottom": 574,
+    "footTop": 586,
+    "lastClearsFoot": true
+   },
+   {
+    "engine": "chromium",
+    "lang": "zh_Hant",
+    "restCovered": [
+     "pg-chip \"5\" under hk-btn",
+     "pg-chip \"6\" under hk-btn",
+     "pg-chip \"7\" under ks-foot",
+     "pg-chip \"8\" under ks-foot"
+    ],
+    "restScroll": "0/135",
+    "endCovered": 0,
+    "lastContentBottom": 574,
+    "footTop": 586,
+    "lastClearsFoot": true
+   },
+   {
+    "engine": "chromium",
+    "lang": "zh_Hans",
+    "restCovered": [
+     "pg-chip \"5\" under hk-btn",
+     "pg-chip \"6\" under hk-btn",
+     "pg-chip \"7\" under ks-foot",
+     "pg-chip \"8\" under ks-foot"
+    ],
+    "restScroll": "0/135",
+    "endCovered": 0,
+    "lastContentBottom": 574,
+    "footTop": 586,
+    "lastClearsFoot": true
+   },
+   {
+    "engine": "webkit",
+    "lang": "en",
+    "restCovered": [
+     "pg-chip \"5\" under hk-btn",
+     "pg-chip \"6\" under hk-btn",
+     "pg-chip \"7\" under ks-foot",
+     "pg-chip \"8\" under ks-foot"
+    ],
+    "restScroll": "0/135",
+    "endCovered": 0,
+    "lastContentBottom": 574,
+    "footTop": 586,
+    "lastClearsFoot": true
+   },
+   {
+    "engine": "webkit",
+    "lang": "zh_Hant",
+    "restCovered": [
+     "pg-chip \"5\" under hk-btn",
+     "pg-chip \"6\" under hk-btn",
+     "pg-chip \"7\" under ks-foot",
+     "pg-chip \"8\" under ks-foot"
+    ],
+    "restScroll": "0/139",
+    "endCovered": 0,
+    "lastContentBottom": 574,
+    "footTop": 586,
+    "lastClearsFoot": true
+   },
+   {
+    "engine": "webkit",
+    "lang": "zh_Hans",
+    "restCovered": [
+     "pg-chip \"5\" under hk-btn",
+     "pg-chip \"6\" under hk-btn",
+     "pg-chip \"7\" under ks-foot",
+     "pg-chip \"8\" under ks-foot"
+    ],
+    "restScroll": "0/139",
+    "endCovered": 0,
+    "lastContentBottom": 574,
+    "footTop": 586,
+    "lastClearsFoot": true
+   }
+  ]
+ },
+ "fixtureCleanup": {
+  "at": "2026-09-26T10:43:49.192Z",
+  "meetId": "arltn59gql1t00d7",
+  "cancel": 200,
+  "delete": 400,
+  "showAfter": 200,
+  "gone": true
+ },
+ "evidence": [
+  "/root/gen/l6-scope/uat-layout/ksfoot-chromium-before.json",
+  "/root/gen/l6-scope/uat-layout/ksfoot-webkit-before.json",
+  "/root/gen/l6-scope/uat-layout/ksfoot-shots/",
+  "/root/gen/l6-scope/uat-layout/ksfoot-shots-webkit/"
+ ]
+}
