@@ -243,7 +243,9 @@ export class UserSearchService {
 					.where('user.updatedAt IS NULL')
 					.orWhere('user.updatedAt > :activeThreshold', { activeThreshold: activeThreshold });
 			}))
-			.andWhere('user.isSuspended = FALSE');
+			.andWhere('user.isSuspended = FALSE')
+			// SEARCH-HIDE-V1 (lane L6-PROFILE 2026-09-26): Settings › "Hide me from player search" (isExplorable=false) hid nobody
+			.andWhere(meId == null ? 'user.isExplorable = TRUE' : '(user.isExplorable = TRUE OR user.id = :meIdX)', { meIdX: meId });
 
 		if (mutingQuery) {
 			nameQuery.andWhere(`user.id NOT IN (${mutingQuery.getQuery()})`);
@@ -286,7 +288,8 @@ export class UserSearchService {
 						.orWhere('user.updatedAt > :activeThreshold', { activeThreshold: activeThreshold });
 				}))
 				.andWhere('user.isSuspended = FALSE')
-				.setParameters(profQuery.getParameters());
+				.andWhere(meId == null ? 'user.isExplorable = TRUE' : '(user.isExplorable = TRUE OR user.id = :meIdX)')   // SEARCH-HIDE-V1
+				.setParameters({ ...profQuery.getParameters(), meIdX: meId });
 
 			users = users.concat(await userQuery
 				.orderBy('user.updatedAt', 'DESC', 'NULLS LAST')
