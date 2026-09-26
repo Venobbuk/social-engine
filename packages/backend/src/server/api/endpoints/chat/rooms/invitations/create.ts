@@ -45,6 +45,17 @@ export const meta = {
 			code: 'BLOCKED',
 			id: 'c2a1d5e0-5c1b-4f7e-9a3c-7e1b2c3d4e98',
 		},
+
+		// L6-CLUB REINVITE-400-V1 (2026-09-26): ChatService.createRoomInvitation throws a bare Error('already invited') when an
+		// invitation row exists — pending, or IGNORED by the invitee (native Misskey keeps the ignored row so the owner cannot
+		// spam them, and does not tell the owner). It reached the owner as a 500 INTERNAL_ERROR, whose English "Internal error
+		// occurred" sentence the app printed as the toast in every language. Now a 400 the app can word; pending and ignored stay
+		// indistinguishable (the owner is still not told that they were ignored).
+		alreadyInvited: {
+			message: 'This player has already been invited.',
+			code: 'ALREADY_INVITED',
+			id: '6f3b8f5e-2c1d-4d9a-8e7b-1c6c1ab0e1a1',
+		},
 	},
 } as const;
 
@@ -74,7 +85,13 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (await this.userBlockingService.checkBlocked(ps.userId, me.id) || await this.userBlockingService.checkBlocked(me.id, ps.userId)) {
 				throw new ApiError(meta.errors.blocked);
 			}
-			const invitation = await this.chatService.createRoomInvitation(me.id, room.id, ps.userId);
+			let invitation;
+			try {
+				invitation = await this.chatService.createRoomInvitation(me.id, room.id, ps.userId);
+			} catch (e) {
+				if (e instanceof Error && e.message === 'already invited') throw new ApiError(meta.errors.alreadyInvited);   // REINVITE-400-V1
+				throw e;
+			}
 			return await this.chatEntityService.packRoomInvitation(invitation, me);
 		});
 	}
