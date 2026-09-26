@@ -6,12 +6,12 @@
 import * as fs from 'node:fs';
 
 /*
- * CHAT-EXTRAS-V1 (lane chat-extras, 2026-09-26) — chat GIFs (GIPHY) and message translation (DeepSeek), Reclub parity
+ * CHAT-EXTRAS-V1 (lane chat-extras, 2026-09-26) — chat GIFs (GIPHY) and message translation (DeepSeek, through OpenRouter or direct), Reclub parity
  * E-chat-room.09 / .17 / E-giphy.01. Every provider call is made HERE, server side: the keys never reach a browser, a
  * response, a log line or the repo.
  *
  * Where the keys come from (first hit wins, re-read without a restart):
- *   1. the container env (GIPHY_API_KEY / DEEPSEEK_API_KEY) — if a compose env_file ever carries them;
+ *   1. the container env (GIPHY_API_KEY / OPENROUTER_API_KEY / DEEPSEEK_API_KEY) — if a compose env_file ever carries them;
  *   2. /misskey/.config/gb-extras.env — KEY=VALUE lines in the engine's own config dir (host: /root/social-engine/.config
  *      for prod, .config-uat for UAT; the GREEN colour mounts the same dir). Written by the operator's Infisical sync
  *      (/root/gen/chat-extras-keys.py), mode 640 uid 991. The file is re-stat'ed at most every 5 s, so a key switches
@@ -58,13 +58,23 @@ function val(name: string): string | null {
 
 export function giphyKey(): string | null { return val('GIPHY_API_KEY'); }
 export function deepseekKey(): string | null { return val('DEEPSEEK_API_KEY'); }
+export function openrouterKey(): string | null { return val('OPENROUTER_API_KEY'); }
+/** The translator: DeepSeek THROUGH OPENROUTER (operator 2026-09-26: OPENROUTER_API_KEY, model deepseek/deepseek-chat), or
+ *  DeepSeek's own API when only DEEPSEEK_API_KEY is set. The key stays inside deepseekTranslate(). */
+function translator(): { url: string; key: string; model: string; extra: Record<string, string> } | null {
+	const or = openrouterKey();
+	if (or) return { url: 'https://openrouter.ai/api/v1/chat/completions', key: or, model: val('OPENROUTER_TRANSLATE_MODEL') ?? 'deepseek/deepseek-chat', extra: { 'HTTP-Referer': 'https://gripbat.com', 'X-Title': 'GripBat' } };
+	const ds = deepseekKey();
+	if (ds) return { url: 'https://api.deepseek.com/chat/completions', key: ds, model: val('DEEPSEEK_MODEL') ?? 'deepseek-chat', extra: {} };
+	return null;
+}
 /** The UAT cage: mock mode exists only where the sandbox mail does (web-uat). */
 export function mockOn(): boolean {
 	return process.env.GB_SANDBOX_MAIL === '1' && val('GB_EXTRAS_MOCK') === '1';
 }
 export type ExtrasMode = 'live' | 'mock' | 'off';
 export function gifMode(): ExtrasMode { return giphyKey() ? 'live' : mockOn() ? 'mock' : 'off'; }
-export function translateMode(): ExtrasMode { return deepseekKey() ? 'live' : mockOn() ? 'mock' : 'off'; }
+export function translateMode(): ExtrasMode { return translator() ? 'live' : mockOn() ? 'mock' : 'off'; }
 
 export const NOT_CONFIGURED = { message: 'This feature is not available yet.', code: 'NOT_CONFIGURED', id: 'c7e1a0b2-5d3f-4e8a-9b1c-2f6d0a4e8c01', httpStatusCode: 503 } as const;
 export const UPSTREAM_FAILED = { message: 'The provider did not answer. Please try again.', code: 'UPSTREAM_FAILED', id: 'c7e1a0b2-5d3f-4e8a-9b1c-2f6d0a4e8c02', httpStatusCode: 502 } as const;
@@ -176,14 +186,15 @@ export async function giphyGet(http: Http, redis: RedisLike, path: string, param
 	return json;
 }
 
-/** One DeepSeek chat-completions call: translate-only system prompt, the message as the user turn. */
+/** One chat-completions call (OpenRouter or DeepSeek — the same OpenAI shape): translate-only system prompt, the message
+ *  as the user turn. */
 export async function deepseekTranslate(http: Http, text: string, target: Target): Promise<string> {
-	const key = deepseekKey(); if (!key) throw new Error('deepseek key absent');
-	const res = await http.send('https://api.deepseek.com/chat/completions', {
+	const t = translator(); if (!t) throw new Error('translator key absent');
+	const res = await http.send(t.url, {
 		method: 'POST',
-		headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json', Accept: 'application/json' },
+		headers: { 'Authorization': 'Bearer ' + t.key, 'Content-Type': 'application/json', Accept: 'application/json', ...t.extra },
 		body: JSON.stringify({
-			model: val('DEEPSEEK_MODEL') ?? 'deepseek-chat',
+			model: t.model,
 			messages: [{ role: 'system', content: translatePrompt(target) }, { role: 'user', content: text }],
 			temperature: 0.3,
 			max_tokens: 2048,
@@ -194,6 +205,6 @@ export async function deepseekTranslate(http: Http, text: string, target: Target
 	});
 	const json = await res.json() as any;
 	const out = String(json?.choices?.[0]?.message?.content ?? '').trim();
-	if (!out) throw new Error('deepseek: empty answer');
+	if (!out) throw new Error('translator: empty answer');
 	return out;
 }
