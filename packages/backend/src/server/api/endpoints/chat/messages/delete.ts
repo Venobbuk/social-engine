@@ -11,12 +11,16 @@ import { DI } from '@/di-symbols.js';
 import { ChatService } from '@/core/ChatService.js';
 import { ApiError } from '@/server/api/error.js';
 import { runsRoom } from '@/core/ChatModeration.js';
+import { RoleService } from '@/core/RoleService.js';
 
 // CHAT-MODERATE-V1 (W1, T1 E-chat-msg-menu.04): the author deletes their own message (as before); the people who RUN a room
 // delete anyone's message in it — the room owner, the club's owner and admins in the club chat, the meet host and co-hosts
 // in the meet chat, the competition host and co-admins in its chat. Before, only the author could (findMyMessageById), so an admin's
 // only tool against an abusive message was switching the whole chat off. Anyone else still gets NO_SUCH_MESSAGE.
 // The rule lives in ONE place, core/ChatModeration.runsRoom, which chat/threads/show canModerate reads too.
+// STAFF-REMOVE-MSG-V1 (lane L6-ADMIN 2026-09-26): GripBat staff (engine moderators — the report queue's own audience,
+// admin/abuse-user-reports is requireModerator) may also remove a message, so a reported message can be taken down from the
+// Console's Member reports. deletedById = the moderator, so the room reads "Message removed by an admin" (CHAT-SOFTDELETE-V1).
 export const meta = {
 	tags: ['chat'],
 
@@ -51,6 +55,8 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private chatMessagesRepository: ChatMessagesRepository,
 
 		private chatService: ChatService,
+
+		private roleService: RoleService,
 	) {
 		super(meta, paramDef, async (ps, me) => {
 			await this.chatService.checkChatAvailability(me.id, 'write');
@@ -59,7 +65,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (message == null) {
 				throw new ApiError(meta.errors.noSuchMessage);
 			}
-			if (message.fromUserId !== me.id && !(message.toRoomId && await runsRoom(this.db, message.toRoomId, me.id))) {
+			if (message.fromUserId !== me.id && !(message.toRoomId && await runsRoom(this.db, message.toRoomId, me.id)) && !(await this.roleService.isModerator(me))) {
 				throw new ApiError(meta.errors.noSuchMessage);
 			}
 			// CHAT-SOFTDELETE-V1: who deleted it decides the placeholder (self = "unsent", a moderator = "removed by an admin") and who may undelete
