@@ -275,6 +275,7 @@ export * as 'coaches/lessons/book' from '@/modules/coaches/endpoints/lessons-boo
 export * as 'coaches/lessons/enroll' from '@/modules/coaches/endpoints/lessons-enroll.js';
 export * as 'coaches/lessons/unenroll' from '@/modules/coaches/endpoints/lessons-unenroll.js';
 export * as 'coaches/lessons/skip' from '@/modules/coaches/endpoints/lessons-skip.js';
+export * as 'coaches/lessons/pack-paid' from '@/modules/coaches/endpoints/lessons-pack-paid.js'; // L6-COACH PACK-PAID-V1
 export * as 'coaches/lessons/mine' from '@/modules/coaches/endpoints/lessons-mine.js';
 export * as 'coaches/lessons/broadcast' from '@/modules/coaches/endpoints/lessons-broadcast.js';
 export * as 'coaches/my-lessons' from '@/modules/coaches/endpoints/my-lessons.js';

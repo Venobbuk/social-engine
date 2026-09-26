@@ -395,6 +395,24 @@ export class CoachScheduleService {
 		return { left, kept };
 	}
 
+	/** L6-COACH PACK-PAID-V1: the coach confirms (or takes back) the one payment for a pack. Owner, or an owner/admin of the
+	 *  schedule's club — the same gate as editing the schedule. Only packs: a single lesson or a weekly seat is paid per
+	 *  lesson on the meet (the native 'paid' tag). */
+	@bindThis
+	public async setPackPaid(enrollmentId: string, paid: boolean, by: MiUser): Promise<Record<string, unknown>> {
+		this.assertEnabled();
+		const row = (await this.db.query(`SELECT * FROM "coach_enrollment" WHERE "id" = $1`, [enrollmentId]) as EnrollmentRow[])[0];
+		if (!row) throw this.err('no_such_enrolment', 'No such enrolment.');
+		const s = await this.get(row.scheduleId);
+		if (by.id !== s.ownerUserId) {
+			try { await this.assertClubAdmin(s.channelId, by); } catch { throw this.err('not_yours', 'Only the coach can confirm a pack payment.'); }
+		}
+		if (row.mode !== 'pack') throw this.err('invalid', 'Only a lesson pack is paid as one payment.');
+		await this.db.query(`UPDATE "coach_enrollment" SET "paid" = $2, "paidAt" = CASE WHEN $2 THEN now() ELSE NULL END WHERE "id" = $1`, [row.id, paid]);
+		if (paid && !row.paid) this.notify(row.userId, 'Pack payment confirmed', `${s.name}: your coach confirmed the payment for your lesson pack.`, 'coach:' + s.ownerUserId);
+		return this.packEnrollment((await this.db.query(`SELECT * FROM "coach_enrollment" WHERE "id" = $1`, [row.id]) as EnrollmentRow[])[0]);
+	}
+
 	/** research #3: skip ONE week. No charge, the seat opens to the waitlist (native auto-promote), the enrolment stays. */
 	@bindThis
 	public async skip(enrollmentId: string, lessonId: string, user: MiUser): Promise<{ skippedAt: string; leftLesson: boolean }> {
@@ -441,6 +459,10 @@ export class CoachScheduleService {
 			for (const m of meets) {
 				if (new Date(m.startAt).getTime() > to.getTime()) continue;
 				const parts = await this.meetParticipantsRepository.find({ where: { meetId: m.id, status: In(['confirmed', 'waitlisted']) }, order: { statusChangedAt: 'ASC' } });
+				// L6-COACH PACK-PAID-V1: a pack seat is paid when its PACK is paid (one payment), never by itself
+				const packIds = [...new Set(parts.filter(p => p.enrollmentId && (p.tags ?? []).includes('punch')).map(p => p.enrollmentId as string))];
+				const packPaid = new Map<string, boolean>();
+				if (packIds.length) for (const e of await this.db.query(`SELECT "id", "paid" FROM "coach_enrollment" WHERE "id" = ANY($1)`, [packIds]) as { id: string; paid: boolean }[]) packPaid.set(e.id, e.paid === true);
 				const roster = [] as Record<string, unknown>[];
 				for (const p of parts) {
 					if (!p.userId) continue;
@@ -452,6 +474,7 @@ export class CoachScheduleService {
 						participantId: p.id, userId: p.userId, name: u?.name ?? u?.username ?? null, username: u?.username ?? null,
 						status: p.status, agreedPrice: p.agreedPrice, agreedCurrency: p.agreedCurrency,
 						paid, prepaid, paidClaim: (p.tags ?? []).includes('paidClaim'),
+							packPaid: prepaid && p.enrollmentId ? (packPaid.get(p.enrollmentId) ?? false) : null,
 						gbRating: await this.gbRating(p.userId, m.sport, coach.id),
 					});
 				}
@@ -465,10 +488,18 @@ export class CoachScheduleService {
 		// paid packs count once, at price × pack size (their per-lesson rows are prepaid 'punch', never re-counted above)
 		const paidPacks = await this.db.query(`SELECT e."agreedPrice" AS p, e."packSize" AS n, e."agreedCurrency" AS c FROM "coach_enrollment" e WHERE e."scheduleId" = ANY($1) AND e."mode" = 'pack' AND e."paid" = true`, [scheduleIds.length ? scheduleIds : ['-']]) as { p: number | null; n: number | null; c: string | null }[];
 		for (const pk of paidPacks) { if (pk.p && pk.n) { revenuePaid += pk.p * pk.n; currencies.add(pk.c ?? 'HKD'); } }
+		const packRows = scheduleIds.length ? await this.db.query(`SELECT e.*, s."name" AS "scheduleName" FROM "coach_enrollment" e JOIN "coach_schedule" s ON s."id" = e."scheduleId"
+			WHERE e."scheduleId" = ANY($1) AND e."mode" = 'pack' AND (e."status" = 'active' OR e."paid" = true) ORDER BY e."createdAt" DESC LIMIT 100`, [scheduleIds]) as (EnrollmentRow & { scheduleName: string })[] : [];
+		const packs = [] as Record<string, unknown>[];
+		for (const e of packRows) {
+			const u = await this.usersRepository.findOneBy({ id: e.userId });
+			packs.push({ ...this.packEnrollment(e), enrollmentId: e.id, scheduleName: e.scheduleName, name: u?.name ?? u?.username ?? null, username: u?.username ?? null });
+		}
 		return {
 			from: from.toISOString(), to: to.toISOString(),
 			schedules: await Promise.all(schedules.map(s => this.packSchedule(s, coach))),
 			lessons,
+			packs,   // L6-COACH PACK-PAID-V1
 			revenue: { paid: revenuePaid, currency: currencies.size === 1 ? [...currencies][0] : (currencies.size === 0 ? 'HKD' : 'MIXED') },
 		};
 	}
