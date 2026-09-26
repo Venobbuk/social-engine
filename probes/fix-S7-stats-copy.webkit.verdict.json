@@ -1,0 +1,80 @@
+{
+ "id": "fix-S7-stats-copy",
+ "at": "2026-09-26T10:06:25.770Z",
+ "rows": {
+  "webkit.en": {
+   "pass": true,
+   "found": true,
+   "oldPresent": [],
+   "header": {
+    "y": 9,
+    "h": 39
+   },
+   "clipped": [],
+   "rect": {
+    "x": 79,
+    "y": 9,
+    "w": 231,
+    "h": 17
+   },
+   "inViewport": true,
+   "title": null,
+   "carriers": [
+    "3365.c30f96fe.js"
+   ],
+   "appBundleLoaded": true,
+   "jsLoaded": 10,
+   "shot": "D:\\tmp\\gb-uat-tools\\fix-S7-stats-copy-shots\\webkit.en.png"
+  },
+  "webkit.zh_Hant": {
+   "pass": true,
+   "found": true,
+   "oldPresent": [],
+   "header": {
+    "y": 9,
+    "h": 39
+   },
+   "clipped": [],
+   "rect": {
+    "x": 144,
+    "y": 9,
+    "w": 103,
+    "h": 17
+   },
+   "inViewport": true,
+   "title": null,
+   "carriers": [
+    "sup.zh_Hant.31cceff7.js"
+   ],
+   "appBundleLoaded": true,
+   "jsLoaded": 11,
+   "shot": "D:\\tmp\\gb-uat-tools\\fix-S7-stats-copy-shots\\webkit.zh_Hant.png"
+  },
+  "webkit.zh_Hans": {
+   "pass": true,
+   "found": true,
+   "oldPresent": [],
+   "header": {
+    "y": 9,
+    "h": 39
+   },
+   "clipped": [],
+   "rect": {
+    "x": 144,
+    "y": 9,
+    "w": 103,
+    "h": 17
+   },
+   "inViewport": true,
+   "title": null,
+   "carriers": [
+    "sup.zh_Hans.3e1f54db.js"
+   ],
+   "appBundleLoaded": true,
+   "jsLoaded": 11,
+   "shot": "D:\\tmp\\gb-uat-tools\\fix-S7-stats-copy-shots\\webkit.zh_Hans.png"
+  }
+ },
+ "errors": [],
+ "bundle": "app.180e2c32.js"
+}

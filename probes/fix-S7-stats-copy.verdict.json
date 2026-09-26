@@ -1,0 +1,82 @@
+{
+ "id": "fix-S7-stats-copy",
+ "at": "2026-09-26T10:02:23.237Z",
+ "rows": {
+  "chromium.en": {
+   "pass": true,
+   "found": true,
+   "oldPresent": [],
+   "header": {
+    "y": 9,
+    "h": 39
+   },
+   "clipped": [],
+   "rect": {
+    "x": 80,
+    "y": 9,
+    "w": 231,
+    "h": 17
+   },
+   "inViewport": true,
+   "title": null,
+   "carriers": [
+    "3365.c30f96fe.js"
+   ],
+   "appBundleLoaded": true,
+   "jsLoaded": 10,
+   "shot": "/root/social-engine/probes/fix-S7-shots/stats-copy/chromium.en.png"
+  },
+  "chromium.zh_Hant": {
+   "pass": true,
+   "found": true,
+   "oldPresent": [],
+   "header": {
+    "y": 9,
+    "h": 39
+   },
+   "clipped": [],
+   "rect": {
+    "x": 144,
+    "y": 9,
+    "w": 103,
+    "h": 17
+   },
+   "inViewport": true,
+   "title": null,
+   "carriers": [
+    "sup.zh_Hant.31cceff7.js"
+   ],
+   "appBundleLoaded": true,
+   "jsLoaded": 11,
+   "shot": "/root/social-engine/probes/fix-S7-shots/stats-copy/chromium.zh_Hant.png"
+  },
+  "chromium.zh_Hans": {
+   "pass": true,
+   "found": true,
+   "oldPresent": [],
+   "header": {
+    "y": 9,
+    "h": 39
+   },
+   "clipped": [],
+   "rect": {
+    "x": 144,
+    "y": 9,
+    "w": 103,
+    "h": 17
+   },
+   "inViewport": true,
+   "title": null,
+   "carriers": [
+    "sup.zh_Hans.3e1f54db.js"
+   ],
+   "appBundleLoaded": true,
+   "jsLoaded": 11,
+   "shot": "/root/social-engine/probes/fix-S7-shots/stats-copy/chromium.zh_Hans.png"
+  }
+ },
+ "errors": [
+  "webkit launch browserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/webkit_ubuntu20.04_x64_special-2092/pw_run.sh\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝"
+ ],
+ "bundle": "app.180e2c32.js"
+}
