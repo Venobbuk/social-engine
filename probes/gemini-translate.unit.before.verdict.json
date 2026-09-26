@@ -1,0 +1,24 @@
+{
+ "id": "gemini-translate-unit",
+ "src": "/t/GbChatExtras.ts",
+ "at": "2026-09-26T09:43:43.080Z",
+ "verdict": "fail",
+ "rows": {
+  "module loads": {
+   "ok": true
+  },
+  "translateText + translateProviders exported": {
+   "ok": false,
+   "exports": [
+    "deepseekTranslate",
+    "mockTranslation",
+    "translateMode",
+    "translatePrompt"
+   ]
+  }
+ },
+ "evidence": [
+  "PASS module loads",
+  "FAIL translateText + translateProviders exported"
+ ]
+}

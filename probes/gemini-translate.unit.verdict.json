@@ -1,0 +1,145 @@
+{
+ "id": "gemini-translate-unit",
+ "src": "/t/GbChatExtras.ts",
+ "at": "2026-09-26T09:59:22.355Z",
+ "verdict": "pass",
+ "rows": {
+  "module loads": {
+   "ok": true
+  },
+  "translateText + translateProviders exported": {
+   "ok": true,
+   "exports": [
+    "geminiBody",
+    "geminiKey",
+    "geminiModel",
+    "geminiText",
+    "geminiVia",
+    "mockTranslation",
+    "translateMode",
+    "translatePrompt",
+    "translateProviders",
+    "translateText"
+   ]
+  },
+  "no key: providers [] + mode off + translate throws": {
+   "ok": true,
+   "providers": [],
+   "mode": "off",
+   "err": "translator key absent"
+  },
+  "defaults: model gemini-3.5-flash-lite, via gemini-sg:8443, direct = Google:443": {
+   "ok": true,
+   "model": "gemini-3.5-flash-lite",
+   "via": {
+    "host": "gemini-sg",
+    "port": 8443
+   }
+  },
+  "gemini answers: provider=gemini, thought parts skipped": {
+   "ok": true,
+   "provider": "gemini",
+   "text": "GEMINI:你好，明天打球嗎？",
+   "ms": 19
+  },
+  "gemini request: POST /v1beta/models/gemini-3.5-flash-lite:generateContent": {
+   "ok": true,
+   "url": "/v1beta/models/gemini-3.5-flash-lite:generateContent"
+  },
+  "gemini request: key in x-goog-api-key only (not URL, no Bearer)": {
+   "ok": true,
+   "keyHeader": true,
+   "inUrl": false
+  },
+  "gemini request: SNI + Host = generativelanguage.googleapis.com (TCP went to the forward)": {
+   "ok": true,
+   "sni": "generativelanguage.googleapis.com",
+   "host": "generativelanguage.googleapis.com",
+   "via": "127.0.0.1:35919"
+  },
+  "gemini request: translate-only systemInstruction + text as the one user turn": {
+   "ok": true,
+   "sys": "You are a translation engine. Translate the text the user sends into English. Detect the s",
+   "gen": {
+    "temperature": 0.3,
+    "maxOutputTokens": 2048
+   }
+  },
+  "GEMINI_TRANSLATE_MODEL overrides the model path": {
+   "ok": true,
+   "url": "/v1beta/models/gemini-x-test:generateContent"
+  },
+  "order gemini → openrouter → deepseek; gemini answers, no fallback call": {
+   "ok": true,
+   "providers": [
+    "gemini",
+    "openrouter",
+    "deepseek"
+   ],
+   "provider": "gemini"
+  },
+  "gemini HTTP 500 → openrouter answers": {
+   "ok": true,
+   "provider": "openrouter",
+   "tried": [
+    "gemini:gemini: HTTP 500",
+    "openrouter:ok"
+   ]
+  },
+  "gemini timeout (default 7 s cap) → openrouter within the 10 s deadline": {
+   "ok": true,
+   "wall": 7006,
+   "orTimeout": 2995,
+   "tried": [
+    "gemini:gemini: timeout 7000 ms",
+    "openrouter:ok"
+   ]
+  },
+  "gemini alone hangs → error at ~10 s (endpoint → UPSTREAM_FAILED)": {
+   "ok": true,
+   "wall": 10010,
+   "err": "translate: every provider failed"
+  },
+  "gemini blocked/empty → deepseek answers (openrouter absent)": {
+   "ok": true,
+   "provider": "deepseek",
+   "tried": [
+    "gemini:gemini: empty answer (SAFETY)",
+    "deepseek:ok"
+   ]
+  },
+  "PLANTED: wrong-name cert on the forward → gemini refused (no request reaches it)": {
+   "ok": true,
+   "err": "translate: every provider failed",
+   "serverHits": 0
+  },
+  "no key in any log line or result": {
+   "ok": true,
+   "logLines": 9,
+   "sample": [
+    "[gb-translate] provider=gemini ms=19 target=EN tried=gemini:ok",
+    "[gb-translate] provider=gemini ms=1 target=EN tried=gemini:ok",
+    "[gb-translate] provider=gemini ms=1 target=EN tried=gemini:ok"
+   ]
+  }
+ },
+ "evidence": [
+  "PASS module loads",
+  "PASS translateText + translateProviders exported",
+  "PASS no key: providers [] + mode off + translate throws",
+  "PASS defaults: model gemini-3.5-flash-lite, via gemini-sg:8443, direct = Google:443",
+  "PASS gemini answers: provider=gemini, thought parts skipped",
+  "PASS gemini request: POST /v1beta/models/gemini-3.5-flash-lite:generateContent",
+  "PASS gemini request: key in x-goog-api-key only (not URL, no Bearer)",
+  "PASS gemini request: SNI + Host = generativelanguage.googleapis.com (TCP went to the forward)",
+  "PASS gemini request: translate-only systemInstruction + text as the one user turn",
+  "PASS GEMINI_TRANSLATE_MODEL overrides the model path",
+  "PASS order gemini → openrouter → deepseek; gemini answers, no fallback call",
+  "PASS gemini HTTP 500 → openrouter answers",
+  "PASS gemini timeout (default 7 s cap) → openrouter within the 10 s deadline",
+  "PASS gemini alone hangs → error at ~10 s (endpoint → UPSTREAM_FAILED)",
+  "PASS gemini blocked/empty → deepseek answers (openrouter absent)",
+  "PASS PLANTED: wrong-name cert on the forward → gemini refused (no request reaches it)",
+  "PASS no key in any log line or result"
+ ]
+}

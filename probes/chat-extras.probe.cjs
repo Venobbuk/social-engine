@@ -6,7 +6,7 @@
 //              the thread (the other party, after reload)
 //   translate  admin long-presses (real touch) amy's text → "Translate message" → gb/chat/translate 200 → the translation shows
 //              UNDER the original (original still on screen) → "Show original" hides it
-//   off-clean  mock OFF (no key): no GIF button; Translate row says "Not available yet"; gb/extras/status answers false
+//   off-clean  mock OFF (no key): no GIF button; NO Translate row in the message menu (TRANSLATE-OFF-HIDDEN-V1); gb/extras/status answers false
 // API rows: gb/* without a key = 503 NOT_CONFIGURED; a non-member cannot translate a room message (404); the status door
 // names no key. 5B/5C: GIF button + a GIF cell hit at their centres, >= 24 px, no sideways scroll; axe: 0 critical/serious on cx-*.
 // MODE=before (the unfixed UAT) must FAIL these rows; MODE=after must pass. Fixtures: [probe] messages, deleted in finally.
@@ -16,6 +16,8 @@ const fs = require('fs');
 const A = require('/root/social-engine/probes/bench-a.lib.cjs');
 const MODE = process.env.MODE === 'before' ? 'before' : 'after';
 const REAL = process.env.REAL === '1';   // keys configured: live providers, no mock switching, no no-key rows
+// GEMINI-TRANSLATE-V1: in REAL mode the provider that must answer (gb/chat/translate returns `provider`); gemini by default
+const WANT_PROVIDER = process.env.EXPECT_PROVIDER || 'gemini';
 if (!A.BASE.includes('uat.')) throw new Error('refusing: not UAT');
 const OUT = '/root/social-engine/probes/chat-extras' + (MODE === 'before' ? '.before' : REAL ? '.real' : '') + '.verdict.json';
 const SH = '/root/social-engine/probes/chat-extras-shots/'; fs.mkdirSync(SH, { recursive: true });
@@ -64,13 +66,13 @@ async function axeCx(page) {
     // ---- API rows, no key and no mock
     if (!REAL) { setMock(false); await waitStatus(amy.token, false, 12000); }
     const st = await A.se('gb/extras/status', {}, amy.token);
-    if (REAL) row('api status live', st.status === 200 && st.json && st.json.gifMode === 'live' && st.json.translateMode === 'live', { body: st.text.slice(0, 160) });
+    if (REAL) row('api status live (translate first provider = ' + WANT_PROVIDER + ')', st.status === 200 && st.json && st.json.gifMode === 'live' && st.json.translateMode === 'live' && st.json.translateProvider === WANT_PROVIDER, { body: st.text.slice(0, 200) });
     if (!REAL) {
     const s1 = await A.se('gb/gif/trending', {}, amy.token);
     const s2 = await A.se('gb/gif/search', { q: 'tennis' }, amy.token);
     row('api no-key 503 NOT_CONFIGURED', st.status === 200 && st.json && st.json.gif === false && s1.status === 503 && s2.status === 503 && /NOT_CONFIGURED/.test(s1.text) && /NOT_CONFIGURED/.test(s2.text), { status: st.status, statusBody: st.text.slice(0, 120), trending: s1.status + ' ' + s1.text.slice(0, 100), search: s2.status });
     }
-    row('api status names no key', st.status === 200 && !/key|secret|giphy_api|deepseek_api|openrouter/i.test(st.text), { body: st.text.slice(0, 160) });
+    row('api status names no key', st.status === 200 && !/api_key|secret|sk-or-|sk-[a-z0-9]{8}|AIza/i.test(st.text), { body: st.text.slice(0, 200) });   // provider NAMES are allowed (translateProvider), key material is not
     // fixtures: amy → admin text (to translate); a room of mei with one message (for the non-member check)
     const m1 = await A.se('chat/messages/create-to-user', { toUserId: admin.userId, text: '[probe] 今晚七點球場見，記得帶球拍。' }, amy.token);
     if (m1.json && m1.json.id) msgIds.push([m1.json.id, amy.token]);
@@ -90,6 +92,9 @@ async function axeCx(page) {
     const okTr = (r, orig, tag) => r.status === 200 && r.json && r.json.text && (REAL ? r.json.text !== orig : r.json.text.includes('[TEST ' + tag + ']'));
     row('api translate 繁→EN and EN→繁 (+cache)', okTr(tA, m1.json && m1.json.text, 'EN') && okTr(tB, m2.json && m2.json.text, '繁') && (REAL ? tC.json && tC.json.cached === true : tC.status === 200), { zhToEn: tA.status + ' ' + String(tA.json && tA.json.text).slice(0, 80), enToZh: tB.status + ' ' + String(tB.json && tB.json.text).slice(0, 80), secondCallCached: tC.json && tC.json.cached });
     V.statusMockOn = on && on.json;
+    // GEMINI-TRANSLATE-V1: which provider answered (fresh calls; the third is the cache)
+    if (REAL) row('api translate answered by ' + WANT_PROVIDER, tA.json && tA.json.provider === WANT_PROVIDER && tB.json && tB.json.provider === WANT_PROVIDER && tC.json && tC.json.provider === 'cache', { providerA: tA.json && tA.json.provider, providerB: tB.json && tB.json.provider, providerC: tC.json && tC.json.provider });
+    else row('api translate provider = mock', tA.json && tA.json.provider === 'mock', { providerA: tA.json && tA.json.provider });
     const nm = rm && rm.json ? await A.se('gb/chat/translate', { messageId: rm.json.id, target: 'EN' }, amy.token) : { status: 0, text: 'no room msg' };
     row('api translate non-member refused', nm.status === 404 && /NO_SUCH_MESSAGE/.test(nm.text), { status: nm.status, body: String(nm.text).slice(0, 100) });
     const own = rm && rm.json ? await A.se('gb/chat/translate', { messageId: rm.json.id, target: 'ZH-HANT' }, mei.token) : { status: 0, text: '' };
@@ -166,9 +171,10 @@ async function axeCx(page) {
         sub = await pc.page.evaluate(() => { const e = Array.from(document.querySelectorAll('[data-act="translate"]')).find((x) => x.getBoundingClientRect().width > 0); return e ? (e.textContent || '') : ''; });
       }
       await pc.page.screenshot({ path: SH + MODE + '-' + lang + '-nokey.png' });
-      const want = lang === 'zh_Hant' ? '暫未提供' : 'Not available yet';
+      // TRANSLATE-OFF-HIDDEN-V1 (app 7e35727): with no translator the menu has NO Translate row (was "Not available yet"); the menu itself must open
+      const menuRows = bubble.asElement() ? await pc.page.evaluate(() => Array.from(document.querySelectorAll('.ct-act')).filter((x) => x.getBoundingClientRect().width > 0).length) : 0;
       const errs = pc.page.__errors.slice(0, 3);
-      row(lang + ' off-clean', btn === 0 && sub.includes(want) && !errs.length, { gifButtons: btn, translateRow: sub.slice(0, 80), pageErrors: errs });
+      row(lang + ' off-clean', btn === 0 && menuRows > 0 && sub === '' && !errs.length, { gifButtons: btn, menuRows, translateRow: sub.slice(0, 80), pageErrors: errs });
       await pc.ctx.close();
     }
   } catch (e) { V.error = String(e && e.stack || e).slice(0, 600); console.error(V.error); }

@@ -11,10 +11,10 @@ import { HttpRequestService } from '@/core/HttpRequestService.js';
 import { ChatService } from '@/core/ChatService.js';
 import type { ChatMessagesRepository, ChatRoomsRepository } from '@/models/_.js';
 import { ApiError } from '@/server/api/error.js';
-import { NOT_CONFIGURED, UPSTREAM_FAILED, TARGETS, translateMode, deepseekTranslate, mockTranslation } from '@/core/GbChatExtras.js';
+import { NOT_CONFIGURED, UPSTREAM_FAILED, TARGETS, translateMode, translateText, mockTranslation } from '@/core/GbChatExtras.js';
 
 // CHAT-EXTRAS-V1 (Reclub E-chat-room.09 Translate message / Show original) — gb/chat/translate {messageId, target}:
-// DeepSeek chat-completions with a translate-only system prompt (source detected, output = the translation only), into
+// Gemini (GEMINI-TRANSLATE-V1, via the SG tunnel; OpenRouter / DeepSeek as fallbacks — core/GbChatExtras.ts translateText) with a translate-only system prompt (source detected, output = the translation only), into
 // the reader's language (EN / ZH-HANT / ZH-HANS). Only the viewer's copy is translated — nothing is stored on the message.
 // Access is the chat's own rule, stricter than the older chat/messages/translate: a party of the 1-on-1 or a MEMBER of
 // the room (ChatService.isRoomMember, REUSED). Cached per message + target (30 days); limited per user. 503
@@ -28,6 +28,8 @@ export const meta = {
 		text: { type: 'string', optional: false, nullable: false },
 		target: { type: 'string', optional: false, nullable: false },
 		cached: { type: 'boolean', optional: false, nullable: false },
+		// which provider answered: gemini | openrouter | deepseek, 'mock' (UAT mock) or 'cache' (served from the 30-day cache)
+		provider: { type: 'string', optional: false, nullable: false },
 	} },
 	errors: {
 		notConfigured: NOT_CONFIGURED,
@@ -69,18 +71,18 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const text = (message.text ?? '').slice(0, 4000);
 			if (text.trim() === '') throw new ApiError(meta.errors.nothing);
 			const target = ps.target;
-			if (mode === 'mock') return { text: mockTranslation(text, target), target, cached: false };
+			if (mode === 'mock') return { text: mockTranslation(text, target), target, cached: false, provider: 'mock' };
 			const key = `gb:tr:v1:${message.id}:${target}`;
 			const hit = await this.redisClient.get(key);
-			if (hit != null) return { text: hit, target, cached: true };
-			let out: string;
+			if (hit != null) return { text: hit, target, cached: true, provider: 'cache' };
+			let out: string; let provider: string;
 			try {
-				out = await deepseekTranslate(this.httpRequestService, text, target);
+				({ text: out, provider } = await translateText(this.httpRequestService, text, target));
 			} catch {
 				throw new ApiError(meta.errors.upstream);
 			}
 			await this.redisClient.set(key, out, 'EX', 30 * 86400);
-			return { text: out, target, cached: false };
+			return { text: out, target, cached: false, provider };
 		});
 	}
 }
