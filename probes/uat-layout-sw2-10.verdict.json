@@ -1,0 +1,130 @@
+{
+ "id": "uat-layout-sw2-10",
+ "at": "2026-09-26T10:33:20.257Z",
+ "criterion": "real ScoreSheet at 390x664 (host-ken, [probe] meet arlsztwwql1t003q, 4 guests with long EN / 繁 names): every team card right edge <= 390",
+ "condition_fired": true,
+ "verdict": "pass",
+ "before": {
+  "how": "the pre-fix rule (flex:1; min-width:auto; nowrap name) re-applied on the same real screen (plant): the right card runs off",
+  "cells": [
+   {
+    "engine": "chromium",
+    "lang": "en",
+    "plant": true,
+    "opened": true,
+    "rightEdges": [
+     527,
+     875
+    ],
+    "offRight": 2,
+    "shot": "/root/gen/l6-scope/uat-layout/sw2-shots/score-chromium-en-plant.png"
+   },
+   {
+    "engine": "chromium",
+    "lang": "zh_Hant",
+    "plant": true,
+    "opened": true,
+    "rightEdges": [
+     527,
+     875
+    ],
+    "offRight": 2,
+    "shot": "/root/gen/l6-scope/uat-layout/sw2-shots/score-chromium-zh_Hant-plant.png"
+   },
+   {
+    "engine": "webkit",
+    "lang": "en",
+    "plant": true,
+    "opened": true,
+    "rightEdges": [
+     528,
+     876
+    ],
+    "offRight": 2,
+    "shot": "wk\\sw2-shots\\score-webkit-en-plant.png"
+   },
+   {
+    "engine": "webkit",
+    "lang": "zh_Hant",
+    "plant": true,
+    "opened": true,
+    "rightEdges": [
+     544,
+     893
+    ],
+    "offRight": 2,
+    "shot": "wk\\sw2-shots\\score-webkit-zh_Hant-plant.png"
+   }
+  ]
+ },
+ "after": {
+  "build": [
+   "https://uat.gripbat.com/app/js/app.d547e5b1.js",
+   "https://uat.gripbat.com/app/js/app.d547e5b1.js"
+  ],
+  "cells": [
+   {
+    "engine": "chromium",
+    "lang": "en",
+    "plant": false,
+    "opened": true,
+    "rightEdges": [
+     190,
+     378
+    ],
+    "offRight": 0,
+    "shot": "/root/gen/l6-scope/uat-layout/sw2-shots/score-chromium-en.png"
+   },
+   {
+    "engine": "chromium",
+    "lang": "zh_Hant",
+    "plant": false,
+    "opened": true,
+    "rightEdges": [
+     190,
+     378
+    ],
+    "offRight": 0,
+    "shot": "/root/gen/l6-scope/uat-layout/sw2-shots/score-chromium-zh_Hant.png"
+   },
+   {
+    "engine": "webkit",
+    "lang": "en",
+    "plant": false,
+    "opened": true,
+    "rightEdges": [
+     190,
+     378
+    ],
+    "offRight": 0,
+    "shot": "wk\\sw2-shots\\score-webkit-en.png"
+   },
+   {
+    "engine": "webkit",
+    "lang": "zh_Hant",
+    "plant": false,
+    "opened": true,
+    "rightEdges": [
+     190,
+     378
+    ],
+    "offRight": 0,
+    "shot": "wk\\sw2-shots\\score-webkit-zh_Hant.png"
+   }
+  ]
+ },
+ "fixtureCleanup": {
+  "at": "2026-09-26T10:27:54.206Z",
+  "meetId": "arlsztwwql1t003q",
+  "cancel": 200,
+  "delete": 400,
+  "showAfter": 200,
+  "gone": true
+ },
+ "evidence": [
+  "/root/gen/l6-scope/uat-layout/sw2-chromium.json",
+  "/root/gen/l6-scope/uat-layout/sw2-webkit.json",
+  "/root/gen/l6-scope/uat-layout/sw2-shots/",
+  "/root/gen/l6-scope/uat-layout/sw2-shots-webkit/"
+ ]
+}
