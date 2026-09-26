@@ -31,6 +31,11 @@ export * as 'gb/dupr/connection' from './endpoints/gb/dupr-connection.js'; // GR
 export * as 'gb/dupr/connect' from './endpoints/gb/dupr-connect.js'; // GRIPBAT-ACCOUNTS-V1
 export * as 'gb/dupr/sso-url' from './endpoints/gb/dupr-sso-url.js'; // GRIPBAT-ACCOUNTS-V1
 export * as 'gb/dupr/resync' from './endpoints/gb/dupr-resync.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/extras/status' from './endpoints/gb/extras-status.js'; // CHAT-EXTRAS-V1
+export * as 'gb/gif/search' from './endpoints/gb/gif-search.js'; // CHAT-EXTRAS-V1
+export * as 'gb/gif/trending' from './endpoints/gb/gif-trending.js'; // CHAT-EXTRAS-V1
+export * as 'gb/gif/attach' from './endpoints/gb/gif-attach.js'; // CHAT-EXTRAS-V1
+export * as 'gb/chat/translate' from './endpoints/gb/chat-translate.js'; // CHAT-EXTRAS-V1
 export * as 'admin/accounts/create' from './endpoints/admin/accounts/create.js';
 export * as 'admin/accounts/delete' from './endpoints/admin/accounts/delete.js';
 export * as 'admin/accounts/find-by-email' from './endpoints/admin/accounts/find-by-email.js';
