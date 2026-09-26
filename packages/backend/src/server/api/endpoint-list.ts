@@ -26,6 +26,7 @@ export * as 'gb/account/me' from './endpoints/gb/account-me.js'; // GRIPBAT-ACCO
 export * as 'gb/account/username' from './endpoints/gb/account-username.js'; // GRIPBAT-ACCOUNTS-V1
 export * as 'gb/auth/code' from './endpoints/gb/auth-code.js'; // GRIPBAT-ACCOUNTS-V1
 export * as 'gb/auth/code/verify' from './endpoints/gb/auth-code-verify.js'; // GRIPBAT-ACCOUNTS-V1
+export * as 'gb/auth/signout' from './endpoints/gb/auth-signout.js'; // GB-SIGNOUT-V1 (L6-SIGNIN)
 export * as 'gb/role-door' from './endpoints/gb/role-door.js'; // ROLE-SWITCH-V1 (UAT only: GB_SANDBOX_MAIL)
 export * as 'gb/dupr/connection' from './endpoints/gb/dupr-connection.js'; // GRIPBAT-ACCOUNTS-V1
 export * as 'gb/dupr/connect' from './endpoints/gb/dupr-connect.js'; // GRIPBAT-ACCOUNTS-V1
