@@ -34,11 +34,15 @@ export const chemFor = (edge: number, n: number, viewerId: string | null, a: str
  * folded into the player's next VISIBLE match (the rating is one chain — that residue is stated, not hidden). For the
  * player themselves this is every live row (the RATINGS-LIVE-V1 rule of lane account-rest: newest live post, live count).
  * Returns only players with at least one visible row. */
+/* RATING-SEQ-V1 (fix-S7, 2026-09-26): "newest rating" = the newest row of the rating CHAIN (createdAt: processRatings appends
+ * in play order, pre = the previous post), not the newest playedAt. A casual game is dated at noon of its day, so ordering by
+ * playedAt put an evening game's row after it and the shown rating / trend30 never moved (lane CLAIMS o3: 3.123 -> 3.159 stored,
+ * 3.12 and +0.00 shown). */
 export async function viewerRatings(db: DataSource, userIds: string[], sport: string, viewerId: string | null): Promise<Map<string, { rating: number; matches: number }>> {
 	const out = new Map<string, { rating: number; matches: number }>();
 	if (!userIds.length) return out;
 	const rows = await db.query(
-		`SELECT l."userId", count(*)::int AS matches, (array_agg(l.post ORDER BY l."playedAt" DESC, l."createdAt" DESC))[1] AS rating
+		`SELECT l."userId", count(*)::int AS matches, (array_agg(l.post ORDER BY l."createdAt" DESC, l."playedAt" DESC))[1] AS rating
 		 FROM gb_rating_log l WHERE l."userId" = ANY($1) AND l.sport = $2 AND NOT l.skipped AND ${logVisible('l', '$3')} GROUP BY l."userId"`,
 		[userIds, sport, viewerId ?? '']) as { userId: string; matches: number; rating: string }[];
 	for (const r of rows) out.set(r.userId, { rating: Number(r.rating), matches: Number(r.matches) });
@@ -90,7 +94,7 @@ export async function retireCompetitionRatings(db: DataSource, competitionId: st
 		for (const t of touched) {
 			if (!t.userId || t.userId === '-') continue;
 			const agg = (await db.query(
-				'SELECT count(*)::int AS cnt, (array_agg(post ORDER BY "playedAt" DESC))[1] AS last FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped',
+				'SELECT count(*)::int AS cnt, (array_agg(post ORDER BY "createdAt" DESC, "playedAt" DESC))[1] AS last FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped',
 				[t.userId, t.sport]))[0] as { cnt: number; last: string | null } | undefined;
 			if (!agg || !agg.cnt) await db.query('DELETE FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport]);
 			else await db.query('UPDATE gb_player_rating SET matches = $3, rating = $4, "updatedAt" = now() WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport, agg.cnt, agg.last]);
@@ -227,7 +231,7 @@ export async function edgeOf(db: DataSource, userId: string, sport = 'pickleball
 	const GUARD = isSubject ? liveLog('gb_rating_log') : logVisible('gb_rating_log', '$3');   // ACCOUNT-BUGS-V1 liveness; SEC-RATING-VIEW-V1 visibility
 	const rows = (await db.query(
 		`SELECT "matchId", source, "partnerId", "opponentIds", pre, post, "teamRating", "oppRating", expected, won, games, "playedAt", true AS vis
-		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD} ORDER BY "playedAt" DESC LIMIT 300`, isSubject ? [userId, sport] : [userId, sport, viewerId ?? '']) as LogRow[])
+		 FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD} ORDER BY "createdAt" DESC, "playedAt" DESC LIMIT 300`, isSubject ? [userId, sport] : [userId, sport, viewerId ?? '']) as LogRow[])
 		.map((r) => ({ ...r, pre: Number(r.pre), post: Number(r.post), teamRating: Number(r.teamRating), oppRating: Number(r.oppRating), expected: Number(r.expected) }));
 	const counted = Number(((await db.query(
 		`SELECT count(*)::int AS n FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped AND ${GUARD}`, isSubject ? [userId, sport] : [userId, sport, viewerId ?? '']))[0] ?? { n: 0 }).n);
@@ -313,8 +317,8 @@ export async function risingOf(db: DataSource, sport = 'pickleball', limit = 20,
 	const rows = await db.query(
 		`WITH w AS (
 		   SELECT "userId", count(*)::int AS n,
-		          (array_agg(pre ORDER BY "playedAt" ASC))[1] AS first_pre,
-		          (array_agg(post ORDER BY "playedAt" DESC))[1] AS last_post,
+		          (array_agg(pre ORDER BY "createdAt" ASC, "playedAt" ASC))[1] AS first_pre,
+		          (array_agg(post ORDER BY "createdAt" DESC, "playedAt" DESC))[1] AS last_post,
 		          sum(CASE WHEN won AND "oppRating" - "teamRating" >= 0.25 THEN 1 ELSE 0 END)::int AS upsets
 		   FROM gb_rating_log WHERE sport = $1 AND NOT skipped AND "playedAt" > now() - interval '30 days' AND ${logVisible('gb_rating_log', '$3')}
 		   GROUP BY "userId")

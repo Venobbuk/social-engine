@@ -343,9 +343,10 @@ WITH base AS (
 ),
 agg AS (SELECT "userId", count(*)::int AS matches, sum(CASE WHEN won THEN 1 ELSE 0 END)::int AS wins FROM base GROUP BY "userId"),
 opp AS (SELECT b."userId", count(DISTINCT o)::int AS opponents FROM base b CROSS JOIN LATERAL unnest(b."opponentIds") o GROUP BY b."userId"),
+-- RATING-SEQ-V1 (fix-S7): newest = newest in the rating chain (createdAt), GbRating.viewerRatings.
 -- SEC-RATING-VIEW-V1 (G15.3 addendum (c)): the rating a player is ranked on is the VIEWER's view of it — the newest post of
 -- the rows this viewer may see (GbRating.viewerRatings, the same rule) — never the running total a private game moved.
-rt AS (SELECT l."userId", count(*)::int AS matches, (array_agg(l.post ORDER BY l."playedAt" DESC, l."createdAt" DESC))[1] AS rating
+rt AS (SELECT l."userId", count(*)::int AS matches, (array_agg(l.post ORDER BY l."createdAt" DESC, l."playedAt" DESC))[1] AS rating
        FROM gb_rating_log l WHERE l.sport = $1 AND NOT l.skipped AND l."userId" IN (SELECT "userId" FROM agg) AND ${logVisible('l', '$4')} GROUP BY l."userId"),
 ranked AS (
 	SELECT a."userId", r.rating::float AS rating, r.matches::int AS total, a.matches, a.wins, COALESCE(opp.opponents, 0) AS opponents,

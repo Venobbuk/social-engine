@@ -467,7 +467,7 @@ export class MeetService {
 			for (const t of touched) {
 				if (!t.userId || t.userId === '-') continue;
 				const agg = (await this.db.query(
-					'SELECT count(*)::int AS cnt, (array_agg(post ORDER BY "playedAt" DESC))[1] AS last FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped',
+					'SELECT count(*)::int AS cnt, (array_agg(post ORDER BY "createdAt" DESC, "playedAt" DESC))[1] AS last FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped',
 					[t.userId, t.sport]))[0] as { cnt: number; last: string | null } | undefined;
 				if (!agg || !agg.cnt) await this.db.query('DELETE FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport]);
 				else await this.db.query('UPDATE gb_player_rating SET matches = $3, rating = $4, "updatedAt" = now() WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport, agg.cnt, agg.last]);
