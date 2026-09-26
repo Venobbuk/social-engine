@@ -1,0 +1,47 @@
+{
+ "id": "fix-S7-dict-late",
+ "app": "live",
+ "delayMs": 3000,
+ "at": "2026-09-26T06:59:47.668Z",
+ "rows": {
+  "signup": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [
+    "Privacy Policy",
+    "EMAIL"
+   ],
+   "zhAtEnd": [
+    "私隱政策"
+   ],
+   "leftEnglish": [],
+   "secs": 11
+  },
+  "help": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [
+    "Privacy Policy",
+    "Send feedback"
+   ],
+   "zhAtEnd": [
+    "私隱政策",
+    "發送反饋"
+   ],
+   "leftEnglish": [],
+   "secs": 11
+  },
+  "settings": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [],
+   "zhAtEnd": [
+    "私隱政策"
+   ],
+   "leftEnglish": [],
+   "secs": 11
+  }
+ },
+ "errors": [],
+ "bundle": "app.85e0698c.js"
+}

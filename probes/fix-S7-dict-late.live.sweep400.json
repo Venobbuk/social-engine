@@ -1,0 +1,73 @@
+{
+ "id": "fix-S7-dict-late",
+ "app": "live",
+ "delayMs": 400,
+ "at": "2026-09-26T07:29:46.081Z",
+ "rows": {
+  "signup~0": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [],
+   "zhAtEnd": [
+    "私隱政策"
+   ],
+   "leftEnglish": [],
+   "secs": 11
+  },
+  "signup~1": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [],
+   "zhAtEnd": [
+    "私隱政策"
+   ],
+   "leftEnglish": [],
+   "secs": 10
+  },
+  "signup~2": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [],
+   "zhAtEnd": [
+    "私隱政策"
+   ],
+   "leftEnglish": [],
+   "secs": 10
+  },
+  "help~0": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [],
+   "zhAtEnd": [
+    "私隱政策",
+    "發送反饋"
+   ],
+   "leftEnglish": [],
+   "secs": 9
+  },
+  "help~1": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [],
+   "zhAtEnd": [
+    "私隱政策",
+    "發送反饋"
+   ],
+   "leftEnglish": [],
+   "secs": 9
+  },
+  "help~2": {
+   "pass": true,
+   "dictHeld": 1,
+   "earlyEnglish": [],
+   "zhAtEnd": [
+    "私隱政策",
+    "發送反饋"
+   ],
+   "leftEnglish": [],
+   "secs": 9
+  }
+ },
+ "errors": [],
+ "bundle": "app.39c79099.js"
+}
