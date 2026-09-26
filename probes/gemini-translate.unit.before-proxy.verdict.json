@@ -1,8 +1,8 @@
 {
  "id": "gemini-translate-unit",
  "src": "/t/GbChatExtras.ts",
- "at": "2026-09-26T10:39:34.053Z",
- "verdict": "pass",
+ "at": "2026-09-26T10:39:15.068Z",
+ "verdict": "fail",
  "rows": {
   "module loads": {
    "ok": true
@@ -13,12 +13,9 @@
     "geminiBody",
     "geminiKey",
     "geminiModel",
-    "geminiProxy",
     "geminiText",
     "geminiVia",
     "mockTranslation",
-    "translateChain",
-    "translateHops",
     "translateMode",
     "translatePrompt",
     "translateProviders",
@@ -43,7 +40,7 @@
    "ok": true,
    "provider": "gemini",
    "text": "GEMINI:你好，明天打球嗎？",
-   "ms": 23
+   "ms": 47
   },
   "gemini request: POST /v1beta/models/gemini-3.5-flash-lite:generateContent": {
    "ok": true,
@@ -58,7 +55,7 @@
    "ok": true,
    "sni": "generativelanguage.googleapis.com",
    "host": "generativelanguage.googleapis.com",
-   "via": "127.0.0.1:42141"
+   "via": "127.0.0.1:40873"
   },
   "gemini request: translate-only systemInstruction + text as the one user turn": {
    "ok": true,
@@ -82,33 +79,33 @@
    "provider": "gemini"
   },
   "gemini HTTP 500 → openrouter answers": {
-   "ok": true,
+   "ok": false,
    "provider": "openrouter",
    "tried": [
-    "gemini:sg=gemini-sg: HTTP 500",
-    "openrouter=ok"
+    "gemini:gemini: HTTP 500",
+    "openrouter:ok"
    ]
   },
   "gemini timeout (default 7 s cap) → openrouter within the 10 s deadline": {
    "ok": true,
-   "wall": 7002,
-   "orTimeout": 2998,
+   "wall": 7004,
+   "orTimeout": 2996,
    "tried": [
-    "gemini:sg=gemini-sg: timeout 7000 ms",
-    "openrouter=ok"
+    "gemini:gemini: timeout 7000 ms",
+    "openrouter:ok"
    ]
   },
   "gemini alone hangs → error at ~10 s (endpoint → UPSTREAM_FAILED)": {
    "ok": true,
-   "wall": 10008,
+   "wall": 10010,
    "err": "translate: every provider failed"
   },
   "gemini blocked/empty → deepseek answers (openrouter absent)": {
    "ok": true,
    "provider": "deepseek",
    "tried": [
-    "gemini:sg=gemini-sg: empty answer (SAFETY)",
-    "deepseek=ok"
+    "gemini:gemini: empty answer (SAFETY)",
+    "deepseek:ok"
    ]
   },
   "PLANTED: wrong-name cert on the forward → gemini refused (no request reaches it)": {
@@ -117,69 +114,15 @@
    "serverHits": 0
   },
   "proxy route exported (geminiProxy, translateChain)": {
-   "ok": true
-  },
-  "GEMINI_PROXY on the host loopback is SKIPPED in a container (unreachable) → sg route": {
-   "ok": true,
-   "route": "sg",
-   "chain": "gemini:sg",
-   "proxyHits": 0
-  },
-  "proxy first: provider gemini route proxy, sg not dialled": {
-   "ok": true,
-   "provider": "gemini",
-   "route": "proxy",
-   "text": "PROXY:你好"
-  },
-  "proxy call = gemini-call.js shape: /v1beta/models/<model>/generateContent + x-vip-key 000000, NO key of ours": {
-   "ok": true,
-   "url": "/v1beta/models/gemini-3.5-flash-lite/generateContent",
-   "vip": "000000",
-   "googHeader": false
-  },
-  "proxy only (no key): live; base path prefix kept; GEMINI_VIP_KEY sent": {
-   "ok": true,
-   "url": "/pfx/v1beta/models/gemini-3.5-flash-lite/generateContent",
-   "mode": "live"
-  },
-  "chain gemini:proxy>gemini:sg>openrouter>deepseek; proxy 500 → sg answers": {
-   "ok": true,
-   "chain": "gemini:proxy>gemini:sg>openrouter>deepseek",
-   "route": "sg",
-   "tried": [
-    "gemini:proxy=gemini-proxy: HTTP 500",
-    "gemini:sg=ok"
-   ]
-  },
-  "proxy hangs → capped at 4 s, sg answers inside the 10 s deadline": {
-   "ok": true,
-   "wall": 4004,
-   "tried": [
-    "gemini:proxy=gemini-proxy: timeout 4000 ms",
-    "gemini:sg=ok"
-   ]
-  },
-  "proxy + sg hang → openrouter still answers before 10 s": {
-   "ok": true,
-   "wall": 7504,
-   "tried": [
-    "gemini:proxy=gemini-proxy: timeout 4000 ms",
-    "gemini:sg=gemini-sg: timeout 3498 ms",
-    "openrouter=ok"
-   ],
-   "orTimeout": 2496
-  },
-  "invalid GEMINI_PROXY ignored (off)": {
-   "ok": true,
-   "skip": "invalid"
+   "ok": false
   },
   "no key in any log line or result": {
    "ok": true,
-   "logLines": 15,
+   "logLines": 9,
    "sample": [
-    "[gb-translate] provider=gemini route=sg ms=23 target=EN tried=gemini:sg=ok",
-    "[gb-translate] provider=gemini route=sg ms=2 target=EN tried=gemini:sg=ok",
-    "[gb-translate] provider=gemini route=sg ms=1 target=EN tried=gemini:sg=ok"
+    "[gb-translate] provider=gemini ms=47 target=EN tried=gemini:ok",
+    "[gb-translate] provider=gemini ms=2 target=EN tried=gemini:ok",
+    "[gb-translate] provider=gemini ms=1 target=EN tried=gemini:ok"
    ]
   }
  },
@@ -195,20 +138,12 @@
   "PASS gemini request: translate-only systemInstruction + text as the one user turn",
   "PASS GEMINI_TRANSLATE_MODEL overrides the model path",
   "PASS order gemini → openrouter → deepseek; gemini answers, no fallback call",
-  "PASS gemini HTTP 500 → openrouter answers",
+  "FAIL gemini HTTP 500 → openrouter answers",
   "PASS gemini timeout (default 7 s cap) → openrouter within the 10 s deadline",
   "PASS gemini alone hangs → error at ~10 s (endpoint → UPSTREAM_FAILED)",
   "PASS gemini blocked/empty → deepseek answers (openrouter absent)",
   "PASS PLANTED: wrong-name cert on the forward → gemini refused (no request reaches it)",
-  "PASS proxy route exported (geminiProxy, translateChain)",
-  "PASS GEMINI_PROXY on the host loopback is SKIPPED in a container (unreachable) → sg route",
-  "PASS proxy first: provider gemini route proxy, sg not dialled",
-  "PASS proxy call = gemini-call.js shape: /v1beta/models/<model>/generateContent + x-vip-key 000000, NO key of ours",
-  "PASS proxy only (no key): live; base path prefix kept; GEMINI_VIP_KEY sent",
-  "PASS chain gemini:proxy>gemini:sg>openrouter>deepseek; proxy 500 → sg answers",
-  "PASS proxy hangs → capped at 4 s, sg answers inside the 10 s deadline",
-  "PASS proxy + sg hang → openrouter still answers before 10 s",
-  "PASS invalid GEMINI_PROXY ignored (off)",
+  "FAIL proxy route exported (geminiProxy, translateChain)",
   "PASS no key in any log line or result"
  ]
 }

@@ -30,6 +30,8 @@ export const meta = {
 		cached: { type: 'boolean', optional: false, nullable: false },
 		// which provider answered: gemini | openrouter | deepseek, 'mock' (UAT mock) or 'cache' (served from the 30-day cache)
 		provider: { type: 'string', optional: false, nullable: false },
+		// how Gemini was reached: proxy (the estate worker, GEMINI_PROXY) | sg (our key through the SG forward) | api (OpenRouter/DeepSeek) | mock | cache
+		route: { type: 'string', optional: false, nullable: false },
 	} },
 	errors: {
 		notConfigured: NOT_CONFIGURED,
@@ -71,18 +73,18 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			const text = (message.text ?? '').slice(0, 4000);
 			if (text.trim() === '') throw new ApiError(meta.errors.nothing);
 			const target = ps.target;
-			if (mode === 'mock') return { text: mockTranslation(text, target), target, cached: false, provider: 'mock' };
+			if (mode === 'mock') return { text: mockTranslation(text, target), target, cached: false, provider: 'mock', route: 'mock' };
 			const key = `gb:tr:v1:${message.id}:${target}`;
 			const hit = await this.redisClient.get(key);
-			if (hit != null) return { text: hit, target, cached: true, provider: 'cache' };
-			let out: string; let provider: string;
+			if (hit != null) return { text: hit, target, cached: true, provider: 'cache', route: 'cache' };
+			let out: string; let provider: string; let route: string;
 			try {
-				({ text: out, provider } = await translateText(this.httpRequestService, text, target));
+				({ text: out, provider, route } = await translateText(this.httpRequestService, text, target));
 			} catch {
 				throw new ApiError(meta.errors.upstream);
 			}
 			await this.redisClient.set(key, out, 'EX', 30 * 86400);
-			return { text: out, target, cached: false, provider };
+			return { text: out, target, cached: false, provider, route };
 		});
 	}
 }

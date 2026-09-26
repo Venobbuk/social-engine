@@ -1,3 +1,4 @@
+import * as nhttp from 'node:http';
 // GEMINI-TRANSLATE-V1 unit probe (lane gemini-translate, 2026-09-26). Runs WITHOUT any real key and WITHOUT network:
 // a mock Gemini (node:https on 127.0.0.1, a throwaway cert for generativelanguage.googleapis.com trusted only through
 // NODE_EXTRA_CA_CERTS) stands in for the SG forward, a fake HttpRequestService stands in for OpenRouter / DeepSeek.
@@ -54,7 +55,7 @@ const http = { send: async (url, args) => {
 } };
 
 function env(o) {
-	for (const k of ['GEMINI_API_KEY', 'OPENROUTER_API_KEY', 'DEEPSEEK_API_KEY', 'GEMINI_VIA', 'GEMINI_TRANSLATE_MODEL', 'GEMINI_TIMEOUT_MS']) delete process.env[k];
+	for (const k of ['GEMINI_API_KEY', 'OPENROUTER_API_KEY', 'DEEPSEEK_API_KEY', 'GEMINI_VIA', 'GEMINI_TRANSLATE_MODEL', 'GEMINI_TIMEOUT_MS', 'GEMINI_PROXY', 'GEMINI_PROXY_LOOPBACK_OK', 'GEMINI_VIP_KEY', 'GEMINI_PROXY_TIMEOUT_MS']) delete process.env[k];
 	Object.assign(process.env, o);
 }
 async function tr(text, target = 'EN') {
@@ -62,6 +63,18 @@ async function tr(text, target = 'EN') {
 	try { const r = await X.translateText(http, text, target); return { ok: true, ...r, wall: Date.now() - t0 }; } catch (e) { return { ok: false, err: String(e.message), wall: Date.now() - t0 }; }
 }
 const VIA = '127.0.0.1:' + goodPort;
+// ---- mock estate Gemini worker (GEMINI_PROXY): plain http on loopback
+let pmode = 'ok'; let plast = null; let phits = 0;
+const proxySrv = nhttp.createServer((req, res) => { const ch = []; req.on('data', (c) => ch.push(c)); req.on('end', () => {
+  phits++; let body = null; try { body = JSON.parse(Buffer.concat(ch).toString('utf8')); } catch { /* */ }
+  plast = { url: req.url, vip: req.headers['x-vip-key'], goog: req.headers['x-goog-api-key'], body };
+  if (pmode === 'hang') return;
+  if (pmode === '500') { res.writeHead(500); return res.end('{}'); }
+  res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'PROXY:' + (body?.contents?.[0]?.parts?.[0]?.text ?? '') }] } }] }));
+}); });
+const proxyPort = await new Promise((r) => proxySrv.listen(0, '127.0.0.1', () => r(proxySrv.address().port)));
+const PROXY = 'http://127.0.0.1:' + proxyPort;
+
 
 if (has('translateText')) {
 	// T0 no keys → off / throws
@@ -95,7 +108,7 @@ if (has('translateText')) {
 	// T4 gemini 500 → openrouter
 	mode = '500'; httpCalls = [];
 	const r4 = await tr('see you at 7');
-	row('gemini HTTP 500 → openrouter answers', r4.ok && r4.provider === 'openrouter' && r4.text === 'OR:see you at 7' && /gemini:gemini: HTTP 500/.test(r4.tried.join(',')) && httpCalls.length === 1 && httpCalls[0].url.includes('openrouter'), { provider: r4.provider, tried: r4.tried });
+	row('gemini HTTP 500 → openrouter answers', r4.ok && r4.provider === 'openrouter' && r4.text === 'OR:see you at 7' && /gemini:sg=gemini-sg: HTTP 500/.test(r4.tried.join(',')) && httpCalls.length === 1 && httpCalls[0].url.includes('openrouter'), { provider: r4.provider, tried: r4.tried });
 
 	// T5 gemini hangs → capped at 7 s, openrouter gets the rest of the 10 s
 	mode = 'hang'; httpCalls = [];
@@ -117,12 +130,39 @@ if (has('translateText')) {
 	const r8 = await tr('mitm?');
 	row('PLANTED: wrong-name cert on the forward → gemini refused (no request reaches it)', !r8.ok && hits === 0, { err: r8.err, serverHits: hits });
 
+	row('proxy route exported (geminiProxy, translateChain)', has('geminiProxy') && has('translateChain'));
+	if (has('geminiProxy') && has('translateChain')) {
+	// ---- GEMINI_PROXY route (the estate worker pattern, hkpl-server lib/gemini-call.js)
+	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: VIA, GEMINI_PROXY: PROXY }); mode = 'ok'; pmode = 'ok'; phits = 0; last = null;
+	const p0 = await tr('loop');
+	row('GEMINI_PROXY on the host loopback is SKIPPED in a container (unreachable) → sg route', p0.ok && p0.route === 'sg' && phits === 0 && X.translateChain() === 'gemini:sg' && X.geminiProxy().skip === 'loopback', { route: p0.route, chain: X.translateChain(), proxyHits: phits });
+	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: VIA, GEMINI_PROXY: PROXY, GEMINI_PROXY_LOOPBACK_OK: '1' }); pmode = 'ok'; phits = 0; last = null;
+	const p1 = await tr('你好');
+	row('proxy first: provider gemini route proxy, sg not dialled', p1.ok && p1.provider === 'gemini' && p1.route === 'proxy' && p1.text === 'PROXY:你好' && last === null, { provider: p1.provider, route: p1.route, text: p1.text });
+	row('proxy call = gemini-call.js shape: /v1beta/models/<model>/generateContent + x-vip-key 000000, NO key of ours', plast && plast.url === '/v1beta/models/gemini-3.5-flash-lite/generateContent' && plast.vip === '000000' && !plast.goog && !/key=/.test(plast.url) && /translation engine/.test(plast.body?.systemInstruction?.parts?.[0]?.text ?? ''), { url: plast && plast.url, vip: plast && plast.vip, googHeader: !!(plast && plast.goog) });
+	env({ GEMINI_PROXY: PROXY + '/pfx/', GEMINI_PROXY_LOOPBACK_OK: '1', GEMINI_VIP_KEY: 'vip-test' }); pmode = 'ok';
+	const p2 = await tr('x');
+	row('proxy only (no key): live; base path prefix kept; GEMINI_VIP_KEY sent', p2.ok && p2.route === 'proxy' && X.translateMode() === 'live' && plast.url === '/pfx/v1beta/models/gemini-3.5-flash-lite/generateContent' && plast.vip === 'vip-test', { url: plast && plast.url, mode: X.translateMode() });
+	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: VIA, GEMINI_PROXY: PROXY, GEMINI_PROXY_LOOPBACK_OK: '1', OPENROUTER_API_KEY: FAKE_OR, DEEPSEEK_API_KEY: FAKE_DS }); pmode = '500'; mode = 'ok'; httpCalls = [];
+	const p3 = await tr('fall');
+	row('chain gemini:proxy>gemini:sg>openrouter>deepseek; proxy 500 → sg answers', X.translateChain() === 'gemini:proxy>gemini:sg>openrouter>deepseek' && p3.ok && p3.route === 'sg' && /gemini:proxy=gemini-proxy: HTTP 500/.test(p3.tried[0]) && httpCalls.length === 0, { chain: X.translateChain(), route: p3.route, tried: p3.tried });
+	pmode = 'hang'; mode = 'ok';
+	const p4 = await tr('slow proxy');
+	row('proxy hangs → capped at 4 s, sg answers inside the 10 s deadline', p4.ok && p4.route === 'sg' && p4.wall >= 3900 && p4.wall < 5500, { wall: p4.wall, tried: p4.tried });
+	pmode = 'hang'; mode = 'hang'; httpCalls = [];
+	const p5 = await tr('both slow');
+	row('proxy + sg hang → openrouter still answers before 10 s', p5.ok && p5.provider === 'openrouter' && p5.wall < 10000, { wall: p5.wall, tried: p5.tried, orTimeout: httpCalls[0] && httpCalls[0].timeout });
+	env({ GEMINI_PROXY: 'ftp://x' });
+	row('invalid GEMINI_PROXY ignored (off)', X.geminiProxy().skip === 'invalid' && X.translateMode() === 'off', { skip: X.geminiProxy().skip });
+
+	}
+
 	// T9 no key anywhere in logs / results
 	const blob = JSON.stringify({ logs, rows: V.rows });
 	row('no key in any log line or result', ![FAKE_KEY, FAKE_OR, FAKE_DS].some((k) => blob.includes(k)) && logs.some((l) => /\[gb-translate\] provider=gemini/.test(l)), { logLines: logs.length, sample: logs.filter((l) => /gb-translate/.test(l)).slice(0, 3) });
 }
 
-good.close(); wrong.close();
+good.close(); wrong.close(); proxySrv.close();
 const rows = Object.values(V.rows);
 V.verdict = rows.length && rows.every((r) => r.ok) ? 'pass' : 'fail';
 V.evidence = Object.entries(V.rows).map(([k, r]) => (r.ok ? 'PASS ' : 'FAIL ') + k);

@@ -93,7 +93,7 @@ async function axeCx(page) {
     row('api translate 繁→EN and EN→繁 (+cache)', okTr(tA, m1.json && m1.json.text, 'EN') && okTr(tB, m2.json && m2.json.text, '繁') && (REAL ? tC.json && tC.json.cached === true : tC.status === 200), { zhToEn: tA.status + ' ' + String(tA.json && tA.json.text).slice(0, 80), enToZh: tB.status + ' ' + String(tB.json && tB.json.text).slice(0, 80), secondCallCached: tC.json && tC.json.cached });
     V.statusMockOn = on && on.json;
     // GEMINI-TRANSLATE-V1: which provider answered (fresh calls; the third is the cache)
-    if (REAL) row('api translate answered by ' + WANT_PROVIDER, tA.json && tA.json.provider === WANT_PROVIDER && tB.json && tB.json.provider === WANT_PROVIDER && tC.json && tC.json.provider === 'cache', { providerA: tA.json && tA.json.provider, providerB: tB.json && tB.json.provider, providerC: tC.json && tC.json.provider });
+    if (REAL) row('api translate answered by ' + WANT_PROVIDER, tA.json && tA.json.provider === WANT_PROVIDER && tB.json && tB.json.provider === WANT_PROVIDER && tC.json && tC.json.provider === 'cache', { providerA: tA.json && tA.json.provider, routeA: tA.json && tA.json.route, providerB: tB.json && tB.json.provider, routeB: tB.json && tB.json.route, providerC: tC.json && tC.json.provider, chain: st.json && st.json.translateChain });
     else row('api translate provider = mock', tA.json && tA.json.provider === 'mock', { providerA: tA.json && tA.json.provider });
     const nm = rm && rm.json ? await A.se('gb/chat/translate', { messageId: rm.json.id, target: 'EN' }, amy.token) : { status: 0, text: 'no room msg' };
     row('api translate non-member refused', nm.status === 404 && /NO_SUCH_MESSAGE/.test(nm.text), { status: nm.status, body: String(nm.text).slice(0, 100) });

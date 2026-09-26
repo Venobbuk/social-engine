@@ -5,7 +5,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { Endpoint } from '@/server/api/endpoint-base.js';
-import { gifMode, translateMode, translateProviders } from '@/core/GbChatExtras.js';
+import { gifMode, translateMode, translateProviders, translateChain } from '@/core/GbChatExtras.js';
 
 // CHAT-EXTRAS-V1 — which chat extras this engine can serve right now (a key is configured, or UAT's mock is on). The app
 // reads it once per chat: no GIF button without `gif`, "Not available yet" on Translate without `translate`. Names no key.
@@ -20,6 +20,8 @@ export const meta = {
 		translateMode: { type: 'string', optional: false, nullable: false },
 		// GEMINI-TRANSLATE-V1: the provider tried FIRST (gemini | openrouter | deepseek | none) — a name, never a key
 		translateProvider: { type: 'string', optional: false, nullable: false },
+		// the hop chain by NAME, e.g. gemini:proxy>gemini:sg>openrouter — no key, no URL
+		translateChain: { type: 'string', optional: false, nullable: false },
 	} },
 } as const;
 
@@ -30,7 +32,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 	constructor() {
 		super(meta, paramDef, async () => {
 			const g = gifMode(); const t = translateMode();
-			return { gif: g !== 'off', translate: t !== 'off', gifMode: g, translateMode: t, translateProvider: translateProviders()[0] ?? 'none' };
+			return { gif: g !== 'off', translate: t !== 'off', gifMode: g, translateMode: t, translateProvider: translateProviders()[0] ?? 'none', translateChain: translateChain() };
 		});
 	}
 }

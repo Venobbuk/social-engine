@@ -4,6 +4,7 @@
  */
 
 import * as fs from 'node:fs';
+import * as http from 'node:http';
 import * as https from 'node:https';
 
 /*
@@ -65,26 +66,36 @@ export function geminiKey(): string | null { return val('GEMINI_API_KEY'); }
 
 /*
  * GEMINI-TRANSLATE-V1 (lane gemini-translate, 2026-09-26; operator: "for translation use gemini 3.5 flash lite instead …
- * using the sg tunnel"). Provider ORDER: GEMINI_API_KEY first, then OPENROUTER_API_KEY, then DEEPSEEK_API_KEY — each one
- * only if its key is set; a provider that fails (HTTP error, timeout, empty/blocked answer) hands over to the next one.
+ * using the sg tunnel"). ORDER: Gemini first, then OPENROUTER_API_KEY, then DEEPSEEK_API_KEY — each only when configured; a
+ * failed hop (HTTP error, timeout, empty/blocked answer) hands over to the next one, all inside one 10 s deadline.
  *
- * Gemini path: Google blocks the Gemini API from HK, so the call leaves through Singapore. The engine opens TLS to
- * GEMINI_VIA (default gemini-sg:8443 — the gb-gemini-sg sidecar on the engine's docker network, an `ssh -L` port forward
- * whose far end is generativelanguage.googleapis.com:443 dialled FROM the SG box). TLS is end-to-end with Google: SNI and
- * certificate identity are checked against generativelanguage.googleapis.com (servername), so the forward sees ciphertext
- * only and cannot impersonate Google. GEMINI_VIA=direct dials Google from this host (outside HK only).
+ * Gemini has two ROUTES, tried in this order — the estate's own pattern (hkpl-server lib/gemini-call.js, used by kaka / mimi /
+ * taotao: tier 1 the GEMINI_PROXY worker, tier 2 an SG-routed direct call with a key):
+ *   'proxy'  GEMINI_PROXY (Infisical /shared) — the base URL of the estate's Gemini worker (a Cloudflare worker, or the local
+ *            drop-in gemini-gateway). Called exactly like gemini-call.js does: POST <GEMINI_PROXY>/v1beta/models/<model>/
+ *            generateContent with x-vip-key (GEMINI_VIP_KEY, default 000000); the WORKER holds and rotates the Google keys,
+ *            so no key of ours is sent. A GEMINI_PROXY on the host's loopback (127.x / localhost) is SKIPPED: every estate
+ *            consumer runs network_mode host, the engine containers do not, and they cannot reach the host's 127.0.0.1
+ *            (GEMINI_PROXY_LOOPBACK_OK=1 only for a process that shares the host network, or a test).
+ *   'sg'     GEMINI_API_KEY (Infisical /hkpl-server GEMINI_KEY) through the SG forward. Google blocks the Gemini API from HK,
+ *            so the engine opens TLS to GEMINI_VIA (default gemini-sg:8443 — the gb-gemini-sg sidecar on the engine's docker
+ *            network, an `ssh -L` forward whose far end is generativelanguage.googleapis.com:443 dialled FROM the SG box,
+ *            /root/gen/gemini-sg-sidecar.sh). SNI + certificate identity = generativelanguage.googleapis.com, so TLS is
+ *            end-to-end with Google and the forward sees ciphertext only. GEMINI_VIA=direct dials Google from this host.
+ *            Key in the x-goog-api-key header (never in a URL or a log line).
  * Model GEMINI_TRANSLATE_MODEL, default gemini-3.5-flash-lite (Google's model list, ai.google.dev/gemini-api/docs/models,
- * read 2026-09-26: "gemini-3.5-flash-lite — Stable"). Key in the x-goog-api-key header (never in a URL or a log line).
+ * read 2026-09-26: "gemini-3.5-flash-lite — Stable").
  */
 export const GEMINI_HOST = 'generativelanguage.googleapis.com';
 export const GEMINI_DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 export const GEMINI_DEFAULT_VIA = 'gemini-sg:8443';
-/** The whole translate call (every provider tried) ends within this; Gemini alone gets at most GEMINI_TIMEOUT_MS of it
- *  when a fallback is configured, so the fallback still has time. */
+/** The whole translate call (every hop tried) ends within this. A Gemini hop that is not the last one gets at most its own
+ *  cap and leaves HOP_RESERVE_MS for the next hop. */
 const TRANSLATE_DEADLINE_MS = 10000;
-function geminiTimeoutMs(): number { const n = Number(val('GEMINI_TIMEOUT_MS')); return Number.isFinite(n) && n >= 1000 && n <= TRANSLATE_DEADLINE_MS ? n : 7000; }
+const HOP_RESERVE_MS = 2500;
+function capMs(name: string, dflt: number): number { const n = Number(val(name)); return Number.isFinite(n) && n >= 1000 && n <= TRANSLATE_DEADLINE_MS ? n : dflt; }
 export function geminiModel(): string { return val('GEMINI_TRANSLATE_MODEL') ?? GEMINI_DEFAULT_MODEL; }
-/** Where the TCP connection for Gemini goes: {host, port} of the SG forward, or Google itself for GEMINI_VIA=direct. */
+/** Where the TCP connection of the 'sg' route goes: {host, port} of the SG forward, or Google itself for GEMINI_VIA=direct. */
 export function geminiVia(): { host: string; port: number } {
 	const v = val('GEMINI_VIA') ?? GEMINI_DEFAULT_VIA;
 	if (v.toLowerCase() === 'direct') return { host: GEMINI_HOST, port: 443 };
@@ -92,16 +103,41 @@ export function geminiVia(): { host: string; port: number } {
 	if (!m) return { host: v, port: 443 };
 	return { host: m[1], port: Number(m[2]) };
 }
+function isLoopback(host: string): boolean {
+	const h = host.replace(/^\[|\]$/g, '').toLowerCase();
+	return h === 'localhost' || h === '::1' || h === '0.0.0.0' || /^127\./.test(h);
+}
+/** GEMINI_PROXY parsed, or why it is not used: 'absent' | 'invalid' | 'loopback' (host-local, unreachable from a container). */
+export function geminiProxy(): { url: URL } | { skip: 'absent' | 'invalid' | 'loopback' } {
+	const v = val('GEMINI_PROXY');
+	if (!v) return { skip: 'absent' };
+	let u: URL;
+	try { u = new URL(v); } catch { return { skip: 'invalid' }; }
+	if (u.protocol !== 'https:' && u.protocol !== 'http:') return { skip: 'invalid' };
+	if (isLoopback(u.hostname) && val('GEMINI_PROXY_LOOPBACK_OK') !== '1') return { skip: 'loopback' };
+	return { url: u };
+}
 
 export type Provider = 'gemini' | 'openrouter' | 'deepseek';
-/** The providers that have a key, in the order they are tried. Names only — never a key. */
-export function translateProviders(): Provider[] {
-	const out: Provider[] = [];
-	if (geminiKey()) out.push('gemini');
-	if (openrouterKey()) out.push('openrouter');
-	if (deepseekKey()) out.push('deepseek');
+export type Hop = { provider: Provider; route: 'proxy' | 'sg' | 'api' };
+/** Every hop that is configured, in the order it is tried. Names only — never a key or a URL. */
+export function translateHops(): Hop[] {
+	const out: Hop[] = [];
+	if ('url' in geminiProxy()) out.push({ provider: 'gemini', route: 'proxy' });
+	if (geminiKey()) out.push({ provider: 'gemini', route: 'sg' });
+	if (openrouterKey()) out.push({ provider: 'openrouter', route: 'api' });
+	if (deepseekKey()) out.push({ provider: 'deepseek', route: 'api' });
 	return out;
 }
+/** The providers that are configured, in order (each once). */
+export function translateProviders(): Provider[] {
+	return [...new Set(translateHops().map((h) => h.provider))];
+}
+/** 'proxy+sg+openrouter…' — the hop chain by name, for the status door and the log. */
+export function translateChain(): string {
+	return translateHops().map((h) => (h.provider === 'gemini' ? 'gemini:' + h.route : h.provider)).join('>') || 'none';
+}
+
 /** An OpenAI-shape chat-completions provider: DeepSeek THROUGH OPENROUTER (OPENROUTER_API_KEY, model deepseek/deepseek-chat),
  *  or DeepSeek's own API (DEEPSEEK_API_KEY). The key stays inside translateText(). */
 function openAiShape(p: 'openrouter' | 'deepseek'): { url: string; key: string; model: string; extra: Record<string, string> } | null {
@@ -231,7 +267,7 @@ export async function giphyGet(http: Http, redis: RedisLike, path: string, param
 }
 
 // ---- Gemini (GEMINI-TRANSLATE-V1): generateContent, the same translate-only prompt as systemInstruction, the message as
-// the one user turn. Plain node:https so the TCP target (the SG forward) and the TLS identity (Google) can differ.
+// the one user turn. Plain node:http(s) so the TCP target (the SG forward) and the TLS identity (Google) can differ.
 const geminiAgent = new https.Agent({ keepAlive: true, maxSockets: 8 });
 export function geminiBody(text: string, target: Target): Record<string, unknown> {
 	return {
@@ -246,10 +282,9 @@ export function geminiText(json: any): string {
 	if (!Array.isArray(parts)) return '';
 	return parts.filter((p: any) => p && typeof p.text === 'string' && p.thought !== true).map((p: any) => p.text as string).join('').trim();
 }
-function geminiTranslate(text: string, target: Target, timeoutMs: number): Promise<string> {
-	const key = geminiKey(); if (!key) return Promise.reject(new Error('gemini key absent'));
-	const via = geminiVia();
-	const body = Buffer.from(JSON.stringify(geminiBody(text, target)), 'utf8');
+/** One JSON POST with a hard deadline and a 1 MiB answer cap; resolves the parsed generateContent text or rejects with a
+ *  short reason (HTTP status / timeout / empty) — never the body, never a header. */
+function geminiPost(tag: string, opts: https.RequestOptions, secure: boolean, body: Buffer, timeoutMs: number): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		let done = false;
 		let timer: NodeJS.Timeout | null = null;
@@ -257,59 +292,82 @@ function geminiTranslate(text: string, target: Target, timeoutMs: number): Promi
 			if (done) return; done = true; if (timer) clearTimeout(timer);
 			if (err) reject(err); else resolve(out as string);
 		};
-		const req = https.request({
-			host: via.host, port: via.port, servername: GEMINI_HOST, agent: geminiAgent, method: 'POST',
-			path: `/v1beta/models/${encodeURIComponent(geminiModel())}:generateContent`,
-			headers: { 'Host': GEMINI_HOST, 'x-goog-api-key': key, 'Content-Type': 'application/json', 'Accept': 'application/json', 'Content-Length': String(body.length) },
-		}, (res) => {
+		const onRes = (res: http.IncomingMessage) => {
 			const chunks: Buffer[] = []; let size = 0;
 			res.on('data', (c: Buffer) => {
 				size += c.length;
-				if (size > 1024 * 1024) { req.destroy(new Error('gemini: answer too large')); return; }
+				if (size > 1024 * 1024) { req.destroy(new Error(tag + ': answer too large')); return; }
 				chunks.push(c);
 			});
 			res.on('end', () => {
-				if (res.statusCode !== 200) { finish(new Error('gemini: HTTP ' + res.statusCode)); return; }
+				if (res.statusCode !== 200) { finish(new Error(tag + ': HTTP ' + res.statusCode)); return; }
 				let json: any;
-				try { json = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { finish(new Error('gemini: not JSON')); return; }
+				try { json = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { finish(new Error(tag + ': not JSON')); return; }
 				const out = geminiText(json);
 				if (out) finish(null, out);
-				else finish(new Error('gemini: empty answer (' + String(json?.candidates?.[0]?.finishReason ?? json?.promptFeedback?.blockReason ?? 'none') + ')'));
+				else finish(new Error(tag + ': empty answer (' + String(json?.candidates?.[0]?.finishReason ?? json?.promptFeedback?.blockReason ?? 'none') + ')'));
 			});
 			res.on('error', (e) => finish(e));
-		});
-		timer = setTimeout(() => req.destroy(new Error('gemini: timeout ' + timeoutMs + ' ms')), timeoutMs);
+		};
+		const req = secure ? https.request(opts, onRes) : http.request(opts, onRes);
+		timer = setTimeout(() => req.destroy(new Error(tag + ': timeout ' + timeoutMs + ' ms')), timeoutMs);
 		req.on('error', (e) => finish(e));
 		req.end(body);
 	});
+}
+/** Route 'sg': our key, through the SG forward, TLS identity = Google. */
+function geminiViaSg(text: string, target: Target, timeoutMs: number): Promise<string> {
+	const key = geminiKey(); if (!key) return Promise.reject(new Error('gemini key absent'));
+	const via = geminiVia();
+	const body = Buffer.from(JSON.stringify(geminiBody(text, target)), 'utf8');
+	return geminiPost('gemini-sg', {
+		host: via.host, port: via.port, servername: GEMINI_HOST, agent: geminiAgent, method: 'POST',
+		path: `/v1beta/models/${encodeURIComponent(geminiModel())}:generateContent`,
+		headers: { 'Host': GEMINI_HOST, 'x-goog-api-key': key, 'Content-Type': 'application/json', 'Accept': 'application/json', 'Content-Length': String(body.length) },
+	}, true, body, timeoutMs);
+}
+/** Route 'proxy': the estate's Gemini worker (GEMINI_PROXY) — the lib/gemini-call.js call shape, the worker owns the keys. */
+function geminiViaProxy(text: string, target: Target, timeoutMs: number): Promise<string> {
+	const p = geminiProxy(); if (!('url' in p)) return Promise.reject(new Error('gemini proxy ' + p.skip));
+	const u = p.url; const secure = u.protocol === 'https:';
+	const body = Buffer.from(JSON.stringify(geminiBody(text, target)), 'utf8');
+	return geminiPost('gemini-proxy', {
+		host: u.hostname, port: u.port ? Number(u.port) : (secure ? 443 : 80), method: 'POST',
+		path: u.pathname.replace(/\/+$/, '') + `/v1beta/models/${encodeURIComponent(geminiModel())}/generateContent`,
+		headers: { 'x-vip-key': val('GEMINI_VIP_KEY') ?? '000000', 'Content-Type': 'application/json', 'Accept': 'application/json', 'Content-Length': String(body.length) },
+	}, secure, body, timeoutMs);
 }
 
 function reason(e: unknown): string {
 	return String((e as any)?.message ?? e).replace(/\s+/g, ' ').slice(0, 80);
 }
 
-export type TranslateResult = { text: string; provider: Provider; ms: number; tried: string[] };
-/** Translate with the first provider that answers (order: translateProviders()), all within TRANSLATE_DEADLINE_MS. Logs
- *  ONE line per call — provider, time and the failed hops — never the text or a key. Throws when every provider failed. */
+export type TranslateResult = { text: string; provider: Provider; route: string; ms: number; tried: string[] };
+/** Translate with the first hop that answers (order: translateHops()), all within TRANSLATE_DEADLINE_MS. Logs ONE line per
+ *  call — provider, route, time and the failed hops — never the text, a key or a URL. Throws when every hop failed. */
 export async function translateText(http: Http, text: string, target: Target): Promise<TranslateResult> {
-	const order = translateProviders();
-	if (!order.length) throw new Error('translator key absent');
+	const hops = translateHops();
+	if (!hops.length) throw new Error('translator key absent');
 	const t0 = Date.now(); const tried: string[] = [];
-	for (let i = 0; i < order.length; i++) {
-		const p = order[i];
+	for (let i = 0; i < hops.length; i++) {
+		const h = hops[i]; const name = h.provider === 'gemini' ? 'gemini:' + h.route : h.provider;
 		const left = TRANSLATE_DEADLINE_MS - (Date.now() - t0);
-		if (left < 1000) { tried.push(p + ':no-time'); break; }
-		const last = i === order.length - 1;
+		if (left < 1000) { tried.push(name + '=no-time'); break; }
+		const last = i === hops.length - 1;
+		// a Gemini hop that is not the last one is capped and leaves HOP_RESERVE_MS for the next hop; an OpenRouter/DeepSeek hop
+		// gets everything that is left (they are the fallbacks — starving them to keep time for DeepSeek was measured wrong: 1 s)
+		const cap = h.route === 'proxy' ? capMs('GEMINI_PROXY_TIMEOUT_MS', 4000) : capMs('GEMINI_TIMEOUT_MS', 7000);
+		const ms = last || h.route === 'api' ? left : Math.max(1000, Math.min(cap, left - HOP_RESERVE_MS));
 		try {
-			const out = p === 'gemini'
-				? await geminiTranslate(text, target, last ? left : Math.min(left, geminiTimeoutMs()))
-				: await openAiTranslate(http, p, text, target, left);
-			tried.push(p + ':ok');
-			const ms = Date.now() - t0;
-			console.info(`[gb-translate] provider=${p} ms=${ms} target=${target} tried=${tried.join(',')}`);
-			return { text: out, provider: p, ms, tried };
+			const out = h.route === 'proxy' ? await geminiViaProxy(text, target, ms)
+				: h.route === 'sg' ? await geminiViaSg(text, target, ms)
+				: await openAiTranslate(http, h.provider as 'openrouter' | 'deepseek', text, target, ms);
+			tried.push(name + '=ok');
+			const took = Date.now() - t0;
+			console.info(`[gb-translate] provider=${h.provider} route=${h.route} ms=${took} target=${target} tried=${tried.join(',')}`);
+			return { text: out, provider: h.provider, route: h.route, ms: took, tried };
 		} catch (e) {
-			tried.push(p + ':' + reason(e));
+			tried.push(name + '=' + reason(e));
 		}
 	}
 	console.warn(`[gb-translate] FAILED ms=${Date.now() - t0} target=${target} tried=${tried.join(' | ')}`);
