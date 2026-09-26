@@ -15,7 +15,7 @@ import { DI } from '@/di-symbols.js';
 import { NotificationService } from '@/core/NotificationService.js';
 import { remindUpcoming } from '@/modules/meets/MeetExtras.js'; // MEET-EXTRAS-V1
 import { meetUpdatesMuted } from '@/modules/meets/meet-updates-mute.js';   // ACCOUNT-BUGS-V1
-import { processRatings, importOpenPlay } from '@/modules/stats/GbRating.js'; // GB-RATING-V1
+import { processRatings, importOpenPlay, rebuildRatingsIfStale } from '@/modules/stats/GbRating.js'; // GB-RATING-V1 · RATING-REBUILD-V1
 import type { Config } from '@/config.js';
 import { DeleteAccountService } from '@/core/DeleteAccountService.js';   // ACCOUNT-GRACE-V1
 import { purgeDue } from '@/modules/account/deletion.js';   // ACCOUNT-GRACE-V1
@@ -45,6 +45,7 @@ export class MeetSweepProcessorService {
 		// MEET-EXTRAS-V1: reminders 24 h / 2 h before start, to confirmed players (receipts on meet.reminded24At / reminded2At)
 		// GB-RATING-V1: rate newly scored GripBat matches (meets, casual, competitions) — idempotent, 200 a minute
 		await importOpenPlay(this.db, new URL(this.config.url).host).then((n) => { if (n) this.logger.info('open play imported: ' + n); }).catch((e) => this.logger.warn('open play import: ' + (e as Error).message));   // GB-OPENPLAY-V1
+		await rebuildRatingsIfStale(this.db).then((b) => { if (b.rebuilt) this.logger.info('gb ratings REBUILT from live matches: ' + b.rated + ' rated'); }).catch((e) => this.logger.warn('gb ratings rebuild: ' + (e as Error).message));   // RATING-REBUILD-V1
 		await processRatings(this.db, 200).then((r) => { if (r.rated || r.skipped) this.logger.info('gb ratings: ' + r.rated + ' rated, ' + r.skipped + ' skipped'); }).catch((e) => this.logger.warn('gb ratings: ' + (e as Error).message));
 		// SEC-CASUAL-CONSENT-V1: send the deferred DUPR submissions of casual games that are now fully confirmed (safety
 		// net; meets/respond submits at the moment of the last confirmation). Idempotent — only unsent matches are touched.

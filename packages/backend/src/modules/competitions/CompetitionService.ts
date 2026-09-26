@@ -583,6 +583,11 @@ export class CompetitionService {
 
 		const confirmed = await this.confirmedEntries(c);
 		if (confirmed.length < 2) throw this.err('not_enough_entries', 'At least 2 confirmed entries are needed for a draw.');
+		// REDRAW-VARY-V1 (BENCH-C, lane CLAIMS O6): a REDRAW returned the identical draw (fixed order, round-robin seed 7). The seeded
+		// entries keep their places; the unseeded ones are shuffled, and a redrawn round robin takes a new schedule seed. A draw
+		// where every entry is seeded cannot change — the app says "The draw follows the seeds" and offers no Redraw there.
+		const redraw = !!opts.reset;
+		if (redraw) { const firstFree = confirmed.findIndex((e) => e.seed == null); if (firstFree >= 0) { const tail = confirmed.splice(firstFree); for (let i = tail.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [tail[i], tail[j]] = [tail[j], tail[i]]; } confirmed.push(...tail); } }
 
 		if (stage === 'regular') {
 			const pools = c.format === 'poolPlayKnockout' ? Math.max(1, Math.min(c.numGroups, Math.floor(confirmed.length / 2))) : 1;
@@ -597,7 +602,7 @@ export class CompetitionService {
 			for (const [p, es] of byPool) {
 				if (es.length > RR_LIMITS.simple) throw this.err('too_many_entries', `A round robin takes at most ${RR_LIMITS.simple} entries per pool — add pools.`);
 				for (const e of es) await this.entriesRepository.update(e.id, { pool: pools === 1 ? null : p });
-				const gen = generateRoundRobin({ scheme: 'SINGLES', participantIds: es.map((e) => e.id), courts: Math.max(1, Math.floor(es.length / 2)), limitRounds: null, stats: {}, startRound: 1, seed: 7 });
+				const gen = generateRoundRobin({ scheme: 'SINGLES', participantIds: es.map((e) => e.id), courts: Math.max(1, Math.floor(es.length / 2)), limitRounds: null, stats: {}, startRound: 1, seed: redraw ? 1 + Math.floor(Math.random() * 1e6) : 7 });   // REDRAW-VARY-V1
 				if (gen.warnings.includes('not_enough_players')) continue;
 				// COMP-T3-V1 (Reclub Double / Triple round robin): every pair meets once per cycle; each later cycle repeats the
 				// schedule with the sides swapped, after the last round — hkpl lib/schedule-generator.js:56-59 (doubleRoundRobin)

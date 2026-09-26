@@ -85,21 +85,50 @@ export const liveLog = (l: string): string => `(${l}.source = 'openplay'
  *  take-back MeetService.retireRatings() does for a meet (FRESH-EYES P1-2), so gb_player_rating says what the remaining
  *  log says. Never fails the cancellation (the competition is already cancelled when this runs). */
 export async function retireCompetitionRatings(db: DataSource, competitionId: string): Promise<void> {
-	try {
-		const touched = await db.query(
-			'SELECT DISTINCT l."userId" AS "userId", l.sport AS sport FROM gb_rating_log l JOIN competition_match cm ON cm.id = l."matchId" WHERE l.source = $1 AND cm."competitionId" = $2',
-			['competition', competitionId]) as { userId: string; sport: string }[];
-		if (!touched.length) return;
-		await db.query('DELETE FROM gb_rating_log l USING competition_match cm WHERE l.source = $1 AND l."matchId" = cm.id AND cm."competitionId" = $2', ['competition', competitionId]);
-		for (const t of touched) {
-			if (!t.userId || t.userId === '-') continue;
-			const agg = (await db.query(
-				'SELECT count(*)::int AS cnt, (array_agg(post ORDER BY "createdAt" DESC, "playedAt" DESC))[1] AS last FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped',
-				[t.userId, t.sport]))[0] as { cnt: number; last: string | null } | undefined;
-			if (!agg || !agg.cnt) await db.query('DELETE FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport]);
-			else await db.query('UPDATE gb_player_rating SET matches = $3, rating = $4, "updatedAt" = now() WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport, agg.cnt, agg.last]);
-		}
-	} catch { /* the cancellation stands; the read-side liveLog() keeps the numbers honest meanwhile */ }
+	/* RATING-REBUILD-V1 (BENCH-C, lane CLAIMS O5): deleting the cancelled matches' rows and keeping the newest remaining post
+	 * left every LATER rating built on the removed matches (the chain is sequential) — gb_player_rating read 16 matches for a
+	 * player with 0 live ones on UAT. The rows now stay until the sweep sees them (not liveLog) and replays the whole chain
+	 * from the live matches (rebuildRatingsIfStale). */
+	void db; void competitionId;
+}
+
+/** RATING-REBUILD-V1 (BENCH-C, lane CLAIMS O5): the stored rating chain is right only when every rated row is still a live
+ *  match (liveLog: its match exists and the meet / competition is not cancelled) and gb_player_rating matches its rows. A
+ *  cancelled or deleted fixture breaks that (every later pre/post was built on it). Then the chain is REPLAYED: every log
+ *  row and stored rating is dropped and the live matches are rated again in play order, in one transaction (readers see
+ *  the old numbers until it commits). Called by the minute sweep, the only writer of ratings. */
+export async function rebuildRatingsIfStale(db: DataSource): Promise<{ rebuilt: boolean; rated: number }> {
+	const stale = (await db.query(
+		`SELECT (EXISTS (SELECT 1 FROM gb_rating_log l WHERE NOT l.skipped AND NOT ${liveLog('l')})
+		   OR EXISTS (SELECT 1 FROM gb_player_rating r WHERE r.matches <> (SELECT count(*) FROM gb_rating_log l2 WHERE l2."userId" = r."userId" AND l2.sport = r.sport AND NOT l2.skipped))) AS stale`))[0];
+	if (!stale || !stale.stale) return { rebuilt: false, rated: 0 };
+	let rated = 0;
+	await db.transaction(async (em) => {
+		await em.query('SELECT pg_advisory_xact_lock(4242017)');
+		await em.query('DELETE FROM gb_rating_log');
+		await em.query('DELETE FROM gb_player_rating');
+		for (let i = 0; i < 200; i++) { const r = await processRatings(em as unknown as DataSource, 500); rated += r.rated; if (!r.rated && !r.skipped) break; }
+	});
+	return { rebuilt: true, rated };
+}
+
+/** ODDS-ONE-V1 (BENCH-C, lane CLAIMS O5): the ONE expected-win answer for a match before it is played — the rating job's
+ *  own rule (the side's average rating; a player's stored GripBat rating, else their seed: DUPR doubles, else self level,
+ *  else 3.0; expectedOf) with each rating as the viewer may know it (SEC-RATING-VIEW-V1). Meets and competitions both
+ *  read it (stats/gb-expect), so a card never shows a number the engine would not use. A side with a guest → null. */
+export async function expectationsFor(db: DataSource, matches: { id: string; a: (string | null)[]; b: (string | null)[] }[], sport: string, viewerId: string | null): Promise<{ id: string; a: number | null; b: number | null }[]> {
+	const users = [...new Set(matches.flatMap((m) => [...m.a, ...m.b]).filter((u): u is string => !!u))];
+	const seen = await viewerRatings(db, users, sport, viewerId);
+	const seeds = new Map<string, number>();
+	const missing = users.filter((u) => !seen.has(u));
+	if (missing.length) for (const l of await db.query('SELECT "userId", "duprDoubles", "selfLevel" FROM meet_player_level WHERE "userId" = ANY($1) AND sport = $2', [missing, sport]) as { userId: string; duprDoubles: string | null; selfLevel: string | null }[]) seeds.set(l.userId, l.duprDoubles != null ? Number(l.duprDoubles) : l.selfLevel != null ? Number(l.selfLevel) : 3.0);
+	const rate = (u: string): number => seen.has(u) ? seen.get(u)!.rating : clamp(seeds.get(u) ?? 3.0, 1.5, 8);
+	return matches.map((m) => {
+		if (!m.a.length || !m.b.length || m.a.length !== m.b.length || [...m.a, ...m.b].some((u) => !u)) return { id: m.id, a: null, b: null };
+		const avg = (ids: (string | null)[]) => ids.reduce((s, u) => s + rate(u as string), 0) / ids.length;
+		const e = Math.round(100 * expectedOf(avg(m.a), avg(m.b)));
+		return { id: m.id, a: e, b: 100 - e };
+	});
 }
 
 const CURVE = 1.2;

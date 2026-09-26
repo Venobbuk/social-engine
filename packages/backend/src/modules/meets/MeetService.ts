@@ -458,21 +458,9 @@ export class MeetService {
 	 * which Misskey has no equivalent of, kept consistent on the existing cancel path.
 	 */
 	private async retireRatings(meet: MiMeet): Promise<void> {
-		try {
-			const touched = await this.db.query(
-				'SELECT DISTINCT l."userId" AS "userId", l.sport AS sport FROM gb_rating_log l JOIN meet_match mm ON mm.id = l."matchId" WHERE l.source = $1 AND mm."meetId" = $2',
-				['meet', meet.id]) as { userId: string; sport: string }[];
-			if (!touched.length) return;
-			await this.db.query('DELETE FROM gb_rating_log l USING meet_match mm WHERE l.source = $1 AND l."matchId" = mm.id AND mm."meetId" = $2', ['meet', meet.id]);
-			for (const t of touched) {
-				if (!t.userId || t.userId === '-') continue;
-				const agg = (await this.db.query(
-					'SELECT count(*)::int AS cnt, (array_agg(post ORDER BY "createdAt" DESC, "playedAt" DESC))[1] AS last FROM gb_rating_log WHERE "userId" = $1 AND sport = $2 AND NOT skipped',
-					[t.userId, t.sport]))[0] as { cnt: number; last: string | null } | undefined;
-				if (!agg || !agg.cnt) await this.db.query('DELETE FROM gb_player_rating WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport]);
-				else await this.db.query('UPDATE gb_player_rating SET matches = $3, rating = $4, "updatedAt" = now() WHERE "userId" = $1 AND sport = $2', [t.userId, t.sport, agg.cnt, agg.last]);
-			}
-		} catch (e) { /* the cancellation stands; probes/_sweep.cjs and the next rating pass reconcile */ }
+		// RATING-REBUILD-V1 (BENCH-C, lane CLAIMS O5): the rows stay; the minute sweep sees they are no longer live and replays
+		// the rating chain (GbRating.rebuildRatingsIfStale). The old re-sum kept later ratings that were built on these matches.
+		void meet;
 	}
 
 	// ------------------------------------------------------------------------------------ the gate
