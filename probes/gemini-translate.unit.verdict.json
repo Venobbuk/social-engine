@@ -1,7 +1,7 @@
 {
  "id": "gemini-translate-unit",
  "src": "/t/GbChatExtras.ts",
- "at": "2026-09-27T09:44:58.950Z",
+ "at": "2026-09-27T14:18:53.130Z",
  "verdict": "pass",
  "rows": {
   "module loads": {
@@ -42,7 +42,7 @@
    "ok": true,
    "provider": "gemini",
    "text": "GEMINI:你好，明天打球嗎？",
-   "ms": 19
+   "ms": 24
   },
   "gemini request: POST /v1beta/models/gemini-3.5-flash-lite:generateContent": {
    "ok": true,
@@ -57,11 +57,11 @@
    "ok": true,
    "sni": "generativelanguage.googleapis.com",
    "host": "generativelanguage.googleapis.com",
-   "via": "127.0.0.1:40605"
+   "via": "127.0.0.1:40371"
   },
   "gemini request: translate-only systemInstruction + text as the one user turn": {
    "ok": true,
-   "sys": "You are a translation engine. Translate the text the user sends into English. Detect the s",
+   "sys": "You are a translation engine. Translate the text the user sends into English. Context: thi",
    "gen": {
     "temperature": 0.3,
     "maxOutputTokens": 2048
@@ -90,8 +90,8 @@
   },
   "gemini timeout (default 7 s cap) → openrouter within the 10 s deadline": {
    "ok": true,
-   "wall": 7002,
-   "orTimeout": 2998,
+   "wall": 7003,
+   "orTimeout": 2997,
    "tried": [
     "gemini:gemini: timeout 7000 ms",
     "openrouter:ok"
@@ -99,7 +99,7 @@
   },
   "gemini alone hangs → error at ~10 s (endpoint → UPSTREAM_FAILED)": {
    "ok": true,
-   "wall": 10011,
+   "wall": 10009,
    "err": "translate: every provider failed"
   },
   "gemini blocked/empty → deepseek answers (openrouter absent)": {
@@ -157,7 +157,7 @@
    "hits": 2,
    "err": "translate: every provider failed",
    "log": [
-    "[gb-translate] FAILED ms=3 target=ZH-HANT finish=PROHIBITED_CONTENT,PROHIBITED_CONTENT tried=gemini:gemini: empty answer (PROHIBITED_CONTENT) -> retry | gemini:gemini: empty answer (PROHIBITED_CONTENT)"
+    "[gb-translate] FAILED ms=2 target=ZH-HANT finish=PROHIBITED_CONTENT,PROHIBITED_CONTENT tried=gemini:gemini: empty answer (PROHIBITED_CONTENT) -> retry | gemini:gemini: empty answer (PROHIBITED_CONTENT)"
    ]
   },
   "R4 blocked twice -> falls through to the next provider with a key (openrouter)": {
@@ -205,8 +205,8 @@
    "ok": true,
    "logLines": 15,
    "sample": [
-    "[gb-translate] provider=gemini ms=19 target=EN finish=STOP tried=gemini:ok",
-    "[gb-translate] provider=gemini ms=2 target=EN finish=STOP tried=gemini:ok",
+    "[gb-translate] provider=gemini ms=24 target=EN finish=STOP tried=gemini:ok",
+    "[gb-translate] provider=gemini ms=1 target=EN finish=STOP tried=gemini:ok",
     "[gb-translate] provider=gemini ms=1 target=EN finish=STOP tried=gemini:ok"
    ]
   }
