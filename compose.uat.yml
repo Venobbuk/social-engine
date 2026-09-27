@@ -28,7 +28,7 @@ services:
       # the code for a reserved test address (.test / .invalid / example.*) so testers and probes finish sign-up with no inbox.
       GB_PUBLIC_ORIGIN: "https://uat.gripbat.com"
       GB_SANDBOX_MAIL: "1"
-      COACHING_V1: "true"   # COACHING-V1 kill-switch: ON on UAT (the showcase feature); prod's compose has no such env, so it stays dark there
+      COACHING_V1: "true"   # COACHING-V1 kill-switch: ON here AND on prod (compose.prod.yml sets it too since PROD-PARITY-V1, 2026-09-23)
       ADAPTER_SSO_STAFF_TENANTS: boyau-uat   # CLUB-CLAIM-VERIFY-V1: UAT tenant admins are GripBat staff on the UAT engine ONLY (never on web)
       # SEC-SSO-AUD-V1 step (a): the engine REQUIRES an audience. Today's hkpl mint stamps 'social.silkvo.com' for every
       # host (one key, SOCIAL_URL unset), so UAT accepts that until the key split (/root/gen/sso-split.sh) flips this

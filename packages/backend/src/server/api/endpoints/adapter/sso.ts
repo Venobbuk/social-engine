@@ -7,7 +7,9 @@
  * it against the host's public key, finds-or-creates the matching local account (username derived from the
  * host id + external id, so the mapping is deterministic and needs no schema change), seeds the display
  * name (ACCOUNT-BUGS-V1 below: only while the account has none of its own), and returns a credential for the client to log in with. No password is ever set that anyone knows;
- * these accounts can only be entered through the host.
+ * these accounts are entered through the host (G15.15-SSO: or natively, once the account carries hkpl's verified address and
+ * its owner sets a password through "Forgot your password?").
+ * Today this is GripBat's "Continue with your HKPL account" sign-in — see SSO-SEAM-TRUTH-V1 in the handler.
  *
  * SSO-SEAM-V2 (2026-09-16) — four changes from the dry run of 2026-09-12:
  *   S3  REPLAY. The JWT carries a `jti`. It is redeemed exactly once: SET NX with the token's own TTL in
@@ -114,7 +116,7 @@ const EXPECTED_TENANT = process.env.ADAPTER_SSO_TENANT ?? null; // optional seco
 // tenant list is production's ("boyau") only; the UAT container sets ADAPTER_SSO_STAFF_TENANTS=boyau-uat.
 const STAFF_TENANTS = (process.env.ADAPTER_SSO_STAFF_TENANTS ?? 'boyau').split(',').map(x => x.trim()).filter(Boolean);
 const MAX_TTL_SEC = 300;
-const SSO_LOGIN_OFF = process.env.ADAPTER_SSO_LOGIN === 'off'; // GRIPBAT-ACCOUNTS-V1 retirement switch
+const SSO_LOGIN_OFF = process.env.ADAPTER_SSO_LOGIN === 'off'; // emergency kill switch, unset everywhere: the door is the live HKPL sign-in (SSO-SEAM-TRUTH-V1 below)
 const CLOCK_SKEW_SEC = 60; // tolerate a minute of clock drift between the mint and this box
 
 // First-party USER scope for the SSO credential. Every non-admin permission in misskey-js consts plus the
@@ -221,8 +223,16 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		private loggerService: LoggerService,
 	) {
 		super(meta, paramDef, async (ps) => {
-			// GRIPBAT-ACCOUNTS-V1 (G15.15): the seam is retired for GripBat (the app signs in natively). It stays open only while
-			// other lanes' probes still sign in through it; ADAPTER_SSO_LOGIN=off (both compose files) closes it — a refusal, no delete.
+			/* SSO-SEAM-TRUTH-V1 (engine-fix lane, 2026-09-28) — this door is LIVE and it is GripBat's "Continue with your HKPL account"
+			 * sign-in (G15.15-SSO, operator 2026-09-24): app lib/gb-account.ts gbHkplStart -> hkpl /api/v1/auth/sso/social/gripbat
+			 * (return origin allow-listed, token in the URL fragment) -> gbSsoExchange -> HERE {jwt, native: true}. The older comment
+			 * ("retired; ADAPTER_SSO_LOGIN=off in both compose files") was false: neither compose file nor either running container sets
+			 * it, and setting it would break that button. What protects the door is the PROOF, not the switch: an RS256 signature by
+			 * hkpl's private key (verifyJwt), this engine's audience, iat/exp with a <= 300 s life, a mandatory single-use jti, and no
+			 * purpose-bound token. Probed on UAT (probes/engine-sso-seam.probe.cjs): a token signed by any other key, alg none, HS256
+			 * keyed with the public key, an unknown issuer and a genuine token with an edited payload are all refused; a genuine
+			 * token signs in exactly the hkpl person it names, once. ADAPTER_SSO_LOGIN=off stays only as the operator's emergency
+			 * kill switch (answers ADAPTER_SSO_RETIRED) — it is not set anywhere. */
 			if (SSO_LOGIN_OFF) throw new ApiError(meta.errors.retired);
 			let claims: Claims;
 			try {
@@ -267,7 +277,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			let existing = await this.usersRepository.findOneBy({ usernameLower: username, host: null as never });
 			/* GRIPBAT-ACCOUNTS-V1 (G15.15): GripBat accounts are native now and a person CHOOSES a username
 			 * (gb/account/username). An account this seam made keeps its seam handle as a registry alias (SSO_HANDLE_KEY),
-			 * so while the seam still runs (other lanes' probes, until ADAPTER_SSO_LOGIN=off) the SAME account is found. */
+			 * so every later "Continue with your HKPL account" sign-in finds the SAME account after a rename. */
 			if (!existing) {
 				const alias = await this.registryItemsRepository.createQueryBuilder('r')
 					.where('r.key = :k', { k: SSO_HANDLE_KEY })

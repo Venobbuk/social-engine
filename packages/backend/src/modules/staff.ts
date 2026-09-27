@@ -5,11 +5,13 @@
 
 import type { DataSource } from 'typeorm';
 
-/* STAFF-ROLE-V1 (batch-1 review fix): "GripBat staff" is a PLAIN engine role (isModerator false, no admin/moderator
- * power anywhere in Misskey). adapter/sso keeps its assignment in step with the host (hkpl SUPER_ADMIN, or TENANT_ADMIN of
- * a tenant in ADAPTER_SSO_STAFF_TENANTS). The only doors it opens are the ones that ask for it by id here:
- * clubs/claims/list, clubs/claims/decide (ClubService.claimsList / claimsDecide) and venues/staff-update. Staff also
- * receive the "Club ownership claim" notification. Nothing else in the engine treats them differently from a member. */
+/* STAFF-ROLE-V1 → STAFF-ADMIN-V1 (2026-09-25, operator: "Yes, full moderator + administrator"): "GripBat staff" is a FULL
+ * moderator + administrator engine role (isModerator AND isAdministrator true — adapter/sso ensureStaffRole creates it so and
+ * promotes an older plain row). It therefore opens every Misskey moderator/admin door, PLUS the id-checked doors that ask for
+ * it here (isGripbatStaff / NOT_GRIPBAT_STAFF): clubs/claims/list|decide, coaches/applications/list|decide,
+ * venues/staff-update, the venue staff checks in VenueExtras, gb/maintenance, and the gb/account/me staff flag. adapter/sso keeps the assignment in step with the host at every SSO sign-in (hkpl
+ * SUPER_ADMIN, or TENANT_ADMIN of a tenant in ADAPTER_SSO_STAFF_TENANTS). Staff also receive the "Club ownership claim"
+ * notification. (The batch-1 "plain role, no moderator power" rule was superseded by STAFF-ADMIN-V1.) */
 export const STAFF_ROLE_ID = 'arc5w1aagbstaff1';
 
 export const notStaffError = {
