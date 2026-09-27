@@ -34,6 +34,9 @@ function mkServer(cert, key) {
 			last = { method: req.method, url: req.url, host: req.headers.host, sni: req.socket.servername, apiKey: req.headers['x-goog-api-key'], auth: req.headers.authorization, body };
 			if (mode === 'hang') return;   // never answers
 			if (mode === '500') { res.writeHead(500, { 'content-type': 'application/json' }); return res.end('{"error":{"code":500}}'); }
+			// GEMINI-SAFETY-RETRY-V1 modes
+			if (mode === 'prohibited' || (mode === 'prohibited-once' && hits === 1)) { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ candidates: [{ finishReason: 'PROHIBITED_CONTENT' }] })); }
+			if (mode === '400-off' && (body?.safetySettings || []).some((x) => x.threshold === 'OFF')) { res.writeHead(400, { 'content-type': 'application/json' }); return res.end('{"error":{"code":400,"message":"threshold OFF not supported"}}'); }
 			if (mode === 'blocked') { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ promptFeedback: { blockReason: 'SAFETY' }, candidates: [] })); }
 			const txt = body?.contents?.[0]?.parts?.[0]?.text ?? '';
 			res.writeHead(200, { 'content-type': 'application/json' });
@@ -116,6 +119,35 @@ if (has('translateText')) {
 	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: '127.0.0.1:' + wrongPort }); mode = 'ok'; hits = 0;
 	const r8 = await tr('mitm?');
 	row('PLANTED: wrong-name cert on the forward → gemini refused (no request reaches it)', !r8.ok && hits === 0, { err: r8.err, serverHits: hits });
+
+	// ---- GEMINI-SAFETY-RETRY-V1 (lane L6-CHAT, 2026-09-27)
+	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: VIA }); mode = 'ok';
+	await tr('safety?');
+	const ss = last?.body?.safetySettings || [];
+	row('R1 request carries safetySettings: every harm category at OFF (least-blocking)', ss.length === 5 && ss.every((x) => x.threshold === 'OFF') && ['HARASSMENT', 'HATE_SPEECH', 'SEXUALLY_EXPLICIT', 'DANGEROUS_CONTENT', 'CIVIC_INTEGRITY'].every((c) => ss.some((x) => x.category === 'HARM_CATEGORY_' + c)), { safetySettings: ss });
+
+	mode = 'prohibited-once'; hits = 0; let l0 = logs.length;
+	const rr2 = await tr('See you at the courts at 7, bring your paddle.', 'ZH-HANT');
+	const lg2 = logs.slice(l0).filter((l) => /gb-translate/.test(l));
+	row('R2 PROHIBITED_CONTENT once -> retried once -> gemini answers; log names the finish reasons', rr2.ok && rr2.provider === 'gemini' && hits === 2 && /retry/.test(rr2.tried.join(',')) && lg2.some((l) => /finish=PROHIBITED_CONTENT,STOP/.test(l)), { hits, tried: rr2.tried, log: lg2 });
+
+	mode = 'prohibited'; hits = 0; l0 = logs.length;
+	const rr3 = await tr('always blocked', 'ZH-HANT');
+	const lg3 = logs.slice(l0).filter((l) => /gb-translate/.test(l));
+	row('R3 blocked twice, gemini alone -> exactly ONE retry, then fails (FAILED line with finish=)', !rr3.ok && hits === 2 && rr3.wall < 10500 && lg3.some((l) => /FAILED .*finish=PROHIBITED_CONTENT,PROHIBITED_CONTENT/.test(l)), { hits, err: rr3.err, log: lg3 });
+
+	env({ GEMINI_API_KEY: FAKE_KEY, OPENROUTER_API_KEY: FAKE_OR, GEMINI_VIA: VIA }); mode = 'prohibited'; hits = 0; httpCalls = [];
+	const rr4 = await tr('fall through', 'ZH-HANT');
+	row('R4 blocked twice -> falls through to the next provider with a key (openrouter)', rr4.ok && rr4.provider === 'openrouter' && hits === 2 && httpCalls.length === 1, { hits, provider: rr4.provider, tried: rr4.tried });
+
+	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: VIA }); mode = '400-off'; hits = 0;
+	const rr5 = await tr('model refuses OFF');
+	const ss5 = last?.body?.safetySettings || [];
+	row('R5 HTTP 400 on OFF -> asked again with BLOCK_NONE -> answers', rr5.ok && rr5.provider === 'gemini' && hits === 2 && ss5.length === 4 && ss5.every((x) => x.threshold === 'BLOCK_NONE'), { hits, tried: rr5.tried, second: ss5 });
+
+	mode = '500'; hits = 0;
+	const rr6 = await tr('server error');
+	row('R6 HTTP 500 is NOT retried on gemini (one hit; straight to the next provider / failure)', !rr6.ok && hits === 1, { hits, err: rr6.err });
 
 	// T9 no key anywhere in logs / results
 	const blob = JSON.stringify({ logs, rows: V.rows });

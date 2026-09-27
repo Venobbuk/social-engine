@@ -233,12 +233,29 @@ export async function giphyGet(http: Http, redis: RedisLike, path: string, param
 // ---- Gemini (GEMINI-TRANSLATE-V1): generateContent, the same translate-only prompt as systemInstruction, the message as
 // the one user turn. Plain node:https so the TCP target (the SG forward) and the TLS identity (Google) can differ.
 const geminiAgent = new https.Agent({ keepAlive: true, maxSockets: 8 });
-export function geminiBody(text: string, target: Target): Record<string, unknown> {
+/* GEMINI-SAFETY-RETRY-V1 (lane L6-CHAT, 2026-09-27). Measured on UAT (WebKit, 繁): "See you at the courts at 7, bring your
+ * paddle." -> ZH-HANT came back EMPTY with PROHIBITED_CONTENT once in four calls; the door answered 502 UPSTREAM_FAILED and the
+ * reader saw an error for a harmless sentence. This call only translates a member's own chat text, so the adjustable filters
+ * run at the least-blocking threshold the API offers (OFF); a model that refuses OFF (HTTP 400) is asked again with BLOCK_NONE
+ * on the four core categories. PROHIBITED_CONTENT itself is not adjustable (Google's non-configurable filter), so an empty /
+ * blocked answer is retried ONCE and then falls through to the next provider that has a key — all inside the 10 s deadline. */
+export type GeminiSafety = 'OFF' | 'BLOCK_NONE';
+const GEMINI_HARM = ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT'];
+export function geminiSafetySettings(level: GeminiSafety = 'OFF'): { category: string; threshold: GeminiSafety }[] {
+	const cats = level === 'OFF' ? [...GEMINI_HARM, 'HARM_CATEGORY_CIVIC_INTEGRITY'] : GEMINI_HARM;
+	return cats.map((category) => ({ category, threshold: level }));
+}
+export function geminiBody(text: string, target: Target, safety: GeminiSafety = 'OFF'): Record<string, unknown> {
 	return {
 		systemInstruction: { parts: [{ text: translatePrompt(target) }] },
 		contents: [{ role: 'user', parts: [{ text }] }],
 		generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+		safetySettings: geminiSafetySettings(safety),
 	};
+}
+/** Why a generateContent answer ended: the candidate's finishReason, else the prompt's blockReason, else 'none'. */
+export function geminiFinish(json: any): string {
+	return String(json?.candidates?.[0]?.finishReason ?? json?.promptFeedback?.blockReason ?? 'none').replace(/[^A-Z_]/gi, '').slice(0, 40) || 'none';
 }
 /** The answer text of a generateContent response (thought parts skipped), '' when blocked or empty. */
 export function geminiText(json: any): string {
@@ -246,16 +263,18 @@ export function geminiText(json: any): string {
 	if (!Array.isArray(parts)) return '';
 	return parts.filter((p: any) => p && typeof p.text === 'string' && p.thought !== true).map((p: any) => p.text as string).join('').trim();
 }
-function geminiTranslate(text: string, target: Target, timeoutMs: number): Promise<string> {
+type GeminiOut = { text: string; finish: string };
+const markErr = (msg: string, o: Record<string, unknown>): Error => Object.assign(new Error(msg), o);
+function geminiTranslate(text: string, target: Target, timeoutMs: number, safety: GeminiSafety = 'OFF'): Promise<GeminiOut> {
 	const key = geminiKey(); if (!key) return Promise.reject(new Error('gemini key absent'));
 	const via = geminiVia();
-	const body = Buffer.from(JSON.stringify(geminiBody(text, target)), 'utf8');
-	return new Promise<string>((resolve, reject) => {
+	const body = Buffer.from(JSON.stringify(geminiBody(text, target, safety)), 'utf8');
+	return new Promise<GeminiOut>((resolve, reject) => {
 		let done = false;
 		let timer: NodeJS.Timeout | null = null;
-		const finish = (err: Error | null, out?: string) => {
+		const finish = (err: Error | null, out?: GeminiOut) => {
 			if (done) return; done = true; if (timer) clearTimeout(timer);
-			if (err) reject(err); else resolve(out as string);
+			if (err) reject(err); else resolve(out as GeminiOut);
 		};
 		const req = https.request({
 			host: via.host, port: via.port, servername: GEMINI_HOST, agent: geminiAgent, method: 'POST',
@@ -269,12 +288,12 @@ function geminiTranslate(text: string, target: Target, timeoutMs: number): Promi
 				chunks.push(c);
 			});
 			res.on('end', () => {
-				if (res.statusCode !== 200) { finish(new Error('gemini: HTTP ' + res.statusCode)); return; }
+				if (res.statusCode !== 200) { finish(markErr('gemini: HTTP ' + res.statusCode, { status: res.statusCode })); return; }
 				let json: any;
 				try { json = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { finish(new Error('gemini: not JSON')); return; }
-				const out = geminiText(json);
-				if (out) finish(null, out);
-				else finish(new Error('gemini: empty answer (' + String(json?.candidates?.[0]?.finishReason ?? json?.promptFeedback?.blockReason ?? 'none') + ')'));
+				const out = geminiText(json); const why = geminiFinish(json);
+				if (out) finish(null, { text: out, finish: why });
+				else finish(markErr('gemini: empty answer (' + why + ')', { blocked: true, finish: why }));
 			});
 			res.on('error', (e) => finish(e));
 		});
@@ -294,7 +313,7 @@ export type TranslateResult = { text: string; provider: Provider; ms: number; tr
 export async function translateText(http: Http, text: string, target: Target): Promise<TranslateResult> {
 	const order = translateProviders();
 	if (!order.length) throw new Error('translator key absent');
-	const t0 = Date.now(); const tried: string[] = [];
+	const t0 = Date.now(); const tried: string[] = []; const finishes: string[] = [];
 	for (let i = 0; i < order.length; i++) {
 		const p = order[i];
 		const left = TRANSLATE_DEADLINE_MS - (Date.now() - t0);
@@ -302,18 +321,39 @@ export async function translateText(http: Http, text: string, target: Target): P
 		const last = i === order.length - 1;
 		try {
 			const out = p === 'gemini'
-				? await geminiTranslate(text, target, last ? left : Math.min(left, geminiTimeoutMs()))
+				? await geminiWithRetry(text, target, last ? left : Math.min(left, geminiTimeoutMs()), tried, finishes)
 				: await openAiTranslate(http, p, text, target, left);
 			tried.push(p + ':ok');
 			const ms = Date.now() - t0;
-			console.info(`[gb-translate] provider=${p} ms=${ms} target=${target} tried=${tried.join(',')}`);
+			console.info(`[gb-translate] provider=${p} ms=${ms} target=${target} finish=${finishes.join(',') || '-'} tried=${tried.join(',')}`);
 			return { text: out, provider: p, ms, tried };
 		} catch (e) {
 			tried.push(p + ':' + reason(e));
 		}
 	}
-	console.warn(`[gb-translate] FAILED ms=${Date.now() - t0} target=${target} tried=${tried.join(' | ')}`);
+	console.warn(`[gb-translate] FAILED ms=${Date.now() - t0} target=${target} finish=${finishes.join(',') || '-'} tried=${tried.join(' | ')}`);
 	throw new Error('translate: every provider failed');
+}
+
+/** GEMINI-SAFETY-RETRY-V1: Gemini within one time slice — a blocked / empty answer is asked once more; an HTTP 400 on the OFF
+ *  thresholds is asked once more with BLOCK_NONE. Any other failure (timeout, 5xx, TLS) goes straight to the next provider. The
+ *  first failed attempt is recorded in `tried`; the last error is thrown for translateText's own record. */
+async function geminiWithRetry(text: string, target: Target, sliceMs: number, tried: string[], finishes: string[]): Promise<string> {
+	const s0 = Date.now(); let safety: GeminiSafety = 'OFF';
+	for (let attempt = 1; ; attempt++) {
+		const left = sliceMs - (Date.now() - s0);
+		try {
+			const r = await geminiTranslate(text, target, left, safety);
+			finishes.push(r.finish);
+			return r.text;
+		} catch (e: any) {
+			if (e?.finish) finishes.push(String(e.finish));
+			const again = attempt === 1 && (e?.blocked || (e?.status === 400 && safety === 'OFF')) && sliceMs - (Date.now() - s0) >= 1000;
+			if (!again) throw e;
+			tried.push('gemini:' + reason(e) + (e?.status === 400 ? ' -> BLOCK_NONE' : ' -> retry'));
+			if (e?.status === 400) safety = 'BLOCK_NONE';
+		}
+	}
 }
 
 /** One chat-completions call (OpenRouter or DeepSeek — the same OpenAI shape): translate-only system prompt, the message
