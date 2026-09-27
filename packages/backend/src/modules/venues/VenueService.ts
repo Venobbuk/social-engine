@@ -71,9 +71,13 @@ export class VenueService {
 
 	/** Nearby / keyword search. Bounding box + haversine, as meets/list. Verified first, then under review. */
 	@bindThis
-	public async search(opts: { q?: string | null; lat?: number | null; lng?: number | null; radiusKm?: number | null; includeUnderReview?: boolean; limit?: number }): Promise<(MiVenue & { distanceKm: number | null })[]> {
+	public async search(opts: { q?: string | null; lat?: number | null; lng?: number | null; radiusKm?: number | null; includeUnderReview?: boolean; limit?: number; mineUserId?: string | null }): Promise<(MiVenue & { distanceKm: number | null })[]> {
 		const q = this.venuesRepository.createQueryBuilder('v').where('v.status <> :closed', { closed: 'closed' });
-		if (!opts.includeUnderReview) q.andWhere('v.status = :verified', { verified: 'verified' });
+		// VENUE-MINE-V1 (L6-DISCOVER-HOME): "Verified only" still shows the caller's OWN venues under review (the one they just added)
+		if (!opts.includeUnderReview) {
+			if (opts.mineUserId) q.andWhere('(v.status = :verified OR (v.status = :ur AND v."createdById" = :mine))', { verified: 'verified', ur: 'under_review', mine: opts.mineUserId });
+			else q.andWhere('v.status = :verified', { verified: 'verified' });
+		}
 		if (opts.q) q.andWhere('(v.name ILIKE :kw OR v.address ILIKE :kw OR v.district ILIKE :kw)', { kw: `%${opts.q.replace(/[%_]/g, '')}%` });
 		let distanceExpr: string | null = null;
 		if (opts.lat != null && opts.lng != null) {

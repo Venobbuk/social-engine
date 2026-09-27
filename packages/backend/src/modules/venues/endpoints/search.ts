@@ -29,6 +29,7 @@ export const paramDef = {
 		lng: { type: 'number', nullable: true, minimum: -180, maximum: 180 },
 		radiusKm: { type: 'number', nullable: true, minimum: 1, maximum: 80 },
 		includeUnderReview: { type: 'boolean', default: false },
+		includeMine: { type: 'boolean', default: false },   // VENUE-MINE-V1: + the caller's own under-review venues when includeUnderReview is off
 		limit: { type: 'integer', minimum: 1, maximum: 200, default: 50 },
 	},
 	required: [],
@@ -42,11 +43,11 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 		@Inject(DI.driveFilesRepository) private driveFilesRepository: DriveFilesRepository,
 		private driveFileEntityService: DriveFileEntityService,
 	) {
-		super(meta, paramDef, async (ps) => {
-			const rows = await this.venueService.search({ q: ps.q, lat: ps.lat, lng: ps.lng, radiusKm: ps.radiusKm, includeUnderReview: ps.includeUnderReview, limit: ps.limit });
+		super(meta, paramDef, async (ps, me) => {
+			const rows = await this.venueService.search({ q: ps.q, lat: ps.lat, lng: ps.lng, radiusKm: ps.radiusKm, includeUnderReview: ps.includeUnderReview, limit: ps.limit, mineUserId: ps.includeMine && me ? me.id : null });
 			// VENUES-REST-V1 search: the card's photo carousel (C-discover.23) — up to 5 per venue, one query for the page
 			const covers = await coversOf(this.db, this.driveFilesRepository, this.driveFileEntityService, rows.map(r => r.id), 5);
-			return rows.map(r => ({ ...packVenue(r), photos: covers[r.id] ?? [] }));
+			return rows.map(r => ({ ...packVenue(r), photos: covers[r.id] ?? [], mine: !!me && r.createdById === me.id }));   // VENUE-MINE-V1
 		});
 	}
 }
