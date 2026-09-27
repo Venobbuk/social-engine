@@ -59,7 +59,13 @@ export async function clubsNear(db: DataSource, q: { q?: string | null; lat?: nu
 	const here = q.lat != null && q.lng != null ? { lat: q.lat, lng: q.lng } : null;
 	const radius = q.radiusKm ?? 20;
 	let out = rows.map((r) => toRow(r, here));
-	if (here) out = out.filter((r) => r.distanceKm != null && r.distanceKm <= radius).sort((a, b) => (a.distanceKm! - b.distanceKm!) || (b.usersCount - a.usersCount));
+	// DISCOVER-UNPLACED-V1 (L6-DISCOVER-HOME 2026-09-27, orchestrator): a club with NO position (no club venue, no placed meet —
+	// every new club) is kept in a near list, after the near ones: it was dropped, so a player with a saved home never saw a
+	// club created a minute ago. A typed name is explicit intent: with a keyword the radius does not cut, it only orders.
+	if (here) {
+		const near = out.filter((r) => r.distanceKm != null && (kw !== '' || r.distanceKm <= radius)).sort((a, b) => (a.distanceKm! - b.distanceKm!) || (b.usersCount - a.usersCount));
+		out = near.concat(out.filter((r) => r.distanceKm == null));
+	}
 	const off = q.offset ?? 0;
 	return out.slice(off, off + q.limit);
 }
