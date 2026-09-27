@@ -3,9 +3,11 @@
 // NODE_EXTRA_CA_CERTS) stands in for the SG forward, a fake HttpRequestService stands in for OpenRouter / DeepSeek.
 // It imports the REAL core/GbChatExtras.ts (Node >= 23.6 strips the types) — run by /root/gen/gemini-translate-unit.sh
 // inside the engine image with --network none. Prints one JSON verdict on stdout.
-// Rows: provider order, request shape (model path, key in header not URL, SNI/Host = Google, prompt + text), fallback on
-// 500 / timeout / blocked answer, the 10 s deadline, the TLS identity check (plant: a cert for the WRONG name must fail),
-// defaults (model, via), NOT_CONFIGURED without keys, and no key in any log line or result.
+// Rows: request shape (model path, key in header not URL, SNI/Host = Google, prompt + text), the 10 s deadline, the TLS
+// identity check (plant: a cert for the WRONG name must fail), defaults (model, via), NOT_CONFIGURED without keys, no key in
+// any log line or result, and TRANSLATE-NO-FALLBACK-V1 (2026-09-28, operator "no fallback"): with OpenRouter / DeepSeek keys
+// PRESENT, a Gemini 500 / hang / blocked answer FAILS LOUD and no OpenAI-shape call is ever made (NF rows; the fake
+// HttpRequestService below counts any such call — on the pre-change module those rows fail, which is the before proof).
 import * as https from 'node:https';
 import * as fs from 'node:fs';
 
@@ -93,30 +95,30 @@ if (has('translateText')) {
 	await tr('x');
 	row('GEMINI_TRANSLATE_MODEL overrides the model path', last?.url === '/v1beta/models/gemini-x-test:generateContent', { url: last?.url });
 
-	// T3 order with all three, gemini OK
+	// NF1 (was T3) fallback keys present are IGNORED: gemini is the only provider; gemini answers, no OpenAI-shape call
 	env({ GEMINI_API_KEY: FAKE_KEY, OPENROUTER_API_KEY: FAKE_OR, DEEPSEEK_API_KEY: FAKE_DS, GEMINI_VIA: VIA }); mode = 'ok'; httpCalls = [];
 	const r3 = await tr('see you at 7');
-	row('order gemini → openrouter → deepseek; gemini answers, no fallback call', JSON.stringify(X.translateProviders()) === '["gemini","openrouter","deepseek"]' && r3.provider === 'gemini' && httpCalls.length === 0, { providers: X.translateProviders(), provider: r3.provider });
+	row('NF1 OPENROUTER / DEEPSEEK keys present are ignored: providers = [gemini], gemini answers, 0 fallback calls', JSON.stringify(X.translateProviders()) === '["gemini"]' && r3.provider === 'gemini' && httpCalls.length === 0, { providers: X.translateProviders(), provider: r3.provider, fallbackCalls: httpCalls.length });
 
-	// T4 gemini 500 → openrouter
+	// NF2 (was T4) gemini 500 with both fallback keys present -> FAILS (the door answers UPSTREAM_FAILED), 0 fallback calls
 	mode = '500'; httpCalls = [];
 	const r4 = await tr('see you at 7');
-	row('gemini HTTP 500 → openrouter answers', r4.ok && r4.provider === 'openrouter' && r4.text === 'OR:see you at 7' && /gemini:gemini: HTTP 500/.test(r4.tried.join(',')) && httpCalls.length === 1 && httpCalls[0].url.includes('openrouter'), { provider: r4.provider, tried: r4.tried });
+	row('NF2 gemini HTTP 500, fallback keys present -> fails loud, 0 fallback calls', !r4.ok && httpCalls.length === 0 && /gemini/.test(r4.err || ''), { answered: r4.ok, provider: r4.provider, err: r4.err, fallbackCalls: httpCalls.length });
 
-	// T5 gemini hangs → capped at 7 s, openrouter gets the rest of the 10 s
+	// NF3 (was T5) gemini hangs with fallback keys present -> fails at the 10 s deadline (Gemini gets the whole of it), 0 fallback calls
 	mode = 'hang'; httpCalls = [];
 	const r5 = await tr('late?');
-	row('gemini timeout (default 7 s cap) → openrouter within the 10 s deadline', r5.ok && r5.provider === 'openrouter' && r5.wall >= 6900 && r5.wall < 8500 && httpCalls[0]?.timeout > 1000 && httpCalls[0]?.timeout <= 3200, { wall: r5.wall, orTimeout: httpCalls[0]?.timeout, tried: r5.tried });
+	row('NF3 gemini hangs, fallback keys present -> fails at ~10 s, 0 fallback calls', !r5.ok && r5.wall >= 9900 && r5.wall < 11000 && httpCalls.length === 0, { answered: r5.ok, provider: r5.provider, wall: r5.wall, fallbackCalls: httpCalls.length });
 
 	// T6 gemini only, hangs → fails by the 10 s deadline
 	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: VIA }); mode = 'hang';
 	const r6 = await tr('late?');
 	row('gemini alone hangs → error at ~10 s (endpoint → UPSTREAM_FAILED)', !r6.ok && r6.wall >= 9900 && r6.wall < 11000, { wall: r6.wall, err: r6.err });
 
-	// T7 blocked answer → deepseek (openrouter absent)
+	// NF4 (was T7) gemini blocked with a DEEPSEEK key present -> fails loud, no deepseek call
 	env({ GEMINI_API_KEY: FAKE_KEY, DEEPSEEK_API_KEY: FAKE_DS, GEMINI_VIA: VIA }); mode = 'blocked'; httpCalls = [];
 	const r7 = await tr('blocked?');
-	row('gemini blocked/empty → deepseek answers (openrouter absent)', r7.ok && r7.provider === 'deepseek' && r7.text === 'DS:blocked?' && /empty answer \(SAFETY\)/.test(r7.tried[0]) && httpCalls[0]?.url.includes('deepseek'), { provider: r7.provider, tried: r7.tried });
+	row('NF4 gemini blocked/empty, DEEPSEEK key present -> fails loud, 0 fallback calls', !r7.ok && httpCalls.length === 0 && /empty answer \(SAFETY\)/.test(r7.err || ''), { answered: r7.ok, provider: r7.provider, err: r7.err, fallbackCalls: httpCalls.length });
 
 	// T8 PLANTED FAULT: the forward presents a cert for the wrong name → TLS identity check must refuse it
 	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: '127.0.0.1:' + wrongPort }); mode = 'ok'; hits = 0;
@@ -141,7 +143,7 @@ if (has('translateText')) {
 
 	env({ GEMINI_API_KEY: FAKE_KEY, OPENROUTER_API_KEY: FAKE_OR, GEMINI_VIA: VIA }); mode = 'prohibited'; hits = 0; httpCalls = [];
 	const rr4 = await tr('fall through', 'ZH-HANT');
-	row('R4 blocked twice -> falls through to the next provider with a key (openrouter)', rr4.ok && rr4.provider === 'openrouter' && hits === 2 && httpCalls.length === 1, { hits, provider: rr4.provider, tried: rr4.tried });
+	row('R4 blocked twice with an OPENROUTER key present -> exactly one retry, then FAILS (no fall-through, 0 fallback calls)', !rr4.ok && hits === 2 && httpCalls.length === 0, { hits, answered: rr4.ok, provider: rr4.provider, err: rr4.err, fallbackCalls: httpCalls.length });
 
 	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: VIA }); mode = '400-off'; hits = 0;
 	const rr5 = await tr('model refuses OFF');
@@ -150,7 +152,7 @@ if (has('translateText')) {
 
 	mode = '500'; hits = 0;
 	const rr6 = await tr('server error');
-	row('R6 HTTP 500 is NOT retried on gemini (one hit; straight to the next provider / failure)', !rr6.ok && hits === 1, { hits, err: rr6.err });
+	row('R6 HTTP 500 is NOT retried on gemini (one hit; straight to failure)', !rr6.ok && hits === 1, { hits, err: rr6.err });
 
 	// ---- TRANSLATE-DELIMIT-V1 (lane L6-CHAT, 2026-09-27): the user text is one delimited data block for every provider
 	env({ GEMINI_API_KEY: FAKE_KEY, GEMINI_VIA: VIA }); mode = 'ok';
@@ -160,9 +162,8 @@ if (has('translateText')) {
 	mode = 'wrapped';
 	const rd2 = await tr('see you at 7');
 	row('D2 an answer that comes back wrapped in the tags is unwrapped', rd2.ok && rd2.text === 'GEMINI:see you at 7', { text: rd2.text });
-	env({ GEMINI_API_KEY: FAKE_KEY, OPENROUTER_API_KEY: FAKE_OR, GEMINI_VIA: VIA }); mode = '500'; httpCalls = [];
-	const rd3 = await tr('see you at 7');
-	row('D3 OpenRouter / DeepSeek get the same delimited user turn', rd3.ok && rd3.text === 'OR:see you at 7' && httpCalls[0]?.user === '<message>\nsee you at 7\n</message>', { user: httpCalls[0]?.user, text: rd3.text });
+	// D3 (TRANSLATE-NO-FALLBACK-V1) the OpenAI-shape fallback code is gone from the module: no openrouterKey / deepseekKey export
+	row('D3 no fallback code left: the module exports no openrouterKey / deepseekKey', !has('openrouterKey') && !has('deepseekKey'), { exports: Object.keys(X).filter((k) => /openrouter|deepseek|openAi/i.test(k)) });
 
 	// T9 no key anywhere in logs / results
 	const blob = JSON.stringify({ logs, rows: V.rows });
