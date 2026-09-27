@@ -19,11 +19,14 @@ const REAL = process.env.REAL === '1';   // keys configured: live providers, no 
 // GEMINI-TRANSLATE-V1: in REAL mode the provider that must answer (gb/chat/translate returns `provider`); gemini by default
 const WANT_PROVIDER = process.env.EXPECT_PROVIDER || 'gemini';
 if (!A.BASE.includes('uat.')) throw new Error('refusing: not UAT');
-const OUT = '/root/social-engine/probes/chat-extras' + (MODE === 'before' ? '.before' : REAL ? '.real' : '') + '.verdict.json';
+const OUT = '/root/social-engine/probes/chat-extras' + (MODE === 'before' ? '.before' : REAL ? '.real' : '') + (process.env.API_ONLY === '1' ? '.api' : '') + (process.env.PLANT ? '.plant-' + process.env.PLANT : '') + '.verdict.json';
 const SH = '/root/social-engine/probes/chat-extras-shots/'; fs.mkdirSync(SH, { recursive: true });
 const AXE = fs.readFileSync('/root/gen/uat-tools/node_modules/axe-core/axe.min.js', 'utf8');
 const CFG = '/root/social-engine/.config-uat/gb-extras.env';
 const LANGS = (process.env.LANGS || 'en,zh_Hant').split(',');
+// the room message is a real sentence: an English line must come back as Chinese, so the member row proves a translation, not an echo
+const ROOM_TEXT = '[probe] Court 3 is booked from 8 to 10 tonight, the fee is $80 each.';
+const API_ONLY = process.env.API_ONLY === '1';   // ENGINE-FIX-NONMEMBER-V1: the API rows only (no browser, no GIPHY calls)
 const TR_LABEL = { en: 'Translate message', zh_Hant: null };
 const V = { id: 'chat-extras', mode: MODE, at: new Date().toISOString(), condition_fired: false, verdict: 'no_verdict', rows: {}, evidence: [], cleanup: [] };
 const row = (id, ok, ev) => { V.rows[id] = { ok: !!ok, ...ev }; console.log((ok ? 'PASS ' : 'FAIL ') + id + ' ' + JSON.stringify(ev).slice(0, 300)); };
@@ -78,8 +81,36 @@ async function axeCx(page) {
     if (m1.json && m1.json.id) msgIds.push([m1.json.id, amy.token]);
     const m2 = await A.se('chat/messages/create-to-user', { toUserId: admin.userId, text: '[probe] See you at the courts at 7, bring your paddle.' }, amy.token);
     if (m2.json && m2.json.id) msgIds.push([m2.json.id, amy.token]);
-    const r = await A.se('chat/rooms/create', { name: '[probe] chat-extras room' }, mei.token); roomId = r.json && r.json.id;
-    const rm = roomId ? await A.se('chat/messages/create-to-room', { toRoomId: roomId, text: '[probe] room message' }, mei.token) : null;
+    /* ENGINE-FIX-NONMEMBER-V1 (2026-09-28): the room fixture. chat/rooms/create allows 10 rooms a DAY per user (Misskey meta limit)
+     * and clubowner-mei is shared by every lane, so the create answered 429 and the two room rows ran on NO message (status 0,
+     * "no room msg" — 2026-09-28 01:13 real verdict). Now: a room mei ALREADY owns with nobody else in it and amy not a member
+     * (chat/rooms/owned + chat/rooms/members), a [probe] message posted there (create-to-room: 500/hour), deleted in finally.
+     * Only when mei owns no such room is one created. Every step is recorded; a missing fixture is a named precondition failure. */
+    const pre = V.roomFixture = { tried: [] };
+    const owned = await A.se('chat/rooms/owned', { limit: 100 }, mei.token);
+    pre.owned = owned.status + ' ' + (Array.isArray(owned.json) ? owned.json.length + ' rooms' : owned.text.slice(0, 80));
+    const cands = (Array.isArray(owned.json) ? owned.json : []).filter((x) => !x.readOnlyAt || Date.parse(x.readOnlyAt) > Date.now() + 3600e3)
+      .sort((x, y) => (/^\[probe\]/.test(x.name || '') ? 1 : 0) - (/^\[probe\]/.test(y.name || '') ? 1 : 0));   // a [probe] room may be swept mid-run
+    let rm = null;
+    for (const c of cands) {
+      const mem = await A.se('chat/rooms/members', { roomId: c.id, limit: 100 }, mei.token);
+      const ids = (Array.isArray(mem.json) ? mem.json : []).map((x) => x.userId || (x.user && x.user.id));
+      if (mem.status !== 200 || ids.includes(amy.userId) || ids.length) { pre.tried.push(c.id + ' skip (members ' + mem.status + ' n=' + ids.length + ')'); continue; }
+      const p = await A.se('chat/messages/create-to-room', { toRoomId: c.id, text: ROOM_TEXT }, mei.token);
+      pre.tried.push(c.id + ' post ' + p.status);
+      if (p.status === 200 && p.json && p.json.id) { rm = p; pre.roomId = c.id; pre.roomName = c.name; msgIds.push([p.json.id, mei.token]); break; }
+      if (pre.tried.length >= 8) break;
+    }
+    if (!rm) {
+      const r = await A.se('chat/rooms/create', { name: '[probe] chat-extras room' }, mei.token); roomId = r.json && r.json.id;
+      pre.created = r.status + ' ' + r.text.slice(0, 80);
+      rm = roomId ? await A.se('chat/messages/create-to-room', { toRoomId: roomId, text: ROOM_TEXT }, mei.token) : null;
+      if (rm && rm.json && rm.json.id) { pre.roomId = roomId; msgIds.push([rm.json.id, mei.token]); }
+    }
+    pre.messageId = rm && rm.json && rm.json.id || null;
+    if (!pre.messageId) V.precondition_failed = 'no room message to target: ' + JSON.stringify(pre).slice(0, 400);
+    // the fixture is read back as it is stored: amy is NOT a member of that room (the refusal row means nothing otherwise)
+    if (pre.messageId) { const mm = await A.se('chat/rooms/members', { roomId: pre.roomId, limit: 100 }, mei.token); pre.amyMemberAtTest = (mm.json || []).some((x) => (x.userId || (x.user && x.user.id)) === amy.userId); }
     const t0 = REAL ? null : await A.se('gb/chat/translate', { messageId: m1.json && m1.json.id, target: 'EN' }, admin.token);
     if (!REAL) row('api translate no-key 503', t0.status === 503 && /NOT_CONFIGURED/.test(t0.text), { status: t0.status, body: t0.text.slice(0, 120) });
 
@@ -95,13 +126,19 @@ async function axeCx(page) {
     // GEMINI-TRANSLATE-V1: which provider answered (fresh calls; the third is the cache)
     if (REAL) row('api translate answered by ' + WANT_PROVIDER, tA.json && tA.json.provider === WANT_PROVIDER && tB.json && tB.json.provider === WANT_PROVIDER && tC.json && tC.json.provider === 'cache', { providerA: tA.json && tA.json.provider, providerB: tB.json && tB.json.provider, providerC: tC.json && tC.json.provider });
     else row('api translate provider = mock', tA.json && tA.json.provider === 'mock', { providerA: tA.json && tA.json.provider });
-    const nm = rm && rm.json ? await A.se('gb/chat/translate', { messageId: rm.json.id, target: 'EN' }, amy.token) : { status: 0, text: 'no room msg' };
-    row('api translate non-member refused', nm.status === 404 && /NO_SUCH_MESSAGE/.test(nm.text), { status: nm.status, body: String(nm.text).slice(0, 100) });
-    const own = rm && rm.json ? await A.se('gb/chat/translate', { messageId: rm.json.id, target: 'ZH-HANT' }, mei.token) : { status: 0, text: '' };
-    row('api translate member ok', own.status === 200 && own.json && (REAL ? !!own.json.text && own.json.text !== '[probe] room message' : /\[TEST 繁\] \[probe\] room message/.test(own.json.text)), { status: own.status, body: String(own.text).slice(0, 120) });
+    // PLANT=member-as-nonmember: the refusal row is asked by the room OWNER instead of amy — it must then FAIL (the check can see a leak)
+    const nmTok = process.env.PLANT === 'member-as-nonmember' ? mei.token : amy.token;
+    const nm = rm && rm.json ? await A.se('gb/chat/translate', { messageId: rm.json.id, target: 'EN' }, nmTok) : { status: 0, text: 'precondition failed: ' + (V.precondition_failed || 'no room msg') };
+    row('api translate non-member refused', pre.amyMemberAtTest === false && nm.status === 404 && /NO_SUCH_MESSAGE/.test(nm.text) && !(nm.json && nm.json.text), { status: nm.status, body: String(nm.text).slice(0, 160), messageId: pre.messageId, roomId: pre.roomId, amyMember: pre.amyMemberAtTest });
+    // the same message, the same door, the room's OWNER (a member): 200 with a translation — the refusal above is membership, not a dead door
+    const own = rm && rm.json ? await A.se('gb/chat/translate', { messageId: rm.json.id, target: 'ZH-HANT' }, mei.token) : { status: 0, text: 'precondition failed' };
+    row('api translate member ok', own.status === 200 && own.json && (REAL ? !!own.json.text && own.json.text !== ROOM_TEXT && /[一-鿿]/.test(own.json.text) : own.json.text === '[TEST 繁] ' + ROOM_TEXT), { status: own.status, body: String(own.text).slice(0, 120) });
+    // the family: the older door chat/messages/translate (KUDOS-CHAT-V1, DeepL meta key) must not hand a non-member the text either
+    const old = rm && rm.json ? await A.se('chat/messages/translate', { messageId: rm.json.id, targetLang: 'EN' }, amy.token) : { status: 0, text: 'precondition failed' };
+    row('api older chat/messages/translate non-member gets no text', old.status !== 0 && !(old.status === 200 && old.json && old.json.text), { status: old.status, body: String(old.text).slice(0, 120) });
 
-    b = await A.browser();
-    for (const lang of LANGS) {
+    b = API_ONLY ? null : await A.browser();
+    for (const lang of (API_ONLY ? [] : LANGS)) {
       const net = [];
       // amy sends a GIF
       const pa = await A.newCtx(b, 'player-amy', 390, 844, lang); watch(pa.page, 'amy', net);
@@ -160,7 +197,7 @@ async function axeCx(page) {
 
     // ---- mock OFF again: the no-key UI is clean
     if (!REAL) { setMock(false); await waitStatus(amy.token, false, 15000); }
-    for (const lang of (REAL ? [] : LANGS)) {
+    for (const lang of (REAL || API_ONLY ? [] : LANGS)) {
       const pc = await A.newCtx(b, 'admin', 390, 844, lang);
       await A.open(pc.page, 'chat/index?user=' + amy.userId, lang); await A.sleep(4000);
       const btn = await visible(pc.page, '.cx-gifbtn');
