@@ -13,7 +13,7 @@ import { DriveService } from '@/core/DriveService.js';
 import { DriveFileEntityService } from '@/core/entities/DriveFileEntityService.js';
 import { createTemp } from '@/misc/create-temp.js';
 import { ApiError } from '@/server/api/error.js';
-import { NOT_CONFIGURED, UPSTREAM_FAILED, PROVIDER_BUSY, gifMode, giphyGet, isGiphyMedia, mockGif, mockId } from '@/core/GbChatExtras.js';
+import { NOT_CONFIGURED, UPSTREAM_FAILED, PROVIDER_BUSY, gifMode, giphyGet, giphyRatingOk, isGiphyMedia, mockGif, mockId } from '@/core/GbChatExtras.js';
 
 // CHAT-EXTRAS-V1 (Reclub E-giphy.01) — gb/gif/attach {gifId}: the picked GIF becomes a file in the SENDER's drive, so the
 // app sends it on the existing chat path (chat/messages/create-to-room|user with fileId — REUSED, nothing new in chat).
@@ -67,6 +67,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				throw new ApiError(meta.errors.upstream);
 			}
 			if (json === 'busy') throw new ApiError(meta.errors.busy);
+			if (!giphyRatingOk(json?.data)) throw new ApiError(meta.errors.noSuchGif);   // GIPHY-RATING-G-V1: only a g-rated GIF is attached
 			const im = json?.data?.images;
 			const url = String(im?.downsized?.url ?? im?.fixed_height?.url ?? '');
 			if (!url || !isGiphyMedia(url)) throw new ApiError(meta.errors.noSuchGif);

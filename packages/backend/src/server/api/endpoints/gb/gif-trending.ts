@@ -12,7 +12,7 @@ import { ApiError } from '@/server/api/error.js';
 import { NOT_CONFIGURED, UPSTREAM_FAILED, PROVIDER_BUSY, gifMode, giphyGet, packGiphy, mockPage } from '@/core/GbChatExtras.js';
 
 // CHAT-EXTRAS-V1 (Reclub E-giphy.01) — gb/gif/trending: GIPHY v1 trending through the engine (the key stays here), rated
-// pg-13, cached 300 s per query/page (GIPHY's beta key allows 100 calls an hour for the whole app, so the cache and an
+// g ONLY (GIPHY-RATING-G-V1: core/GbChatExtras.ts giphyGet forces rating=g, packGiphy drops anything else), cached 300 s per query/page (GIPHY's beta key allows 100 calls an hour for the whole app, so the cache and an
 // app-wide hourly budget sit in front of it), limited per user. 503 NOT_CONFIGURED without a key.
 export const meta = {
 	tags: ['chat'],
@@ -56,7 +56,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 			if (mode === 'mock') return await mockPage('', offset, limit);
 			let json: any;
 			try {
-				json = await giphyGet(this.httpRequestService, this.redisClient, '/v1/gifs/trending', { limit: String(limit), offset: String(offset), rating: 'pg-13', bundle: 'messaging_non_clips' }, 300);
+				json = await giphyGet(this.httpRequestService, this.redisClient, '/v1/gifs/trending', { limit: String(limit), offset: String(offset), bundle: 'messaging_non_clips' }, 300);
 			} catch {
 				throw new ApiError(meta.errors.upstream);
 			}

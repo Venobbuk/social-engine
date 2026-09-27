@@ -1,0 +1,60 @@
+{
+ "id": "giphy-rating-unit",
+ "src": "/t/GbChatExtras.ts",
+ "at": "2026-09-27T20:31:22.015Z",
+ "verdict": "pass",
+ "rows": {
+  "module loads": {
+   "ok": true
+  },
+  "G1 every GIPHY call asks rating=g (trending with a caller pg-13, search, get-by-id)": {
+   "ratings": [
+    [
+     "g"
+    ],
+    [
+     "g"
+    ],
+    [
+     "g"
+    ]
+   ],
+   "paths": [
+    "/v1/gifs/trending",
+    "/v1/gifs/search",
+    "/v1/gifs/abc123"
+   ],
+   "ok": true
+  },
+  "G2 every cache key carries rating=g": {
+   "keys": [
+    "gb:giphy:v1:/v1/gifs/trending?limit=24&offset=0&rating=g&bundle=messaging_non_clips",
+    "gb:giphy:v1:/v1/gifs/search?q=tennis&limit=24&offset=0&rating=g",
+    "gb:giphy:v1:/v1/gifs/abc123?rating=g"
+   ],
+   "ok": true
+  },
+  "G3 packGiphy keeps only g-rated items": {
+   "kept": [
+    "a",
+    "f"
+   ],
+   "ok": true
+  },
+  "G4 giphyRatingOk: g yes; pg-13 / r / missing no": {
+   "exported": true,
+   "ok": true
+  },
+  "no key in any recorded URL outside the api_key param": {
+   "ok": true
+  }
+ },
+ "evidence": [
+  "PASS module loads",
+  "PASS G1 every GIPHY call asks rating=g (trending with a caller pg-13, search, get-by-id)",
+  "PASS G2 every cache key carries rating=g",
+  "PASS G3 packGiphy keeps only g-rated items",
+  "PASS G4 giphyRatingOk: g yes; pg-13 / r / missing no",
+  "PASS no key in any recorded URL outside the api_key param"
+ ]
+}

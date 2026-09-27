@@ -119,12 +119,19 @@ export function giphyLang(lang: string | null | undefined): string {
 	return 'en';
 }
 
+/* GIPHY-RATING-G-V1 (engine-fix lane, 2026-09-28; L6-CHAT run: a pg-13 clip was the FIRST trending cell). GripBat shows only
+ * GIPHY rating "g": giphyGet (the ONE place a GIPHY call is made) forces rating=g on EVERY call, whatever the caller passes;
+ * packGiphy drops any item not rated g; gb/gif/attach refuses a GIF id that is not rated g (a client can send any id). */
+export const GIPHY_RATING = 'g';
+export function giphyRatingOk(g: any): boolean { return String(g?.rating ?? '').trim().toLowerCase() === GIPHY_RATING; }
+
 export function packGiphy(json: any): { items: GifItem[]; next: number | null } {
 	const data: any[] = Array.isArray(json?.data) ? json.data : [];
 	const items: GifItem[] = [];
 	for (const g of data) {
 		const im = g?.images?.fixed_width_downsampled ?? g?.images?.fixed_width ?? g?.images?.downsized;
 		if (!g?.id || !im?.url) continue;
+		if (!giphyRatingOk(g)) continue;   // GIPHY-RATING-G-V1
 		items.push({ id: String(g.id), title: String(g.title ?? ''), previewUrl: String(im.url), width: Number(im.width) || 200, height: Number(im.height) || 200 });
 	}
 	const p = json?.pagination;
@@ -233,6 +240,7 @@ function giphyBudget(): number { const n = Number(val('GIPHY_HOURLY_BUDGET')); r
 export async function giphyGet(http: Http, redis: RedisLike, path: string, params: Record<string, string>, ttl: number): Promise<any | 'busy'> {
 	const key = giphyKey(); if (!key) throw new Error('giphy key absent');
 	const qs = new URLSearchParams(params);
+	qs.set('rating', GIPHY_RATING);   // GIPHY-RATING-G-V1: every call, before the cache key (a cached pg-13 answer is never reused)
 	const cacheKey = 'gb:giphy:v1:' + path + '?' + qs.toString();
 	const hit = await redis.get(cacheKey);
 	if (hit) { try { return JSON.parse(hit); } catch { /* re-fetch */ } }
