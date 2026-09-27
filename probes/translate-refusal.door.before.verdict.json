@@ -1,0 +1,326 @@
+{
+ "id": "refusal-root.door",
+ "tag": "flash-lite",
+ "at": "2026-09-27T15:00:13.276Z",
+ "N": 5,
+ "envNames": "GIPHY_API_KEY GEMINI_API_KEY",
+ "modelLine": "0",
+ "engineRev": "3827139a4ab487c33e3e60e958a1298ae832e185",
+ "variants": {
+  "A": "See you at the courts at 7, bring your paddle.",
+  "B": "[probe] See you at the courts at 7, bring your paddle.",
+  "C": "l6-chat ju6pj9 See you at the courts at 7, bring your paddle.",
+  "D": "zh_Hant See you at the courts at 7, bring your paddle.",
+  "E": "See you at the courts at",
+  "F": "[probe] l6-chat ju6pj9 meet zh_Hant See you at the courts at 7, bring your paddle."
+ },
+ "rows": [
+  {
+   "id": "A",
+   "i": 0,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "B",
+   "i": 0,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "[probe] 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "C",
+   "i": 0,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "l6-chat ju6pj9 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "D",
+   "i": 0,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "E",
+   "i": 0,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "喺球場見"
+  },
+  {
+   "id": "F",
+   "i": 0,
+   "http": 502,
+   "finish": "PROHIBITED_CONTENT,PROHIBITED_CONTENT",
+   "tried": "gemini:gemini: empty answer (PROHIBITED_CONTENT) -> retry | gemini:gemini: empty answer (PROHIBITED_CONTENT)",
+   "out": ""
+  },
+  {
+   "id": "A",
+   "i": 1,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "B",
+   "i": 1,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "[probe] 7點球場見，記得帶塊拍。"
+  },
+  {
+   "id": "C",
+   "i": 1,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "l6-chat ju6pj9 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "D",
+   "i": 1,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "E",
+   "i": 1,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "喺球場見"
+  },
+  {
+   "id": "F",
+   "i": 1,
+   "http": 502,
+   "finish": "PROHIBITED_CONTENT,PROHIBITED_CONTENT",
+   "tried": "gemini:gemini: empty answer (PROHIBITED_CONTENT) -> retry | gemini:gemini: empty answer (PROHIBITED_CONTENT)",
+   "out": ""
+  },
+  {
+   "id": "A",
+   "i": 2,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "B",
+   "i": 2,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "[probe] 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "C",
+   "i": 2,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "l6-chat ju6pj9 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "D",
+   "i": 2,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點球場見，記得帶塊拍。"
+  },
+  {
+   "id": "E",
+   "i": 2,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "喺球場見"
+  },
+  {
+   "id": "F",
+   "i": 2,
+   "http": 502,
+   "finish": "PROHIBITED_CONTENT,PROHIBITED_CONTENT",
+   "tried": "gemini:gemini: empty answer (PROHIBITED_CONTENT) -> retry | gemini:gemini: empty answer (PROHIBITED_CONTENT)",
+   "out": ""
+  },
+  {
+   "id": "A",
+   "i": 3,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "B",
+   "i": 3,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "[probe] 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "C",
+   "i": 3,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "l6-chat ju6pj9 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "D",
+   "i": 3,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "E",
+   "i": 3,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "喺球場見"
+  },
+  {
+   "id": "F",
+   "i": 3,
+   "http": 502,
+   "finish": "PROHIBITED_CONTENT,PROHIBITED_CONTENT",
+   "tried": "gemini:gemini: empty answer (PROHIBITED_CONTENT) -> retry | gemini:gemini: empty answer (PROHIBITED_CONTENT)",
+   "out": ""
+  },
+  {
+   "id": "A",
+   "i": 4,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "B",
+   "i": 4,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "[probe] 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "C",
+   "i": 4,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "l6-chat ju6pj9 7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "D",
+   "i": 4,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "7點喺球場見，記得帶塊拍。"
+  },
+  {
+   "id": "E",
+   "i": 4,
+   "http": 200,
+   "provider": "gemini",
+   "finish": "STOP",
+   "tried": "gemini:ok",
+   "out": "喺球場見"
+  },
+  {
+   "id": "F",
+   "i": 4,
+   "http": 502,
+   "finish": "PROHIBITED_CONTENT,PROHIBITED_CONTENT",
+   "tried": "gemini:gemini: empty answer (PROHIBITED_CONTENT) -> retry | gemini:gemini: empty answer (PROHIBITED_CONTENT)",
+   "out": ""
+  }
+ ],
+ "table": {
+  "A": {
+   "calls": 5,
+   "http502": 0,
+   "attemptsRefused": 0,
+   "attempts": 5
+  },
+  "B": {
+   "calls": 5,
+   "http502": 0,
+   "attemptsRefused": 0,
+   "attempts": 5
+  },
+  "C": {
+   "calls": 5,
+   "http502": 0,
+   "attemptsRefused": 0,
+   "attempts": 5
+  },
+  "D": {
+   "calls": 5,
+   "http502": 0,
+   "attemptsRefused": 0,
+   "attempts": 5
+  },
+  "E": {
+   "calls": 5,
+   "http502": 0,
+   "attemptsRefused": 0,
+   "attempts": 5
+  },
+  "F": {
+   "calls": 5,
+   "http502": 5,
+   "attemptsRefused": 10,
+   "attempts": 10
+  }
+ },
+ "cleanup": [
+  "messages deleted: 30/30",
+  "meet arniewe8y6sh009x -> 400 / cancel 200"
+ ]
+}

@@ -4,7 +4,7 @@
  "promptHasContext": true,
  "model": "gemini-3.5-flash-lite",
  "rounds": 3,
- "at": "2026-09-27T14:18:28.234Z",
+ "at": "2026-09-27T15:22:27.825Z",
  "summary": {
   "calls": 72,
   "pass": 72,
@@ -118,8 +118,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "7點球場見，記得帶塊拍。",
-   "log": "[gb-translate] provider=gemini ms=1729 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "7點球場見，記得帶埋個拍。",
+   "log": "[gb-translate] provider=gemini ms=2198 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -127,8 +127,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "東區走廊塞車塞到傻咗，我要遲大約10分鐘 😩",
-   "log": "[gb-translate] provider=gemini ms=1219 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "塞緊東廊，塞車勁甘 😩，我會遲大約10分鐘到",
+   "log": "[gb-translate] provider=gemini ms=1530 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -136,8 +136,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "今晚邊個拎波？我淨係得番兩個咋。",
-   "log": "[gb-translate] provider=gemini ms=1256 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "今晚邊個拎波？我得返兩個咋。",
+   "log": "[gb-translate] provider=gemini ms=1748 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -145,8 +145,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "今個星期場費每人 $80，請喺星期日前用 PayMe 過數畀我。",
-   "log": "[gb-translate] provider=gemini ms=1747 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "今個星期場費每人 $80，請喺星期日之前用 PayMe 過數畀我。",
+   "log": "[gb-translate] provider=gemini ms=1771 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -154,8 +154,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "有無人可以轉去8:30嗰個slot？我有個飯局走唔甩。",
-   "log": "[gb-translate] provider=gemini ms=1611 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "有無人可以調去8:30嗰個slot？我有個飯局走唔甩。",
+   "log": "[gb-translate] provider=gemini ms=1392 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -163,8 +163,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "昨日場波好正！不過我嘅 dink 仲爭好遠 😅",
-   "log": "[gb-translate] provider=gemini ms=1337 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "昨日場波好正！不過我啲 dink 仲爭好多 😅",
+   "log": "[gb-translate] provider=gemini ms=1573 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -172,8 +172,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "提提大家：九龍公園球場星期六維修暫停開放。",
-   "log": "[gb-translate] provider=gemini ms=1508 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "提下大家：九龍公園球場星期六維修關閉。",
+   "log": "[gb-translate] provider=gemini ms=1249 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -182,7 +182,7 @@
    "ok": true,
    "why": [],
    "out": "我會喺維園 book 兩個場，淨係打雙打，最多 8 個人。",
-   "log": "[gb-translate] provider=gemini ms=1677 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1468 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -190,8 +190,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "小心呀 Ken，今晚 single 我一定會將你打到落花流水 😈",
-   "log": "[gb-translate] provider=gemini ms=1239 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "小心呀Ken，今晚Single我一定要 𲁬 爆你 😈",
+   "log": "[gb-translate] provider=gemini ms=1518 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -199,8 +199,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "仲做唔做得成呀？天文台話夜晚6點前會有黃色暴雨警告信號。",
-   "log": "[gb-translate] provider=gemini ms=1231 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "仲係唔係照打？天文台話夜晚6點前會發出黃色暴雨警告信號。",
+   "log": "[gb-translate] provider=gemini ms=1582 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -208,8 +208,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "帶埋水同毛巾呀，出面成33度 🥵",
-   "log": "[gb-translate] provider=gemini ms=1331 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "帶定水同毛巾呀，出面成33度 🥵",
+   "log": "[gb-translate] provider=gemini ms=1513 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -217,8 +217,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "有冇人明天返工前打轉？朝早7點在大坑。",
-   "log": "[gb-translate] provider=gemini ms=1505 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "明天返工前有人想打陣波開下拍嗎？朝早七點在大坑。",
+   "log": "[gb-translate] provider=gemini ms=1619 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -226,8 +226,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "See you at the court tonight at 7, remember to bring your paddle.",
-   "log": "[gb-translate] provider=gemini ms=1814 target=EN finish=STOP tried=gemini:ok"
+   "out": "See you at the court at seven tonight, remember to bring your paddle.",
+   "log": "[gb-translate] provider=gemini ms=1491 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
@@ -235,233 +235,233 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Sorry, I'm going to be ten minutes late, stuck in traffic 🙏",
-   "log": "[gb-translate] provider=gemini ms=1350 target=EN finish=STOP tried=gemini:ok"
+   "out": "Sorry, I'm going to be 10 minutes late, stuck in traffic 🙏",
+   "log": "[gb-translate] provider=gemini ms=1607 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 1,
-   "key": "Z03",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "Who is bringing balls? I only have two left.",
-   "log": "[gb-translate] provider=gemini ms=1437 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z04",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "The court fee is eighty dollars per person this week, please PayMe me by Sunday thanks.",
-   "log": "[gb-translate] provider=gemini ms=1504 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z05",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "Does anyone want to swap the 8:30 court with me? I have a dinner gathering and can't get out of it.",
-   "log": "[gb-translate] provider=gemini ms=1519 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z06",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "Had a great time playing yesterday! But I really need to practice my dinks more 😅",
-   "log": "[gb-translate] provider=gemini ms=1866 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z07",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "The courts at Kowloon Park are undergoing maintenance on Saturday and won't be open.",
-   "log": "[gb-translate] provider=gemini ms=1290 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z08",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "I've booked two courts at Victoria Park, strictly playing doubles, maximum of eight people.",
-   "log": "[gb-translate] provider=gemini ms=1125 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z09",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "Ken you lost so you have to treat us to drinks 🍺😂",
-   "log": "[gb-translate] provider=gemini ms=1168 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z10",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "The Observatory says they will issue the Amber Rainstorm Signal before six, are we still playing tonight?",
-   "log": "[gb-translate] provider=gemini ms=1145 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z11",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "Ok see you at 7, don't forget to bring two more balls 😂",
-   "log": "[gb-translate] provider=gemini ms=1695 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 1,
-   "key": "Z12",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "Does anyone want to play for a bit tomorrow morning before work? 7 o'clock at Tai Hang.",
-   "log": "[gb-translate] provider=gemini ms=1579 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E01",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "7點場見，記得帶拍。",
-   "log": "[gb-translate] provider=gemini ms=1417 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E02",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "我塞緊東區走廊，traffic好差，大約遲10分鐘 😩",
-   "log": "[gb-translate] provider=gemini ms=1430 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E03",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "今晚邊個拎波？我淨係得番兩個咋。",
-   "log": "[gb-translate] provider=gemini ms=1238 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E04",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "今個星期每人場費係 $80，請喺星期日之前用 PayMe 過數畀我。",
-   "log": "[gb-translate] provider=gemini ms=1606 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E05",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "有無人可以換去8:30嗰個slot？我有個飯局走唔甩。",
-   "log": "[gb-translate] provider=gemini ms=1425 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E06",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "昨日場波真係好正！不過我嘅 dinks 仲有好大進步空間 😅",
-   "log": "[gb-translate] provider=gemini ms=1553 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E07",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "提提大家：九龍公園球場星期六維修暫停開放。",
-   "log": "[gb-translate] provider=gemini ms=1289 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E08",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "我喺維園book兩個場，淨係玩雙打，最多8個人。",
-   "log": "[gb-translate] provider=gemini ms=1187 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E09",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "小心呀 Ken，今晚 single 我實會摧毀你 😈",
-   "log": "[gb-translate] provider=gemini ms=1359 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E10",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "仲照打?天文台話6點前轉黃雨。",
-   "log": "[gb-translate] provider=gemini ms=1774 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E11",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "帶支水同毛巾呀，出面成33度 🥵",
-   "log": "[gb-translate] provider=gemini ms=1188 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "E12",
-   "target": "ZH-HANT",
-   "ok": true,
-   "why": [],
-   "out": "有冇人明天返工前打轉？朝早7點喺大坑。",
-   "log": "[gb-translate] provider=gemini ms=1270 target=ZH-HANT finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "Z01",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "See you at the court tonight at 7, remember to bring your paddle.",
-   "log": "[gb-translate] provider=gemini ms=1437 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
-   "key": "Z02",
-   "target": "EN",
-   "ok": true,
-   "why": [],
-   "out": "Sorry, I'm going to be ten minutes late, I'm stuck in traffic 🙏",
-   "log": "[gb-translate] provider=gemini ms=1581 target=EN finish=STOP tried=gemini:ok"
-  },
-  {
-   "round": 2,
    "key": "Z03",
    "target": "EN",
    "ok": true,
    "why": [],
    "out": "Who is bringing the balls? I only have two left.",
-   "log": "[gb-translate] provider=gemini ms=1321 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=2035 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z04",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "The court fee is eighty dollars per person this week, please PayMe me by Sunday thanks.",
+   "log": "[gb-translate] provider=gemini ms=1480 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z05",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "Can anyone swap the 8:30 court with me? I have a dinner gathering and can't get out of it.",
+   "log": "[gb-translate] provider=gemini ms=1839 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z06",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "Had so much fun playing yesterday! But I really need to practice my dinks more 😅",
+   "log": "[gb-translate] provider=gemini ms=1206 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z07",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "The courts at Kowloon Park are undergoing maintenance on Saturday and won't be open.",
+   "log": "[gb-translate] provider=gemini ms=1976 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z08",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "I've booked two courts at Victoria Park, strictly for doubles, maximum eight people.",
+   "log": "[gb-translate] provider=gemini ms=1434 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z09",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "Ken, you have to treat us to drinks since you lost 🍺😂",
+   "log": "[gb-translate] provider=gemini ms=1503 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z10",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "The Observatory says they will issue the Amber Rainstorm Warning Signal before 6 o'clock, are we still playing tonight?",
+   "log": "[gb-translate] provider=gemini ms=1195 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z11",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "Ok see you at 7, don't forget to bring two more balls 😂",
+   "log": "[gb-translate] provider=gemini ms=1356 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 1,
+   "key": "Z12",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "Does anyone want to play for a bit tomorrow morning before work? 7 o'clock at Tai Hang.",
+   "log": "[gb-translate] provider=gemini ms=1235 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E01",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "7點場見，記得帶塊拍。",
+   "log": "[gb-translate] provider=gemini ms=1403 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E02",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "我塞緊東區走廊，塞得好勁，大約會遲10分鐘左右 😩",
+   "log": "[gb-translate] provider=gemini ms=1669 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E03",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "今晚邊個拎波？我得返兩個咋。",
+   "log": "[gb-translate] provider=gemini ms=1603 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E04",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "今個星期場費每人 $80，請喺星期日之前用 PayMe 過數畀我。",
+   "log": "[gb-translate] provider=gemini ms=1416 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E05",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "有冇人可以同我調去8點半嗰個slot？我有個飯局推唔甩。",
+   "log": "[gb-translate] provider=gemini ms=1157 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E06",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "昨日場波真係好正！不過我嘅 dink 仲係要練多好多 😅",
+   "log": "[gb-translate] provider=gemini ms=1895 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E07",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "提提大家：九龍公園球場星期六維修關閉。",
+   "log": "[gb-translate] provider=gemini ms=1680 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E08",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "我會喺維園 book 兩個場，淨係打雙打，最多 8 個人。",
+   "log": "[gb-translate] provider=gemini ms=2310 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E09",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "小心呀 Ken，今晚 single 我會同你死過 😈",
+   "log": "[gb-translate] provider=gemini ms=1216 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E10",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "仲開緊波？天文台話夜晚六點會有黃雨警告。",
+   "log": "[gb-translate] provider=gemini ms=1581 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E11",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "帶定水同毛巾呀，出面成33度 🥵",
+   "log": "[gb-translate] provider=gemini ms=1521 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "E12",
+   "target": "ZH-HANT",
+   "ok": true,
+   "why": [],
+   "out": "明天返工前有人想快打一轉嗎？早上七點在大坑。",
+   "log": "[gb-translate] provider=gemini ms=2297 target=ZH-HANT finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "Z01",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "See you at the court at seven tonight, remember to bring your paddle.",
+   "log": "[gb-translate] provider=gemini ms=1646 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "Z02",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "Sorry, I'm 10 minutes late. I'm stuck in traffic 🙏",
+   "log": "[gb-translate] provider=gemini ms=1492 target=EN finish=STOP tried=gemini:ok"
+  },
+  {
+   "round": 2,
+   "key": "Z03",
+   "target": "EN",
+   "ok": true,
+   "why": [],
+   "out": "Who's bringing balls? I only have two left.",
+   "log": "[gb-translate] provider=gemini ms=1360 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -470,7 +470,7 @@
    "ok": true,
    "why": [],
    "out": "The court fee is eighty dollars per person this week, please PayMe me by Sunday thanks.",
-   "log": "[gb-translate] provider=gemini ms=1070 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1306 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -478,8 +478,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Anyone able to swap the 8:30 court with me? I have a dinner gathering I can't get out of.",
-   "log": "[gb-translate] provider=gemini ms=1346 target=EN finish=STOP tried=gemini:ok"
+   "out": "Can anyone swap the 8:30 court with me? I have a dinner gathering and can't get out of it.",
+   "log": "[gb-translate] provider=gemini ms=1502 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -487,8 +487,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Had a great time playing yesterday! But I really need to practice my dinks more 😅",
-   "log": "[gb-translate] provider=gemini ms=1437 target=EN finish=STOP tried=gemini:ok"
+   "out": "Had so much fun playing yesterday! But I really need to practice my dinks more 😅",
+   "log": "[gb-translate] provider=gemini ms=1375 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -497,7 +497,7 @@
    "ok": true,
    "why": [],
    "out": "The courts at Kowloon Park are undergoing maintenance on Saturday and won't be open.",
-   "log": "[gb-translate] provider=gemini ms=1715 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1275 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -505,8 +505,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "I've booked two courts at Victoria Park, playing doubles only, maximum of eight people.",
-   "log": "[gb-translate] provider=gemini ms=1183 target=EN finish=STOP tried=gemini:ok"
+   "out": "I've booked two courts at Victoria Park, strictly for doubles, maximum eight people.",
+   "log": "[gb-translate] provider=gemini ms=1554 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -514,8 +514,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Ken, you have to treat us to drinks since you lost 🍺😂",
-   "log": "[gb-translate] provider=gemini ms=1537 target=EN finish=STOP tried=gemini:ok"
+   "out": "Ken you lost so you gotta treat us to drinks 🍺😂",
+   "log": "[gb-translate] provider=gemini ms=1370 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -524,7 +524,7 @@
    "ok": true,
    "why": [],
    "out": "The Observatory says they will issue the Amber Rainstorm Signal before six, are we still playing tonight?",
-   "log": "[gb-translate] provider=gemini ms=1366 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1420 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -533,7 +533,7 @@
    "ok": true,
    "why": [],
    "out": "Ok see you at 7, don't forget to bring two more balls 😂",
-   "log": "[gb-translate] provider=gemini ms=1873 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1230 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 2,
@@ -541,8 +541,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Does anyone want to play for a bit tomorrow morning before work? 7 o'clock at Tai Hang.",
-   "log": "[gb-translate] provider=gemini ms=1571 target=EN finish=STOP tried=gemini:ok"
+   "out": "Anyone want to play for a bit tomorrow morning before work? 7 o'clock at Tai Hang.",
+   "log": "[gb-translate] provider=gemini ms=1423 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -551,7 +551,7 @@
    "ok": true,
    "why": [],
    "out": "7點球場見，記得帶塊拍。",
-   "log": "[gb-translate] provider=gemini ms=1295 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1463 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -559,8 +559,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "我遲大約10分鐘，東區走廊塞車好甘 😩",
-   "log": "[gb-translate] provider=gemini ms=1699 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "我有排塞，東區走廊勁塞車，大約遲10分鐘左右 😩",
+   "log": "[gb-translate] provider=gemini ms=1166 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -568,8 +568,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "今晚邊個拎波？我淨係剩低兩個咋。",
-   "log": "[gb-translate] provider=gemini ms=1442 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "今晚邊個拎波？我得返兩個咋。",
+   "log": "[gb-translate] provider=gemini ms=1282 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -577,8 +577,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "今個星期場費每人 $80，請喺星期日前用 PayMe 過數畀我。",
-   "log": "[gb-translate] provider=gemini ms=1414 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "今個星期場費每人 $80，請喺星期日之前用 PayMe 過數畀我。",
+   "log": "[gb-translate] provider=gemini ms=1479 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -586,8 +586,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "有冇人可以同我調去8點半個場？我食飯推唔甩。",
-   "log": "[gb-translate] provider=gemini ms=1163 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "有無人可以調去8:30嗰個slot？我有個飯局走唔甩。",
+   "log": "[gb-translate] provider=gemini ms=1078 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -595,8 +595,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "昨日場波好正！不過我嘅 dink 仲爭好遠 😅",
-   "log": "[gb-translate] provider=gemini ms=1225 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "昨日場波好正！不過我啲 dink 仲爭好遠 😅",
+   "log": "[gb-translate] provider=gemini ms=1480 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -604,8 +604,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "各位注意：九龍公園球場星期六維修關閉。",
-   "log": "[gb-translate] provider=gemini ms=1560 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "提提大家：九龍公園球場星期六維修唔開。",
+   "log": "[gb-translate] provider=gemini ms=1433 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -613,8 +613,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "我會喺維園 book 兩個場，淨係打雙打，最多 8 個人。",
-   "log": "[gb-translate] provider=gemini ms=1926 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "我會喺維園 book 兩個場，只打雙打，最多 8 個人。",
+   "log": "[gb-translate] provider=gemini ms=1524 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -622,8 +622,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "小心呀 Ken，今晚 single 我實會摧毀你 😈",
-   "log": "[gb-translate] provider=gemini ms=1399 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "小心呀 Ken，今晚 single 我會摧毀你 😈",
+   "log": "[gb-translate] provider=gemini ms=1166 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -631,8 +631,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "仲開緊波/照打唔打？天文台話夜晚6點前會改發黃色暴雨警告信號。",
-   "log": "[gb-translate] provider=gemini ms=1513 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "仲係唔係照打？天文台話夜晚6點前轉黃雨喎。",
+   "log": "[gb-translate] provider=gemini ms=1354 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -640,8 +640,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "帶水同毛巾呀，外面有33度 🥵",
-   "log": "[gb-translate] provider=gemini ms=1840 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "帶水同毛巾呀，外面成33度 🥵",
+   "log": "[gb-translate] provider=gemini ms=1356 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -649,8 +649,8 @@
    "target": "ZH-HANT",
    "ok": true,
    "why": [],
-   "out": "有冇人明天返工前想快打一場？朝早七點在大坑。",
-   "log": "[gb-translate] provider=gemini ms=1509 target=ZH-HANT finish=STOP tried=gemini:ok"
+   "out": "有冇人明天返工前想快打一場？朝早7點在大坑。",
+   "log": "[gb-translate] provider=gemini ms=1287 target=ZH-HANT finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -658,8 +658,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "See you at the court at 7 tonight, remember to bring your paddle.",
-   "log": "[gb-translate] provider=gemini ms=1702 target=EN finish=STOP tried=gemini:ok"
+   "out": "See you at the court at seven tonight, remember to bring your paddle.",
+   "log": "[gb-translate] provider=gemini ms=1081 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -667,8 +667,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Sorry, I'm going to be ten minutes late, I'm stuck in traffic 🙏",
-   "log": "[gb-translate] provider=gemini ms=1428 target=EN finish=STOP tried=gemini:ok"
+   "out": "Sorry, I'm going to be ten minutes late, stuck in traffic 🙏",
+   "log": "[gb-translate] provider=gemini ms=1522 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -676,8 +676,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Who's bringing balls? I only have two left.",
-   "log": "[gb-translate] provider=gemini ms=1420 target=EN finish=STOP tried=gemini:ok"
+   "out": "Who is bringing balls? I only have two left.",
+   "log": "[gb-translate] provider=gemini ms=1525 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -686,7 +686,7 @@
    "ok": true,
    "why": [],
    "out": "The court fee is eighty dollars per person this week, please PayMe me by Sunday thanks.",
-   "log": "[gb-translate] provider=gemini ms=1091 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1539 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -695,7 +695,7 @@
    "ok": true,
    "why": [],
    "out": "Can anyone swap the 8:30 court with me? I have a dinner gathering and can't get out of it.",
-   "log": "[gb-translate] provider=gemini ms=1583 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1405 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -703,8 +703,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Had a great time playing yesterday! But I really need to practice my dinks more 😅",
-   "log": "[gb-translate] provider=gemini ms=1365 target=EN finish=STOP tried=gemini:ok"
+   "out": "Had so much fun playing yesterday! But I really need to practice my dinks more 😅",
+   "log": "[gb-translate] provider=gemini ms=1401 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -713,7 +713,7 @@
    "ok": true,
    "why": [],
    "out": "The courts at Kowloon Park are undergoing maintenance on Saturday and won't be open.",
-   "log": "[gb-translate] provider=gemini ms=1442 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1459 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -721,8 +721,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "I booked two courts at Victoria Park, we're only playing doubles, maximum eight people.",
-   "log": "[gb-translate] provider=gemini ms=1846 target=EN finish=STOP tried=gemini:ok"
+   "out": "I booked two courts at Victoria Park. We are only playing doubles, with a maximum of eight people.",
+   "log": "[gb-translate] provider=gemini ms=1388 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -731,7 +731,7 @@
    "ok": true,
    "why": [],
    "out": "Ken you have to treat us to drinks since you lost 🍺😂",
-   "log": "[gb-translate] provider=gemini ms=1501 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1193 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -740,7 +740,7 @@
    "ok": true,
    "why": [],
    "out": "The Observatory says they will issue the Amber Rainstorm Signal before six, are we still playing tonight?",
-   "log": "[gb-translate] provider=gemini ms=1443 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1213 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -749,7 +749,7 @@
    "ok": true,
    "why": [],
    "out": "Ok see you at 7, don't forget to bring two more balls 😂",
-   "log": "[gb-translate] provider=gemini ms=1415 target=EN finish=STOP tried=gemini:ok"
+   "log": "[gb-translate] provider=gemini ms=1308 target=EN finish=STOP tried=gemini:ok"
   },
   {
    "round": 3,
@@ -757,8 +757,8 @@
    "target": "EN",
    "ok": true,
    "why": [],
-   "out": "Does anyone want to hit for a bit tomorrow morning before work? 7 o'clock at Tai Hang.",
-   "log": "[gb-translate] provider=gemini ms=1355 target=EN finish=STOP tried=gemini:ok"
+   "out": "Anyone want to play for a bit tomorrow morning before work? 7 o'clock at Tai Hang.",
+   "log": "[gb-translate] provider=gemini ms=1251 target=EN finish=STOP tried=gemini:ok"
   }
  ],
  "verdict": "pass"
