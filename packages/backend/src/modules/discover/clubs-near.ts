@@ -10,7 +10,10 @@ import { memberExistsSql, adminExistsSql } from '@/modules/clubs/club-tiers.js';
 // channels/search (G11 EXTEND: lat/lng/radiusKm/club params) and by discover/search. A club (Misskey channel +
 // club_setting) has no address of its own, so its position is read, in this order, from
 //   1. its first club venue with a point (club_setting.venueIds → venue.lat/lng — CLUB-V3 club venues), else
-//   2. the centre of the points of its active meets of the last 180 days / upcoming (where the club actually plays).
+//   2. the place its active meets of the last 180 days / upcoming use MOST (where the club actually plays; ties -> the latest).
+//      CO-FIX CLUB-POS-MODE-V1 (2026-10-01): this was the AVERAGE of those points. A club that plays in Tuen Mun, Tai Po, Sha Tin
+//      and Kowloon averaged to a hillside no one plays on, "6.6 km from Kowloon" (stranger walk CO-03). A real place it uses is
+//      never further from the truth than the mean of several.
 // A club with neither has no position: it is listed only when the reader asked for no location (Everywhere).
 // The level is the club's own band (club_setting.level, free text) — null prints "All levels" (Reclub's default).
 
@@ -41,7 +44,7 @@ function facts(db: DataSource, where: string, args: unknown[], viewerExpr: strin
 		FROM channel c
 		LEFT JOIN club_setting cs ON cs."channelId" = c.id
 		LEFT JOIN LATERAL (SELECT v.lat, v.lng FROM venue v WHERE cs."venueIds" IS NOT NULL AND v.id = ANY(cs."venueIds") AND v.lat IS NOT NULL AND v.lng IS NOT NULL LIMIT 1) vp ON true
-		LEFT JOIN LATERAL (SELECT AVG(m.lat) AS lat, AVG(m.lng) AS lng FROM meet m WHERE m."channelId" = c.id AND m.lat IS NOT NULL AND m.lng IS NOT NULL AND m.status = 'active' AND m."startAt" > now() - interval '180 days') mp ON true
+		LEFT JOIN LATERAL (SELECT m.lat, m.lng FROM meet m WHERE m."channelId" = c.id AND m.lat IS NOT NULL AND m.lng IS NOT NULL AND m.status = 'active' AND m."startAt" > now() - interval '180 days' GROUP BY m.lat, m.lng ORDER BY count(*) DESC, max(m."startAt") DESC LIMIT 1) mp ON true
 		LEFT JOIN LATERAL (SELECT count(*)::int AS n FROM meet m WHERE m."channelId" = c.id AND m.status = 'active' AND m."startAt" >= now() AND NOT ('casual' = ANY(m.flags))) up ON true
 		WHERE ${where} AND ${notPrivateToThisViewer(viewerExpr)} ${tail}`, args) as Promise<Raw[]>;
 }
