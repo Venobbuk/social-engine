@@ -35,9 +35,14 @@ export class SigninService {
 	}
 
 	@bindThis
-	public signin(request: FastifyRequest, reply: FastifyReply, user: MiLocalUser) {
+	/* SIGNUP-NO-LOGIN-ALERT-V1 (lane DELIVERY 2026-10-01): `firstSignin` = the sign-in that completes a sign-up (SignupApiService
+	 * signupPending). It is recorded like any other, but the "new sign-in" alerts — the in-app 'login' notification (and the
+	 * web push it triggers) and the newLogin mail — are not sent: the person is confirming the account they just made, and a
+	 * "was this you?" warning a second after the welcome mail reads as an attack (measured on UAT: signup -> newLogin mail). */
+	public signin(request: FastifyRequest, reply: FastifyReply, user: MiLocalUser, opts: { firstSignin?: boolean } = {}) {
+		const alert = opts.firstSignin !== true;
 		setImmediate(async () => {
-			this.notificationService.createNotification(user.id, 'login', {});
+			if (alert) this.notificationService.createNotification(user.id, 'login', {});
 
 			const record = await this.signinsRepository.insertOne({
 				id: this.idService.gen(),
@@ -50,7 +55,7 @@ export class SigninService {
 			this.globalEventService.publishMainStream(user.id, 'signin', await this.signinEntityService.pack(record));
 
 			const profile = await this.userProfilesRepository.findOneByOrFail({ userId: user.id });
-			if (profile.email && profile.emailVerified) {
+			if (alert && profile.email && profile.emailVerified) {
 				// GRIPBAT-ACCOUNTS-V1: the security notice is GripBat's, in the account's language (was Misskey's EN/JA text)
 				const m = mailCopy('newLogin', profile.lang);
 				this.emailService.sendEmail(profile.email, m.subject, m.html, m.text).catch(() => { /* logged by EmailService */ });

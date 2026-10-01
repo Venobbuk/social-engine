@@ -326,7 +326,7 @@ export class SignupApiService {
 				});
 			}
 
-			return this.signinService.signin(request, reply, account as MiLocalUser);
+			return this.signinService.signin(request, reply, account as MiLocalUser, { firstSignin: true });   // SIGNUP-NO-LOGIN-ALERT-V1
 		} catch (err) {
 			throw new FastifyReplyError(400, typeof err === 'string' ? err : (err as Error).toString());
 		}
