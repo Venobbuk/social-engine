@@ -34,6 +34,14 @@ services:
       # host (one key, SOCIAL_URL unset), so UAT accepts that until the key split (/root/gen/sso-split.sh) flips this
       # to "uat.social.silkvo.com" together with the UAT key and the per-tenant mint.
       ADAPTER_SSO_AUDIENCE: "social.silkvo.com"
+      # SSO-AUD-SPLIT-V1 (2026-10-01, lane SSO-SPLIT-B): web-uat's OWN audience. hkpl mints every hand-off for the UAT GripBat
+      # host (tenant boyau-uat / return https://uat.gripbat.com) with aud "uat.social.silkvo.com"; the production engine only
+      # accepts "social.silkvo.com", so a UAT token can no longer sign anyone in to production, and a production token is
+      # refused here. "social.silkvo.com@boyau-uat" = TRANSITION ONLY: the old audience, accepted ONLY from tenant boyau-uat,
+      # so UAT sign-in keeps working in the minutes between this engine ship and the hkpl mint change (a production token,
+      # tenant boyau, is refused from the engine ship on). Drop that entry on the next engine ship after the hkpl change.
+      # ADAPTER_SSO_AUDIENCE above is read only by images older than SSO-AUD-SPLIT-V1.
+      ADAPTER_SSO_AUDIENCES: "uat.social.silkvo.com,social.silkvo.com@boyau-uat"
     env_file:
       - /root/social-engine.env
       - /root/social-engine.hkpl.env

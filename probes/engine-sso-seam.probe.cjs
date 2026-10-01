@@ -25,7 +25,7 @@ const { getSession } = require('/root/social-engine/probes/_session.cjs');
 const PUB = process.env.PUB || '/root/social-engine/.config-uat/hkpl-sso-rs256.pub';   // the engine's PUBLIC key (not a secret)
 const MODE = process.env.MODE || 'before';
 const OUT = process.env.OUT || ('/root/gen/l6-scope/verdicts/engine-sso-seam.' + MODE + '.probe.json');
-const AUD = 'social.silkvo.com';   // web-uat's ADAPTER_SSO_AUDIENCE (compose.uat.yml, SEC-SSO-AUD-V1 step a)
+const AUD = process.env.AUD || 'uat.social.silkvo.com';   // SSO-AUD-SPLIT-V1: web-uat's own audience once hkpl stamps it (was 'social.silkvo.com' before SSO-SPLIT-B); AUD=social.silkvo.com for a pre-split run
 
 const V = { id: 'engine-sso-seam', mode: MODE, at: new Date().toISOString(), engine: ENG, hkpl: HK, rows: {}, evidence: [], cleanup: [] };
 const row = (id, ok, ev) => { V.rows[id] = { ok: !!ok, ...ev }; console.log((ok ? 'PASS ' : 'FAIL ') + id + ' ' + JSON.stringify(ev).slice(0, 320)); };

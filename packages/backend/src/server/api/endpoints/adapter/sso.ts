@@ -112,6 +112,28 @@ const ISSUERS: Record<string, string> = {
 // second binding and is deliberately NOT set in step (a) (an hkpl row of tenant 'uat' signs in to prod today).
 const AUDIENCE = process.env.ADAPTER_SSO_AUDIENCE ?? null;
 const EXPECTED_TENANT = process.env.ADAPTER_SSO_TENANT ?? null; // optional second binding; unset = not enforced
+/* SSO-AUD-SPLIT-V1 (2026-10-01, lane SSO-SPLIT-B) — step (b) of SEC-SSO-AUD-V1, done by AUDIENCE (one key stays).
+ * Measured before (/root/gen/l6-scope/verdicts/sso-split-b.before.probe.json): a token hkpl minted for the UAT GripBat host
+ * (aud social.silkvo.com, tenant boyau-uat) passed the PRODUCTION engine's verifyJwt, and a production token passed UAT's —
+ * one RS256 key and one audience for both. hkpl now stamps the TARGET environment's audience (boyau-uat / return
+ * https://uat.gripbat.com → "uat.social.silkvo.com", everything else → "social.silkvo.com"), and each engine accepts only
+ * its own:
+ *   ADAPTER_SSO_AUDIENCES       comma list of accepted audiences; an entry "aud@t1|t2" accepts that audience ONLY from those
+ *                               tenants (the transition entry web-uat carries while hkpl's change lands). Unset → the single
+ *                               ADAPTER_SSO_AUDIENCE as before. Neither set → SSO refused (fails closed, unchanged).
+ *   ADAPTER_SSO_REFUSE_TENANTS  tenants this engine never signs in (production: boyau-uat, the public sandbox tenant).
+ * The signature check is unchanged: the audience/tenant are signed claims, so they cannot be edited without the hkpl key. */
+type AudienceRule = { aud: string; tenants: string[] | null };
+function parseAudiences(raw: string): AudienceRule[] {
+	return raw.split(',').map(x => x.trim()).filter(Boolean).map((entry) => {
+		const at = entry.indexOf('@');
+		if (at < 0) return { aud: entry, tenants: null };
+		return { aud: entry.slice(0, at).trim(), tenants: entry.slice(at + 1).split('|').map(x => x.trim()).filter(Boolean) };
+	}).filter(r => r.aud.length > 0 && (r.tenants == null || r.tenants.length > 0));
+}
+const AUDIENCES: AudienceRule[] = process.env.ADAPTER_SSO_AUDIENCES ? parseAudiences(process.env.ADAPTER_SSO_AUDIENCES) : (AUDIENCE ? [{ aud: AUDIENCE, tenants: null }] : []);
+const AUDIENCES_TEXT = AUDIENCES.map(r => r.tenants ? `${r.aud}@${r.tenants.join('|')}` : r.aud).join(',') || 'none';
+const REFUSE_TENANTS = (process.env.ADAPTER_SSO_REFUSE_TENANTS ?? '').split(',').map(x => x.trim()).filter(Boolean);
 // STAFF-ROLE-V1: the one engine role the host's admins hold (fixed id so every worker converges on one row). Default
 // tenant list is production's ("boyau") only; the UAT container sets ADAPTER_SSO_STAFF_TENANTS=boyau-uat.
 const STAFF_TENANTS = (process.env.ADAPTER_SSO_STAFF_TENANTS ?? 'boyau').split(',').map(x => x.trim()).filter(Boolean);
@@ -156,8 +178,13 @@ export function verifyJwt(token: string): Claims {
 	if (!verifier.verify(createPublicKey(pem), b64urlToBuf(parts[2]))) throw new Error('sig');
 	const now = Math.floor(Date.now() / 1000);
 	// SEC-SSO-AUD-V1: fail closed if this engine has no audience configured, and require the token to name THIS engine.
-	if (!AUDIENCE) throw new ApiError(meta.errors.unconfigured);
-	if (payload.aud !== AUDIENCE) throw new Error('aud');
+	if (AUDIENCES.length === 0) throw new ApiError(meta.errors.unconfigured);
+	// SSO-AUD-SPLIT-V1: the token must name THIS engine (one of its accepted audiences), a tenant-limited audience only from
+	// its tenants, and never a tenant this engine refuses.
+	const audRule = AUDIENCES.find(r => r.aud === payload.aud);
+	if (!audRule) throw new Error('aud');
+	if (audRule.tenants && !audRule.tenants.includes(String(payload.tenant))) throw new Error('aud_tenant');
+	if (REFUSE_TENANTS.includes(String(payload.tenant))) throw new Error('tenant_refused');
 	if (EXPECTED_TENANT != null && payload.tenant !== EXPECTED_TENANT) throw new Error('tenant');
 	if (typeof payload.exp !== 'number' || payload.exp < now) throw new Error('exp');
 	// SEC-SSO-HYGIENE-V1 (2026-09-20): iat is MANDATORY. Without it the 5-minute lifetime cap cannot be enforced, so a
@@ -242,7 +269,7 @@ export default class extends Endpoint<typeof meta, typeof paramDef> { // eslint-
 				// iss/aud/tenant — never the token itself — so a misconfigured fail-closed deploy is diagnosable.
 				let hint = '';
 				try { const p = JSON.parse(b64urlToBuf(ps.jwt.split('.')[1] ?? '').toString('utf8')); hint = ` iss=${String(p.iss)} aud=${String(p.aud)} tenant=${String(p.tenant)}`; } catch { hint = ' (payload unreadable)'; }
-				this.logger.warn(`SSO token refused: ${e instanceof ApiError ? e.code : (e instanceof Error ? e.message : String(e))}${hint} (engine audience=${String(AUDIENCE)})`);
+				this.logger.warn(`SSO token refused: ${e instanceof ApiError ? e.code : (e instanceof Error ? e.message : String(e))}${hint} (engine audiences=${AUDIENCES_TEXT})`);
 				if (e instanceof ApiError) throw e;
 				throw new ApiError(meta.errors.invalidToken);
 			}
