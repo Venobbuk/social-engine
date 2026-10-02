@@ -25,6 +25,12 @@ import { SystemWebhookService } from '@/core/SystemWebhookService.js';
 import { UserEntityService } from '@/core/entities/UserEntityService.js';
 import { IdService } from './IdService.js';
 
+/** PROBE-REPORT-NO-MAIL-V1: a probe fixture's report (see notifyMail). */
+export function isProbeReportComment(comment: string | null | undefined): boolean {
+	const c = String(comment ?? '');
+	return c.startsWith('[probe] ') || /^\[message:[^\]]+\] "\[probe\] /.test(c);
+}
+
 @Injectable()
 export class AbuseReportNotificationService implements OnApplicationShutdown {
 	constructor(
@@ -92,6 +98,11 @@ export class AbuseReportNotificationService implements OnApplicationShutdown {
 	 */
 	@bindThis
 	public async notifyMail(abuseReports: MiAbuseUserReport[]) {
+		/* PROBE-REPORT-NO-MAIL-V1 (PERF-FINISH, 2026-10-02; GLOBAL_CONTRACT G13 probe hygiene): a report on a probe fixture —
+		 * its comment opens with "[probe] ", or it is a chat/messages/report quoting a "[probe] …" message — is still filed,
+		 * queued for moderators, streamed and webhooked (the l6-chat suite reads it back from admin/abuse-user-reports), but
+		 * mails nobody: the suite's report rows sent the admin a "New Abuse Report" every minute during a run. */
+		abuseReports = abuseReports.filter(it => !isProbeReportComment(it.comment));
 		if (abuseReports.length <= 0) {
 			return;
 		}
